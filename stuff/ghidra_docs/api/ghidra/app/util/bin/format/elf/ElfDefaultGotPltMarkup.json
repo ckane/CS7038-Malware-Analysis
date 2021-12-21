@@ -1,0 +1,519 @@
+{
+  "name": "ElfDefaultGotPltMarkup",
+  "comment": "ElfDefaultGotPltMarkup provides the legacy/default implementation of ELF GOT/PLT processing \n which handles a limited set of cases.  It is intended that over time this default implementation be \n eliminated although it may form the basis of an abstract implementation for specific processor\n extensions.",
+  "javadoc": "\u003ccode\u003eElfDefaultGotPltMarkup\u003c/code\u003e provides the legacy/default implementation of ELF GOT/PLT processing \n which handles a limited set of cases.  It is intended that over time this default implementation be \n eliminated although it may form the basis of an abstract implementation for specific processor\n extensions.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "PLT_HEAD_SYMBOL_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"__PLT_HEAD\""
+    },
+    {
+      "name": "elfLoadHelper",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.elf.ElfLoadHelper",
+      "type_short": "ElfLoadHelper",
+      "constant_value": null
+    },
+    {
+      "name": "elf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+      "type_short": "ElfHeader",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "listing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "memory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.mem.Memory",
+      "type_short": "Memory",
+      "constant_value": null
+    },
+    {
+      "name": "MAX_SUPPORTED_PLT_ENTRY_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "32"
+    },
+    {
+      "name": "MIN_SUPPORTED_PLT_ENTRY_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "PLT_SYMBOL_SAMPLE_COUNT_THRESHOLD",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "elfLoadHelper",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfLoadHelper",
+          "type_short": "ElfLoadHelper",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "process",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processGOTSections",
+      "comment": "Process all GOT sections based upon blocks whose names begin with .got",
+      "javadoc": "Process all GOT sections based upon blocks whose names begin with .got\n@param monitor task monitor\n@throws CancelledException thrown if task cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "thrown if task cancelled"
+        }
+      ]
+    },
+    {
+      "name": "processDynamicPLTGOT",
+      "comment": "Process GOT and associated PLT based upon specified dynamic table entries.\n The primary goal is to identify the bounds of the GOT and PLT and process\n any external symbols which may be defined within the PLT.  Processing of PLT\n is only critical if it contains external symbols which must be processed, otherwise\n they will likely resolve adequately during subsequent analysis.",
+      "javadoc": "Process GOT and associated PLT based upon specified dynamic table entries.\n The primary goal is to identify the bounds of the GOT and PLT and process\n any external symbols which may be defined within the PLT.  Processing of PLT\n is only critical if it contains external symbols which must be processed, otherwise\n they will likely resolve adequately during subsequent analysis.\n@param pltGotType dynamic type for dynamic PLTGOT lookup (identifies dynamic PLTGOT)\n@param pltGotRelType dynamic type for associated dynamic JMPREL lookup (identifies dynamic PLTGOT relocation table)\n@param monitor task monitor\n@throws CancelledException thrown if task cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "pltGotType",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfDynamicType",
+          "type_short": "ElfDynamicType",
+          "comment": "dynamic type for dynamic PLTGOT lookup (identifies dynamic PLTGOT)"
+        },
+        {
+          "name": "pltGotRelType",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfDynamicType",
+          "type_short": "ElfDynamicType",
+          "comment": "dynamic type for associated dynamic JMPREL lookup (identifies dynamic PLTGOT relocation table)"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "thrown if task cancelled"
+        }
+      ]
+    },
+    {
+      "name": "processGOT",
+      "comment": "Mark-up all GOT entries as pointers within the memory range gotStart to\n gotEnd.",
+      "javadoc": "Mark-up all GOT entries as pointers within the memory range gotStart to\n gotEnd.\n@param gotStart address for start of GOT\n@param gotEnd address for end of GOT\n@param monitor task monitor\n@throws CancelledException thrown if task cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "gotStart",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address for start of GOT"
+        },
+        {
+          "name": "gotEnd",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address for end of GOT"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "thrown if task cancelled"
+        }
+      ]
+    },
+    {
+      "name": "processPLTSection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processLinkageTable",
+      "comment": "Perform disassembly and markup of specified external linkage table which \n consists of thunks to external functions.  If symbols are defined within the \n linkage table, these will be transitioned to external functions.",
+      "javadoc": "Perform disassembly and markup of specified external linkage table which \n consists of thunks to external functions.  If symbols are defined within the \n linkage table, these will be transitioned to external functions.\n@param pltName name of PLT section for log messages\n@param minAddress minimum address of linkage table\n@param maxAddress maximum address of linkage table\n@param monitor task monitor\n@throws CancelledException task cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "pltName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of PLT section for log messages"
+        },
+        {
+          "name": "minAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "minimum address of linkage table"
+        },
+        {
+          "name": "maxAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "maximum address of linkage table"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "task cancelled"
+        }
+      ]
+    },
+    {
+      "name": "convertSymbolsToExternalFunctions",
+      "comment": "Convert all symbols over a specified range to thunks to external functions.",
+      "javadoc": "Convert all symbols over a specified range to thunks to external functions.\n@param minAddress\n@param maxAddress\n@return number of symbols converted",
+      "static": false,
+      "params": [
+        {
+          "name": "minAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "maxAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of symbols converted"
+      },
+      "throws": []
+    },
+    {
+      "name": "disassemble",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "prog",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createPointer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "keepRefWhenValid",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Data",
+        "type_short": "Data",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.util.CodeUnitInsertionException",
+          "type_short": "CodeUnitInsertionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setConstant",
+      "comment": "Set specified data as constant if contained within a writable block.  It can be helpful\n to the decompiler results if constant pointers are marked as such (e.g., GOT entries)",
+      "javadoc": "Set specified data as constant if contained within a writable block.  It can be helpful\n to the decompiler results if constant pointers are marked as such (e.g., GOT entries)\n@param data program data",
+      "static": true,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "ghidra.program.model.listing.Data",
+          "type_short": "Data",
+          "comment": "program data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidPointer",
+      "comment": "Determine if pointerData refers to a valid memory address or symbol",
+      "javadoc": "Determine if pointerData refers to a valid memory address or symbol\n@param pointerData pointer data\n@return true if pointer data refers to valid memory address or symbol",
+      "static": true,
+      "params": [
+        {
+          "name": "pointerData",
+          "type_long": "ghidra.program.model.listing.Data",
+          "type_short": "Data",
+          "comment": "pointer data"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if pointer data refers to valid memory address or symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "removeMemRefs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "ghidra.program.model.listing.Data",
+          "type_short": "Data",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "UglyImageBaseCheck",
+      "comment": "This is an ugly hack to catch pre-linked ARM shared libraries.  All entries in the .GOT should\n be either relocated, or point to a good location in the binary.  If they aren\u0027t a good address,\n then the base of the .so is most likely incorrect.  Shift it!",
+      "javadoc": "This is an ugly hack to catch pre-linked ARM shared libraries.  All entries in the .GOT should\n be either relocated, or point to a good location in the binary.  If they aren\u0027t a good address,\n then the base of the .so is most likely incorrect.  Shift it!",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "ghidra.program.model.listing.Data",
+          "type_short": "Data",
+          "comment": ""
+        },
+        {
+          "name": "imageBase",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

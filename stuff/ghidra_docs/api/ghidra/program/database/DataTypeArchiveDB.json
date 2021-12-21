@@ -1,0 +1,1007 @@
+{
+  "name": "DataTypeArchiveDB",
+  "comment": "Database implementation for Data Type Archive.",
+  "javadoc": "Database implementation for Data Type Archive.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.listing.DataTypeArchive",
+    "ghidra.program.util.DataTypeArchiveChangeManager"
+  ],
+  "extends": "ghidra.framework.data.DomainObjectAdapterDB",
+  "fields": [
+    {
+      "name": "DB_VERSION",
+      "comment": "DB_VERSION should be incremented any time a change is made to the overall\n database schema associated with any of the managers.\n 18-Sep-2008 - version 1 - added fields for synchronizing program data types with project archives.\n 03-Dec-2009 - version 2 - Added source archive updating (consolidating windows.gdt, clib.gdt, ntddk.gdt)\n 14-Nov-2019 - version 3 - Corrected fixed length indexing implementation causing change\n                           in index table low-level storage for newly created tables.",
+      "javadoc": "DB_VERSION should be incremented any time a change is made to the overall\n database schema associated with any of the managers.\n 18-Sep-2008 - version 1 - added fields for synchronizing program data types with project archives.\n 03-Dec-2009 - version 2 - Added source archive updating (consolidating windows.gdt, clib.gdt, ntddk.gdt)\n 14-Nov-2019 - version 3 - Corrected fixed length indexing implementation causing change\n                           in index table low-level storage for newly created tables.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "UPGRADE_REQUIRED_BEFORE_VERSION",
+      "comment": "UPGRADE_REQUIRED_BEFORE_VERSION should be changed to DB_VERSION any time the\n latest version requires a forced upgrade (i.e., Read-only mode not supported\n until upgrade is performed).  It is assumed that read-only mode is supported \n if the data\u0027s version is \u003d UPGRADE_REQUIRED_BEFORE_VERSION and \u003d DB_VERSION.",
+      "javadoc": "UPGRADE_REQUIRED_BEFORE_VERSION should be changed to DB_VERSION any time the\n latest version requires a forced upgrade (i.e., Read-only mode not supported\n until upgrade is performed).  It is assumed that read-only mode is supported \n if the data\u0027s version is \u0026gt;\u003d UPGRADE_REQUIRED_BEFORE_VERSION and \u0026lt;\u003d DB_VERSION.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "ARCHIVE_INFO",
+      "comment": "Name of data type archive information property list",
+      "javadoc": "Name of data type archive information property list",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Data Type Archive Information\""
+    },
+    {
+      "name": "ARCHIVE_SETTINGS",
+      "comment": "Name of data type archive settings property list",
+      "javadoc": "Name of data type archive settings property list",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Data Type Archive Settings\""
+    },
+    {
+      "name": "DATE_CREATED",
+      "comment": "Name of date created property",
+      "javadoc": "Name of date created property",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Date Created\""
+    },
+    {
+      "name": "CREATED_WITH_GHIDRA_VERSION",
+      "comment": "Name of Ghidra version property",
+      "javadoc": "Name of Ghidra version property",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Created With Ghidra Version\""
+    },
+    {
+      "name": "JANUARY_1_1970",
+      "comment": "A date from January 1, 1970",
+      "javadoc": "A date from January 1, 1970",
+      "static": true,
+      "type_long": "java.util.Date",
+      "type_short": "Date",
+      "constant_value": null
+    },
+    {
+      "name": "ARCHIVE_DB_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"DB Version\""
+    },
+    {
+      "name": "TABLE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Data Type Archive\""
+    },
+    {
+      "name": "DEFAULT_POINTER_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Default Pointer Size\""
+    },
+    {
+      "name": "COL_FIELDS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "db.Field[]",
+      "type_short": "db.Field[]",
+      "constant_value": null
+    },
+    {
+      "name": "COL_TYPES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "SCHEMA",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "db.Schema",
+      "type_short": "Schema",
+      "constant_value": null
+    },
+    {
+      "name": "dataTypeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.data.ProjectDataTypeManager",
+      "type_short": "ProjectDataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "recordChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "changeable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Table",
+      "type_short": "Table",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new DataTypeArchiveDB within a project folder.",
+      "javadoc": "Constructs a new DataTypeArchiveDB within a project folder.\n@param folder folder within which the project archive will be created\n@param name the name of the data type archive\n@param consumer the object that is using this data type archive.\n@throws IOException if there is an error accessing the database.\n@throws InvalidNameException\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "folder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": "folder within which the project archive will be created"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the data type archive"
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that is using this data type archive."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there is an error accessing the database."
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new DataTypeArchiveDB",
+      "javadoc": "Constructs a new DataTypeArchiveDB\n@param dbh a handle to an open data type archive database.\n@param openMode one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened.\n@param monitor TaskMonitor that allows the open to be canceled.\n@param consumer the object that keeping the program open.\n@throws IOException if an error accessing the database occurs.\n@throws VersionException if database version does not match implementation, UPGRADE may be possible.\n@throws CancelledException if instantiation is canceled by monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "dbh",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "a handle to an open data type archive database."
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor that allows the open to be canceled."
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that keeping the program open."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an error accessing the database occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if database version does not match implementation, UPGRADE may be possible."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if instantiation is canceled by monitor"
+        }
+      ]
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDomainFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "df",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertiesRestore",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertiesCreate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertyChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidDefaultpointerSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pointerSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataTypeManager",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Program#getDataTypeManager()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeManager",
+        "type_short": "DataTypeManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCreationDate",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Program#getCreationDate()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Date",
+        "type_short": "Date",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultPointerSize",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Program#getDefaultPointerSize()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getChanges",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Program#getChanges()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.DataTypeArchiveDBChangeSet",
+        "type_short": "DataTypeArchiveDBChangeSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeChanged",
+      "comment": "notification the a data type has changed",
+      "javadoc": "notification the a data type has changed\n@param dataTypeID the id of the data type that changed.\n@param type the type of the change (moved, renamed, etc.)\n@param isAutoResponseChange true if change is an auto-response change caused by \n another datatype\u0027s change (e.g., size, alignment), else false in which case this\n change will be added to archive change-set to aid merge conflict detection.\n@param oldValue the old data type.\n@param newValue the new data type.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataTypeID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the data type that changed."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of the change (moved, renamed, etc.)"
+        },
+        {
+          "name": "isAutoResponseChange",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if change is an auto-response change caused by \n another datatype\u0027s change (e.g., size, alignment), else false in which case this\n change will be added to archive change-set to aid merge conflict detection."
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the old data type."
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the new data type."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeAdded",
+      "comment": "Notification that a data type was added.",
+      "javadoc": "Notification that a data type was added.\n@param dataTypeID the id if the data type that was added.\n@param type should always be DATATYPE_ADDED\n@param oldValue always null\n@param newValue the data type added.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataTypeID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id if the data type that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "should always be DATATYPE_ADDED"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "always null"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the data type added."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "categoryChanged",
+      "comment": "Notification that a category was changed.",
+      "javadoc": "Notification that a category was changed.\n@param categoryID the id of the data type that was added.\n@param type the type of changed\n@param oldValue old value depends on the type.\n@param newValue new value depends on the type.",
+      "static": false,
+      "params": [
+        {
+          "name": "categoryID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the data type that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of changed"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type."
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value depends on the type."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "categoryAdded",
+      "comment": "Notification that a category was added.",
+      "javadoc": "Notification that a category was added.\n@param categoryID the id of the data type that was added.\n@param type the type of changed (should always be CATEGORY_ADDED)\n@param oldValue always null\n@param newValue new value depends on the type.",
+      "static": false,
+      "params": [
+        {
+          "name": "categoryID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the data type that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of changed (should always be CATEGORY_ADDED)"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "always null"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value depends on the type."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChanged",
+      "comment": "Mark the state this Data Type Archive as having changed and generate\n the event.  Any or all parameters may be null.",
+      "javadoc": "Mark the state this Data Type Archive as having changed and generate\n the event.  Any or all parameters may be null.\n@param type event type\n@param oldValue original value\n@param newValue new value",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "event type"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "original value"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setObjChanged",
+      "comment": "Mark the state of a Program as having changed and generate\n the event.  Any or all parameters may be null.\n NOTE: ChangeSet data will not be updated since this a very generic\n change not related to a specific address.",
+      "javadoc": "Mark the state of a Program as having changed and generate\n the event.  Any or all parameters may be null.\n NOTE: ChangeSet data will not be updated since this a very generic\n change not related to a specific address.\n@param type event type\n@param affectedObj object that is the subject of the event\n@param oldValue original value or an Object that is related to\n the event\n@param newValue new value or an Object that is related to the\n the event",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "event type"
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "object that is the subject of the event"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "original value or an Object that is related to\n the event"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value or an Object that is related to the\n the event"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initializeDatabase",
+      "comment": "Initialize the following fields from the database and check the database version for an existing database:\n \n name\n languageName\n languageVersion\n LanguageMinorVersion\n ",
+      "javadoc": "Initialize the following fields from the database and check the database version for an existing database:\n \u003cul\u003e\n \u003cli\u003ename\u003c/li\u003e\n \u003cli\u003elanguageName\u003c/li\u003e\n \u003cli\u003elanguageVersion\u003c/li\u003e\n \u003cli\u003eLanguageMinorVersion\u003c/li\u003e\n \u003c/ul\u003e\n@param openMode program open mode\n@return version exception if the current version is out of date and can be upgraded.\n@throws IOException\n@throws VersionException if the data is newer than this version of Ghidra and can not be\n upgraded or opened.",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "program open mode"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.exception.VersionException",
+        "type_short": "VersionException",
+        "comment": "version exception if the current version is out of date and can be upgraded."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if the data is newer than this version of Ghidra and can not be\n upgraded or opened."
+        }
+      ]
+    },
+    {
+      "name": "upgradeDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getStoredVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkOldProperties",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createManagers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.exception.VersionException",
+        "type_short": "VersionException",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initManagers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "clearCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidate",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Program#invalidate()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isChangeable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "changeSet",
+          "type_long": "ghidra.program.database.DataTypeArchiveDBChangeSet",
+          "type_short": "DataTypeArchiveDBChangeSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

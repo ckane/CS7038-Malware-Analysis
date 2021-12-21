@@ -1,0 +1,616 @@
+{
+  "name": "FunctionTagListingMerger",
+  "comment": "Handles merging of function tags when they are added/removed from \n functions. \n \n Most merging can be done automatically; the exception being when a\n tag has been added to a function by one user, but deleted from the\n program by another.\n \n Note that there are other tag related conflict cases, but they are \n handled by the FunctionTagMerger, which handles all aspects of\n creation/deletion/editing of tags independent of functions. \n \n THIS CLASS ONLY DEALS WITH FUNCTION-RELATED ADDS/REMOVES.\n \n The specific cases handled by the class are described below:\n \n  - X and Y are tags\n  - ** indicates a conflict\n  \n \t\tUser A\t|\tAdd X\tAdd Y\tDelete X\tDelete Y\t\n \t\t\t\t|\n User B\t\t|\n -------------------------------------------------------\n Add X\t\t|\tX\t\tX,Y\t\t\t**\t\t\tX\t\t\n \t\t\t\t|\n Add Y\t\t|\tX,Y\t\tY\t\t\tY\t\t\t**\t\t\n \t\t\t\t|\n Delete X\t\t|\t**\t\tY\t\t\t-\t\t\t-\t\t\t\t\n \t\t\t\t|\n Delete Y\t\t|\tX\t\t**\t\t\t-\t\t\t-",
+  "javadoc": "Handles merging of function tags when they are added/removed from \n functions. \n \n Most merging can be done automatically; the exception being when a\n tag has been added to a function by one user, but deleted from the\n program by another.\n \n Note that there are other tag related conflict cases, but they are \n handled by the {@link FunctionTagMerger}, which handles all aspects of\n creation/deletion/editing of tags independent of functions. \n \n THIS CLASS ONLY DEALS WITH FUNCTION-RELATED ADDS/REMOVES.\n \n The specific cases handled by the class are described below:\n \n  - X and Y are tags\n  - ** indicates a conflict\n  \n \t\tUser A\t|\tAdd X\tAdd Y\tDelete X\tDelete Y\t\n \t\t\t\t|\n User B\t\t|\n -------------------------------------------------------\n Add X\t\t|\tX\t\tX,Y\t\t\t**\t\t\tX\t\t\n \t\t\t\t|\n Add Y\t\t|\tX,Y\t\tY\t\t\tY\t\t\t**\t\t\n \t\t\t\t|\n Delete X\t\t|\t**\t\tY\t\t\t-\t\t\t-\t\t\t\t\n \t\t\t\t|\n Delete Y\t\t|\tX\t\t**\t\t\t-\t\t\t-",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.merge.listing.AbstractListingMerger",
+  "fields": [
+    {
+      "name": "FUNCTION_TAG_LISTING_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "conflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+      "type_short": "VerticalChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "conflictMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.model.address.Address,java.util.List\u003cjava.lang.Long\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "currentlyMergingTagID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Long",
+      "type_short": "Long",
+      "constant_value": null
+    },
+    {
+      "name": "tagChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor.",
+      "javadoc": "Constructor.\n@param listingMergeMgr the listing merge manager that owns this merger.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingMergeMgr",
+          "type_long": "ghidra.app.merge.listing.ListingMergeManager",
+          "type_short": "ListingMergeManager",
+          "comment": "the listing merge manager that owns this merger."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "PUBLIC METHODS",
+      "javadoc": "PUBLIC METHODS",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setConflictResolution",
+      "comment": "Stores the users\u0027 selection for how to handle a conflict.",
+      "javadoc": "Stores the users\u0027 selection for how to handle a conflict.\n@param option user option, from {@link ListingMergeConstants}",
+      "static": false,
+      "params": [
+        {
+          "name": "option",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "user option, from ListingMergeConstants"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMin",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMax",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "autoMerge",
+      "comment": "Attempts to merge changes between the My and Latest versions of the program. Conflicts\n will be stored in the #conflictMap for later resolution.",
+      "javadoc": "Attempts to merge changes between the My and Latest versions of the program. Conflicts\n will be stored in the {@link #conflictMap} for later resolution.\n@param diffType from {@link ProgramDiffFilter}\n@param monitor task monitor\n@throws ProgramConflictException\n@throws CancelledException\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "diffType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "from ProgramDiffFilter"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processChangedAddresses",
+      "comment": "Determines if any deleted tags from one program were added to a function in\n the other. If so, updates the conflict list with the offending tag/address.\n \n If there is no conflict for a particular address, the changes are automatically\n merged.",
+      "javadoc": "Determines if any deleted tags from one program were added to a function in\n the other. If so, updates the conflict list with the offending tag/address.\n \n If there is no conflict for a particular address, the changes are automatically\n merged.\n@param changedAddresses list of addresses to inspect\n@param deletedTags all tags deleted in the \u0027other\u0027 program\n@param programAddedTo the program in which the adds reside\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "changedAddresses",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "list of addresses to inspect"
+        },
+        {
+          "name": "deletedTags",
+          "type_long": "java.util.Collection\u003c? extends ghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Collection",
+          "comment": "all tags deleted in the \u0027other\u0027 program"
+        },
+        {
+          "name": "programAddedTo",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program in which the adds reside"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addToConflicts",
+      "comment": "Adds the given tag/address combo to the global conflict list.",
+      "javadoc": "Adds the given tag/address combo to the global conflict list.\n@param addr the conflicting address\n@param tag the conflicting tag",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the conflicting address"
+        },
+        {
+          "name": "tag",
+          "type_long": "ghidra.program.model.listing.FunctionTag",
+          "type_short": "FunctionTag",
+          "comment": "the conflicting tag"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTagsAddedToFunction",
+      "comment": "Returns all tags that were added to the function at the given address.",
+      "javadoc": "Returns all tags that were added to the function at the given address.\n@param program the program where the function resides\n@param addr the function entry point\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program where the function resides"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the function entry point"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.program.model.listing.FunctionTag\u003e",
+        "type_short": "Collection",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDeletedTags",
+      "comment": "Compares the given program against Original to determine if any tags differ \n between the two. Any tags in Original that are NOT in the given program \n indicate deletions.",
+      "javadoc": "Compares the given program against Original to determine if any tags differ \n between the two. Any tags in Original that are NOT in the given program \n indicate deletions.\n@param program the program version\n@param monitor\n@return database IDs from the FunctionTagAdapter table that were deleted",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program version"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003c? extends ghidra.program.model.listing.FunctionTag\u003e",
+        "type_short": "Collection",
+        "comment": "database IDs from the FunctionTagAdapter table that were deleted"
+      },
+      "throws": []
+    },
+    {
+      "name": "setupConflictsPanel",
+      "comment": "Sets up the conflict panel for SINGLE conflict. This will be a standard listing merge \n panel showing all four programs (Latest, My, Original, Result). Choices for \n resolving the conflict will appear at the bottom.",
+      "javadoc": "Sets up the conflict panel for SINGLE conflict. This will be a standard listing merge \n panel showing all four programs (Latest, My, Original, Result). Choices for \n resolving the conflict will appear at the bottom.\n@param listingPanel the main panel\n@param addr\n@param tagID\n@param changeListener",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": "the main panel"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "tagID",
+          "type_long": "java.lang.Long",
+          "type_short": "Long",
+          "comment": ""
+        },
+        {
+          "name": "changeListener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionTagInfo",
+      "comment": "Returns a string containing the tag and the program version it\u0027s associated\n with. This is used when displaying the conflict panel.",
+      "javadoc": "Returns a string containing the tag and the program version it\u0027s associated\n with. This is used when displaying the conflict panel.\n@param version\n@param tags\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "tag",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflictingTag",
+      "comment": "Merges the tag currently being resolved in the conflict panel according to the\n given conflict option. This is invoked when the user has made a merge \n selection (keep Original, My, or Latest) in the conflict resolution panel.",
+      "javadoc": "Merges the tag currently being resolved in the conflict panel according to the\n given conflict option. This is invoked when the user has made a merge \n selection (keep Original, My, or Latest) in the conflict resolution panel.\n@param addr the location of the conflict\n@param chosenConflictOption KEEP_ORIGINAL, KEEP_LATEST, KEEP_MY\n@param monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the conflict"
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "KEEP_ORIGINAL, KEEP_LATEST, KEEP_MY"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "showMergePanel",
+      "comment": "Displays the conflict resolution panel for a single tag ID at the specified\n address.",
+      "javadoc": "Displays the conflict resolution panel for a single tag ID at the specified\n address.\n@param listingPanel the listing panel to display\n@param addr the address where the merge is occurring\n@param tagID the tag id being merged\n@param monitor the task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": "the listing panel to display"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address where the merge is occurring"
+        },
+        {
+          "name": "tagID",
+          "type_long": "java.lang.Long",
+          "type_short": "Long",
+          "comment": "the tag id being merged"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTag",
+      "comment": "Returns the FunctionTag for the tag ID given.",
+      "javadoc": "Returns the {@link FunctionTag} for the tag ID given.\n@param id the tag ID\n@param program the program version\n@return null if tag not found for the given id\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "java.lang.Long",
+          "type_short": "Long",
+          "comment": "the tag ID"
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program version"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.FunctionTag",
+        "type_short": "FunctionTag",
+        "comment": "null if tag not found for the given id"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

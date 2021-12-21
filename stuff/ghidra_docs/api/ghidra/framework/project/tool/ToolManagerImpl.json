@@ -1,0 +1,1072 @@
+{
+  "name": "ToolManagerImpl",
+  "comment": "Tool manager that knows about all the running tools for each workspace\n in the project; the tool manager is responsible for launching new tools,\n and managing connections among tools.",
+  "javadoc": "Tool manager that knows about all the running tools for each workspace\n in the project; the tool manager is responsible for launching new tools,\n and managing connections among tools.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.model.ToolManager",
+    "java.beans.PropertyChangeListener"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "TYPICAL_NUM_WORKSPACES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "TYPICAL_NUM_TOOLS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "TYPICAL_NUM_CONNECTIONS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    },
+    {
+      "name": "toolChest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.ToolChest",
+      "type_short": "ToolChest",
+      "constant_value": null
+    },
+    {
+      "name": "toolServices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.project.tool.ToolServicesImpl",
+      "type_short": "ToolServicesImpl",
+      "constant_value": null
+    },
+    {
+      "name": "changedWorkspaces",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.framework.model.Workspace,ghidra.framework.model.Workspace\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "workspaces",
+      "comment": "keep track of the workspaces in the project",
+      "javadoc": "keep track of the workspaces in the project",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.framework.model.Workspace\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "wsMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.framework.model.Workspace\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "connectMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.framework.project.tool.ToolConnectionImpl\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "namesMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.util.List\u003cghidra.framework.plugintool.PluginTool\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "activeWorkspace",
+      "comment": "keep a handle to the active workspace to make inactive when another\n workspace is made active",
+      "javadoc": "keep a handle to the active workspace to make inactive when another\n workspace is made active",
+      "static": false,
+      "type_long": "ghidra.framework.project.tool.WorkspaceImpl",
+      "type_short": "WorkspaceImpl",
+      "constant_value": null
+    },
+    {
+      "name": "changeListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.framework.model.WorkspaceChangeListener\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "activeWorkspaceChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "inRestoreMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "project",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.Project",
+      "type_short": "Project",
+      "constant_value": null
+    },
+    {
+      "name": "toolStatusMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.framework.project.tool.ToolManagerImpl.ToolSaveStatus\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "project",
+          "type_long": "ghidra.framework.model.Project",
+          "type_short": "Project",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerTool",
+      "comment": "Registers the new instance of the tool in the namesMap and returns the total number of \n running instances of that tool",
+      "javadoc": "Registers the new instance of the tool in the namesMap and returns the total number of \n running instances of that tool\n@param toolName the name of the tool being registers\n@param tool the tool being registered",
+      "static": false,
+      "params": [
+        {
+          "name": "toolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the tool being registers"
+        },
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "the tool being registered"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deregisterTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveWorkspace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.Workspace",
+        "type_short": "Workspace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConsumerTools",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool[]",
+        "type_short": "ghidra.framework.plugintool.PluginTool[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProducerTools",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool[]",
+        "type_short": "ghidra.framework.plugintool.PluginTool[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRunningTools",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool[]",
+        "type_short": "ghidra.framework.plugintool.PluginTool[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConnection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "producer",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        },
+        {
+          "name": "consumer",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolConnection",
+        "type_short": "ToolConnection",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createWorkspace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.Workspace",
+        "type_short": "Workspace",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeWorkspace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ws",
+          "type_long": "ghidra.framework.model.Workspace",
+          "type_short": "Workspace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getWorkspaces",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.Workspace[]",
+        "type_short": "ghidra.framework.model.Workspace[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveToXml",
+      "comment": "Saves this object to an XML element",
+      "javadoc": "Saves this object to an XML element\n@return the element containing the tool XML",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "org.jdom.Element",
+        "type_short": "Element",
+        "comment": "the element containing the tool XML"
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreFromXml",
+      "comment": "restores the object from an XML element",
+      "javadoc": "restores the object from an XML element\n@param root root element of saved XML state",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "org.jdom.Element",
+          "type_short": "Element",
+          "comment": "root element of saved XML state"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasChanged",
+      "comment": "Return whether any tools have changed, or if any tools were\n added or removed from any of the workspaces.",
+      "javadoc": "Return whether any tools have changed, or if any tools were\n added or removed from any of the workspaces.\n@return true if any tools in this workspace have changed",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if any tools in this workspace have changed"
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "Close all running tools in the project.",
+      "javadoc": "Close all running tools in the project.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveSessionTools",
+      "comment": "Save the tools that are opened and changed, that will be brought back up when the project\n is reopened",
+      "javadoc": "Save the tools that are opened and changed, that will be brought back up when the project\n is reopened\n@return true if the session was saved",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the session was saved"
+      },
+      "throws": []
+    },
+    {
+      "name": "saveToolSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tools",
+          "type_long": "java.util.List\u003cghidra.framework.plugintool.PluginTool\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dumpConnectionList",
+      "comment": "Debug method for printing out the list of connections.",
+      "javadoc": "Debug method for printing out the list of connections.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertyChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "evt",
+          "type_long": "java.beans.PropertyChangeEvent",
+          "type_short": "PropertyChangeEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addWorkspaceChangeListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.framework.model.WorkspaceChangeListener",
+          "type_short": "WorkspaceChangeListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeWorkspaceChangeListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.framework.model.WorkspaceChangeListener",
+          "type_short": "WorkspaceChangeListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearWorkspaceChanged",
+      "comment": "Clear the flag so the user does not get prompted to save the\n project; flag gets set to true when a workspace is created, and\n a workspace is created when a new project is created.",
+      "javadoc": "Clear the flag so the user does not get prompted to save the\n project; flag gets set to true when a workspace is created, and\n a workspace is created when a new project is created.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToolServices",
+      "comment": "Get any tool services available from this tool",
+      "javadoc": "Get any tool services available from this tool\n@return ToolServices list of tool services this tool can provide.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolServices",
+        "type_short": "ToolServices",
+        "comment": "ToolServices list of tool services this tool can provide."
+      },
+      "throws": []
+    },
+    {
+      "name": "toolChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTool",
+      "comment": "Called by WorkspaceImpl when it is restoring its state.",
+      "javadoc": "Called by WorkspaceImpl when it is restoring its state.\n@param toolName the name of the tool\n@return the tool",
+      "static": false,
+      "params": [
+        {
+          "name": "toolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the tool"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool",
+        "type_short": "PluginTool",
+        "comment": "the tool"
+      },
+      "throws": []
+    },
+    {
+      "name": "closeTool",
+      "comment": "Close a tool.",
+      "javadoc": "Close a tool.\n@param tool tool to be closed.",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool to be closed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setActiveWorkspace",
+      "comment": "Set the active workspace.",
+      "javadoc": "Set the active workspace.\n@param workspace workspace to set active",
+      "static": false,
+      "params": [
+        {
+          "name": "workspace",
+          "type_long": "ghidra.framework.project.tool.WorkspaceImpl",
+          "type_short": "WorkspaceImpl",
+          "comment": "workspace to set active"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getWorkspace",
+      "comment": "Get a handle to the workspace with the given name.",
+      "javadoc": "Get a handle to the workspace with the given name.\n@param name name of the workspace.\n@return workspace handle if one exists.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the workspace."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.Workspace",
+        "type_short": "Workspace",
+        "comment": "workspace handle if one exists."
+      },
+      "throws": []
+    },
+    {
+      "name": "setWorkspaceChanged",
+      "comment": "Mark workspace as changed.",
+      "javadoc": "Mark workspace as changed.\n@param ws workspace to tag",
+      "static": false,
+      "params": [
+        {
+          "name": "ws",
+          "type_long": "ghidra.framework.project.tool.WorkspaceImpl",
+          "type_short": "WorkspaceImpl",
+          "comment": "workspace to tag"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setWorkspaceName",
+      "comment": "Called by the workspace when it is updating its name;\n causes a property change event to be fired.",
+      "javadoc": "Called by the workspace when it is updating its name;\n causes a property change event to be fired.\n@param ws workspace to rename\n@param name new name of workspace\n@throws DuplicateNameException if there already exists a workspace by the given name",
+      "static": false,
+      "params": [
+        {
+          "name": "ws",
+          "type_long": "ghidra.framework.model.Workspace",
+          "type_short": "Workspace",
+          "comment": "workspace to rename"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new name of workspace"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if there already exists a workspace by the given name"
+        }
+      ]
+    },
+    {
+      "name": "getTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ws",
+          "type_long": "ghidra.framework.model.Workspace",
+          "type_short": "Workspace",
+          "comment": ""
+        },
+        {
+          "name": "template",
+          "type_long": "ghidra.framework.model.ToolTemplate",
+          "type_short": "ToolTemplate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool",
+        "type_short": "PluginTool",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toolRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ws",
+          "type_long": "ghidra.framework.model.Workspace",
+          "type_short": "Workspace",
+          "comment": ""
+        },
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "generateInstanceName",
+      "comment": "Generate an instance name in the form\n of a one-up number.",
+      "javadoc": "Generate an instance name in the form\n of a one-up number.",
+      "static": false,
+      "params": [
+        {
+          "name": "toolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createEmptyTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool",
+        "type_short": "PluginTool",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addNewTool",
+      "comment": "Add the tool to the table, add us as a listener for property\n changes on the tool.",
+      "javadoc": "Add the tool to the table, add us as a listener for property\n changes on the tool.",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        },
+        {
+          "name": "toolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireToolAddedEvent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ws",
+          "type_long": "ghidra.framework.model.Workspace",
+          "type_short": "Workspace",
+          "comment": ""
+        },
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disconnectTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateConnectMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKey",
+      "comment": "Get the key for the connection map.",
+      "javadoc": "Get the key for the connection map.\n@param producer tool producing an event\n@param consumer tool consuming an event",
+      "static": false,
+      "params": [
+        {
+          "name": "producer",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool producing an event"
+        },
+        {
+          "name": "consumer",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool consuming an event"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateConnections",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ev",
+          "type_long": "java.beans.PropertyChangeEvent",
+          "type_short": "PropertyChangeEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "firePropertyChangeEvent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ev",
+          "type_long": "java.beans.PropertyChangeEvent",
+          "type_short": "PropertyChangeEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDefaultWorkspaceName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueWorkspaceName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canAutoSave",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toolSaved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        },
+        {
+          "name": "toolChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToolInstanceCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,1352 @@
+{
+  "name": "ThreadedTableModel",
+  "comment": "The base implementation of the threaded table model.\n \n You can optionally set this model to load data incrementally by passing the correct\n constructor argument.  Note, if you make this model incremental, then you need to set an\n incremental task monitor in order to get feedback about loading\n (see #setIncrementalTaskMonitor(TaskMonitor).  Alternatively, you can use\n a GThreadedTablePanel, which will install the proper monitor for you.",
+  "javadoc": "The base implementation of the threaded table model.\n \u003cp\u003e\n You can optionally set this model to load data incrementally by passing the correct\n constructor argument.  Note, if you make this model incremental, then you need to set an\n incremental task monitor in order to get feedback about loading\n (see {@link #setIncrementalTaskMonitor(TaskMonitor)}.  Alternatively, you can use\n a {@link GThreadedTablePanel}, which will install the proper monitor for you.\n@param \u003cROW_OBJECT\u003e the row object class for this table model.\n@param \u003cDATA_SOURCE\u003e the type of data that will be returned from {@link #getDataSource()}.  This\n                    object will be given to the {@link DynamicTableColumn} objects used by this\n                    table model when\n                    {@link DynamicTableColumn#getValue(Object, ghidra.docking.settings.Settings, Object, ServiceProvider)}\n                    is called.",
+  "static": false,
+  "implements": [
+    "docking.widgets.table.RowObjectFilterModel"
+  ],
+  "extends": "docking.widgets.table.GDynamicColumnTableModel",
+  "fields": [
+    {
+      "name": "updateManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.ThreadedTableModelUpdateMgr\u003cROW_OBJECT\u003e",
+      "type_short": "ThreadedTableModelUpdateMgr",
+      "constant_value": null
+    },
+    {
+      "name": "loadIncrementally",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "incrementalMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.ConcurrentListenerSet\u003cdocking.widgets.table.threaded.ThreadedTableModelListener\u003e",
+      "type_short": "ConcurrentListenerSet",
+      "constant_value": null
+    },
+    {
+      "name": "modelName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "allData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableData\u003cROW_OBJECT\u003e",
+      "type_short": "TableData",
+      "constant_value": null
+    },
+    {
+      "name": "filteredData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableData\u003cROW_OBJECT\u003e",
+      "type_short": "TableData",
+      "constant_value": null
+    },
+    {
+      "name": "pendingSortContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableSortingContext\u003cROW_OBJECT\u003e",
+      "type_short": "TableSortingContext",
+      "constant_value": null
+    },
+    {
+      "name": "pendingTableFilter",
+      "comment": "This variable can be in one of three states:\n \t\n \t\tnull - signals that there is no filter change taking place\n \t\tAn instance of NullTableFilter - the client has removed the current\n          filter by calling #setTableFilter(TableFilter) with a null value\n \t\tAn instance of a custom TableFilter - the client has changed the\n          filter to a non-null value by calling #setTableFilter(TableFilter)\n  ",
+      "javadoc": "This variable can be in one of three states:\n \t\u003cul\u003e\n \t\t\u003cli\u003enull - signals that there is no filter change taking place\u003c/li\u003e\n \t\t\u003cli\u003eAn instance of \u003ccode\u003eNullTableFilter\u003c/code\u003e - the client has removed the current\n          filter by calling {@link #setTableFilter(TableFilter)} with a null value\u003c/li\u003e\n \t\t\u003cli\u003eAn instance of a custom \u003ccode\u003eTableFilter\u003c/code\u003e - the client has changed the\n          filter to a non-null value by calling {@link #setTableFilter(TableFilter)}\u003c/li\u003e\n  \u003c/ul\u003e",
+      "static": false,
+      "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+      "type_short": "TableFilter",
+      "constant_value": null
+    },
+    {
+      "name": "tableFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+      "type_short": "TableFilter",
+      "constant_value": null
+    },
+    {
+      "name": "threadLocalColumnCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.ThreadLocal\u003cjava.util.Map\u003cROW_OBJECT,java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e\u003e\u003e",
+      "type_short": "ThreadLocal",
+      "constant_value": null
+    },
+    {
+      "name": "worker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.worker.Worker",
+      "type_short": "Worker",
+      "constant_value": null
+    },
+    {
+      "name": "minUpdateDelayMillis",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "maxUpdateDelayMillis",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "binarySearchAddRemoveStrategy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableAddRemoveStrategy\u003cROW_OBJECT\u003e",
+      "type_short": "TableAddRemoveStrategy",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "modelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "serviceProvider",
+          "type_long": "ghidra.framework.plugintool.ServiceProvider",
+          "type_short": "ServiceProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "modelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "serviceProvider",
+          "type_long": "ghidra.framework.plugintool.ServiceProvider",
+          "type_short": "ServiceProvider",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "The constructor through which all others pass.\n \n This class must be created on the Swing Thread\n (see SwingUtilities#isEventDispatchThread()).",
+      "javadoc": "The constructor through which all others pass.\n \u003cp\u003e\n This class must be created on the Swing Thread\n (see {@link SwingUtilities#isEventDispatchThread()}).\n@param modelName The name of the table model. This value will appear as the name of the\n                  thread that manipulates the table data.\n@param serviceProvider The service provider of the environment.  This will be used to\n                        allow column objects to have access to services.  This man not be\n                        null.\n@param monitor The task monitor to use when manipulating table data (i.e., loading, sorting,\n                filtering).\n@param loadIncrementally When true, the table\u0027s results will be displayed as they are\n                          loaded; when false, the table\u0027s results will be displayed after\n                          all items have been loaded.  Passing true is helpful for models\n                          that take a long time to run and periodically find data.\n                          Alternatively, for quick loading tables, the overhead of loading\n                          incrementally is wasteful.",
+      "static": false,
+      "params": [
+        {
+          "name": "modelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The name of the table model. This value will appear as the name of the\n                  thread that manipulates the table data."
+        },
+        {
+          "name": "serviceProvider",
+          "type_long": "ghidra.framework.plugintool.ServiceProvider",
+          "type_short": "ServiceProvider",
+          "comment": "The service provider of the environment.  This will be used to\n                        allow column objects to have access to services.  This man not be\n                        null."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "The task monitor to use when manipulating table data (i.e., loading, sorting,\n                filtering)."
+        },
+        {
+          "name": "loadIncrementally",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "When true, the table\u0027s results will be displayed as they are\n                          loaded; when false, the table\u0027s results will be displayed after\n                          all items have been loaded.  Passing true is helpful for models\n                          that take a long time to run and periodically find data.\n                          Alternatively, for quick loading tables, the overhead of loading\n                          incrementally is wasteful."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLoadIncrementally",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeSorting",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "load",
+      "comment": "A package-level method.  Subclasses should not call this.\n \n This exists to handle whether this model should load incrementally.",
+      "javadoc": "A package-level method.  Subclasses should not call this.\n \n \u003cp\u003eThis exists to handle whether this model should load incrementally.\n@param monitor the monitor\n@return the loaded data\n@throws CancelledException if the load was cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the monitor"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+        "type_short": "List",
+        "comment": "the loaded data"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the load was cancelled"
+        }
+      ]
+    },
+    {
+      "name": "initializeWorker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelCurrentWorkerJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scheduleIncrementalLoad",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createIncrementalLoadJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.IncrementalLoadJob\u003cROW_OBJECT\u003e",
+        "type_short": "IncrementalLoadJob",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doLoad",
+      "comment": "The basic method that all children must implement.  This is where children load their\n data.",
+      "javadoc": "The basic method that all children must implement.  This is where children load their\n data.\n@param accumulator the datastructure into which you should incrementally place you table\n        row data\n@param monitor the task monitor to check for cancellations and to update progress\n@throws CancelledException if the task monitor has been cancelled and a call is made\n         to \u003ccode\u003emonitor.checkCancelled();\u003c/code\u003e.",
+      "static": false,
+      "params": [
+        {
+          "name": "accumulator",
+          "type_long": "ghidra.util.datastruct.Accumulator\u003cROW_OBJECT\u003e",
+          "type_short": "Accumulator",
+          "comment": "the datastructure into which you should incrementally place you table\n        row data"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor to check for cancellations and to update progress"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task monitor has been cancelled and a call is made\n         to monitor.checkCancelled();."
+        }
+      ]
+    },
+    {
+      "name": "getCachedColumnValueForRow",
+      "comment": "This method will retrieve a column value for the given row object.  Further, the retrieved\n value will be cached.   This is useful when sorting a table, as the same column value may\n be requested multiple times.\n \n Performance Notes\n \n \tThis method uses a HashMap to cache column values for a row object.   Further,\n      upon a key collision, the map will perform O(logn) lookups if the \n      key (the row object) is Comparable.   If the key is not comparable, then\n      the collision lookups will be linear.    So, make your row objects comparable\n      for maximum speed when your table size becomes large  (for small tables there\n      is no observable impact).\n  Even if your row objects are comparable, relying on this table model to convert your \n      row object into column values can be slow for large tables.  This is because\n      the default column comparison framework for the tables will call this method \n      multiple times, resulting in many more method calls per column value lookup.  For \n      large data, the repeated method calls start to become noticeable.  For maximum \n      column sorting speed, use a comparator that works not on the column value, but on \n      the row value.  To do this, return a comparator from your model\u0027s \n      #createSortComparator(int) method, instead of from the column itself or \n      by relying on column item implementing Comparable.  This is possible any\n      time that a row object already has a field that is used for a given column.\n ",
+      "javadoc": "This method will retrieve a column value for the given row object.  Further, the retrieved\n value will be cached.   This is useful when sorting a table, as the same column value may\n be requested multiple times.\n \n \u003cp\u003e\u003cu\u003ePerformance Notes\u003c/u\u003e\n \u003cul\u003e\n \t\u003cli\u003eThis method uses a {@link HashMap} to cache column values for a row object.   Further,\n      upon a key collision, the map will perform O(logn) lookups \u003cb\u003eif the \n      key (the row object) is {@link Comparable}\u003c/b\u003e.   If the key is not comparable, then\n      the collision lookups will be linear.    So, make your row objects comparable\n      for maximum speed \u003cb\u003ewhen your table size becomes large\u003c/b\u003e  (for small tables there\n      is no observable impact).\n  \u003cli\u003eEven if your row objects are comparable, relying on this table model to convert your \n      row object into column values can be slow \u003cb\u003efor large tables\u003c/b\u003e.  This is because\n      the default column comparison framework for the tables will call this method \n      multiple times, resulting in many more method calls per column value lookup.  For \n      large data, the repeated method calls start to become noticeable.  For maximum \n      column sorting speed, use a comparator that works not on the column value, but on \n      the row value.  To do this, return a comparator from your model\u0027s \n      {@link #createSortComparator(int)} method, instead of from the column itself or \n      by relying on column item implementing {@link Comparable}.  This is possible any\n      time that a row object already has a field that is used for a given column.\n \u003c/ul\u003e\n@param rowObject the row object\n@param columnIndex the column index for which to get a value\n@return the column value",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObject",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": "the row object"
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the column index for which to get a value"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": "the column value"
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModelData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnfilteredData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnfilteredIndexForRowObject",
+      "comment": "Performs a quick search for the given item in the unfiltered data of this model.\n To search only for object that are visible in the GUI, use\n #getIndexForRowObject(Object).",
+      "javadoc": "Performs a quick search for the given item in the \u003cb\u003eunfiltered\u003c/b\u003e data of this model.\n To search only for object that are visible in the GUI, use\n {@link #getIndexForRowObject(Object)}.\n@param rowObject The object for which to search\n@return The index for the given object; a negative value if the object is not in the list\n@see #getIndexForRowObject(Object)",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObject",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": "The object for which to search"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "The index for the given object; a negative value if the object is not in the list"
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnfilteredRowObjectForIndex",
+      "comment": "Returns the row object at the given index in the unfiltered data of this model;\n null if the index is negative or larger than the list.  To search only for object\n that are visible in the GUI, use #getRowObject(int).",
+      "javadoc": "Returns the row object at the given index in the \u003cb\u003eunfiltered data\u003c/b\u003e of this model;\n null if the index is negative or larger than the list.  To search only for object\n that are visible in the GUI, use {@link #getRowObject(int)}.\n@param row The row index for which to get a row object\n@return Returns the row object at the given index in the \u003cb\u003eunfiltered data\u003c/b\u003e of this model;\n         null if the index is negative or larger than the list.\n@see #getRowObject(int)",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "The row index for which to get a row object"
+        }
+      ],
+      "return": {
+        "type_long": "ROW_OBJECT",
+        "type_short": "ROW_OBJECT",
+        "comment": "Returns the row object at the given index in the unfiltered data of this model;\n         null if the index is negative or larger than the list."
+      },
+      "throws": []
+    },
+    {
+      "name": "createSortComparator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Comparator\u003cROW_OBJECT\u003e",
+        "type_short": "Comparator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValueAt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rowIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "tableSortingContext",
+          "type_long": "docking.widgets.table.TableSortingContext\u003cROW_OBJECT\u003e",
+          "type_short": "TableSortingContext",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSortingContext",
+      "comment": "Returns the current sorting context, which is the next one to be applied, if a sort is\n pending; otherwise the current sorting context.",
+      "javadoc": "Returns the current sorting context, which is the next one to be applied, if a sort is\n pending; otherwise the current sorting context.\n@return the sort context",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.TableSortingContext\u003cROW_OBJECT\u003e",
+        "type_short": "TableSortingContext",
+        "comment": "the sort context"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableFilter",
+      "comment": "Returns the filter for this model.  The value returned from this method will not be null,\n but will instead be an instanceof NullTableFilter when no filter is applied.   The\n value returned from this method may not actually yet be applied, depending upon when the\n background thread finishes loading.",
+      "javadoc": "Returns the filter for this model.  The value returned from this method will not be null,\n but will instead be an instanceof {@link NullTableFilter} when no filter is applied.   The\n value returned from this method may not actually yet be applied, depending upon when the\n background thread finishes loading.\n@return the filter",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+        "type_short": "TableFilter",
+        "comment": "the filter"
+      },
+      "throws": []
+    },
+    {
+      "name": "hasFilter",
+      "comment": "Returns true if there is a table filter set that is not the NullTableFilter.",
+      "javadoc": "Returns true if there is a table filter set that is not the {@link NullTableFilter}.\n@return true if there is a table filter set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is a table filter set."
+      },
+      "throws": []
+    },
+    {
+      "name": "doFilter",
+      "comment": "Override this to change how filtering is performed.  This implementation will do nothing\n if a TableFilter has not been set via a call to #setTableFilter(TableFilter).",
+      "javadoc": "Override this to change how filtering is performed.  This implementation will do nothing\n if a \u003ccode\u003eTableFilter\u003c/code\u003e has not been set via a call to {@link #setTableFilter(TableFilter)}.\n@param data The list of data to be filtered.\n@param monitor the progress monitor to check for cancellation.\n@param lastSortingContext the comparator used to sort data.  This can be used by overridden\n                   filter methods that need to query data about how the table is sorted.\n@return The \u003cb\u003enew\u003c/b\u003e filtered list of data.  If no filtering takes place, then the\n \t       original list should be returned.\n@throws CancelledException If the filter operation is cancelled.",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+          "type_short": "List",
+          "comment": "The list of data to be filtered."
+        },
+        {
+          "name": "lastSortingContext",
+          "type_long": "docking.widgets.table.TableSortingContext\u003cROW_OBJECT\u003e",
+          "type_short": "TableSortingContext",
+          "comment": "the comparator used to sort data.  This can be used by overridden\n                   filter methods that need to query data about how the table is sorted."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the progress monitor to check for cancellation."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+        "type_short": "List",
+        "comment": "The new filtered list of data.  If no filtering takes place, then the\n \t       original list should be returned."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "If the filter operation is cancelled."
+        }
+      ]
+    },
+    {
+      "name": "getUnfilteredRowCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFiltered",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTableFilter",
+      "comment": "Sets the given TableFilter on this model.  This table filter will then be used\n by this model in the default #doFilter(List, TableSortingContext, TaskMonitor)\n method.",
+      "javadoc": "Sets the given \u003ccode\u003eTableFilter\u003c/code\u003e on this model.  This table filter will then be used\n by this model in the default {@link #doFilter(List, TableSortingContext, TaskMonitor)}\n method.\n@param tableFilter The filter to use for table filtering.",
+      "static": false,
+      "params": [
+        {
+          "name": "tableFilter",
+          "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "TableFilter",
+          "comment": "The filter to use for table filtering."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setAppliedTableFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tableFilter",
+          "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "TableFilter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateObject",
+      "comment": "Schedules an update for the specified object.",
+      "javadoc": "Schedules an update for the specified object.\n@param obj the object for which to schedule the update",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": "the object for which to schedule the update"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addObject",
+      "comment": "Adds the specified object to this model and schedules an update.",
+      "javadoc": "Adds the specified object to this model and schedules an update.\n@param obj the object to add",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": "the object to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeObject",
+      "comment": "Removes the specified object from this model and schedules an update.\n \n Note: for this method to function correctly, the given object must compare as \n #equals(Object) and have the same #hashCode() as the object to be removed \n from the table data.   This allows clients to create proxy objects to pass into this method,\n as long as they honor those requirements.    \n \n If this model\u0027s data is sorted, then a binary search will be used to locate the item\n to be removed.  However, for this to work, all field used to sort the data must still be \n available from the original object and must be the same values.   If this is not true, then\n the binary search will not work and a brute force search will be used.",
+      "javadoc": "Removes the specified object from this model and schedules an update.\n \n \u003cP\u003eNote: for this method to function correctly, the given object must compare as \n {@link #equals(Object)} and have the same {@link #hashCode()} as the object to be removed \n from the table data.   This allows clients to create proxy objects to pass into this method,\n as long as they honor those requirements.    \n \n \u003cP\u003eIf this model\u0027s data is sorted, then a binary search will be used to locate the item\n to be removed.  However, for this to work, all field used to sort the data must still be \n available from the original object and must be the same values.   If this is not true, then\n the binary search will not work and a brute force search will be used.\n@param obj the object to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": "the object to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateNow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setModelState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "allData",
+          "type_long": "docking.widgets.table.threaded.TableData\u003cROW_OBJECT\u003e",
+          "type_short": "TableData",
+          "comment": ""
+        },
+        {
+          "name": "filteredData",
+          "type_long": "docking.widgets.table.threaded.TableData\u003cROW_OBJECT\u003e",
+          "type_short": "TableData",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllTableData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableData\u003cROW_OBJECT\u003e",
+        "type_short": "TableData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentTableData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableData\u003cROW_OBJECT\u003e",
+        "type_short": "TableData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "Returns true if the model is busy. \"Busy\" means the model\n is either loading or updating.",
+      "javadoc": "Returns true if the model is busy. \"Busy\" means the model\n is either loading or updating.\n@return true if the model is busy",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the model is busy"
+      },
+      "throws": []
+    },
+    {
+      "name": "isLoading",
+      "comment": "Returns whether this table is loading, which is somewhat misleading.\n \n If this table model is an incrementally loading table model, then this method returns true\n only when an incremental load is taking place.  Otherwise, this method returns true\n whenever the update manager is busy, which may be a load operation, or just a sort\n operation.  At issue is the fact that unless we are an incrementally loading model, we\n cannot tell if we are actually loading, or just busy otherwise manipulating out data.",
+      "javadoc": "Returns whether this table is loading, which is somewhat misleading.\n \u003cp\u003e\n If this table model is an incrementally loading table model, then this method returns true\n only when an incremental load is taking place.  Otherwise, this method returns true\n whenever the update manager is busy, which may be a load operation, or just a sort\n operation.  At issue is the fact that unless we are an incrementally loading model, we\n cannot tell if we are actually loading, or just busy otherwise manipulating out data.\n@return whether this table is loading, which is somewhat misleading.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "whether this table is loading, which is somewhat misleading."
+      },
+      "throws": []
+    },
+    {
+      "name": "isWorkerBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reSort",
+      "comment": "Resort the table using the current sort criteria.  This is useful if the data in the\n table has changed and is no longer sorted properly.  If the setSort method is used, nothing\n will happen because the table will think it is already sorted on that criteria.",
+      "javadoc": "Resort the table using the current sort criteria.  This is useful if the data in the\n table has changed and is no longer sorted properly.  If the setSort method is used, nothing\n will happen because the table will think it is already sorted on that criteria.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reFilter",
+      "comment": "Triggers this class to filter the contents of the data.",
+      "javadoc": "Triggers this class to filter the contents of the data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reload",
+      "comment": "Schedules the model to completely reload\n its underlying data.",
+      "javadoc": "Schedules the model to completely reload\n its underlying data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireTableChanged",
+      "comment": "",
+      "javadoc": "@see javax.swing.table.AbstractTableModel#fireTableChanged(javax.swing.event.TableModelEvent)",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "javax.swing.event.TableModelEvent",
+          "type_short": "TableModelEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Disposes this model.\n Once a model has been disposed, it cannot be reused.",
+      "javadoc": "Disposes this model.\n Once a model has been disposed, it cannot be reused.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearData",
+      "comment": "This method will clear all data and trigger fire a table data changed.  Use this method to\n immediately clear all data.  This is useful when you want to reload your table data and\n not have any old data hanging around being painted, which can produce odd results.",
+      "javadoc": "This method will clear all data and trigger fire a table data changed.  Use this method to\n immediately clear all data.  This is useful when you want to reload your table data and\n not have any old data hanging around being painted, which can produce odd results.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doClearData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelAllUpdates",
+      "comment": "Cancels all current and pending updates to the model. Waits until all updates have\n been cancelled.",
+      "javadoc": "Cancels all current and pending updates to the model. Waits until all updates have\n been cancelled.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowCount",
+      "comment": "",
+      "javadoc": "@see javax.swing.table.TableModel#getRowCount()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewRow",
+      "comment": "Given a row index for the raw (unfiltered) model, return the corresponding index in the\n view (filtered) model.",
+      "javadoc": "Given a row index for the raw (unfiltered) model, return the corresponding index in the\n view (filtered) model.\n@param modelRow The row index that corresponds to unfiltered data\n@return the index of that row in the filtered data\n@see #getModelRow(int)",
+      "static": false,
+      "params": [
+        {
+          "name": "modelRow",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "The row index that corresponds to unfiltered data"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the index of that row in the filtered data"
+      },
+      "throws": []
+    },
+    {
+      "name": "getModelRow",
+      "comment": "Given a row index for the view (filtered) model, return the corresponding index in the\n raw (unfiltered) model.",
+      "javadoc": "Given a row index for the view (filtered) model, return the corresponding index in the\n raw (unfiltered) model.\n@param viewRow The row index that corresponds to filtered data\n@return the index of that row in the unfiltered data\n@see #getViewRow(int)",
+      "static": false,
+      "params": [
+        {
+          "name": "viewRow",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "The row index that corresponds to filtered data"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the index of that row in the unfiltered data"
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModelIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Returns the name of this model.",
+      "javadoc": "Returns the name of this model.\n@return the name of this model",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the name of this model"
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowObjects",
+      "comment": "Returns the corresponding row objects for the specified rows.",
+      "javadoc": "Returns the corresponding row objects for the specified rows.\n@param rows the table rows\n@return the corresponding database keys",
+      "static": false,
+      "params": [
+        {
+          "name": "rows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": "the table rows"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+        "type_short": "List",
+        "comment": "the corresponding database keys"
+      },
+      "throws": []
+    },
+    {
+      "name": "setUpdateDelay",
+      "comment": "Sets the update delay, which is how long the model should wait before updating, after\n a change has been made the data",
+      "javadoc": "Sets the update delay, which is how long the model should wait before updating, after\n a change has been made the data\n@param updateDelayMillis the new update delay\n@param maxUpdateDelayMillis the new max update delay; updates will not wait past this time",
+      "static": false,
+      "params": [
+        {
+          "name": "updateDelayMillis",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the new update delay"
+        },
+        {
+          "name": "maxUpdateDelayMillis",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the new max update delay; updates will not wait past this time"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinDelay",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxDelay",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUpdateManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.ThreadedTableModelUpdateMgr\u003cROW_OBJECT\u003e",
+        "type_short": "ThreadedTableModelUpdateMgr",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDefaultTaskMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddRemoveStrategy",
+      "comment": "Returns the strategy to use for performing adds and removes to this table.   Subclasses can\n override this method to customize this process for their particular type of data.   See\n the implementations of TableAddRemoveStrategy for details.\n \n Note: The default add/remove strategy assumes that objects to be removed will be the \n same instance that is in the list of this model.   This allows the #equals(Object) \n and #hashCode() to be used when removing the object from the list.   If you model \n does not pass the same instance into #removeObject(Object), then you will need to \n update your add/remove strategy accordingly.",
+      "javadoc": "Returns the strategy to use for performing adds and removes to this table.   Subclasses can\n override this method to customize this process for their particular type of data.   See\n the implementations of {@link TableAddRemoveStrategy} for details.\n \n \u003cP\u003eNote: The default add/remove strategy assumes that objects to be removed will be the \n same instance that is in the list of this model.   This allows the {@link #equals(Object)} \n and {@link #hashCode()} to be used when removing the object from the list.   If you model \n does not pass the same instance into {@link #removeObject(Object)}, then you will need to \n update your add/remove strategy accordingly.\n@return the strategy",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableAddRemoveStrategy\u003cROW_OBJECT\u003e",
+        "type_short": "TableAddRemoveStrategy",
+        "comment": "the strategy"
+      },
+      "throws": []
+    },
+    {
+      "name": "setIncrementalTaskMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addInitialLoadListener",
+      "comment": "Adds a listener that will be notified of the first table load of this model.  After the\n initial load, the listener is removed.",
+      "javadoc": "Adds a listener that will be notified of the first table load of this model.  After the\n initial load, the listener is removed.\n@param listener the listener",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModelListener",
+          "type_short": "ThreadedTableModelListener",
+          "comment": "the listener"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addThreadedTableModelListener",
+      "comment": "This is a way to know about updates from the table.",
+      "javadoc": "This is a way to know about updates from the table.\n@param listener the listener to add\n@see #addInitialLoadListener(ThreadedTableModelListener)\n@see #removeThreadedTableModelListener(ThreadedTableModelListener)",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModelListener",
+          "type_short": "ThreadedTableModelListener",
+          "comment": "the listener to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeThreadedTableModelListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModelListener",
+          "type_short": "ThreadedTableModelListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyFinished",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "wasCancelled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyStarted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyPending",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

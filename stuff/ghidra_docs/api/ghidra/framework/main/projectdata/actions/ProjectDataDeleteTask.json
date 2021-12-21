@@ -1,0 +1,387 @@
+{
+  "name": "ProjectDataDeleteTask",
+  "comment": "Task that handles deleting DomainFile and DomainFolder\n from the project.\n \n This task will iterate all the files and folders specified by the user to weed out\n common problem issues (read-only files, checked-out files), ask the user to confirm,\n and then perform the actual delete operations.\n \n This task will show a summary dialog if there were multiple files involved or any errors\n encountered.\n ",
+  "javadoc": "{@link Task} that handles deleting {@link DomainFile files} and {@link DomainFolder folders}\n from the project.\n \u003cp\u003e\n This task will iterate all the files and folders specified by the user to weed out\n common problem issues (read-only files, checked-out files), ask the user to confirm,\n and then perform the actual delete operations.\n \u003cp\u003e\n This task will show a summary dialog if there were multiple files involved or any errors\n encountered.\n \u003cp\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.util.task.Task",
+  "fields": [
+    {
+      "name": "parentComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.Component",
+      "type_short": "Component",
+      "constant_value": null
+    },
+    {
+      "name": "startFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.framework.model.DomainFile\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "startFolders",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.framework.model.DomainFolder\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "failPreprocessCheckedOut",
+      "comment": "Files that failed during the preprocess phase because they were checked out",
+      "javadoc": "Files that failed during the preprocess phase because they were checked out",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.framework.model.DomainFile\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "failPreprocessReadOnly",
+      "comment": "Files that failed during the preprocess phase because they were marked read-only.",
+      "javadoc": "Files that failed during the preprocess phase because they were marked read-only.",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.framework.model.DomainFile\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "readOnlyOverride",
+      "comment": "A lookup Set of the #failPreprocessReadOnly files\n found during the preprocess phase, if the user has chosen to override the read-only\n status.",
+      "javadoc": "A lookup {@link Set set} of the {@link #failPreprocessReadOnly read-only} files\n found during the preprocess phase, if the user has chosen to override the read-only\n status.",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.framework.model.DomainFile\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "filesToDelete",
+      "comment": "The files that are queued up to be deleted, pointing to the string error message\n that was encountered during the actual delete operation, or null if no error.",
+      "javadoc": "The files that are queued up to be deleted, pointing to the string error message\n that was encountered during the actual delete operation, or null if no error.",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.framework.model.DomainFile,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "foldersToDelete",
+      "comment": "The folders that are queued up to be deleted  , pointing to the string error message\n that was encountered during the actual delete operation, or null if no error.",
+      "javadoc": "The folders that are queued up to be deleted  , pointing to the string error message\n that was encountered during the actual delete operation, or null if no error.",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.framework.model.DomainFolder,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "erroredFileCount",
+      "comment": "The number of files that encountered an error during the delete operation.",
+      "javadoc": "The number of files that encountered an error during the delete operation.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "erroredFolderCount",
+      "comment": "The number of folders that encountered an error during the delete operation.",
+      "javadoc": "The number of folders that encountered an error during the delete operation.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "elapsedTime",
+      "comment": "The number of milliseconds used during preprocessing and delete operations.",
+      "javadoc": "The number of milliseconds used during preprocessing and delete operations.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "fileBytesDeleted",
+      "comment": "Count of the number of bytes occupied by files that were successfully deleted.",
+      "javadoc": "Count of the number of bytes occupied by files that were successfully deleted.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new task to delete the specified files and folders.",
+      "javadoc": "Creates a new task to delete the specified files and folders.\n@param files - the {@link DomainFile files} the user requested to be deleted, or null.\n@param folders - the {@link DomainFolder folders} the user requested to be deleted, or null.\n@param parentComponent - parent java awt component that will be parent of the message dialogs and such.",
+      "static": false,
+      "params": [
+        {
+          "name": "files",
+          "type_long": "java.util.List\u003cghidra.framework.model.DomainFile\u003e",
+          "type_short": "List",
+          "comment": "- the DomainFile the user requested to be deleted, or null."
+        },
+        {
+          "name": "folders",
+          "type_long": "java.util.List\u003cghidra.framework.model.DomainFolder\u003e",
+          "type_short": "List",
+          "comment": "- the DomainFolder the user requested to be deleted, or null."
+        },
+        {
+          "name": "parentComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "- parent java awt component that will be parent of the message dialogs and such."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "run",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasErrors",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "confirmUserSkipFailedPreprocessedFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "confirmDeleteFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showErrorSummary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "wasCancelled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showResults",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "hasErrors",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteFolders",
+      "comment": "Attempts to delete the folders listed in #foldersToDelete (in reverse\n lexical order to delete child folders first before attempting to delete the\n containing parent folders).\n \n Errors are saved into #foldersToDelete as the value that the folder maps to.\n ",
+      "javadoc": "Attempts to delete the folders listed in {@link #foldersToDelete} (in reverse\n lexical order to delete child folders first before attempting to delete the\n containing parent folders).\n \u003cp\u003e\n Errors are saved into {@link #foldersToDelete} as the value that the folder maps to.\n \u003cp\u003e\n@param monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteFiles",
+      "comment": "Attempts to delete the files listed in #filesToDelete.\n \n Errors are saved into #filesToDelete as the value that the file maps to.\n ",
+      "javadoc": "Attempts to delete the files listed in {@link #filesToDelete}.\n \u003cp\u003e\n Errors are saved into {@link #filesToDelete} as the value that the file maps to.\n \u003cp\u003e\n@param monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "preprocessStartFilesAndFolders",
+      "comment": "Iterates over the user-supplied files and folders, saving the discovered files and\n subfolders and their files into #filesToDelete and #foldersToDelete.",
+      "javadoc": "Iterates over the user-supplied files and folders, saving the discovered files and\n subfolders and their files into {@link #filesToDelete} and {@link #foldersToDelete}.\n@param monitor\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "preprocessFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "preprocessFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

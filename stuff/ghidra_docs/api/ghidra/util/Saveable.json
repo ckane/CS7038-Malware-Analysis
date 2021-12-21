@@ -1,0 +1,141 @@
+{
+  "name": "Saveable",
+  "comment": "Save and restore elements that are compatible with ObjectStorage objects.\n \n Important: Any class implementing this interface that\n may have its class path saved to the data base (i.e. user defined properties)\n should create a map in the ClassTranslator when it is moved \n or renamed between versions of Ghidra. It should also implement ExtensionPoint.\n For example, any class that implements the Saveable interface \n can potentially be saved as a property in the program. If used as a program \n property the class name gets saved to a database field in the property manager. \n If the class gets moved or renamed, the property manager won\u0027t be able to \n instantiate it. The ClassTranslator allows the saveable class \n to indicate its old path name (that was stored in the database) and its\n current path name (the actual location of the class it needs to instantiate \n for the property). \n The saveable class should call \n     ClassTranslator.put(oldClassPath, newClassPath);\n in its static initializer.\n The property manager would then call \n     String newPathName \u003d ClassTranslator.get(oldPathName); \n when it can\u0027t find the class for the old path name. \n If the new path name isn\u0027t null the property manager can use it to get the class.",
+  "javadoc": "Save and restore elements that are compatible with ObjectStorage objects.\n \u003cbr\u003e\n \u003cp\u003e\u003cb\u003eImportant\u003c/b\u003e: Any class implementing this interface that\n may have its class path saved to the data base (i.e. user defined properties)\n should create a map in the \u003ccode\u003eClassTranslator\u003c/code\u003e when it is moved \n or renamed between versions of Ghidra. It should also implement \u003ccode\u003eExtensionPoint\u003c/code\u003e.\n \u003cbr\u003e\u003cp\u003eFor example, any class that implements the \u003ccode\u003eSaveable\u003c/code\u003e interface \n can potentially be saved as a property in the program. If used as a program \n property the class name gets saved to a database field in the property manager. \n If the class gets moved or renamed, the property manager won\u0027t be able to \n instantiate it. The \u003ccode\u003eClassTranslator\u003c/code\u003e allows the saveable class \n to indicate its old path name (that was stored in the database) and its\n current path name (the actual location of the class it needs to instantiate \n for the property). \n \u003cbr\u003eThe saveable class should call \n \u003cbr\u003e\u003ccode\u003e    ClassTranslator.put(oldClassPath, newClassPath);\u003c/code\u003e\n \u003cbr\u003ein its static initializer.\n \u003cbr\u003eThe property manager would then call \n \u003cbr\u003e\u003ccode\u003e    String newPathName \u003d ClassTranslator.get(oldPathName);\u003c/code\u003e \n \u003cbr\u003ewhen it can\u0027t find the class for the old path name. \n If the new path name isn\u0027t null the property manager can use it to get the class.",
+  "static": false,
+  "implements": [],
+  "fields": [],
+  "methods": [
+    {
+      "name": "getObjectStorageFields",
+      "comment": "Returns the field classes, in Java types, in the same order as used #save and\n #restore. \n \n For example, if the save method calls objStorage.putInt() and then\n objStorage.putFloat(), then this method must return \n Class[]{ Integer.class, Float.class }.",
+      "javadoc": "Returns the field classes, in Java types, in the same order as used {@link #save} and\n {@link #restore}. \n \u003cp\u003e\n For example, if the save method calls \u003ccode\u003eobjStorage.putInt()\u003c/code\u003e and then\n \u003ccode\u003eobjStorage.putFloat()\u003c/code\u003e, then this method must return \n \u003ccode\u003eClass[]{ Integer.class, Float.class }\u003c/code\u003e.\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Class\u003c?\u003e[]",
+        "type_short": "java.lang.Class\u003c?\u003e[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "save",
+      "comment": "Save to the given ObjectStorage.",
+      "javadoc": "Save to the given ObjectStorage.\n@param objStorage Object that can handle Java primitives, Strings, and\n arrays of primitives and Strings",
+      "static": false,
+      "params": [
+        {
+          "name": "objStorage",
+          "type_long": "ghidra.util.ObjectStorage",
+          "type_short": "ObjectStorage",
+          "comment": "Object that can handle Java primitives, Strings, and\n arrays of primitives and Strings"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restore",
+      "comment": "Restore from the given ObjectStorage.",
+      "javadoc": "Restore from the given ObjectStorage.\n@param objStorage Object that can handle Java primitives, Strings, and\n arrays of primitives and Strings\n@throws db.IllegalFieldAccessException if objStorage is improperly accessed.",
+      "static": false,
+      "params": [
+        {
+          "name": "objStorage",
+          "type_long": "ghidra.util.ObjectStorage",
+          "type_short": "ObjectStorage",
+          "comment": "Object that can handle Java primitives, Strings, and\n arrays of primitives and Strings"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSchemaVersion",
+      "comment": "Get the storage schema version.  Any time there is a software release\n in which the implementing class has changed the data structure used \n for the save and restore methods, the schema version must be incremented.\n NOTE: While this could be a static method, the Saveable interface is unable to \n define such methods.",
+      "javadoc": "Get the storage schema version.  Any time there is a software release\n in which the implementing class has changed the data structure used \n for the save and restore methods, the schema version must be incremented.\n NOTE: While this could be a static method, the Saveable interface is unable to \n define such methods.\n@return storage schema version.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "storage schema version."
+      },
+      "throws": []
+    },
+    {
+      "name": "isUpgradeable",
+      "comment": "Determine if the implementation supports an storage upgrade of the specified\n oldSchemaVersion to the current schema version.",
+      "javadoc": "Determine if the implementation supports an storage upgrade of the specified\n oldSchemaVersion to the current schema version.\n@param oldSchemaVersion\n@return true if upgrading is supported for the older schema version.",
+      "static": false,
+      "params": [
+        {
+          "name": "oldSchemaVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if upgrading is supported for the older schema version."
+      },
+      "throws": []
+    },
+    {
+      "name": "upgrade",
+      "comment": "Upgrade an older stored object to the current storage schema.",
+      "javadoc": "Upgrade an older stored object to the current storage schema.\n@param oldObjStorage the old stored object\n@param oldSchemaVersion storage schema version number for the old object\n@param currentObjStorage new object for storage in the current schema\n@return true if data was upgraded to the currentObjStorage successfully.",
+      "static": false,
+      "params": [
+        {
+          "name": "oldObjStorage",
+          "type_long": "ghidra.util.ObjectStorage",
+          "type_short": "ObjectStorage",
+          "comment": "the old stored object"
+        },
+        {
+          "name": "oldSchemaVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "storage schema version number for the old object"
+        },
+        {
+          "name": "currentObjStorage",
+          "type_long": "ghidra.util.ObjectStorage",
+          "type_short": "ObjectStorage",
+          "comment": "new object for storage in the current schema"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if data was upgraded to the currentObjStorage successfully."
+      },
+      "throws": []
+    },
+    {
+      "name": "isPrivate",
+      "comment": "Returns true if this saveable should not have it\u0027s changes broadcast.",
+      "javadoc": "Returns true if this saveable should not have it\u0027s changes broadcast.\n@return true if this saveable should not have it\u0027s changes broadcast.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this saveable should not have it\u0027s changes broadcast."
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,353 @@
+{
+  "name": "GraphJobRunner",
+  "comment": "A class to run GraphJobs.  This class will queue jobs and will run them\n in the Swing thread.  Job implementations may be multi-threaded, as they choose, by managing\n threads themselves.    This is different than a typical job runner, which is usually\n itself threaded.\n \n A job is considered finished when #jobFinished(GraphJob)\n is called on this class.  After this callback, the next job will be run.  \n \n #setFinalJob(GraphJob) sets a job to be run last, after all jobs in the queue\n have finished.\n \n When a job is added via #schedule(GraphJob), any currently running job will \n be told to finish immediately, if it\u0027s GraphJob#canShortcut() returns true.  If it \n cannot be shortcut, then it will be allowed to finish.  Further, this logic will be applied\n to each job in the queue.  So, if there are multiple jobs in the queue, which all return\n true for GraphJob#canShortcut(), then they will each be shortcut (allowing them \n to complete) before running the newly scheduled job.\n \n This class is thread-safe in that you can #schedule(GraphJob) jobs from any\n thread.\n \n Synchronization Policy:  the methods that mutate fields of this class or read them \n must be synchronized.",
+  "javadoc": "A class to run {@link GraphJob}s.  This class will queue jobs and will run them\n in the Swing thread.  Job implementations may be multi-threaded, as they choose, by managing\n threads themselves.    This is different than a typical job runner, which is usually\n itself threaded.\n \u003cP\u003e\n A job is considered finished when {@link #jobFinished(GraphJob)}\n is called on this class.  After this callback, the next job will be run.  \n \u003cP\u003e\n {@link #setFinalJob(GraphJob)} sets a job to be run last, after all jobs in the queue\n have finished.\n \n \u003cP\u003eWhen a job is added via {@link #schedule(GraphJob)}, any currently running job will \n be told to finish immediately, if it\u0027s {@link GraphJob#canShortcut()} returns true.  If it \n cannot be shortcut, then it will be allowed to finish.  Further, this logic will be applied\n to each job in the queue.  So, if there are multiple jobs in the queue, which all return\n true for {@link GraphJob#canShortcut()}, then they will each be shortcut (allowing them \n to complete) before running the newly scheduled job.\n \n \u003cP\u003eThis class is thread-safe in that you can {@link #schedule(GraphJob)} jobs from any\n thread.\n \n \u003cP\u003eSynchronization Policy:  the methods that mutate fields of this class or read them \n must be synchronized.",
+  "static": false,
+  "implements": [
+    "ghidra.graph.job.GraphJobListener"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "queue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Queue\u003cghidra.graph.job.GraphJob\u003e",
+      "type_short": "Queue",
+      "constant_value": null
+    },
+    {
+      "name": "finalJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.job.GraphJob",
+      "type_short": "GraphJob",
+      "constant_value": null
+    },
+    {
+      "name": "currentJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.job.GraphJob",
+      "type_short": "GraphJob",
+      "constant_value": null
+    },
+    {
+      "name": "isShortcutting",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "schedule",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "job",
+          "type_long": "ghidra.graph.job.GraphJob",
+          "type_short": "GraphJob",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "swing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "r",
+          "type_long": "java.lang.Runnable",
+          "type_short": "Runnable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFinalJob",
+      "comment": "Sets a job to run after all currently running and queued jobs.  If a final job was already\n set, then that job will be replaced with the given job.",
+      "javadoc": "Sets a job to run after all currently running and queued jobs.  If a final job was already\n set, then that job will be replaced with the given job.\n@param job the job to run",
+      "static": false,
+      "params": [
+        {
+          "name": "job",
+          "type_long": "ghidra.graph.job.GraphJob",
+          "type_short": "GraphJob",
+          "comment": "the job to run"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.job.GraphJob",
+        "type_short": "GraphJob",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "finishAllJobs",
+      "comment": "Causes all jobs to be finished as quickly as possible, calling GraphJob#shortcut()\n on each job.   \n \n Note: some jobs are not shortcut-able and will finish on their own time.  Any jobs \n queued behind a non-shortcut-able job will not be shortcut.",
+      "javadoc": "Causes all jobs to be finished as quickly as possible, calling {@link GraphJob#shortcut()}\n on each job.   \n \n \u003cP\u003eNote: some jobs are not shortcut-able and will finish on their own time.  Any jobs \n queued behind a non-shortcut-able job will \u003cb\u003enot\u003c/b\u003e be shortcut.\n@see #dispose()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Clears any pending jobs, stops the currently running job ungracefully and updates this\n class so that any new jobs added will be ignored.",
+      "javadoc": "Clears any pending jobs, stops the currently running job ungracefully and updates this\n class so that any new jobs added will be ignored.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearAllJobs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "jobFinished",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "job",
+          "type_long": "ghidra.graph.job.GraphJob",
+          "type_short": "GraphJob",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shortCutAndRunNextJob",
+      "comment": "Shortcut as many jobs as possible to clear the queue and then trigger the run of the \n remaining jobs.",
+      "javadoc": "Shortcut as many jobs as possible to clear the queue and then trigger the run of the \n remaining jobs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shortCutAll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "performShortcutFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "callback",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shortcutAsMuchAsPossible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "shortcutAll",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shortcutCurrentJob",
+      "comment": "Attempts to shortcut the currently running job, if there is one",
+      "javadoc": "Attempts to shortcut the currently running job, if there is one\n@return false if there is a currently running job that cannot be shortcut",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "false if there is a currently running job that cannot be shortcut"
+      },
+      "throws": []
+    },
+    {
+      "name": "shortcutPendingJobs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "shortcutAll",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shortcutFinalJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybeRunNextJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "trace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,512 @@
+{
+  "name": "AddressMap",
+  "comment": "Address map interface add methods need by the program database implementation to manage its address map.\n NOTE: Objects implementing this interface are not intended for use outside of the\n ghidra.program.database packages.",
+  "javadoc": "Address map interface add methods need by the program database implementation to manage its address map.\n NOTE: Objects implementing this interface are not intended for use outside of the\n \u003ccode\u003eghidra.program.database\u003c/code\u003e packages.",
+  "static": false,
+  "implements": [],
+  "fields": [
+    {
+      "name": "INVALID_ADDRESS_KEY",
+      "comment": "Reserved key for an invalid key.",
+      "javadoc": "Reserved key for an invalid key.",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "-1"
+    }
+  ],
+  "methods": [
+    {
+      "name": "getKey",
+      "comment": "Get the database key associated with the given relative address.\n This key uniquely identifies a relative location within the program.\n If the program\u0027s image base is moved to another address, this key will map to a new\n address that is the same distance to the new base as the old address was to the old base.\n If the requested key does not exist and create is false, INVALID_ADDRESS_KEY\n will be returned.  Note that nothing should ever be stored using the returned key unless\n create is true.",
+      "javadoc": "Get the database key associated with the given relative address.\n This key uniquely identifies a relative location within the program.\n If the program\u0027s image base is moved to another address, this key will map to a new\n address that is the same distance to the new base as the old address was to the old base.\n If the requested key does not exist and create is false, INVALID_ADDRESS_KEY\n will be returned.  Note that nothing should ever be stored using the returned key unless\n create is true.\n@param addr the address for which to get a database key.\n@param create true if a new key may be generated\n@return the database key for the given address or INVALID_ADDRESS_KEY if \n create is false and one does not exist for the specified addr.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address for which to get a database key."
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if a new key may be generated"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the database key for the given address or INVALID_ADDRESS_KEY if \n create is false and one does not exist for the specified addr."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAbsoluteEncoding",
+      "comment": "Get the database key associated with the given absolute address.\n This key uniquely identifies an absolute location within the program.\n If the requested key does not exist and create is false, INVALID_ADDRESS_KEY\n will be returned.  Note that nothing should ever be stored using the returned key unless\n create is true.",
+      "javadoc": "Get the database key associated with the given absolute address.\n This key uniquely identifies an absolute location within the program.\n If the requested key does not exist and create is false, INVALID_ADDRESS_KEY\n will be returned.  Note that nothing should ever be stored using the returned key unless\n create is true.\n@param addr the address for which to get a database key.\n@param create true if a new key may be generated\n@return the database key for the given address or INVALID_ADDRESS_KEY if \n create is false and one does not exist for the specified addr.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address for which to get a database key."
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if a new key may be generated"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the database key for the given address or INVALID_ADDRESS_KEY if \n create is false and one does not exist for the specified addr."
+      },
+      "throws": []
+    },
+    {
+      "name": "findKeyRange",
+      "comment": "Search for addr within the \"sorted\" keyRangeList and return the index of the\n keyRange which contains the specified addr.",
+      "javadoc": "Search for addr within the \"sorted\" keyRangeList and return the index of the\n keyRange which contains the specified addr.\n@param keyRangeList key range list to search\n@param addr address or null\n@return index of the keyRange within the keyRangeList which contains addr \n if it is contained in the list; otherwise, \u003ccode\u003e(-(\u003ci\u003einsertion point\u003c/i\u003e) - 1)\u003c/code\u003e. \n The \u003ci\u003einsertion point\u003c/i\u003e is defined as the point at which the\n addr would be inserted into the list: the index of the first keyRange\n greater than addr, or \u003ccode\u003ekeyRangeList.size()\u003c/code\u003e, if all\n keyRanges in the list are less than the specified addr.  Note\n that this guarantees that the return value will be \u0026gt;\u003d 0 if\n and only if the addr is found within a keyRange.  \n An addr of null will always result in a returned index of -1.",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": "key range list to search"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address or null"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "index of the keyRange within the keyRangeList which contains addr \n if it is contained in the list; otherwise, (-(insertion point) - 1). \n The insertion point is defined as the point at which the\n addr would be inserted into the list: the index of the first keyRange\n greater than addr, or keyRangeList.size(), if all\n keyRanges in the list are less than the specified addr.  Note\n that this guarantees that the return value will be \u003d 0 if\n and only if the addr is found within a keyRange.  \n An addr of null will always result in a returned index of -1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "Generates a properly ordered list of database key ranges for a\n a specified address range.  If absolute encodings are requested, \n only memory addresses will be included.  Returned key ranges are \n generally intended for read-only operations since new keys will \n never be generated.  The returned key ranges will correspond \n to those key ranges which have previously been created within \n the specified address range and may represent a much smaller subset \n of addresses within the specified range.",
+      "javadoc": "Generates a properly ordered list of database key ranges for a\n a specified address range.  If absolute encodings are requested, \n only memory addresses will be included.  Returned key ranges are \n generally intended for read-only operations since new keys will \n never be generated.  The returned key ranges will correspond \n to those key ranges which have previously been created within \n the specified address range and may represent a much smaller subset \n of addresses within the specified range.\n@param start minimum address of range\n@param end maximum address of range\n@param create true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined.\n@return \"sorted\" list of KeyRange objects",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "minimum address of range"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "maximum address of range"
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": "\"sorted\" list of KeyRange objects"
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "Generates a properly ordered list of database key ranges for a\n a specified address set.  If absolute encodings are requested, \n only memory addresses will be included.",
+      "javadoc": "Generates a properly ordered list of database key ranges for a\n a specified address set.  If absolute encodings are requested, \n only memory addresses will be included.\n@param set address set or null for all addresses.  May not be null if \u003ccode\u003ecreate\u003c/code\u003e is true.\n@param create true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined.\n@return \"sorted\" list of KeyRange objects",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "address set or null for all addresses.  May not be null if create is true."
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": "\"sorted\" list of KeyRange objects"
+      },
+      "throws": []
+    },
+    {
+      "name": "decodeAddress",
+      "comment": "Returns the address that was used to generate the given long key. (If the image base was\n moved, then a different address is returned unless the value was encoded using the\n \"absoluteEncoding\" method.  If the program\u0027s default address space is segmented (i.e., SegmentedAddressSpace).\n the address returned will be always be normalized to defined segmented memory blocks if possible.",
+      "javadoc": "Returns the address that was used to generate the given long key. (If the image base was\n moved, then a different address is returned unless the value was encoded using the\n \"absoluteEncoding\" method.  If the program\u0027s default address space is segmented (i.e., SegmentedAddressSpace).\n the address returned will be always be normalized to defined segmented memory blocks if possible.\n@param value the long value to convert to an address.\n@return address decoded from long",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the long value to convert to an address."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "address decoded from long"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressFactory",
+      "comment": "Returns the address factory associated with this map.\n Null may be returned if map not associated with a specific address factory.",
+      "javadoc": "Returns the address factory associated with this map.\n Null may be returned if map not associated with a specific address factory.\n@return associated {@link AddressFactory} or null",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressFactory",
+        "type_short": "AddressFactory",
+        "comment": "associated AddressFactory or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "Generates a properly ordered list of database key ranges for a\n a specified address range.  If absolute encodings are requested, \n only memory addresses will be included.",
+      "javadoc": "Generates a properly ordered list of database key ranges for a\n a specified address range.  If absolute encodings are requested, \n only memory addresses will be included.\n@param start minimum address of range\n@param end maximum address of range\n@param absolute if true, absolute key encodings are returned, otherwise \n standard/relocatable address key encodings are returned.\n@param create true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined.\n@return \"sorted\" list of KeyRange objects",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "minimum address of range"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "maximum address of range"
+        },
+        {
+          "name": "absolute",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, absolute key encodings are returned, otherwise \n standard/relocatable address key encodings are returned."
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": "\"sorted\" list of KeyRange objects"
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "Generates a properly ordered list of database key ranges for a\n a specified address set.  If absolute encodings are requested, \n only memory addresses will be included.",
+      "javadoc": "Generates a properly ordered list of database key ranges for a\n a specified address set.  If absolute encodings are requested, \n only memory addresses will be included.\n@param set address set or null for all addresses.  May not be null if \u003ccode\u003ecreate\u003c/code\u003e is true.\n@param absolute if true, absolute key encodings are returned, otherwise \n standard/relocatable address key encodings are returned.\n@param create true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined.\n@return \"sorted\" list of KeyRange objects",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "address set or null for all addresses.  May not be null if create is true."
+        },
+        {
+          "name": "absolute",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, absolute key encodings are returned, otherwise \n standard/relocatable address key encodings are returned."
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if a new keys may be generated, otherwise returned \n key-ranges will be limited to those already defined."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": "\"sorted\" list of KeyRange objects"
+      },
+      "throws": []
+    },
+    {
+      "name": "getOldAddressMap",
+      "comment": "Returns an address map capable of decoding old address encodings.",
+      "javadoc": "Returns an address map capable of decoding old address encodings.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.map.AddressMap",
+        "type_short": "AddressMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUpgraded",
+      "comment": "Returns true if this address map has been upgraded.",
+      "javadoc": "Returns true if this address map has been upgraded.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setImageBase",
+      "comment": "Sets the image base, effectively changing the mapping between addresses and longs.",
+      "javadoc": "Sets the image base, effectively changing the mapping between addresses and longs.\n@param base the new base address.",
+      "static": false,
+      "params": [
+        {
+          "name": "base",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the new base address."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModCount",
+      "comment": "Returns a modification number that always increases when the address map base table has\n changed.",
+      "javadoc": "Returns a modification number that always increases when the address map base table has\n changed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getImageBase",
+      "comment": "Returns the current image base setting.",
+      "javadoc": "Returns the current image base setting.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLanguage",
+      "comment": "Converts the current base addresses to addresses compatible with the new language.",
+      "javadoc": "Converts the current base addresses to addresses compatible with the new language.\n@param newLanguage the new language to use.\n@param addrFactory the new AddressFactory.\n@param translator translates address spaces from the old language to the new language.",
+      "static": false,
+      "params": [
+        {
+          "name": "newLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": "the new language to use."
+        },
+        {
+          "name": "addrFactory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "the new AddressFactory."
+        },
+        {
+          "name": "translator",
+          "type_long": "ghidra.program.util.LanguageTranslator",
+          "type_short": "LanguageTranslator",
+          "comment": "translates address spaces from the old language to the new language."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "invalidateCache",
+      "comment": "Clears any cached values.",
+      "javadoc": "Clears any cached values.\n@throws IOException",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "renameOverlaySpace",
+      "comment": "Rename an existing overlay space.",
+      "javadoc": "Rename an existing overlay space.\n@param oldName old overlay name\n@param newName new overlay name (must be unique among all space names within this map)\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "old overlay name"
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new overlay name (must be unique among all space names within this map)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteOverlaySpace",
+      "comment": "Delete the specified overlay space from this address map.",
+      "javadoc": "Delete the specified overlay space from this address map.\n@param name overlay space name (must be unique among all space names within this map)\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "overlay space name (must be unique among all space names within this map)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "hasSameKeyBase",
+      "comment": "Returns true if the two address keys share a common key base and can be \n used within a single key-range.",
+      "javadoc": "Returns true if the two address keys share a common key base and can be \n used within a single key-range.\n@param addrKey1\n@param addrKey2",
+      "static": false,
+      "params": [
+        {
+          "name": "addrKey1",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "addrKey2",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isKeyRangeMin",
+      "comment": "Returns true if the specified addrKey is the minimum key within\n its key-range.",
+      "javadoc": "Returns true if the specified addrKey is the minimum key within\n its key-range.\n@param addrKey",
+      "static": false,
+      "params": [
+        {
+          "name": "addrKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isKeyRangeMax",
+      "comment": "Returns true if the specified addrKey is the maximum key within\n its key-range.",
+      "javadoc": "Returns true if the specified addrKey is the maximum key within\n its key-range.\n@param addrKey",
+      "static": false,
+      "params": [
+        {
+          "name": "addrKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

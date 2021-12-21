@@ -1,0 +1,540 @@
+{
+  "name": "EventManager",
+  "comment": "Helper class to manage the events that plugins consume and produce. This class keeps track of the\n last events that went out so that when a plugin is added, it receives those events.",
+  "javadoc": "Helper class to manage the events that plugins consume and produce. This class keeps track of the\n last events that went out so that when a plugin is added, it receives those events.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "toolListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.framework.model.ToolListener\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "listenersByEventType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e,java.util.Set\u003cghidra.framework.plugintool.util.PluginEventListener\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "producerMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.framework.plugintool.mgr.Counter\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "consumerMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.framework.plugintool.mgr.Counter\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "lastEventsByType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.LinkedHashMap\u003cjava.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e,ghidra.framework.plugintool.PluginEvent\u003e",
+      "type_short": "LinkedHashMap",
+      "constant_value": null
+    },
+    {
+      "name": "eventQ",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.LinkedList\u003cghidra.framework.plugintool.PluginEvent\u003e",
+      "type_short": "LinkedList",
+      "constant_value": null
+    },
+    {
+      "name": "allEventListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.framework.plugintool.util.PluginEventListener\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "tool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.PluginTool",
+      "type_short": "PluginTool",
+      "constant_value": null
+    },
+    {
+      "name": "currentEvent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.PluginEvent",
+      "type_short": "PluginEvent",
+      "constant_value": null
+    },
+    {
+      "name": "sendEventsRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "sendingToolEvent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new EventManager.",
+      "javadoc": "Construct a new EventManager.\n@param tool plugin tool associated with this EventManager",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "plugin tool associated with this EventManager"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEventListener",
+      "comment": "Add a plugin event listener that will be notified when an event of the given event class is\n generated.",
+      "javadoc": "Add a plugin event listener that will be notified when an event of the given event class is\n generated.\n@param eventClass class of the event of interest\n@param listener listener to notify",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": "class of the event of interest"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.plugintool.util.PluginEventListener",
+          "type_short": "PluginEventListener",
+          "comment": "listener to notify"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addAllEventListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.plugintool.util.PluginEventListener",
+          "type_short": "PluginEventListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAllEventListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.plugintool.util.PluginEventListener",
+          "type_short": "PluginEventListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEventListener",
+      "comment": "Remove the plugin event listener from the list of listeners notified when an event of the\n given event class is generated.",
+      "javadoc": "Remove the plugin event listener from the list of listeners notified when an event of the\n given event class is generated.\n@param eventClass class of the event of interest\n@param listener listener to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": "class of the event of interest"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.plugintool.util.PluginEventListener",
+          "type_short": "PluginEventListener",
+          "comment": "listener to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "eventConsumerRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addToolListener",
+      "comment": "Add the given tool listener to be notified notified when tool events are generated",
+      "javadoc": "Add the given tool listener to be notified notified when tool events are generated\n@param listener listener to add",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.ToolListener",
+          "type_short": "ToolListener",
+          "comment": "listener to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeToolListener",
+      "comment": "Remove the given tool listener from the list of tool listeners",
+      "javadoc": "Remove the given tool listener from the list of tool listeners\n@param listener listener to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.ToolListener",
+          "type_short": "ToolListener",
+          "comment": "listener to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasToolListeners",
+      "comment": "Return whether there are any registered tool listeners for the tool associated with class",
+      "javadoc": "Return whether there are any registered tool listeners for the tool associated with class\n@return true if there are any listeners",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there are any listeners"
+      },
+      "throws": []
+    },
+    {
+      "name": "addEventProducer",
+      "comment": "Add the class for the PluginEvent that a plugin will produce",
+      "javadoc": "Add the class for the PluginEvent that a plugin will produce\n@param eventClass class for the PluginEvent",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": "class for the PluginEvent"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEventProducer",
+      "comment": "Remove the class of a PluginEvent that a plugin produces.",
+      "javadoc": "Remove the class of a PluginEvent that a plugin produces.\n@param eventClass class for the PluginEvent",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": "class for the PluginEvent"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEventsProduced",
+      "comment": "Get the names of all events produced by plugins in the tool.",
+      "javadoc": "Get the names of all events produced by plugins in the tool.\n@return array of PluginEvent names",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "array of PluginEvent names"
+      },
+      "throws": []
+    },
+    {
+      "name": "getEventsConsumed",
+      "comment": "Get the names of all events consumed by plugins in the tool.",
+      "javadoc": "Get the names of all events consumed by plugins in the tool.\n@return array of PluginEvent names",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "array of PluginEvent names"
+      },
+      "throws": []
+    },
+    {
+      "name": "fireEvent",
+      "comment": "Notify all plugin listeners that are registered to consume the given event. Events are fired\n in the SwingThread.",
+      "javadoc": "Notify all plugin listeners that are registered to consume the given event. Events are fired\n in the SwingThread.\n@param event event to fire",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": "event to fire"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateEventChain",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startEvent",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": ""
+        },
+        {
+          "name": "newEvent",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processToolEvent",
+      "comment": "Convert the given tool event to a plugin event; notify the appropriate plugin listeners. This\n method allows one tool\u0027s event manager to send events to another connected tool.",
+      "javadoc": "Convert the given tool event to a plugin event; notify the appropriate plugin listeners. This\n method allows one tool\u0027s event manager to send events to another connected tool.\n@param event tool event",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": "tool event"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearLastEvents",
+      "comment": "Clear the list of last plugin events fired",
+      "javadoc": "Clear the list of last plugin events fired",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Clear last plugin events fired, current event, listeners, etc.",
+      "javadoc": "Clear last plugin events fired, current event, listeners, etc.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastEvents",
+      "comment": "Return an array of the last plugin events fired. EventManager maps the event class to the\n last event fired.",
+      "javadoc": "Return an array of the last plugin events fired. EventManager maps the event class to the\n last event fired.\n@return array of plugin events",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginEvent[]",
+        "type_short": "ghidra.framework.plugintool.PluginEvent[]",
+        "comment": "array of plugin events"
+      },
+      "throws": []
+    },
+    {
+      "name": "sendEvents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Iterable\u003cghidra.framework.plugintool.util.PluginEventListener\u003e",
+        "type_short": "Iterable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sendToolEvent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEventListener",
+      "comment": "Remove the event listener by className; the plugin registered for events, but the\n construction failed.",
+      "javadoc": "Remove the event listener by className; the plugin registered for events, but the\n construction failed.\n@param className class name of the plugin (event listener)",
+      "static": false,
+      "params": [
+        {
+          "name": "className",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "class name of the plugin (event listener)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

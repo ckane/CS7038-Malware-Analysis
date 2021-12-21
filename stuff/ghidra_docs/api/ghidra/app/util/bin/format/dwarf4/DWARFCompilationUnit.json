@@ -1,0 +1,529 @@
+{
+  "name": "DWARFCompilationUnit",
+  "comment": "A DWARF \"CompilationUnit\" is a contiguous block of DebugInfoEntry records found\n in a \".debug_info\" section of an ELF program.  The compilation unit block starts with a\n header that has a few important values and flags, and is followed by the DIE records.\n \n The first DIE record must be a DW_TAG_compile_unit (see DWARFCompileUnit,\n and #getCompileUnit()).\n \n DIE records are identified by their byte offset in the \".debug_info\" section.\n ",
+  "javadoc": "A DWARF \"CompilationUnit\" is a contiguous block of {@link DebugInfoEntry DIE} records found\n in a \".debug_info\" section of an ELF program.  The compilation unit block starts with a\n header that has a few important values and flags, and is followed by the DIE records.\n \u003cp\u003e\n The first DIE record must be a DW_TAG_compile_unit (see {@link DWARFCompileUnit},\n and {@link #getCompileUnit()}).\n \u003cp\u003e\n DIE records are identified by their byte offset in the \".debug_info\" section.\n \u003cp\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DWARF_32",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "32"
+    },
+    {
+      "name": "DWARF_64",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "64"
+    },
+    {
+      "name": "dwarfProgram",
+      "comment": "Reference to the owning DWARFProgram.",
+      "javadoc": "Reference to the owning {@link DWARFProgram}.",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+      "type_short": "DWARFProgram",
+      "constant_value": null
+    },
+    {
+      "name": "startOffset",
+      "comment": "Offset in the debug_info section of this compUnit\u0027s header",
+      "javadoc": "Offset in the debug_info section of this compUnit\u0027s header",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "endOffset",
+      "comment": "Offset in the debug_info section of the end of this compUnit.  (right after\n the last DIE record)",
+      "javadoc": "Offset in the debug_info section of the end of this compUnit.  (right after\n the last DIE record)",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "length",
+      "comment": "Length in bytes of this compUnit header and DIE records.",
+      "javadoc": "Length in bytes of this compUnit header and DIE records.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "format",
+      "comment": "#DWARF_32 or #DWARF_64",
+      "javadoc": "{@link #DWARF_32} or {@link #DWARF_64}",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "version",
+      "comment": "DWARF ver number, as read from the compunit structure, currently not used but being kept.",
+      "javadoc": "DWARF ver number, as read from the compunit structure, currently not used but being kept.",
+      "static": false,
+      "type_long": "short",
+      "type_short": "short",
+      "constant_value": null
+    },
+    {
+      "name": "compUnitNumber",
+      "comment": "Sequential number of this compUnit",
+      "javadoc": "Sequential number of this compUnit",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "pointerSize",
+      "comment": "Size of pointers that are held in DIEs in this compUnit.",
+      "javadoc": "Size of pointers that are held in DIEs in this compUnit.",
+      "static": false,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": null
+    },
+    {
+      "name": "abbreviationOffset",
+      "comment": "Offset in the abbr section of this compUnit\u0027s abbreviations.",
+      "javadoc": "Offset in the abbr section of this compUnit\u0027s abbreviations.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "firstDIEOffset",
+      "comment": "Offset in the debug_info section of the first DIE of this compUnit.",
+      "javadoc": "Offset in the debug_info section of the first DIE of this compUnit.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "codeToAbbreviationMap",
+      "comment": "Map of abbrevCode to DWARFAbbreviation instances.",
+      "javadoc": "Map of abbrevCode to {@link DWARFAbbreviation} instances.",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Integer,ghidra.app.util.bin.format.dwarf4.DWARFAbbreviation\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "compUnit",
+      "comment": "The contents of the first DIE (that must be a compile unit) in this compUnit.",
+      "javadoc": "The contents of the first DIE (that must be a compile unit) in this compUnit.",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFCompileUnit",
+      "type_short": "DWARFCompileUnit",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "readCompilationUnit",
+      "comment": "Creates a new DWARFCompilationUnit by reading a compilationUnit\u0027s header data\n from the debug_info section and the debug_abbr section and its compileUnit DIE (ie.\n the first DIE right after the header).\n \n Returns  if there was an ignorable error while reading the compilation unit (and\n leaves the input stream at the next compilation unit to read), otherwise throws\n an IOException if there was an unrecoverable error.\n \n Also returns  (and leaves the stream at EOF) if the remainder of the stream \n is filled with null bytes.",
+      "javadoc": "Creates a new {@link DWARFCompilationUnit} by reading a compilationUnit\u0027s header data\n from the debug_info section and the debug_abbr section and its compileUnit DIE (ie.\n the first DIE right after the header).\n \u003cp\u003e\n Returns {@code NULL} if there was an ignorable error while reading the compilation unit (and\n leaves the input stream at the next compilation unit to read), otherwise throws\n an IOException if there was an unrecoverable error.\n \u003cp\u003e\n Also returns {@code NULL} (and leaves the stream at EOF) if the remainder of the stream \n is filled with null bytes.\n@param dwarfProgram the dwarf program.\n@param debugInfoBR the debug info binary reader.\n@param debugAbbrBR the debug abbreviation binary reader\n@param cuNumber the compilation unit number\n@param monitor the current task monitor\n@return the read compilation unit, or null if the compilation unit was bad/empty and should \n be ignored\n@throws DWARFException if an invalid or unsupported DWARF version is read.\n@throws IOException if the length of the compilation unit is invalid.\n@throws CancelledException if the task has been canceled.",
+      "static": true,
+      "params": [
+        {
+          "name": "dwarfProgram",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+          "type_short": "DWARFProgram",
+          "comment": "the dwarf program."
+        },
+        {
+          "name": "debugInfoBR",
+          "type_long": "ghidra.app.util.bin.BinaryReader",
+          "type_short": "BinaryReader",
+          "comment": "the debug info binary reader."
+        },
+        {
+          "name": "debugAbbrBR",
+          "type_long": "ghidra.app.util.bin.BinaryReader",
+          "type_short": "BinaryReader",
+          "comment": "the debug abbreviation binary reader"
+        },
+        {
+          "name": "cuNumber",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the compilation unit number"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the current task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFCompilationUnit",
+        "type_short": "DWARFCompilationUnit",
+        "comment": "the read compilation unit, or null if the compilation unit was bad/empty and should \n be ignored"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFException",
+          "type_short": "DWARFException",
+          "comment": "if an invalid or unsupported DWARF version is read."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if the length of the compilation unit is invalid."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task has been canceled."
+        }
+      ]
+    },
+    {
+      "name": "isAllZerosUntilEOF",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.BinaryReader",
+          "type_short": "BinaryReader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "This ctor is public only for junit tests.  Do not use directly.",
+      "javadoc": "This ctor is public only for junit tests.  Do not use directly.\n@param dwarfProgram {@link DWARFProgram}\n@param startOffset offset in provider where it starts\n@param endOffset offset in provider where it ends\n@param length how many bytes following the header the DIEs of this unit take\n@param format DWARF_32 or DWARF_64\n@param version 2, 3, 4\n@param abbreviationOffset offset into abbrev section\n@param pointerSize default size of pointers\n@param compUnitNumber this compunits ordinal in the file\n@param firstDIEOffset start of DIEs in the provider\n@param codeToAbbreviationMap map of abbreviation numbers to {@link DWARFAbbreviation} instances",
+      "static": false,
+      "params": [
+        {
+          "name": "dwarfProgram",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+          "type_short": "DWARFProgram",
+          "comment": "DWARFProgram"
+        },
+        {
+          "name": "startOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "offset in provider where it starts"
+        },
+        {
+          "name": "endOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "offset in provider where it ends"
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "how many bytes following the header the DIEs of this unit take"
+        },
+        {
+          "name": "format",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "DWARF_32 or DWARF_64"
+        },
+        {
+          "name": "version",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": "2, 3, 4"
+        },
+        {
+          "name": "abbreviationOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "offset into abbrev section"
+        },
+        {
+          "name": "pointerSize",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "default size of pointers"
+        },
+        {
+          "name": "compUnitNumber",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "this compunits ordinal in the file"
+        },
+        {
+          "name": "firstDIEOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "start of DIEs in the provider"
+        },
+        {
+          "name": "codeToAbbreviationMap",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,ghidra.app.util.bin.format.dwarf4.DWARFAbbreviation\u003e",
+          "type_short": "Map",
+          "comment": "map of abbreviation numbers to DWARFAbbreviation instances"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompileUnit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFCompileUnit",
+        "type_short": "DWARFCompileUnit",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCompileUnit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "compUnit",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFCompileUnit",
+          "type_short": "DWARFCompileUnit",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+        "type_short": "DWARFProgram",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLength",
+      "comment": "An unsigned long (4 bytes in 32-bit or 8 bytes in 64-bit format) representing\n the length of the .debug_info contribution for that compilation unit,\n not including the length field itself.",
+      "javadoc": "An unsigned long (4 bytes in 32-bit or 8 bytes in 64-bit format) representing\n the length of the .debug_info contribution for that compilation unit,\n not including the length field itself.\n@return the length in bytes of the this compilation unit",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the length in bytes of the this compilation unit"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPointerSize",
+      "comment": "A 1-byte unsigned integer representing the size\n in bytes of an address on the target\n architecture. If the system uses segmented addressing, this\n value represents the size of the offset portion of an address.",
+      "javadoc": "A 1-byte unsigned integer representing the size\n in bytes of an address on the target\n architecture. If the system uses segmented addressing, this\n value represents the size of the offset portion of an address.\n@return the size in bytes of pointers",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "the size in bytes of pointers"
+      },
+      "throws": []
+    },
+    {
+      "name": "getStartOffset",
+      "comment": "Returns the byte offset to the start of this compilation unit.",
+      "javadoc": "Returns the byte offset to the start of this compilation unit.\n@return the byte offset to the start of this compilation unit",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the byte offset to the start of this compilation unit"
+      },
+      "throws": []
+    },
+    {
+      "name": "getEndOffset",
+      "comment": "Returns the byte offset to the end of this compilation unit.",
+      "javadoc": "Returns the byte offset to the end of this compilation unit.\n@return the byte offset to the end of this compilation unit",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the byte offset to the end of this compilation unit"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFormat",
+      "comment": "Returns either DWARF_32 or DWARF_64 depending on the current compilation unit format",
+      "javadoc": "Returns either DWARF_32 or DWARF_64 depending on the current compilation unit format\n@return DWARF_32 or DWARF_64 constant depending on the current compilation unit format",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "DWARF_32 or DWARF_64 constant depending on the current compilation unit format"
+      },
+      "throws": []
+    },
+    {
+      "name": "containsOffset",
+      "comment": "Returns true if the  value is within\n this compUnit\u0027s start and end position in the debug_info section.",
+      "javadoc": "Returns true if the {@code offset} value is within\n this compUnit\u0027s start and end position in the debug_info section.\n@param offset DIE offset\n@return true if within range of this compunit",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "DIE offset"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if within range of this compunit"
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCodeToAbbreviationMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.Integer,ghidra.app.util.bin.format.dwarf4.DWARFAbbreviation\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFirstDIEOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompUnitNumber",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readDIEs",
+      "comment": "Reads the DebugInfoEntry records for this compilation unit from the .debug_info\n section.\n ",
+      "javadoc": "Reads the {@link DebugInfoEntry} records for this compilation unit from the .debug_info\n section.\n \u003cp\u003e\n@param entries List of DIE records that is written to by this method.  This list should\n be empty if the caller only wants this CU\u0027s records (ie. normal mode), or the list\n can be used to accumulate all DIE records (preload all DIE mode).\n@param monitor {@link TaskMonitor} to watch for cancelation\n@throws IOException if error reading data\n@throws DWARFException if error in DWARF structure\n@throws CancelledException if user cancels.",
+      "static": false,
+      "params": [
+        {
+          "name": "entries",
+          "type_long": "java.util.List\u003cghidra.app.util.bin.format.dwarf4.DebugInfoEntry\u003e",
+          "type_short": "List",
+          "comment": "List of DIE records that is written to by this method.  This list should\n be empty if the caller only wants this CU\u0027s records (ie. normal mode), or the list\n can be used to accumulate all DIE records (preload all DIE mode)."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch for cancelation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error reading data"
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFException",
+          "type_short": "DWARFException",
+          "comment": "if error in DWARF structure"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        }
+      ]
+    }
+  ]
+}

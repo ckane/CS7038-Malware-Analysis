@@ -1,0 +1,1098 @@
+{
+  "name": "ProgramTreeMergeManager",
+  "comment": "Manages changes and conflicts between the latest versioned Program and the\n Program that is being checked into version control.",
+  "javadoc": "Manages changes and conflicts between the latest versioned Program and the\n Program that is being checked into version control.",
+  "static": false,
+  "implements": [
+    "ghidra.app.merge.MergeResolver"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "PROGRAM_TREE_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "NAME_PANEL_ID",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Name Panel\""
+    },
+    {
+      "name": "CONFLICTS_PANEL_ID",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Name/Content Conflicts Panel\""
+    },
+    {
+      "name": "resultProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "originalProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "myChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "latestChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "currentMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "myListing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "resultListing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "latestListing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "conflictsChangeList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cjava.lang.Long\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "conflictOption",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "mergeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+      "type_short": "ProgramMultiUserMergeManager",
+      "constant_value": null
+    },
+    {
+      "name": "mergePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.tree.ProgramTreeMergePanel",
+      "type_short": "ProgramTreeMergePanel",
+      "constant_value": null
+    },
+    {
+      "name": "progressIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "onlyNamesChangedChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "onlyDestinationStructureChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "onlySourceStructureChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "bothStructuresChangedChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "CANCELED",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-2"
+    },
+    {
+      "name": "ASK_USER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-1"
+    },
+    {
+      "name": "KEEP_OTHER_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "KEEP_PRIVATE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "ADD_NEW_TREE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "RENAME_PRIVATE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "ORIGINAL_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new manager for merging trees",
+      "javadoc": "Construct a new manager for merging trees\n@param mergeManager the program merge manager\n@param resultProgram latest version of the Program that is the \n destination for changes applied from the source program\n@param myProgram source of changes to apply to the destination\n program\n@param originalProgram program that was originally checked out\n@param latestProgram program that that is the latest version; the\n resultProgram and latestProgram start out as being identical\n@param latestChangeSet change set of the destination program\n@param myChangeSet change set for the source program",
+      "static": false,
+      "params": [
+        {
+          "name": "mergeManager",
+          "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+          "type_short": "ProgramMultiUserMergeManager",
+          "comment": "the program merge manager"
+        },
+        {
+          "name": "resultProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "latest version of the Program that is the \n destination for changes applied from the source program"
+        },
+        {
+          "name": "myProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "source of changes to apply to the destination\n program"
+        },
+        {
+          "name": "originalProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program that was originally checked out"
+        },
+        {
+          "name": "latestProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program that that is the latest version; the\n resultProgram and latestProgram start out as being identical"
+        },
+        {
+          "name": "latestChangeSet",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "change set of the destination program"
+        },
+        {
+          "name": "myChangeSet",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "change set for the source program"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setConflictResolution",
+      "comment": "For JUnit testing only, set the option for resolving a conflict.",
+      "javadoc": "For JUnit testing only, set the option for resolving a conflict.\n@param option",
+      "static": false,
+      "params": [
+        {
+          "name": "option",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyAdditions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myList",
+          "type_long": "java.util.ArrayList\u003cjava.lang.Long\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getUniqueTreeName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "baseName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueTreeName",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "baseName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyChanges",
+      "comment": "Apply changes that are not conflicts.",
+      "javadoc": "Apply changes that are not conflicts.\n@param changeList list tree IDs changed in the source program.\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "changeList",
+          "type_long": "java.util.ArrayList\u003cjava.lang.Long\u003e",
+          "type_short": "ArrayList",
+          "comment": "list tree IDs changed in the source program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "treeStructureChanged",
+      "comment": "Tree structure changed if the modification numbers on trees do not\n match, OR, modification number of original is not the same as the\n modification on the source tree.",
+      "javadoc": "Tree structure changed if the modification numbers on trees do not\n match, OR, modification number of original is not the same as the\n modification on the source tree.\n@param treeID ID of source root\n@return whether the structure changed",
+      "static": false,
+      "params": [
+        {
+          "name": "treeID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "ID of source root"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "whether the structure changed"
+      },
+      "throws": []
+    },
+    {
+      "name": "treeStructureChanged",
+      "comment": "Called when we need to know which tree changed (not enough to know\n that the structures are different).",
+      "javadoc": "Called when we need to know which tree changed (not enough to know\n that the structures are different).\n@param root1 root of the original program\n@param root2 root for either the source tree or the destination tree\n@return true if there was no original root, OR the modification\n numbers for the original tree and tree containing root do not match",
+      "static": false,
+      "params": [
+        {
+          "name": "root1",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "root of the original program"
+        },
+        {
+          "name": "root2",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "root for either the source tree or the destination tree"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there was no original root, OR the modification\n numbers for the original tree and tree containing root do not match"
+      },
+      "throws": []
+    },
+    {
+      "name": "createTree",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listing",
+          "type_long": "ghidra.program.model.listing.Listing",
+          "type_short": "Listing",
+          "comment": ""
+        },
+        {
+          "name": "treeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "sourceRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEmptyFragments",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "module",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "fragmentNameList",
+          "type_long": "java.util.ArrayList\u003cjava.lang.String\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createModules",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "sourceParent",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "fragmentNameList",
+          "type_long": "java.util.ArrayList\u003cjava.lang.String\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createModule",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "sourceModule",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "fragmentNameList",
+          "type_long": "java.util.ArrayList\u003cjava.lang.String\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createFragment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "sourceFrag",
+          "type_long": "ghidra.program.model.listing.ProgramFragment",
+          "type_short": "ProgramFragment",
+          "comment": ""
+        },
+        {
+          "name": "fragmentNameList",
+          "type_long": "java.util.ArrayList\u003cjava.lang.String\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.ArrayList\u003cjava.lang.Long\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "keepOtherOrCreateTree",
+      "comment": "Covers case 6: dest content changed, source content changed;\n        case 7: dest name change and content changed, source name changed and content changed\n        case 8: dest name and content changed, source content changed\n        case 9: dest content changed, source name and content changed",
+      "javadoc": "Covers case 6: dest content changed, source content changed;\n        case 7: dest name change and content changed, source name changed and content changed\n        case 8: dest name and content changed, source content changed\n        case 9: dest content changed, source name and content changed\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "origRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "sourceRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "destRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "namesChanged",
+      "comment": "Case 1: both names changed, no structure changes",
+      "javadoc": "Case 1: both names changed, no structure changes\n@param sourceRoot\n@param destRoot",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "destRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "origRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "waitForUserInput",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "destTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "origTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "latestNameChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "latestStructureChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "privNameChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "privStructureChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "namesContentChanged",
+      "comment": "Case 4: destination Name and content changed, source name changed",
+      "javadoc": "Case 4: destination Name and content changed, source name changed\n@param sourceRoot source root module\n@param sourceTreeName source tree name\n@param destTreeName destination tree name\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "source root module"
+        },
+        {
+          "name": "sourceTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "source tree name"
+        },
+        {
+          "name": "destTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "destination tree name"
+        },
+        {
+          "name": "origRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "nameContentsChanged",
+      "comment": "Case 5: destination Name changed, source name and content changed",
+      "javadoc": "Case 5: destination Name changed, source name and content changed\n@param sourceRoot source root module\n@param sourceTreeName source tree name\n@param destTreeName destination tree name\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "source root module"
+        },
+        {
+          "name": "sourceTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "source tree name"
+        },
+        {
+          "name": "destTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "destination tree name"
+        },
+        {
+          "name": "origTreeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "nameChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "origRoot",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "treeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showMergePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "panelID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "name1",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name2",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "origName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "latestNameChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "latestStructureChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "privNameChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "privStructureChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPhases",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[][]",
+        "type_short": "java.lang.String[][]",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

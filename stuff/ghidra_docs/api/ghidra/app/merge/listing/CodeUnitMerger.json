@@ -1,0 +1,1334 @@
+{
+  "name": "CodeUnitMerger",
+  "comment": "Manages byte and code unit changes and conflicts between the latest versioned\n program and the modified program being checked into version control.\n Indirect conflicts include:\n \n bytes and code units\n bytes and equates\n code units and equates\n \n Important: This class is intended to be used only for a single program\n version merge. It should be constructed, followed by an autoMerge(), and lastly\n should call mergeConflicts() passing it ASK_USER for the conflictOption.",
+  "javadoc": "Manages byte and code unit changes and conflicts between the latest versioned\n program and the modified program being checked into version control.\n \u003cbr\u003eIndirect conflicts include:\n \u003cul\u003e\n \u003cli\u003ebytes and code units\u003c/li\u003e\n \u003cli\u003ebytes and equates\u003c/li\u003e\n \u003cli\u003ecode units and equates\u003c/li\u003e\n \u003c/ul\u003e\n \u003cbr\u003eImportant: This class is intended to be used only for a single program\n version merge. It should be constructed, followed by an autoMerge(), and lastly\n should call mergeConflicts() passing it ASK_USER for the conflictOption.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.merge.listing.AbstractListingMerger",
+  "fields": [
+    {
+      "name": "CODE_UNITS_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Bytes \u0026 Code Units\""
+    },
+    {
+      "name": "min",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "max",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "conflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VariousChoicesPanel",
+      "type_short": "VariousChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "conflictChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "latestCUSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "myCUSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "bothChangedCUSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "latestByteSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "myByteSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "resultUninitSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictCodeUnits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictByteCU",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictCUByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictByteEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictEquateByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictEquateCU",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictCUEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictRefCU",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictCURef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictAll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "ranges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressRange[]",
+      "type_short": "ghidra.program.model.address.AddressRange[]",
+      "constant_value": null
+    },
+    {
+      "name": "manualSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "autoBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "autoCodeUnits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "mergedCodeUnits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "pickedLatestCodeUnits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "pickedMyCodeUnits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "pickedOriginalCodeUnits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "mergeMy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "mergeLatest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "mergeOriginal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "myResolvedDts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Long,ghidra.program.model.data.DataType\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "origResolvedDts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Long,ghidra.program.model.data.DataType\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Manages code unit changes and conflicts between the latest versioned\n program and the modified program being checked into version control.",
+      "javadoc": "Manages code unit changes and conflicts between the latest versioned\n program and the modified program being checked into version control.\n@param listingMergeMgr the listing merge manager that owns this merger.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingMergeMgr",
+          "type_long": "ghidra.app.merge.listing.ListingMergeManager",
+          "type_short": "ListingMergeManager",
+          "comment": "the listing merge manager that owns this merger."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setConflictDecision",
+      "comment": "For JUnit testing only, set the option for resolving a conflict.",
+      "javadoc": "For JUnit testing only, set the option for resolving a conflict.\n@param decision CANCELED, ASK_USER, LATEST, MY, ORIGINAL",
+      "static": false,
+      "params": [
+        {
+          "name": "decision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "CANCELED, ASK_USER, LATEST, MY, ORIGINAL"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMin",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMax",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getCodeUnitSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getByteSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getManualMergeRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange[]",
+        "type_short": "ghidra.program.model.address.AddressRange[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "backwardToCommon",
+      "comment": "Code units are compared between the indicated listings starting at the\n indicated address. The listings are searched in reverse address order\n until the address is found where all the listings have a code unit\n with the same minimum address.",
+      "javadoc": "Code units are compared between the indicated listings starting at the\n indicated address. The listings are searched in reverse address order\n until the address is found where all the listings have a code unit\n with the same minimum address.\n@param listings the program listings in the order LATEST, MY, ORIGINAL.\n@param start the address to start at.\n@return the common address where code units begin for all listings or null.",
+      "static": false,
+      "params": [
+        {
+          "name": "listings",
+          "type_long": "ghidra.program.model.listing.Listing[]",
+          "type_short": "ghidra.program.model.listing.Listing[]",
+          "comment": "the program listings in the order LATEST, MY, ORIGINAL."
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to start at."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the common address where code units begin for all listings or null."
+      },
+      "throws": []
+    },
+    {
+      "name": "forwardToCommon",
+      "comment": "Code units are compared between the indicated listings starting at the\n indicated address. The listings are searched in forward address order\n until the address is found where all the listings have a code unit\n with the same maximum address.",
+      "javadoc": "Code units are compared between the indicated listings starting at the\n indicated address. The listings are searched in forward address order\n until the address is found where all the listings have a code unit\n with the same maximum address.\n@param listings the program listings in the order LATEST, MY, ORIGINAL.\n@param start the address to start at.\n@return the common address where code units end for all listings or null.",
+      "static": false,
+      "params": [
+        {
+          "name": "listings",
+          "type_long": "ghidra.program.model.listing.Listing[]",
+          "type_short": "ghidra.program.model.listing.Listing[]",
+          "comment": "the program listings in the order LATEST, MY, ORIGINAL."
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to start at."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the common address where code units end for all listings or null."
+      },
+      "throws": []
+    },
+    {
+      "name": "computeRemainingDelaySlots",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findLastDelaySlot",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Instruction",
+        "type_short": "Instruction",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "Merges all the current conflicts according to the conflictOption.",
+      "javadoc": "Merges all the current conflicts according to the conflictOption.\n@param listingPanel the listing merge panel\n@param chosenConflictOption the conflict option to use when merging (should be ASK_USER for interactive).\n@param monitor the status monitor\n@throws CancelledException if the user cancels\n@throws MemoryAccessException if bytes can\u0027t be merged.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": "the listing merge panel"
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the conflict option to use when merging (should be ASK_USER for interactive)."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the status monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels"
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        }
+      ]
+    },
+    {
+      "name": "getSelectedOption",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictPanel2",
+          "type_long": "ghidra.app.merge.listing.ConflictPanel",
+          "type_short": "ConflictPanel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showMergePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "minAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "maxAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "min2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "max2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictPrefix",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictBuffer",
+          "type_long": "java.lang.StringBuffer",
+          "type_short": "StringBuffer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "performAutoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "minAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "maxAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pm",
+          "type_long": "ghidra.program.util.ProgramMerge",
+          "type_short": "ProgramMerge",
+          "comment": ""
+        },
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeProgramContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultContext",
+          "type_long": "ghidra.program.model.listing.ProgramContext",
+          "type_short": "ProgramContext",
+          "comment": ""
+        },
+        {
+          "name": "originContext",
+          "type_long": "ghidra.program.model.listing.ProgramContext",
+          "type_short": "ProgramContext",
+          "comment": ""
+        },
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "addrRange",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeCodeUnits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "copyBytes",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "adjustCodeUnitPicked",
+      "comment": "",
+      "javadoc": "@param fromPgm\n@param addrSet",
+      "static": false,
+      "params": [
+        {
+          "name": "fromPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "performMergeInstruction",
+      "comment": "performMergeInstruction merges the indicated instruction\n into the result program. The bytes are also moved from the program\n if they differ. The flow override and fallthrough override will be set\n the same in the result program\u0027s instruction as they are in the instruction\n that is passed to this method.",
+      "javadoc": "\u003cCODE\u003eperformMergeInstruction\u003c/CODE\u003e merges the indicated instruction\n into the result program. The bytes are also moved from the program\n if they differ. The flow override and fallthrough override will be set\n the same in the result program\u0027s instruction as they are in the instruction\n that is passed to this method.\n@param instruction the instruction to be merged\n@param copyBytes whether or not bytes should be copied if turned into\n an instruction.\n@throws CodeUnitInsertionException if the instruction can\u0027t be created\n in the merge program.\n@throws MemoryAccessException if bytes can\u0027t be copied.",
+      "static": false,
+      "params": [
+        {
+          "name": "instruction",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "the instruction to be merged"
+        },
+        {
+          "name": "copyBytes",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "whether or not bytes should be copied if turned into\n an instruction."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.util.CodeUnitInsertionException",
+          "type_short": "CodeUnitInsertionException",
+          "comment": "if the instruction can\u0027t be created\n in the merge program."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        }
+      ]
+    },
+    {
+      "name": "performMergeData",
+      "comment": "performMergeData merges the indicated defined data\n into the merge program. The bytes in the merge program are not affected\n by this method.",
+      "javadoc": "\u003cCODE\u003eperformMergeData\u003c/CODE\u003e merges the indicated defined data\n into the merge program. The bytes in the merge program are not affected\n by this method.\n@param data the defined data to be merged\n@param copyBytes whether or not bytes should be copied.\n@throws CodeUnitInsertionException if the defined data can\u0027t be created\n in the merge program.",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "ghidra.program.model.listing.Data",
+          "type_short": "Data",
+          "comment": "the defined data to be merged"
+        },
+        {
+          "name": "copyBytes",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "whether or not bytes should be copied."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.util.CodeUnitInsertionException",
+          "type_short": "CodeUnitInsertionException",
+          "comment": "if the defined data can\u0027t be created\n in the merge program."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dtID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "fromPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndirectConflicts",
+      "comment": "Determines indirect code unit conflicts. This is anywhere that code unit\n changes to one program conflict with non-codeunit changes to the other\n program. The following non-codeunit changes conflict with code unit changes.\n \n bytes\n equates\n references\n ",
+      "javadoc": "Determines indirect code unit conflicts. This is anywhere that code unit\n changes to one program conflict with non-codeunit changes to the other\n program. The following non-codeunit changes conflict with code unit changes.\n \u003cul\u003e\n \u003cli\u003ebytes\u003c/li\u003e\n \u003cli\u003eequates\u003c/li\u003e\n \u003cli\u003ereferences\u003c/li\u003e\n \u003c/ul\u003e",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "determineEquateConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "onlyMyBytesChanged",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "onlyLatestBytesChanged",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "onlyMyCUsChanged",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "onlyLatestCUsChanged",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "determineReferenceConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "onlyMyCUsChanged",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "onlyLatestCUsChanged",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "hasConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

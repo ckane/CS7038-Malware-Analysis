@@ -1,0 +1,610 @@
+{
+  "name": "AbstractSortedTableModel",
+  "comment": "Table models should extends this model when they want sorting, potentially across multiple\n columns, but do not want Threading or do not work on Program-related data (Address,\n ProgramLocations, etc...).\n \n In order to define custom comparators for a column, simply override\n #createSortComparator(int).  Otherwise, a default comparator will be created for you.\n\n Note on sorting: it is possible that the user can disable sorting by de-selecting all\n sorted columns.   This can also be achieved programmatically by calling\n #setTableSortState(TableSortState) with a value of\n TableSortState#createUnsortedSortState().",
+  "javadoc": "Table models should extends this model when they want sorting, potentially across multiple\n columns, but do not want Threading or do not work on Program-related data (Address,\n ProgramLocations, etc...).\n \u003cp\u003e\n In order to define custom comparators for a column, simply override\n {@link #createSortComparator(int)}.  Otherwise, a default comparator will be created for you.\n\n \u003cp\u003eNote on sorting: it is possible that the user can disable sorting by de-selecting all\n sorted columns.   This can also be achieved programmatically by calling\n {@link #setTableSortState(TableSortState)} with a value of\n {@link TableSortState#createUnsortedSortState()}.\n@param \u003cT\u003e The row type upon which the table is based",
+  "static": false,
+  "implements": [
+    "docking.widgets.table.SortedTableModel"
+  ],
+  "extends": "docking.widgets.table.AbstractGTableModel",
+  "fields": [
+    {
+      "name": "NO_SORT_COMPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Comparator\u003cT\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    },
+    {
+      "name": "pendingSortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableSortState",
+      "type_short": "TableSortState",
+      "constant_value": null
+    },
+    {
+      "name": "sortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableSortState",
+      "type_short": "TableSortState",
+      "constant_value": null
+    },
+    {
+      "name": "isSortPending",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "hasEverSorted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cdocking.widgets.table.SortListener\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "defaultSortColumn",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDefaultTableSortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "defaultSortState",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addSortListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "docking.widgets.table.SortListener",
+          "type_short": "SortListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowObject",
+      "comment": "Returns the corresponding object for the given row.",
+      "javadoc": "Returns the corresponding object for the given row.\n@param viewRow The row for which to get the row object.\n@return the row object.",
+      "static": false,
+      "params": [
+        {
+          "name": "viewRow",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "The row for which to get the row object."
+        }
+      ],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": "the row object."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowIndex",
+      "comment": "Returns the index of the given row object in this model; a negative value if the model\n does not contain the given object.\n\n Warning: if the this model has no sort applied, then performance will be O(n).  If\n sorted, then performance is O(log n).  You can call #isSorted() to know when\n this will happen.",
+      "javadoc": "Returns the index of the given row object in this model; a negative value if the model\n does not contain the given object.\n\n \u003cp\u003eWarning: if the this model has no sort applied, then performance will be O(n).  If\n sorted, then performance is O(log n).  You can call {@link #isSorted()} to know when\n this will happen.",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObject",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireTableChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "javax.swing.event.TableModelEvent",
+          "type_short": "TableModelEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reSort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableSortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.TableSortState",
+        "type_short": "TableSortState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrimarySortColumnIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTableSortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newSortState",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidSortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tableSortState",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanupTableSortState",
+      "comment": "A convenience method that will take a given sort state and remove from it any columns\n that cannot be sorted.  This is useful if the client is restoring a sort state that\n contains columns that have been removed or are no longer sortable (such as during major\n table model rewrites).",
+      "javadoc": "A convenience method that will take a given sort state and remove from it any columns\n that cannot be sorted.  This is useful if the client is restoring a sort state that\n contains columns that have been removed or are no longer sortable (such as during major\n table model rewrites).\n@param state the state\n@return the updated state",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": "the state"
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.TableSortState",
+        "type_short": "TableSortState",
+        "comment": "the updated state"
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetTableSortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newSortState",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPendingSortState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.TableSortState",
+        "type_short": "TableSortState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSortPending",
+      "comment": "Returns true if there is a pending change to the current sort state\n (this includes a sort state that signals no sort will be applied)",
+      "javadoc": "Returns true if there is a pending change to the current sort state\n (this includes a sort state that signals no sort will be applied)\n@return true if there is a pending change to the current sort state",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is a pending change to the current sort state"
+      },
+      "throws": []
+    },
+    {
+      "name": "isSorted",
+      "comment": "Returns true if this model has been sorted and does not have a new pending sort that will\n be applied",
+      "javadoc": "Returns true if this model has been sorted and does not have a new pending sort that will\n be applied\n@return true if sorted\n@see #isSortPending()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if sorted"
+      },
+      "throws": []
+    },
+    {
+      "name": "createSortingContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newSortState",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.TableSortingContext\u003cT\u003e",
+        "type_short": "TableSortingContext",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValueAt",
+      "comment": "The default implementation of TableModel#getValueAt(int, int) that calls the\n abstract #getColumnValueForRow(Object, int).",
+      "javadoc": "The default implementation of {@link TableModel#getValueAt(int, int)} that calls the\n abstract {@link #getColumnValueForRow(Object, int)}.",
+      "static": false,
+      "params": [
+        {
+          "name": "rowIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeSorting",
+      "comment": "This method is an attempt to help models that forget to call fireTableDataChanged().  It\n is expected that tables will fire the notification when they are ready to display data,\n even if they have that data at construction time.  We put this call here so that the\n forgetful subclasses will have their data sorted for them the first time that this table\n tries to render itself.",
+      "javadoc": "This method is an attempt to help models that forget to call fireTableDataChanged().  It\n is expected that tables will fire the notification when they are ready to display data,\n even if they have that data at construction time.  We put this call here so that the\n forgetful subclasses will have their data sorted for them the first time that this table\n tries to render itself.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndexForRowObject",
+      "comment": "A convenience method for subclasses to quickly/efficiently search for the index of a given\n row object that is visible in the GUI.  The visible limitation is due to the\n fact that the data searched is retrieved from #getModelData(), which may be\n filtered.",
+      "javadoc": "A convenience method for subclasses to quickly/efficiently search for the index of a given\n row object \u003cb\u003ethat is visible in the GUI\u003c/b\u003e.  The \u003ci\u003evisible\u003c/i\u003e limitation is due to the\n fact that the data searched is retrieved from {@link #getModelData()}, which may be\n filtered.\n@param rowObject The object for which to search.\n@return the index of the item in the data returned by",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObject",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "The object for which to search."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the index of the item in the data returned by"
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndexForRowObject",
+      "comment": "Returns the index for the given object in the given list",
+      "javadoc": "Returns the index for the given object in the given list\n@param rowObject the item\n@param data the data\n@return the index",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObject",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the item"
+        },
+        {
+          "name": "data",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": "the data"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the index"
+      },
+      "throws": []
+    },
+    {
+      "name": "sort",
+      "comment": "A default sort method that uses the Collections#sort(List, Comparator) method for\n sorting.  Implementors with reasonably sized data sets can rely on this method.  For data\n sets that can become large, the ThreadedTableModel is the recommended base class,\n as it handles loading/sorting/filtering in a threaded way.",
+      "javadoc": "A default sort method that uses the {@link Collections#sort(List, Comparator)} method for\n sorting.  Implementors with reasonably sized data sets can rely on this method.  For data\n sets that can become large, the \u003ccode\u003eThreadedTableModel\u003c/code\u003e is the recommended base class,\n as it handles loading/sorting/filtering in a threaded way.\n@param data The data to be sorted\n@param sortingContext The context required to sort (it contains the sorting columns, a\n        comparator for sorting, etc...).",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": "The data to be sorted"
+        },
+        {
+          "name": "sortingContext",
+          "type_long": "docking.widgets.table.TableSortingContext\u003cT\u003e",
+          "type_short": "TableSortingContext",
+          "comment": "The context required to sort (it contains the sorting columns, a\n        comparator for sorting, etc...)."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sortCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sortingContext",
+          "type_long": "docking.widgets.table.TableSortingContext\u003cT\u003e",
+          "type_short": "TableSortingContext",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyModelSorted",
+      "comment": "Fires an event to let the listeners (like JTable) know that things have been changed.\n This method exists so that subclasses have a way to call the various tableChanged()\n methods without triggering this class\u0027s overridden version.",
+      "javadoc": "Fires an event to let the listeners (like JTable) know that things have been changed.\n This method exists so that subclasses have a way to call the various \u003ccode\u003etableChanged()\u003c/code\u003e\n methods without triggering this class\u0027s overridden version.\n@param dataChanged True signals that the actual data has changed; false signals that the\n        data is the same, with exception that attributes of that data may be different.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataChanged",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True signals that the actual data has changed; false signals that the\n        data is the same, with exception that attributes of that data may be different."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSortComparator",
+      "comment": "An extension point for subclasses to insert their own comparator objects for their data.\n Subclasses can create comparators for a single or multiple columns, as desired.",
+      "javadoc": "An extension point for subclasses to insert their own comparator objects for their data.\n Subclasses can create comparators for a single or multiple columns, as desired.\n@param columnIndex the column index\n@return the comparator",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the column index"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Comparator\u003cT\u003e",
+        "type_short": "Comparator",
+        "comment": "the comparator"
+      },
+      "throws": []
+    },
+    {
+      "name": "createLastResortComparator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentChain",
+          "type_long": "docking.widgets.table.AbstractSortedTableModel\u003cT\u003e.ComparatorLink",
+          "type_short": "ComparatorLink",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Comparator\u003cT\u003e",
+        "type_short": "Comparator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComparatorChain",
+      "comment": "Creates a \u0027Chain of Responsibility\u0027 object that knows how to do comparisons in a\n waterfall fashion (this handles the case where there are multiple columns upon which the\n data is sorted).",
+      "javadoc": "Creates a \u0027Chain of Responsibility\u0027 object that knows how to do comparisons in a\n waterfall fashion (this handles the case where there are multiple columns upon which the\n data is sorted).",
+      "static": false,
+      "params": [
+        {
+          "name": "newSortState",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Comparator\u003cT\u003e",
+        "type_short": "Comparator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComparator",
+      "comment": "Builds a comparator for the given column sort state while allowing for subclasses to\n provider their own comparators.  This method also handles directionality of sorting, so\n that the comparators used can be simple and generic.",
+      "javadoc": "Builds a comparator for the given column sort state while allowing for subclasses to\n provider their own comparators.  This method also handles directionality of sorting, so\n that the comparators used can be simple and generic.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnSortState",
+          "type_long": "docking.widgets.table.ColumnSortState",
+          "type_short": "ColumnSortState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Comparator\u003cT\u003e",
+        "type_short": "Comparator",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

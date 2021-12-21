@@ -1,0 +1,358 @@
+{
+  "name": "ModuleAlgorithmCmd",
+  "comment": "Command that applies the \"module\" algorithm to a specified Module or\n Fragment. \n Gets an iterator over the code blocks containing the selected folder or fragment.\n Creates a folder for each code block in the iterator.\n For each code block, gets an iterator over code blocks containing the code block.\n For each of these code blocks, create a fragment and move the code units to the fragment.",
+  "javadoc": "Command that applies the \"module\" algorithm to a specified Module or\n Fragment. \n Gets an iterator over the code blocks containing the selected folder or fragment.\n Creates a folder for each code block in the iterator.\n For each code block, gets an iterator over code blocks containing the code block.\n For each of these code blocks, create a fragment and move the code units to the fragment.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.framework.cmd.BackgroundCommand",
+  "fields": [
+    {
+      "name": "NEW_MODULE_SUFFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\" [Subroutine Tree]\""
+    },
+    {
+      "name": "PROGRAM_CHANGED_MESSAGE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Modularization did not run: Program Tree has changed since the algorithm was scheduled.\""
+    },
+    {
+      "name": "groupPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.GroupPath",
+      "type_short": "GroupPath",
+      "constant_value": null
+    },
+    {
+      "name": "treeName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "blockModelService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.services.BlockModelService",
+      "type_short": "BlockModelService",
+      "constant_value": null
+    },
+    {
+      "name": "partitioningModelName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "moduleSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.program.model.listing.ProgramModule\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "tool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.PluginTool",
+      "type_short": "PluginTool",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor",
+      "javadoc": "Constructor\n@param path path the source module or fragment where the algorithm\n will be applied\n@param treeName name of the tree\n@param blockModelService service that has the known block models\n@param partitioningModelName name of the model to use",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "ghidra.program.util.GroupPath",
+          "type_short": "GroupPath",
+          "comment": "path the source module or fragment where the algorithm\n will be applied"
+        },
+        {
+          "name": "treeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the tree"
+        },
+        {
+          "name": "blockModelService",
+          "type_long": "ghidra.app.services.BlockModelService",
+          "type_short": "BlockModelService",
+          "comment": "service that has the known block models"
+        },
+        {
+          "name": "partitioningModelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the model to use"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyTo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.cmd.BackgroundCommand#applyTo(ghidra.framework.model.DomainObject, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPluginTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyModel",
+      "comment": "",
+      "javadoc": "@param monitor\n@throws NotFoundException\n@throws NotEmptyException\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "root",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.NotEmptyException",
+          "type_short": "NotEmptyException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createFragment",
+      "comment": "Create a fragment with the name as the name of the given block; \n append a one-up number if we get a DuplicateNameException.",
+      "javadoc": "Create a fragment with the name as the name of the given block; \n append a one-up number if we get a DuplicateNameException.\n@param root parent module\n@param block code block\n@return Fragment new fragment",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "parent module"
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": "code block"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.ProgramFragment",
+        "type_short": "ProgramFragment",
+        "comment": "Fragment new fragment"
+      },
+      "throws": []
+    },
+    {
+      "name": "createModule",
+      "comment": "Create a fragment with the name as the name of the given block; \n append a one-up number if we get a DuplicateNameException.",
+      "javadoc": "Create a fragment with the name as the name of the given block; \n append a one-up number if we get a DuplicateNameException.\n@param root parent module\n@param block code block\n@return Fragment new fragment",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "parent module"
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": "code block"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.ProgramModule",
+        "type_short": "ProgramModule",
+        "comment": "Fragment new fragment"
+      },
+      "throws": []
+    },
+    {
+      "name": "moveCodeUnits",
+      "comment": "Method moveCodeUnits.",
+      "javadoc": "Method moveCodeUnits.\n@param fragment\n@param block\n@param monitor\n@throws NotFoundException",
+      "static": false,
+      "params": [
+        {
+          "name": "fragment",
+          "type_long": "ghidra.program.model.listing.ProgramFragment",
+          "type_short": "ProgramFragment",
+          "comment": ""
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "cleanTree",
+      "comment": "Method cleanTree.\n Removes all empty fragments and empty modules",
+      "javadoc": "Method cleanTree.\n Removes all empty fragments and empty modules\n@param module the root branch to be cleaned.  Can be branch or entire tree.\n@throws NotEmptyException if attempting to remove a module or fragment that is not empty",
+      "static": false,
+      "params": [
+        {
+          "name": "module",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "the root branch to be cleaned.  Can be branch or entire tree."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NotEmptyException",
+          "type_short": "NotEmptyException",
+          "comment": "if attempting to remove a module or fragment that is not empty"
+        }
+      ]
+    },
+    {
+      "name": "createModule",
+      "comment": "Create a Module with the name as the name specified; \n append a one-up number if we get a DuplicateNameException.",
+      "javadoc": "Create a Module with the name as the name specified; \n append a one-up number if we get a DuplicateNameException.\n@param module parent module\n@param newName new name\n@return Module new Module",
+      "static": false,
+      "params": [
+        {
+          "name": "module",
+          "type_long": "ghidra.program.model.listing.ProgramModule",
+          "type_short": "ProgramModule",
+          "comment": "parent module"
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new name"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.ProgramModule",
+        "type_short": "ProgramModule",
+        "comment": "Module new Module"
+      },
+      "throws": []
+    }
+  ]
+}

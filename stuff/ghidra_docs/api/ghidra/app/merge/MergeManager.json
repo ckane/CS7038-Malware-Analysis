@@ -1,0 +1,918 @@
+{
+  "name": "MergeManager",
+  "comment": "Top level object that manages each step of the merge/resolve conflicts\n process.",
+  "javadoc": "Top level object that manages each step of the merge/resolve conflicts\n process.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.data.DomainObjectMergeManager"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "mergeResolvers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.MergeResolver[]",
+      "type_short": "ghidra.app.merge.MergeResolver[]",
+      "constant_value": null
+    },
+    {
+      "name": "resultDomainObject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.UndoableDomainObject",
+      "type_short": "UndoableDomainObject",
+      "constant_value": null
+    },
+    {
+      "name": "myDomainObject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.UndoableDomainObject",
+      "type_short": "UndoableDomainObject",
+      "constant_value": null
+    },
+    {
+      "name": "originalDomainObject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.UndoableDomainObject",
+      "type_short": "UndoableDomainObject",
+      "constant_value": null
+    },
+    {
+      "name": "latestDomainObject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.UndoableDomainObject",
+      "type_short": "UndoableDomainObject",
+      "constant_value": null
+    },
+    {
+      "name": "latestChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.DomainObjectChangeSet",
+      "type_short": "DomainObjectChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "myChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.DomainObjectChangeSet",
+      "type_short": "DomainObjectChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "mergePlugin",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.MergeManagerPlugin",
+      "type_short": "MergeManagerPlugin",
+      "constant_value": null
+    },
+    {
+      "name": "runManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.RunManager",
+      "type_short": "RunManager",
+      "constant_value": null
+    },
+    {
+      "name": "mergeMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "isCancelled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "currentIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "inputReceived",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "mergeStatus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "prompting",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "mergeCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "mergeToolIsVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "mergeTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.ModalPluginTool",
+      "type_short": "ModalPluginTool",
+      "constant_value": null
+    },
+    {
+      "name": "resolveMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cjava.lang.String,java.lang.Object\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "mergeProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.MergeProgressPanel",
+      "type_short": "MergeProgressPanel",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultDomainObject",
+          "type_long": "ghidra.framework.model.UndoableDomainObject",
+          "type_short": "UndoableDomainObject",
+          "comment": ""
+        },
+        {
+          "name": "myDomainObject",
+          "type_long": "ghidra.framework.model.UndoableDomainObject",
+          "type_short": "UndoableDomainObject",
+          "comment": ""
+        },
+        {
+          "name": "originalDomainObject",
+          "type_long": "ghidra.framework.model.UndoableDomainObject",
+          "type_short": "UndoableDomainObject",
+          "comment": ""
+        },
+        {
+          "name": "latestDomainObject",
+          "type_long": "ghidra.framework.model.UndoableDomainObject",
+          "type_short": "UndoableDomainObject",
+          "comment": ""
+        },
+        {
+          "name": "latestChangeSet",
+          "type_long": "ghidra.program.model.listing.DomainObjectChangeSet",
+          "type_short": "DomainObjectChangeSet",
+          "comment": ""
+        },
+        {
+          "name": "myChangeSet",
+          "type_long": "ghidra.program.model.listing.DomainObjectChangeSet",
+          "type_short": "DomainObjectChangeSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createMergeResolvers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDomainObject",
+      "comment": "Returns one of the four programs involved in the merge as indicated by the version.",
+      "javadoc": "Returns one of the four programs involved in the merge as indicated by the version.\n@param version the program version to return. (LATEST, MY, ORIGINAL, or RESULT).\n@return the indicated program version or null if a valid version isn\u0027t specified.\n@see MergeConstants",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the program version to return. (LATEST, MY, ORIGINAL, or RESULT)."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.UndoableDomainObject",
+        "type_short": "UndoableDomainObject",
+        "comment": "the indicated program version or null if a valid version isn\u0027t specified."
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createMergeManagerPlugin",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mergePluginTool",
+          "type_long": "ghidra.framework.plugintool.ModalPluginTool",
+          "type_short": "ModalPluginTool",
+          "comment": ""
+        },
+        {
+          "name": "multiUserMergeManager",
+          "type_long": "ghidra.app.merge.MergeManager",
+          "type_short": "MergeManager",
+          "comment": ""
+        },
+        {
+          "name": "modifiableDomainObject",
+          "type_long": "ghidra.framework.model.UndoableDomainObject",
+          "type_short": "UndoableDomainObject",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.MergeManagerPlugin",
+        "type_short": "MergeManagerPlugin",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanupMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPreferredMergeToolSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Dimension",
+        "type_short": "Dimension",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "Convenience method for Junit tests.",
+      "javadoc": "Convenience method for Junit tests.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setApplyEnabled",
+      "comment": "Enable the apply button according to the \"enabled\" parameter.",
+      "javadoc": "Enable the apply button according to the \"enabled\" parameter.",
+      "static": false,
+      "params": [
+        {
+          "name": "enabled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearStatusText",
+      "comment": "Clear the status text on the merge dialog.",
+      "javadoc": "Clear the status text on the merge dialog.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setStatusText",
+      "comment": "Set the status text on the merge dialog.",
+      "javadoc": "Set the status text on the merge dialog.",
+      "static": false,
+      "params": [
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showDefaultMergePanel",
+      "comment": "Show the default merge panel. The default merge panel now shows the status of each phase\n of the merge and also the progress in the current phase.",
+      "javadoc": "Show the default merge panel. The default merge panel now shows the status of each phase\n of the merge and also the progress in the current phase.\n@param description description of current merge process near the top of the merge tool.",
+      "static": false,
+      "params": [
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "description of current merge process near the top of the merge tool."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showComponent",
+      "comment": "Show the component that is used to resolve conflicts. This method\n is called by the MergeResolvers when user input is required. If the\n component is not null, this method blocks until the user either \n cancels the merge process or resolves a conflict. If comp is null,\n then the default component is displayed, and the method does not\n wait for user input.",
+      "javadoc": "Show the component that is used to resolve conflicts. This method\n is called by the MergeResolvers when user input is required. If the\n component is not null, this method blocks until the user either \n cancels the merge process or resolves a conflict. If comp is null,\n then the default component is displayed, and the method does not\n wait for user input.\n@param comp component to show; if component is null, show the \n default component and do not block\n@param componentID id or name for the component",
+      "static": false,
+      "params": [
+        {
+          "name": "comp",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": "component to show; if component is null, show the \n default component and do not block"
+        },
+        {
+          "name": "componentID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "id or name for the component"
+        },
+        {
+          "name": "helpLoc",
+          "type_long": "ghidra.util.HelpLocation",
+          "type_short": "HelpLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeComponent",
+      "comment": "Removes the component that is used to resolve conflicts. This method\n is called by the MergeResolvers when user input is no longer required\n using the specified component.",
+      "javadoc": "Removes the component that is used to resolve conflicts. This method\n is called by the MergeResolvers when user input is no longer required\n using the specified component.\n@param comp component to show; if component is null, show the \n default component and do not block",
+      "static": false,
+      "params": [
+        {
+          "name": "comp",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": "component to show; if component is null, show the \n default component and do not block"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showMergeTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showMonitorComponent",
+      "comment": "Shows/hides the monitor component at the bottom of the merge tool.",
+      "javadoc": "Shows/hides the monitor component at the bottom of the merge tool.\n@param show true means to show the task monitor at the bottom of the merge tool.",
+      "static": false,
+      "params": [
+        {
+          "name": "show",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means to show the task monitor at the bottom of the merge tool."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showProgressIcon",
+      "comment": "Shows/hides the progress icon (spinning globe) at the bottom of the merge tool.",
+      "javadoc": "Shows/hides the progress icon (spinning globe) at the bottom of the merge tool.\n@param show true means to show the icon.",
+      "static": false,
+      "params": [
+        {
+          "name": "show",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means to show the icon."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isPromptingUser",
+      "comment": "Determines whether or not the user is being prompted to resolve a conflict.",
+      "javadoc": "Determines whether or not the user is being prompted to resolve a conflict.\n@return true if the user is being prompted for input.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the user is being prompted for input."
+      },
+      "throws": []
+    },
+    {
+      "name": "processingCompleted",
+      "comment": "Return whether the merge process has completed. (Needed for Junit testing\n only.)",
+      "javadoc": "Return whether the merge process has completed. (Needed for Junit testing\n only.)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "Called from the dialog when the \"Apply\" button is hit; call the \n current MergeResolver\u0027s apply() method, and wake up the merge\n thread waiting on user input.",
+      "javadoc": "Called from the dialog when the \"Apply\" button is hit; call the \n current MergeResolver\u0027s apply() method, and wake up the merge\n thread waiting on user input.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "Called from the dialog when the \"Cancel\" button is hit; call the \n current MergeResolver\u0027s cancel() method, and wake up the merge\n thread waiting on user input.",
+      "javadoc": "Called from the dialog when the \"Cancel\" button is hit; call the \n current MergeResolver\u0027s cancel() method, and wake up the merge\n thread waiting on user input.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scheduleMerge",
+      "comment": "Schedule the next MergeResolver thread to run.",
+      "javadoc": "Schedule the next MergeResolver thread to run.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "displayErrorAndWait",
+      "comment": "Display error message dialog in a blocking fashion.",
+      "javadoc": "Display error message dialog in a blocking fashion.\n@param originator message originator\n@param title dialog title\n@param msg dialog message",
+      "static": true,
+      "params": [
+        {
+          "name": "originator",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "message originator"
+        },
+        {
+          "name": "title",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "dialog title"
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "dialog message"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "waitForInput",
+      "comment": "Block until the user completes the current merge operation, or \n cancels the merge process.",
+      "javadoc": "Block until the user completes the current merge operation, or \n cancels the merge process.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "conflictsResolveCompleted",
+      "comment": "Called when all conflicts have been resolved, or the merge\n process was canceled; dismisses the merge tool which\n unblocks the initial merge thread.",
+      "javadoc": "Called when all conflicts have been resolved, or the merge\n process was canceled; dismisses the merge tool which\n unblocks the initial merge thread.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResolveInformation",
+      "comment": "Gets the resolve information object for the indicated standardized name.\n This is how information is passed between merge managers.\n For example:\n the data type merger knows what data type in the result is equivalent \n to a given data type from my checked out program. The code unit and\n function mergers need to be able to get this information so they\n don\u0027t unknowingly re-introduce a data type that was already eliminated\n by a data type conflict.",
+      "javadoc": "Gets the resolve information object for the indicated standardized name.\n This is how information is passed between merge managers.\n \u003cbr\u003eFor example:\n \u003cbr\u003ethe data type merger knows what data type in the result is equivalent \n to a given data type from my checked out program. The code unit and\n function mergers need to be able to get this information so they\n don\u0027t unknowingly re-introduce a data type that was already eliminated\n by a data type conflict.\n@param infoType the string indicating the type of resolve information\n@return the object for the named string or null",
+      "static": false,
+      "params": [
+        {
+          "name": "infoType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string indicating the type of resolve information"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": "the object for the named string or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "setResolveInformation",
+      "comment": "Sets the resolve information object for the indicated standardized name.\n This is how information is passed between merge managers.",
+      "javadoc": "Sets the resolve information object for the indicated standardized name.\n This is how information is passed between merge managers.\n@param infoType the string indicating the type of resolve information\n@param infoObject the object for the named string. This information is\n determined by the merge manager that creates it.\n@see getResolveInformation(String)",
+      "static": false,
+      "params": [
+        {
+          "name": "infoType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string indicating the type of resolve information"
+        },
+        {
+          "name": "infoObject",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object for the named string. This information is\n determined by the merge manager that creates it."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergeResolverByName",
+      "comment": "Returns the named merge resolver from the ones used directly by the MergeManager.",
+      "javadoc": "Returns the named merge resolver from the ones used directly by the MergeManager.\n@param name the name of the desired merge resolver\n@return the merge resolver or null.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the desired merge resolver"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.MergeResolver",
+        "type_short": "MergeResolver",
+        "comment": "the merge resolver or null."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergeTool",
+      "comment": "For Junit tests",
+      "javadoc": "For Junit tests\n@return the merge tool",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool",
+        "type_short": "PluginTool",
+        "comment": "the merge tool"
+      },
+      "throws": []
+    },
+    {
+      "name": "isMergeToolVisible",
+      "comment": "Determines if the modal merge tool is currently displayed on the screen.",
+      "javadoc": "Determines if the modal merge tool is currently displayed on the screen.\n@return true if the merge tool is displayed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the merge tool is displayed."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergeProgressPanel",
+      "comment": "gets the default merge progress panel that indicates all the phases and their current status.",
+      "javadoc": "gets the default merge progress panel that indicates all the phases and their current status.\n@return the merge panel that indicates progress.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.merge.MergeProgressPanel",
+        "type_short": "MergeProgressPanel",
+        "comment": "the merge panel that indicates progress."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMonitorComponent",
+      "comment": "Gets the TaskMonitor component that is displayed at the bottom of the merge tool.",
+      "javadoc": "Gets the TaskMonitor component that is displayed at the bottom of the merge tool.\n@return the task monitor component.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": "the task monitor component."
+      },
+      "throws": []
+    },
+    {
+      "name": "updateProgress",
+      "comment": "Updates the current phase progress area in the default merge panel.",
+      "javadoc": "Updates the current phase progress area in the default merge panel.\n@param description a message describing what is currently occurring in this phase.\n Null indicates to use the default message.",
+      "static": false,
+      "params": [
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a message describing what is currently occurring in this phase.\n Null indicates to use the default message."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateProgress",
+      "comment": "Updates the current phase progress area in the default merge panel.",
+      "javadoc": "Updates the current phase progress area in the default merge panel.\n@param currentProgressPercentage the progress percentage completed for the current phase.\n This should be a value from 0 to 100.",
+      "static": false,
+      "params": [
+        {
+          "name": "currentProgressPercentage",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the progress percentage completed for the current phase.\n This should be a value from 0 to 100."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateProgress",
+      "comment": "Updates the current phase progress area in the default merge panel.",
+      "javadoc": "Updates the current phase progress area in the default merge panel.\n@param currentProgressPercentage the progress percentage completed for the current phase.\n This should be a value from 0 to 100.\n@param progressMessage a message indicating what is currently occurring in this phase.",
+      "static": false,
+      "params": [
+        {
+          "name": "currentProgressPercentage",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the progress percentage completed for the current phase.\n This should be a value from 0 to 100."
+        },
+        {
+          "name": "progressMessage",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a message indicating what is currently occurring in this phase."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInProgress",
+      "comment": "The manager (MergeResolver) for a particular merge phase should call this when its phase or sub-phase begins.\n The string array should match one that the returned by MergeResolver.getPhases().",
+      "javadoc": "The manager (MergeResolver) for a particular merge phase should call this when its phase or sub-phase begins.\n The string array should match one that the returned by MergeResolver.getPhases().\n@param mergePhase identifier for the merge phase to change to in progress status.\n@see MergeResolver",
+      "static": false,
+      "params": [
+        {
+          "name": "mergePhase",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": "identifier for the merge phase to change to in progress status."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCompleted",
+      "comment": "The manager (MergeResolver) for a particular merge phase should call this when its phase or sub-phase completes.\n The string array should match one that the returned by MergeResolver.getPhases().",
+      "javadoc": "The manager (MergeResolver) for a particular merge phase should call this when its phase or sub-phase completes.\n The string array should match one that the returned by MergeResolver.getPhases().\n@param mergePhase identifier for the merge phase to change to completed status.\n@see MergeResolver",
+      "static": false,
+      "params": [
+        {
+          "name": "mergePhase",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": "identifier for the merge phase to change to completed status."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

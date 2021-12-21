@@ -1,0 +1,855 @@
+{
+  "name": "GTaskManager",
+  "comment": "Class for managing a queue of tasks to be executed, one at a time, in priority order.  All the\n tasks pertain to an UndoableDomainObject and transactions are created on the UndoableDomainObject\n so that tasks can operate on them.\n \n Tasks are organized into groups such that all tasks in a group will be completed before the\n tasks in the next group, regardless of priority.  Within a group, task are ordered first by\n priority and then by the order in which they were added to the group. Groups are executed \n in the order that they are scheduled.\n \n All tasks within the same group are executed within the same transaction on the\n UndoableDomainObject.  When all the tasks within a group are completed, the transaction is closed\n unless there is another group scheduled and that group does not specify that it should run in its\n own transaction.\n \n Suspending:\n The GTaskManager can be suspended.  When suspended, any currently running task will continue to\n run, but no new or currently scheduled tasks will be executed until the GTaskManager is resumed.\n There is a special method, #runNextTaskEvenWhenSuspended(), that will run the next scheduled task\n even if the GTaskManager is suspended.\n \n Yielding to Other Tasks:\n While running, a GTask can call the method #waitForHigherPriorityTasks() on the GTaskManager, \n which will cause the the GTaskManager to run scheduled tasks (within the same group) that are \n a higher priority than the running task, effectively allowing the running task to yield until all\n higher priority tasks are executed.",
+  "javadoc": "Class for managing a queue of tasks to be executed, one at a time, in priority order.  All the\n tasks pertain to an UndoableDomainObject and transactions are created on the UndoableDomainObject\n so that tasks can operate on them.\n \u003cP\u003e\n Tasks are organized into groups such that all tasks in a group will be completed before the\n tasks in the next group, regardless of priority.  Within a group, task are ordered first by\n priority and then by the order in which they were added to the group. Groups are executed \n in the order that they are scheduled.\n \u003cP\u003e\n All tasks within the same group are executed within the same transaction on the\n UndoableDomainObject.  When all the tasks within a group are completed, the transaction is closed\n unless there is another group scheduled and that group does not specify that it should run in its\n own transaction.\n \u003cP\u003e\n \u003cU\u003eSuspending:\u003c/U\u003e\u003cBR\u003e\n The GTaskManager can be suspended.  When suspended, any currently running task will continue to\n run, but no new or currently scheduled tasks will be executed until the GTaskManager is resumed.\n There is a special method, {@link #runNextTaskEvenWhenSuspended()}, that will run the next scheduled task\n even if the GTaskManager is suspended.\n \u003cP\u003e\n \u003cU\u003eYielding to Other Tasks:\u003c/U\u003e\u003cBR\u003e\n While running, a GTask can call the method {@link #waitForHigherPriorityTasks()} on the GTaskManager, \n which will cause the the GTaskManager to run scheduled tasks (within the same group) that are \n a higher priority than the running task, effectively allowing the running task to yield until all\n higher priority tasks are executed.\n@see GTask\n@see GTaskGroup",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "MAX_RESULTS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "100"
+    },
+    {
+      "name": "domainObject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.UndoableDomainObject",
+      "type_short": "UndoableDomainObject",
+      "constant_value": null
+    },
+    {
+      "name": "priorityQ",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.SortedSet\u003cghidra.framework.task.GScheduledTask\u003e",
+      "type_short": "SortedSet",
+      "constant_value": null
+    },
+    {
+      "name": "taskGroupList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Deque\u003cghidra.framework.task.GTaskGroup\u003e",
+      "type_short": "Deque",
+      "constant_value": null
+    },
+    {
+      "name": "threadPool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.GThreadPool",
+      "type_short": "GThreadPool",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.locks.ReentrantLock",
+      "type_short": "ReentrantLock",
+      "constant_value": null
+    },
+    {
+      "name": "notBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.locks.Condition",
+      "type_short": "Condition",
+      "constant_value": null
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.locks.Condition",
+      "type_short": "Condition",
+      "constant_value": null
+    },
+    {
+      "name": "runningTask",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.task.GScheduledTask",
+      "type_short": "GScheduledTask",
+      "constant_value": null
+    },
+    {
+      "name": "runningGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.task.GTaskGroup",
+      "type_short": "GTaskGroup",
+      "constant_value": null
+    },
+    {
+      "name": "suspended",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "currentGroupTransactionID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Integer",
+      "type_short": "Integer",
+      "constant_value": null
+    },
+    {
+      "name": "taskListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.task.GTaskListener",
+      "type_short": "GTaskListener",
+      "constant_value": null
+    },
+    {
+      "name": "delayedTaskStack",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Deque\u003cghidra.framework.task.GScheduledTask\u003e",
+      "type_short": "Deque",
+      "constant_value": null
+    },
+    {
+      "name": "results",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Queue\u003cghidra.framework.task.GTaskResult\u003e",
+      "type_short": "Queue",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new GTaskManager for an UndoableDomainObject",
+      "javadoc": "Creates a new GTaskManager for an UndoableDomainObject\n@param undoableDomainObject the domainObject that tasks scheduled in this GTaskManager will\n operate upon.\n@param threadPool the GThreadPool that will provide the threads that will be used to run \n tasks in this GTaskManager.",
+      "static": false,
+      "params": [
+        {
+          "name": "undoableDomainObject",
+          "type_long": "ghidra.framework.model.UndoableDomainObject",
+          "type_short": "UndoableDomainObject",
+          "comment": "the domainObject that tasks scheduled in this GTaskManager will\n operate upon."
+        },
+        {
+          "name": "threadPool",
+          "type_long": "generic.concurrent.GThreadPool",
+          "type_short": "GThreadPool",
+          "comment": "the GThreadPool that will provide the threads that will be used to run \n tasks in this GTaskManager."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scheduleTask",
+      "comment": "Schedules a task to be run by this TaskManager. Tasks are run one at a time.",
+      "javadoc": "Schedules a task to be run by this TaskManager. Tasks are run one at a time.\n@param task the task to be run.\n@param priority the priority of the task.  Lower numbers are run before higher numbers.\n@param useCurrentGroup . If true, this task will be rolled into the current transaction group\n \t\t\t\t\t\t\tif one exists.  If false, any open transaction \n \t\t\t\t\t\t\twill be closed and a new transaction will be opened before \n \t\t\t\t\t\t\tthis task is run.",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "ghidra.framework.task.GTask",
+          "type_short": "GTask",
+          "comment": "the task to be run."
+        },
+        {
+          "name": "priority",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the priority of the task.  Lower numbers are run before higher numbers."
+        },
+        {
+          "name": "useCurrentGroup",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ". If true, this task will be rolled into the current transaction group\n \t\t\t\t\t\t\tif one exists.  If false, any open transaction \n \t\t\t\t\t\t\twill be closed and a new transaction will be opened before \n \t\t\t\t\t\t\tthis task is run."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.task.GScheduledTask",
+        "type_short": "GScheduledTask",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scheduleTask",
+      "comment": "Schedules a task to be run by this TaskManager within the group with the given group name.\n If a group already exists with the given name(either currently running or waiting), the task\n will be added to that group. Otherwise, a new group will be created with the given group name\n and the task will be placed in that group.",
+      "javadoc": "Schedules a task to be run by this TaskManager within the group with the given group name.\n If a group already exists with the given name(either currently running or waiting), the task\n will be added to that group. Otherwise, a new group will be created with the given group name\n and the task will be placed in that group.\n@param task the task to be run.\n@param priority the priority of the task.  Lower numbers are run before higher numbers.\n@param groupName . The name of the group that the task will be added to.",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "ghidra.framework.task.GTask",
+          "type_short": "GTask",
+          "comment": "the task to be run."
+        },
+        {
+          "name": "priority",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the priority of the task.  Lower numbers are run before higher numbers."
+        },
+        {
+          "name": "groupName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ". The name of the group that the task will be added to."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scheduleTaskGroup",
+      "comment": "Schedules a task group to run.  Task groups are run in the order they are scheduled. They \n have the option of being executed in the current transaction (if it exists) or starting\n a new transaction.",
+      "javadoc": "Schedules a task group to run.  Task groups are run in the order they are scheduled. They \n have the option of being executed in the current transaction (if it exists) or starting\n a new transaction.\n@param group the TaskGroup to be scheduled.",
+      "static": false,
+      "params": [
+        {
+          "name": "group",
+          "type_long": "ghidra.framework.task.GTaskGroup",
+          "type_short": "GTaskGroup",
+          "comment": "the TaskGroup to be scheduled."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSuspended",
+      "comment": "Sets the suspended state of this task queue.  While suspended, this task manager will not\n start any new tasks in its queue.  Any currently running task will continue to run.",
+      "javadoc": "Sets the suspended state of this task queue.  While suspended, this task manager will not\n start any new tasks in its queue.  Any currently running task will continue to run.\n@param b true to suspend this manager, false to resume executing new tasks.",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to suspend this manager, false to resume executing new tasks."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runNextTaskEvenWhenSuspended",
+      "comment": "This method will cause the next scheduled task to run even though the task manager is\n suspended.  Calling this method while the queue is not suspended has no effect because\n if not suspended, it will be busy (or have nothing to do)",
+      "javadoc": "This method will cause the next scheduled task to run even though the task manager is\n suspended.  Calling this method while the queue is not suspended has no effect because\n if not suspended, it will be busy (or have nothing to do)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTaskListener",
+      "comment": "Adds a GTaskListener to be notified as tasks are completed.",
+      "javadoc": "Adds a GTaskListener to be notified as tasks are completed.\n@param listener the listener to add",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.task.GTaskListener",
+          "type_short": "GTaskListener",
+          "comment": "the listener to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTaskListener",
+      "comment": "Removes the given GTaskListener from this queue.",
+      "javadoc": "Removes the given GTaskListener from this queue.\n@param listener the listener to remove.",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.task.GTaskListener",
+          "type_short": "GTaskListener",
+          "comment": "the listener to remove."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "Returns true if this manager is running a task, or if suspended has additional tasks queued.",
+      "javadoc": "Returns true if this manager is running a task, or if suspended has additional tasks queued.\n@return true if this manager is running a task, or if suspended has additional tasks queued.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this manager is running a task, or if suspended has additional tasks queued."
+      },
+      "throws": []
+    },
+    {
+      "name": "waitWhileBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "timeoutMillis",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "waitUntilBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "timeoutMillis",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isRunning",
+      "comment": "Returns true if this manager is currently running a task. If not suspended, a GTaskManager\n will always be executing a task as long as there are tasks to execute.  If suspended, a\n GTaskManager may have tasks scheduled, but may not be currently executing one.",
+      "javadoc": "Returns true if this manager is currently running a task. If not suspended, a GTaskManager\n will always be executing a task as long as there are tasks to execute.  If suspended, a\n GTaskManager may have tasks scheduled, but may not be currently executing one.\n@return true if this manager is currently running a task.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this manager is currently running a task."
+      },
+      "throws": []
+    },
+    {
+      "name": "waitForHigherPriorityTasks",
+      "comment": "This methods is for currently running tasks to suspend and allow higher priority tasks \n (within the same task group) to complete before continuing.  If called by any thread other\n than the thread that is currently executing a task for this queue, an exception will be \n thrown.",
+      "javadoc": "This methods is for currently running tasks to suspend and allow higher priority tasks \n (within the same task group) to complete before continuing.  If called by any thread other\n than the thread that is currently executing a task for this queue, an exception will be \n thrown.\n@throws IllegalStateException if this method is called from any thread not currently \n executing the current task for this queue.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTaskResults",
+      "comment": "Returns a list of the most recent GTaskResults.  The TaskManager only keeps the most recent\n N GTaskResults.",
+      "javadoc": "Returns a list of the most recent GTaskResults.  The TaskManager only keeps the most recent\n N GTaskResults.\n@return the list of the most recent GTaskResults.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.framework.task.GTaskResult\u003e",
+        "type_short": "List",
+        "comment": "the list of the most recent GTaskResults."
+      },
+      "throws": []
+    },
+    {
+      "name": "getScheduledTasks",
+      "comment": "Returns a list of scheduled tasks for the currently running group.",
+      "javadoc": "Returns a list of scheduled tasks for the currently running group.\n@return a list of scheduled tasks for the currently running group.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.framework.task.GScheduledTask\u003e",
+        "type_short": "List",
+        "comment": "a list of scheduled tasks for the currently running group."
+      },
+      "throws": []
+    },
+    {
+      "name": "getDelayedTasks",
+      "comment": "Returns a list of Tasks that are currently waiting for higher priority tasks.",
+      "javadoc": "Returns a list of Tasks that are currently waiting for higher priority tasks.\n@return a list of Tasks that are currently waiting for higher priority tasks.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.framework.task.GScheduledTask\u003e",
+        "type_short": "List",
+        "comment": "a list of Tasks that are currently waiting for higher priority tasks."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRunningTask",
+      "comment": "Returns the currently running task, or null if no task is running.",
+      "javadoc": "Returns the currently running task, or null if no task is running.\n@return the currently running task;",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.task.GScheduledTask",
+        "type_short": "GScheduledTask",
+        "comment": "the currently running task;"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentGroup",
+      "comment": "Returns the currently running group, or null if no group is running.",
+      "javadoc": "Returns the currently running group, or null if no group is running.\n@return the currently running group, or null if no group is running.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.task.GTaskGroup",
+        "type_short": "GTaskGroup",
+        "comment": "the currently running group, or null if no group is running."
+      },
+      "throws": []
+    },
+    {
+      "name": "getScheduledGroups",
+      "comment": "Returns a list of Groups that are waiting to run.",
+      "javadoc": "Returns a list of Groups that are waiting to run.\n@return a list of Groups that are waiting to run.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.framework.task.GTaskGroup\u003e",
+        "type_short": "List",
+        "comment": "a list of Groups that are waiting to run."
+      },
+      "throws": []
+    },
+    {
+      "name": "isSuspended",
+      "comment": "Returns true if this GTaskManager is currently suspended.",
+      "javadoc": "Returns true if this GTaskManager is currently suspended.\n@return true if this GTaskManager is currently suspended.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this GTaskManager is currently suspended."
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelRunningGroup",
+      "comment": "Cancels all tasks in the currently running group.  Tasks in the group that have not yet started\n will never run and will immediately be put into the TaskResults list.  The TaskMonitor for\n the currently running task will be cancelled, but the task will continue to run until it\n checks the monitor.",
+      "javadoc": "Cancels all tasks in the currently running group.  Tasks in the group that have not yet started\n will never run and will immediately be put into the TaskResults list.  The TaskMonitor for\n the currently running task will be cancelled, but the task will continue to run until it\n checks the monitor.\n@param group the group to be cancelled.  It must match the currently running group or nothing\n will happen.",
+      "static": false,
+      "params": [
+        {
+          "name": "group",
+          "type_long": "ghidra.framework.task.GTaskGroup",
+          "type_short": "GTaskGroup",
+          "comment": "the group to be cancelled.  It must match the currently running group or nothing\n will happen."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelAll",
+      "comment": "Cancels all scheduled groups and tasks. The TaskMonitor for\n the currently running task will be cancelled, but the task will continue to run until it\n checks the monitor.",
+      "javadoc": "Cancels all scheduled groups and tasks. The TaskMonitor for\n the currently running task will be cancelled, but the task will continue to run until it\n checks the monitor.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "wakeUpWaitingThread",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doWait",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runNextTaskIfNotBusyOrSuspended",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runNextTaskIfNotBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processNextTaskGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "prepareGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "taskGroup",
+          "type_long": "ghidra.framework.task.GTaskGroup",
+          "type_short": "GTaskGroup",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "openTransaction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "closeTransaction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processNextTaskInPriorityQ",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "taskCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "ghidra.framework.task.GScheduledTask",
+          "type_short": "GScheduledTask",
+          "comment": ""
+        },
+        {
+          "name": "e",
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyTaskStarted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "ghidra.framework.task.GScheduledTask",
+          "type_short": "GScheduledTask",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyTaskCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "ghidra.framework.task.GScheduledTask",
+          "type_short": "GScheduledTask",
+          "comment": ""
+        },
+        {
+          "name": "result",
+          "type_long": "ghidra.framework.task.GTaskResult",
+          "type_short": "GTaskResult",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyTaskGroupScheduled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "group",
+          "type_long": "ghidra.framework.task.GTaskGroup",
+          "type_short": "GTaskGroup",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyTaskScheduled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "scheduledTask",
+          "type_long": "ghidra.framework.task.GScheduledTask",
+          "type_short": "GScheduledTask",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyGroupStarted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "taskGroup",
+          "type_long": "ghidra.framework.task.GTaskGroup",
+          "type_short": "GTaskGroup",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyGroupCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "taskGroup",
+          "type_long": "ghidra.framework.task.GTaskGroup",
+          "type_short": "GTaskGroup",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifySuspendedStateChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processCancelledGroups",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processCancelledJobsInPriorityQ",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

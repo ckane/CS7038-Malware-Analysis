@@ -1,0 +1,576 @@
+{
+  "name": "FileSystemIndexHelper",
+  "comment": "A helper class used by GFilesystem implementors to track mappings between GFile\n instances and the underlying container filesystem\u0027s native file objects.\n \n Threadsafe (methods are synchronized).\n \n This class also provides filename \u0027unique-ifying\u0027 (per directory) where an auto-incrementing\n number will be added to a file\u0027s filename if it is not unique in the directory.\n ",
+  "javadoc": "A helper class used by GFilesystem implementors to track mappings between GFile\n instances and the underlying container filesystem\u0027s native file objects.\n \u003cp\u003e\n Threadsafe (methods are synchronized).\n \u003cp\u003e\n This class also provides filename \u0027unique-ifying\u0027 (per directory) where an auto-incrementing\n number will be added to a file\u0027s filename if it is not unique in the directory.\n \u003cp\u003e\n@param \u003cMETADATATYPE\u003e the filesystem specific native file object that the user of this\n class wants to be able to correlate with Ghidra {@link GFile} instances.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "rootDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.GFile",
+      "type_short": "GFile",
+      "constant_value": null
+    },
+    {
+      "name": "fileToEntryMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.formats.gfilesystem.GFile,ghidra.formats.gfilesystem.FileSystemIndexHelper.FileData\u003cMETADATATYPE\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "fileIndexToEntryMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Long,ghidra.formats.gfilesystem.FileSystemIndexHelper.FileData\u003cMETADATATYPE\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "directoryToListing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.formats.gfilesystem.GFile,java.util.Map\u003cjava.lang.String,ghidra.formats.gfilesystem.FileSystemIndexHelper.FileData\u003cMETADATATYPE\u003e\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new FileSystemIndexHelper for the specified GFileSystem.\n \n A \"root\" directory GFile will be auto-created for the filesystem.\n ",
+      "javadoc": "Creates a new {@link FileSystemIndexHelper} for the specified {@link GFileSystem}.\n \u003cp\u003e\n A \"root\" directory GFile will be auto-created for the filesystem.\n \u003cp\u003e\n@param fs the {@link GFileSystem} that this index will be for.\n@param fsFSRL the {@link FSRLRoot fsrl} of the filesystem itself.\n (this parameter is explicitly passed here so there is no possibility of trying to call\n back to the fs\u0027s {@link GFileSystem#getFSRL()} on a half-constructed filesystem.)",
+      "static": false,
+      "params": [
+        {
+          "name": "fs",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": "the GFileSystem that this index will be for."
+        },
+        {
+          "name": "fsFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+          "type_short": "FSRLRoot",
+          "comment": "the FSRLRoot of the filesystem itself.\n (this parameter is explicitly passed here so there is no possibility of trying to call\n back to the fs\u0027s GFileSystem#getFSRL() on a half-constructed filesystem.)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initRootDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "metadata",
+          "type_long": "METADATATYPE",
+          "type_short": "METADATATYPE",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRootDir",
+      "comment": "Gets the root GFile object for this filesystem index.",
+      "javadoc": "Gets the root {@link GFile} object for this filesystem index.\n@return root {@link GFile} object.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFile",
+        "type_short": "GFile",
+        "comment": "root GFile object."
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Removes all file info from this index.",
+      "javadoc": "Removes all file info from this index.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFileCount",
+      "comment": "Number of files in this index.",
+      "javadoc": "Number of files in this index.\n@return number of file in this index",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of file in this index"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMetadata",
+      "comment": "Gets the opaque filesystem specific blob that was associated with the specified file.",
+      "javadoc": "Gets the opaque filesystem specific blob that was associated with the specified file.\n@param f {@link GFile} to look for\n@return Filesystem specific blob associated with the specified file, or null if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "f",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": "GFile to look for"
+        }
+      ],
+      "return": {
+        "type_long": "METADATATYPE",
+        "type_short": "METADATATYPE",
+        "comment": "Filesystem specific blob associated with the specified file, or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "setMetadata",
+      "comment": "Sets the associated metadata blob for the specified file.",
+      "javadoc": "Sets the associated metadata blob for the specified file.\n@param f GFile to update\n@param metaData new metdata blob\n@throws IOException if unknown file",
+      "static": false,
+      "params": [
+        {
+          "name": "f",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": "GFile to update"
+        },
+        {
+          "name": "metaData",
+          "type_long": "METADATATYPE",
+          "type_short": "METADATATYPE",
+          "comment": "new metdata blob"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if unknown file"
+        }
+      ]
+    },
+    {
+      "name": "getFileByIndex",
+      "comment": "Gets the GFile instance that was associated with the filesystem file index.",
+      "javadoc": "Gets the GFile instance that was associated with the filesystem file index.\n@param fileIndex index of the file in its filesystem\n@return the associated GFile instance, or null if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "fileIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "index of the file in its filesystem"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFile",
+        "type_short": "GFile",
+        "comment": "the associated GFile instance, or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getListing",
+      "comment": "Mirror\u0027s GFileSystem#getListing(GFile) interface.",
+      "javadoc": "Mirror\u0027s {@link GFileSystem#getListing(GFile)} interface.\n@param directory {@link GFile} directory to get the list of child files that have been\n added to this index, null means root directory\n@return {@link List} of GFile files that are in the specified directory, never null",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": "GFile directory to get the list of child files that have been\n added to this index, null means root directory"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.GFile\u003e",
+        "type_short": "List",
+        "comment": "List of GFile files that are in the specified directory, never null"
+      },
+      "throws": []
+    },
+    {
+      "name": "lookup",
+      "comment": "Mirror\u0027s GFileSystem#lookup(String) interface.",
+      "javadoc": "Mirror\u0027s {@link GFileSystem#lookup(String)} interface.\n@param path path and filename of a file to find\n@return {@link GFile} instance or null if no file was added to the index at that path",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "path and filename of a file to find"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFile",
+        "type_short": "GFile",
+        "comment": "GFile instance or null if no file was added to the index at that path"
+      },
+      "throws": []
+    },
+    {
+      "name": "storeFile",
+      "comment": "Creates and stores a file entry into in-memory indexes.\n \n The string path will be normalized to forward slashes before being split into\n directory components.\n \n Filenames that are not unique in their directory will have a \"[nnn]\"\n suffix added to the resultant GFile name, where nnn is the file\u0027s\n order of occurrence in the container file.\n ",
+      "javadoc": "Creates and stores a file entry into in-memory indexes.\n \u003cp\u003e\n The string path will be normalized to forward slashes before being split into\n directory components.\n \u003cp\u003e\n Filenames that are not unique in their directory will have a \"[nnn]\"\n suffix added to the resultant GFile name, where nnn is the file\u0027s\n order of occurrence in the container file.\n \u003cp\u003e\n@param path string path and filename of the file being added to the index.  Back\n slashes are normalized to forward slashes\n@param fileIndex the filesystem specific unique index for this file, or -1\n if not available\n@param isDirectory boolean true if the new file is a directory\n@param length number of bytes in the file or -1 if not known or directory\n@param metadata opaque blob that will be stored and associated with the new\n GFile instance\n@return new GFile instance",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "string path and filename of the file being added to the index.  Back\n slashes are normalized to forward slashes"
+        },
+        {
+          "name": "fileIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the filesystem specific unique index for this file, or -1\n if not available"
+        },
+        {
+          "name": "isDirectory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "boolean true if the new file is a directory"
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "number of bytes in the file or -1 if not known or directory"
+        },
+        {
+          "name": "metadata",
+          "type_long": "METADATATYPE",
+          "type_short": "METADATATYPE",
+          "comment": "opaque blob that will be stored and associated with the new\n GFile instance"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFile",
+        "type_short": "GFile",
+        "comment": "new GFile instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "storeFileWithParent",
+      "comment": "Creates and stores a file entry into in-memory indexes.\n \n Use this when you already know the parent directory GFile object.\n \n Filenames that are not unique in their directory will have a \"[nnn]\"\n suffix added to the resultant GFile name, where nnn is the file\u0027s\n order of occurrence in the container file.\n ",
+      "javadoc": "Creates and stores a file entry into in-memory indexes.\n \u003cp\u003e\n Use this when you already know the parent directory GFile object.\n \u003cp\u003e\n Filenames that are not unique in their directory will have a \"[nnn]\"\n suffix added to the resultant GFile name, where nnn is the file\u0027s\n order of occurrence in the container file.\n \u003cp\u003e\n@param filename the new file\u0027s name\n@param parent the new file\u0027s parent directory\n@param fileIndex the filesystem specific unique index for this file, or -1\n if not available\n@param isDirectory boolean true if the new file is a directory\n@param length number of bytes in the file or -1 if not known or directory\n@param metadata opaque blob that will be stored and associated with the new\n GFile instance\n@return new GFile instance",
+      "static": false,
+      "params": [
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the new file\u0027s name"
+        },
+        {
+          "name": "parent",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": "the new file\u0027s parent directory"
+        },
+        {
+          "name": "fileIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the filesystem specific unique index for this file, or -1\n if not available"
+        },
+        {
+          "name": "isDirectory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "boolean true if the new file is a directory"
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "number of bytes in the file or -1 if not known or directory"
+        },
+        {
+          "name": "metadata",
+          "type_long": "METADATATYPE",
+          "type_short": "METADATATYPE",
+          "comment": "opaque blob that will be stored and associated with the new\n GFile instance"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFile",
+        "type_short": "GFile",
+        "comment": "new GFile instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "doStoreMissingDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "parent",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemIndexHelper.FileData\u003cMETADATATYPE\u003e",
+        "type_short": "FileData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doStoreFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "parent",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        },
+        {
+          "name": "fileIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "isDirectory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "metadata",
+          "type_long": "METADATATYPE",
+          "type_short": "METADATATYPE",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemIndexHelper.FileData\u003cMETADATATYPE\u003e",
+        "type_short": "FileData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "makeUniqueFilename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "wasNameCollision",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "fileIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDirectoryContents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directoryFile",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        },
+        {
+          "name": "createIfMissing",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,ghidra.formats.gfilesystem.FileSystemIndexHelper.FileData\u003cMETADATATYPE\u003e\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lookupParent",
+      "comment": "Walks a list of names of directories in nameparts (stopping prior to the last element)\n starting at the root of the filesystem and returns the final directory.\n \n Directories in a path that have not been encountered before (ie. a file\u0027s path references a directory\n that hasn\u0027t been mentioned yet as its own file entry) will have a stub entry GFile created for them.\n \n Superfluous slashes in the original filename (ie. name/sub//subafter_extra_slash) will\n be represented as empty string elements in the nameparts array and will be skipped\n as if they were not there.\n ",
+      "javadoc": "Walks a list of names of directories in nameparts (stopping prior to the last element)\n starting at the root of the filesystem and returns the final directory.\n \u003cp\u003e\n Directories in a path that have not been encountered before (ie. a file\u0027s path references a directory\n that hasn\u0027t been mentioned yet as its own file entry) will have a stub entry GFile created for them.\n \u003cp\u003e\n Superfluous slashes in the original filename (ie. name/sub//subafter_extra_slash) will\n be represented as empty string elements in the nameparts array and will be skipped\n as if they were not there.\n \u003cp\u003e\n@param nameparts\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "nameparts",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFile",
+        "type_short": "GFile",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createNewFile",
+      "comment": "Creates a new GFile instance, using per-filesystem custom logic.\n ",
+      "javadoc": "Creates a new GFile instance, using per-filesystem custom logic.\n \u003cp\u003e\n@param parentFile the parent file of the new instance.  Never null.\n@param name the name of the file\n@param isDirectory is this is file or directory?\n@param size length of the file data\n@param metadata filesystem specific BLOB that may have data that this method needs to\n create the new GFile instance.  Can be null if this method is being called to create\n a missing directory that was referenced in a filename.\n@return new GFileImpl instance",
+      "static": false,
+      "params": [
+        {
+          "name": "parentFile",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": "the parent file of the new instance.  Never null."
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the file"
+        },
+        {
+          "name": "isDirectory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "is this is file or directory?"
+        },
+        {
+          "name": "size",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "length of the file data"
+        },
+        {
+          "name": "metadata",
+          "type_long": "METADATATYPE",
+          "type_short": "METADATATYPE",
+          "comment": "filesystem specific BLOB that may have data that this method needs to\n create the new GFile instance.  Can be null if this method is being called to create\n a missing directory that was referenced in a filename."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFileImpl",
+        "type_short": "GFileImpl",
+        "comment": "new GFileImpl instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "updateFSRL",
+      "comment": "Updates the FSRL of a file already in the index.",
+      "javadoc": "Updates the FSRL of a file already in the index.\n@param file current {@link GFile}\n@param newFSRL the new FSRL the new file will be given",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": "current GFile"
+        },
+        {
+          "name": "newFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "the new FSRL the new file will be given"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

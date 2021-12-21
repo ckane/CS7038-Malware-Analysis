@@ -1,0 +1,372 @@
+{
+  "name": "IndexedDynamicDataType",
+  "comment": "Indexed Dynamic Data Type template.  Used to create instances of the data type at\n a given location in memory based on the data found there.\n \n This data struture is used when there is a structure with key field in a header.\n The key field, which is a number, sets which of a number of structures follows the header.\n \n     Header\n        field a\n        field b\n        keyfield (value 1 means struct1 follows\n                  value 2 means struct2 follows\n                  .....\n                  value n means structN follows\n     Struct1 | Struct2 | ..... | StructN",
+  "javadoc": "Indexed Dynamic Data Type template.  Used to create instances of the data type at\n a given location in memory based on the data found there.\n \n This data struture is used when there is a structure with key field in a header.\n The key field, which is a number, sets which of a number of structures follows the header.\n \n     Header\n        field a\n        field b\n        keyfield (value 1 means struct1 follows\n                  value 2 means struct2 follows\n                  .....\n                  value n means structN follows\n     Struct1 | Struct2 | ..... | StructN",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.program.model.data.DynamicDataType",
+  "fields": [
+    {
+      "name": "NULL_BODY_DESCRIPTION",
+      "comment": "Structures which do not have a body",
+      "javadoc": "Structures which do not have a body",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"NullBody\""
+    },
+    {
+      "name": "description",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "header",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "keys",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "structs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType[]",
+      "type_short": "ghidra.program.model.data.DataType[]",
+      "constant_value": null
+    },
+    {
+      "name": "indexOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "indexSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "mask",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cjava.lang.Long,java.lang.Integer\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct and the Index dynamic data type template.",
+      "javadoc": "Construct and the Index dynamic data type template.\n@param name name of the data type\n@param description description of the data type\n@param header the header data type that holds the keys to the location of other data types\n@param keys key value array, one to one mapping to structs array\n@param structs structure[n] to use if the key value equals keys[n]\n@param indexOffset index into the header structure that holds the key value\n@param indexSize size of the key value in bytes\n@param mask mask used on the key value to get the final key",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the data type"
+        },
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "description of the data type"
+        },
+        {
+          "name": "header",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "the header data type that holds the keys to the location of other data types"
+        },
+        {
+          "name": "keys",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": "key value array, one to one mapping to structs array"
+        },
+        {
+          "name": "structs",
+          "type_long": "ghidra.program.model.data.DataType[]",
+          "type_short": "ghidra.program.model.data.DataType[]",
+          "comment": "structure[n] to use if the key value equals keys[n]"
+        },
+        {
+          "name": "indexOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "index into the header structure that holds the key value"
+        },
+        {
+          "name": "indexSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "size of the key value in bytes"
+        },
+        {
+          "name": "mask",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "mask used on the key value to get the final key"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct the Indexed dynamic data type template.\n Used when there is one of two structures following and a single value tells which one.\n If the key value in the header structure matches the singleKey, then the first structure is used.\n If the key value does not match the singleKey, then the second structure is used.",
+      "javadoc": "Construct the Indexed dynamic data type template.\n Used when there is one of two structures following and a single value tells which one.\n If the key value in the header structure matches the singleKey, then the first structure is used.\n If the key value does not match the singleKey, then the second structure is used.\n@param name name of the data type\n@param description description of the data type\n@param header the header data type that holds the keys to the location of other data types\n@param singleKey A single key value selects whether the structure appears\n                    If the key value equals the singleKey then the first structure is used\n                    If the key value doesn\u0027t, the second structure is used\n@param structs structure[n] to use if the key value equals keys[n]\n@param indexOffset index into the header structure that holds the key value\n@param indexSize size of the key value in bytes\n@param mask mask used on the key value to get the final key",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the data type"
+        },
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "description of the data type"
+        },
+        {
+          "name": "header",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "the header data type that holds the keys to the location of other data types"
+        },
+        {
+          "name": "singleKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "A single key value selects whether the structure appears\n                    If the key value equals the singleKey then the first structure is used\n                    If the key value doesn\u0027t, the second structure is used"
+        },
+        {
+          "name": "structs",
+          "type_long": "ghidra.program.model.data.DataType[]",
+          "type_short": "ghidra.program.model.data.DataType[]",
+          "comment": "structure[n] to use if the key value equals keys[n]"
+        },
+        {
+          "name": "indexOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "index into the header structure that holds the key value"
+        },
+        {
+          "name": "indexSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "size of the key value in bytes"
+        },
+        {
+          "name": "mask",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "mask used on the key value to get the final key"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllComponents",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.data.DynamicDataType#getAllComponents(ghidra.program.model.mem.MemBuffer)",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent[]",
+        "type_short": "ghidra.program.model.data.DataTypeComponent[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.data.DataType#getDescription()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.data.DataType#getValue(ghidra.program.model.mem.MemBuffer, ghidra.docking.settings.Settings, int)",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRepresentation",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.data.DataType#getRepresentation(ghidra.program.model.mem.MemBuffer, ghidra.docking.settings.Settings, int)",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMnemonic",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "memory",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": ""
+        },
+        {
+          "name": "loc",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

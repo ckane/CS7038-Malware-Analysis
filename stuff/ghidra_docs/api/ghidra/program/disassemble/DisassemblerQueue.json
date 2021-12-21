@@ -1,0 +1,309 @@
+{
+  "name": "DisassemblerQueue",
+  "comment": "",
+  "javadoc": "",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "orderedSeedQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeSet\u003cghidra.program.model.lang.InstructionBlockFlow\u003e",
+      "type_short": "TreeSet",
+      "constant_value": null
+    },
+    {
+      "name": "priorityQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeSet\u003cghidra.program.model.lang.InstructionBlockFlow\u003e",
+      "type_short": "TreeSet",
+      "constant_value": null
+    },
+    {
+      "name": "currentBranchQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeSet\u003cghidra.program.model.lang.InstructionBlockFlow\u003e",
+      "type_short": "TreeSet",
+      "constant_value": null
+    },
+    {
+      "name": "processedBranchFlows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cghidra.program.model.lang.InstructionBlockFlow\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "restrictedAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "lastBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.InstructionBlock",
+      "type_short": "InstructionBlock",
+      "constant_value": null
+    },
+    {
+      "name": "lastBlockAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "lastFlowFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "ORDERED_FLOW_COMPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Comparator\u003cghidra.program.model.lang.InstructionBlockFlow\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor",
+      "javadoc": "Constructor",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "restrictedAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "continueProducingInstructionSets",
+      "comment": "Determine if additional InstructionSets may be produced.  If true is returned,\n this queue will be ready to produce InstructionSet blocks.",
+      "javadoc": "Determine if additional InstructionSets may be produced.  If true is returned,\n this queue will be ready to produce InstructionSet blocks.\n@param monitor cancellable task monitor\n@return true if additional InstructionSets may be produced",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "cancellable task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if additional InstructionSets may be produced"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextBlockToBeDisassembled",
+      "comment": "Return next block to disassemble for the current InstructionSet.",
+      "javadoc": "Return next block to disassemble for the current InstructionSet.\n@param fallThruAddr specifies the next instruction to be disassembled if the \n previous instruction had a fall-through.  If specified, the previous block \n will be return.  If null, the next block to be disassembled will be returned.\n@param memory needed for normalization of SegementedAddresses (may be null).\n@param monitor cancellable task monitor\n@return next block to be disassembled or null if no more queued flows to process\n for current InstructionSet, or remaining flows fall outside restricted address set,\n monitor has cancelled disassembly.",
+      "static": false,
+      "params": [
+        {
+          "name": "fallThruAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "specifies the next instruction to be disassembled if the \n previous instruction had a fall-through.  If specified, the previous block \n will be return.  If null, the next block to be disassembled will be returned."
+        },
+        {
+          "name": "memory",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": "needed for normalization of SegementedAddresses (may be null)."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "cancellable task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.InstructionBlock",
+        "type_short": "InstructionBlock",
+        "comment": "next block to be disassembled or null if no more queued flows to process\n for current InstructionSet, or remaining flows fall outside restricted address set,\n monitor has cancelled disassembly."
+      },
+      "throws": []
+    },
+    {
+      "name": "instructionSetAddedToProgram",
+      "comment": "",
+      "javadoc": "@param instructionSet\n@return number of instructions added to program",
+      "static": false,
+      "params": [
+        {
+          "name": "instructionSet",
+          "type_long": "ghidra.program.model.lang.InstructionSet",
+          "type_short": "InstructionSet",
+          "comment": ""
+        },
+        {
+          "name": "conflictHandler",
+          "type_long": "ghidra.program.disassemble.DisassemblerConflictHandler",
+          "type_short": "DisassemblerConflictHandler",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of instructions added to program"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDisassemblyAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDisassemblyFlowFromAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "queueDelaySlotFallthrough",
+      "comment": "Queue priority delay-slot disassembly for current block.\n Fallthrough must be handled immediately with next InstructionSet\n to ensure that it remains the start of an InstructionBlock contained \n within current InstructionSet.\n Caller is responsible for adding flow to current block.",
+      "javadoc": "Queue priority delay-slot disassembly for current block.\n Fallthrough must be handled immediately with next InstructionSet\n to ensure that it remains the start of an InstructionBlock contained \n within current InstructionSet.\n Caller is responsible for adding flow to current block.\n@param flow instruction flow",
+      "static": false,
+      "params": [
+        {
+          "name": "delaySlotInstruction",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "queueCurrentFlow",
+      "comment": "Queue specified flow for processing within current InstructionSet.\n Caller is responsible for adding flow to current block.",
+      "javadoc": "Queue specified flow for processing within current InstructionSet.\n Caller is responsible for adding flow to current block.\n@param flow instruction flow",
+      "static": false,
+      "params": [
+        {
+          "name": "flow",
+          "type_long": "ghidra.program.model.lang.InstructionBlockFlow",
+          "type_short": "InstructionBlockFlow",
+          "comment": "instruction flow"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkMemoryRestriction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "normalize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.SegmentedAddress",
+          "type_short": "SegmentedAddress",
+          "comment": ""
+        },
+        {
+          "name": "memory",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

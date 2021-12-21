@@ -1,0 +1,867 @@
+{
+  "name": "DefaultProjectManager",
+  "comment": "Implementation for a ProjectManager; creates, opens,\n and deletes Projects. It also keeps track of recently opened projects.",
+  "javadoc": "Implementation for a ProjectManager; creates, opens,\n and deletes Projects. It also keeps track of recently opened projects.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.model.ProjectManager"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "LAST_OPENED_PROJECT",
+      "comment": "Preference name for the last opened project.",
+      "javadoc": "Preference name for the last opened project.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"LastOpenedProject\""
+    },
+    {
+      "name": "LOG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "org.apache.logging.log4j.Logger",
+      "type_short": "Logger",
+      "constant_value": null
+    },
+    {
+      "name": "RECENT_PROJECTS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"RecentProjects\""
+    },
+    {
+      "name": "VIEWED_PROJECTS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"ViewedProjects\""
+    },
+    {
+      "name": "SERVER_INFO",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"ServerInfo\""
+    },
+    {
+      "name": "RECENT_PROJECTS_LIMIT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "6"
+    },
+    {
+      "name": "PROJECT_PATH_SEPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "recentlyOpenedProjectsList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.framework.model.ProjectLocator\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "recentlyViewedProjectsList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cjava.net.URL\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "userToolChest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.ToolChest",
+      "type_short": "ToolChest",
+      "constant_value": null
+    },
+    {
+      "name": "serverInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.ServerInfo",
+      "type_short": "ServerInfo",
+      "constant_value": null
+    },
+    {
+      "name": "lastOpenedProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.ProjectLocator",
+      "type_short": "ProjectLocator",
+      "constant_value": null
+    },
+    {
+      "name": "currentProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.Project",
+      "type_short": "Project",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct the single project manager.",
+      "javadoc": "Construct the single project manager.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.Project",
+        "type_short": "Project",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        },
+        {
+          "name": "repAdapter",
+          "type_long": "ghidra.framework.client.RepositoryAdapter",
+          "type_short": "RepositoryAdapter",
+          "comment": ""
+        },
+        {
+          "name": "remember",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.Project",
+        "type_short": "Project",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "openProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        },
+        {
+          "name": "doRestore",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "resetOwner",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.Project",
+        "type_short": "Project",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.NotOwnerException",
+          "type_short": "NotOwnerException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRecentProjects",
+      "comment": "Get list of project locations that user most recently opened.",
+      "javadoc": "Get list of project locations that user most recently opened.\n@return list of project locations",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectLocator[]",
+        "type_short": "ghidra.framework.model.ProjectLocator[]",
+        "comment": "list of project locations"
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecentViewedProjects",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.net.URL[]",
+        "type_short": "java.net.URL[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastOpenedProject",
+      "comment": "Get the last opened (active) project.",
+      "javadoc": "Get the last opened (active) project.\n@return project last opened by the user; returns NULL if a project\n was never opened OR the last opened project is no longer valid",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectLocator",
+        "type_short": "ProjectLocator",
+        "comment": "project last opened by the user; returns NULL if a project\n was never opened OR the last opened project is no longer valid"
+      },
+      "throws": []
+    },
+    {
+      "name": "setLastOpenedProject",
+      "comment": "Update the last opened project preference.",
+      "javadoc": "Update the last opened project preference.",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteProject",
+      "comment": "Delete the project in the given location and remove it from the list of known projects.",
+      "javadoc": "Delete the project in the given location and remove it from the list of known projects.\n@return false if no project was deleted.",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "false if no project was deleted."
+      },
+      "throws": []
+    },
+    {
+      "name": "forgetProject",
+      "comment": "Remove the specified project from the list of known projects.",
+      "javadoc": "Remove the specified project from the list of known projects.",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "rememberProject",
+      "comment": "Keep the specified project on the list of known projects.",
+      "javadoc": "Keep the specified project on the list of known projects.",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "forgetViewedProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "url",
+          "type_long": "java.net.URL",
+          "type_short": "URL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "rememberViewedProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "url",
+          "type_long": "java.net.URL",
+          "type_short": "URL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "projectExists",
+      "comment": "Returns true if the specified project exists.",
+      "javadoc": "Returns true if the specified project exists.",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRepositoryServerAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "host",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "portNumber",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "forceConnect",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.client.RepositoryServerAdapter",
+        "type_short": "RepositoryServerAdapter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMostRecentServerInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ServerInfo",
+        "type_short": "ServerInfo",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addDefaultTools",
+      "comment": "Add the default tools to the given tool chest.  This method does not attempt to merge the\n user\u0027s previous tools, as does #installTools(ToolChest).",
+      "javadoc": "Add the default tools to the given tool chest.  This method does not attempt to merge the\n user\u0027s previous tools, as does {@link #installTools(ToolChest)}.\n@param toolChest tool chest which to add the default tools",
+      "static": false,
+      "params": [
+        {
+          "name": "toolChest",
+          "type_long": "ghidra.framework.model.ToolChest",
+          "type_short": "ToolChest",
+          "comment": "tool chest which to add the default tools"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "installTools",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toolChest",
+          "type_long": "ghidra.framework.model.ToolChest",
+          "type_short": "ToolChest",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMostRecentValidProjectDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeDefaultToolsIntoExisting",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "defaultTools",
+          "type_long": "java.util.Set\u003cghidra.framework.model.ToolTemplate\u003e",
+          "type_short": "Set",
+          "comment": ""
+        },
+        {
+          "name": "userTools",
+          "type_long": "java.util.Set\u003cghidra.framework.model.ToolTemplate\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.framework.model.ToolTemplate\u003e",
+        "type_short": "Collection",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toolTemplate",
+          "type_long": "ghidra.framework.model.ToolTemplate",
+          "type_short": "ToolTemplate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.net.URL",
+        "type_short": "URL",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getPreExistingUserTools",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "previousUserDir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.framework.model.ToolTemplate\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scrubUserTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "template",
+          "type_long": "ghidra.framework.model.ToolTemplate",
+          "type_short": "ToolTemplate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUserToolChest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolChest",
+        "type_short": "ToolChest",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addDefaultTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toolChest",
+          "type_long": "ghidra.framework.model.ToolChest",
+          "type_short": "ToolChest",
+          "comment": ""
+        },
+        {
+          "name": "template",
+          "type_long": "ghidra.framework.model.ToolTemplate",
+          "type_short": "ToolTemplate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createUserToolChest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addProjectToList",
+      "comment": "Add the project to the given list;\n most recently accessed projects are first in the list.",
+      "javadoc": "Add the project to the given list;\n most recently accessed projects are first in the list.",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003cghidra.framework.model.ProjectLocator\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "populateProjectLocatorList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003cghidra.framework.model.ProjectLocator\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocatorFromProjectPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectLocator",
+        "type_short": "ProjectLocator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "populateProjectURLList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003cjava.net.URL\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updatePreferences",
+      "comment": "Update preferences file with list of known projects.",
+      "javadoc": "Update preferences file with list of known projects.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setProjectLocatorProperty",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003cghidra.framework.model.ProjectLocator\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setProjectURLProperty",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003cjava.net.URL\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getServerInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "str",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ServerInfo",
+        "type_short": "ServerInfo",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "projectClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "project",
+          "type_long": "ghidra.framework.project.DefaultProject",
+          "type_short": "DefaultProject",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

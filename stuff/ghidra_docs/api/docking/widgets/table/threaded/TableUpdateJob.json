@@ -1,0 +1,707 @@
+{
+  "name": "TableUpdateJob",
+  "comment": "State machine object for performing the various update functions on a ThreadedTableModel.\n The general pattern is to:\n \n \tLoad \n  Filter \n  Process individual adds and removes \n  Sort \n  Set the processed data back on the model\n \n \n Not all the update functions are performed on a run of a TableUpdateJob.  If the reloadData flag is\n not set, the the data is just copied from the model\u0027s current list, instead of calling the model\u0027s\n loadData() method. If the sortComparator is null,\n then the data is not sorted (for example, when only filtering needs to be done).  If there\n are no add/removes in the list, then that step does nothing.\n \n Before the job completes, new calls to sort and filter can be called.  If the job is past the\n stage of the new call, the monitor is cancelled, causing the current stage to abort.  \n The next state of this job is set to the appropriate state for the call, the monitor is \n reset, and the job begins executing the next stage, based upon the new call.",
+  "javadoc": "State machine object for performing the various update functions on a ThreadedTableModel.\n The general pattern is to:\n \u003col\u003e\n \t\u003cli\u003eLoad \u003c/li\u003e\n  \u003cli\u003eFilter \u003c/li\u003e\n  \u003cli\u003eProcess individual adds and removes \u003c/li\u003e\n  \u003cli\u003eSort \u003c/li\u003e\n  \u003cli\u003eSet the processed data back on the model\u003c/li\u003e\n \u003c/ol\u003e\n \u003cp\u003e\n Not all the update functions are performed on a run of a TableUpdateJob.  If the reloadData flag is\n not set, the the data is just copied from the model\u0027s current list, instead of calling the model\u0027s\n loadData() method. If the sortComparator is null,\n then the data is not sorted (for example, when only filtering needs to be done).  If there\n are no add/removes in the list, then that step does nothing.\n \u003cp\u003e\n Before the job completes, new calls to sort and filter can be called.  If the job is past the\n stage of the new call, the \u003ccode\u003emonitor\u003c/code\u003e is cancelled, causing the current stage to abort.  \n The next state of this job is set to the appropriate state for the call, the monitor is \n reset, and the job begins executing the next stage, based upon the new call.\n@param \u003cT\u003e the type of data that each row in the table represents.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "model",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+      "type_short": "ThreadedTableModel",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "sourceData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableData\u003cT\u003e",
+      "type_short": "TableData",
+      "constant_value": null
+    },
+    {
+      "name": "updatedData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableData\u003cT\u003e",
+      "type_short": "TableData",
+      "constant_value": null
+    },
+    {
+      "name": "disableSubFiltering",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "reloadData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "doForceSort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "doForceFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "newSortContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableSortingContext\u003cT\u003e",
+      "type_short": "TableSortingContext",
+      "constant_value": null
+    },
+    {
+      "name": "lastSortContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableSortingContext\u003cT\u003e",
+      "type_short": "TableSortingContext",
+      "constant_value": null
+    },
+    {
+      "name": "addRemoveList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.table.AddRemoveListItem\u003cT\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "currentState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableUpdateJob.JobState",
+      "type_short": "JobState",
+      "constant_value": null
+    },
+    {
+      "name": "pendingRequestedState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableUpdateJob.JobState",
+      "type_short": "JobState",
+      "constant_value": null
+    },
+    {
+      "name": "debugStateHistory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.table.threaded.TableUpdateJob.JobState\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "isFired",
+      "comment": "a flag to signal that this job is no longer being used and can die a horrible death",
+      "javadoc": "a flag to signal that this job is no longer being used and can die a horrible death",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": ""
+        },
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setData",
+      "comment": "Meant to be called by subclasses, not clients.  This method will trigger this job not \n to load data, but rather to use the given data.",
+      "javadoc": "Meant to be called by subclasses, not clients.  This method will trigger this job not \n to load data, but rather to use the given data.\n@param data The data to process.",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "docking.widgets.table.threaded.TableData\u003cT\u003e",
+          "type_short": "TableData",
+          "comment": "The data to process."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setForceFilter",
+      "comment": "Allows the precise disabling of the filter operation.  For example, when the user sorts, \n no filtering is needed.  If the filter has changed, then a filter will take place, \n regardless of the state of this variable.",
+      "javadoc": "Allows the precise disabling of the filter operation.  For example, when the user sorts, \n no filtering is needed.  If the filter has changed, then a filter will take place, \n regardless of the state of this variable.\n@param force false to reuse the current filter, if possible.",
+      "static": false,
+      "params": [
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "false to reuse the current filter, if possible."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "run",
+      "comment": "The basic run() method that executes the state machine.",
+      "javadoc": "The basic run() method that executes the state machine.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reload",
+      "comment": "Forces this job to completely reload the data, instead of copying from\n the model\u0027s current data.  This call is not allowed on the currently running job and is only\n appropriate for a pending job.",
+      "javadoc": "Forces this job to completely reload the data, instead of copying from\n the model\u0027s current data.  This call is not allowed on the currently running job and is only\n appropriate for a pending job.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addRemove",
+      "comment": "Adds the Add/Remove item to the list of items to be processed in the add/remove phase. This\n call is not allowed on running jobs, only pending jobs.",
+      "javadoc": "Adds the Add/Remove item to the list of items to be processed in the add/remove phase. This\n call is not allowed on running jobs, only pending jobs.\n@param item the add/remove item to add to the list of items to be processed in the add/remove\n            phase of this job.\n@param maxAddRemoveCount the maximum number of add/remove jobs to queue before performing \n        a full reload",
+      "static": false,
+      "params": [
+        {
+          "name": "item",
+          "type_long": "docking.widgets.table.AddRemoveListItem\u003cT\u003e",
+          "type_short": "AddRemoveListItem",
+          "comment": "the add/remove item to add to the list of items to be processed in the add/remove\n            phase of this job."
+        },
+        {
+          "name": "maxAddRemoveCount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the maximum number of add/remove jobs to queue before performing \n        a full reload"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "requestSort",
+      "comment": "Sets the TableColumnComparator to use for sorting the data.  This method can be called on\n the currently running job as well as the pending job.  If called on the running job, the effect\n depends on the running job\u0027s state:\n \n     If the sort state hasn\u0027t happened yet, all it does is set the comparator for when \n     the sort occurs.  \n     If the sort state has already been started or completed, then this method attempts\n      to stop the current process phase and cause the state\n \t\tmachine to return to the sort phase.\n     If the current job has already entered the DONE state, then the sort cannot \n     take effect in this job and a false value is returned to indicate the\n sort was not handled by this job.\n ",
+      "javadoc": "Sets the TableColumnComparator to use for sorting the data.  This method can be called on\n the currently running job as well as the pending job.  If called on the running job, the effect\n depends on the running job\u0027s state:\n \u003cul\u003e\n     \u003cli\u003eIf the sort state hasn\u0027t happened yet, all it does is set the comparator for when \n     the sort occurs.  \n     \u003cli\u003eIf the sort state has already been started or completed, then this method attempts\n      to stop the current process phase and cause the state\n \t\tmachine to return to the sort phase.\n     \u003cli\u003eIf the current job has already entered the DONE state, then the sort cannot \n     take effect in this job and a false value is returned to indicate the\n sort was not handled by this job.\n \u003c/ul\u003e\n@param newSortingContext the TableColumnComparator to use to sort the data.\n@param forceSort True signals to re-sort, even if this is already sorted\n@return true if the sort can be processed by this job, false if this job is essentially already\n completed and therefor cannot perform the sort job.",
+      "static": false,
+      "params": [
+        {
+          "name": "newSortingContext",
+          "type_long": "docking.widgets.table.TableSortingContext\u003cT\u003e",
+          "type_short": "TableSortingContext",
+          "comment": "the TableColumnComparator to use to sort the data."
+        },
+        {
+          "name": "forceSort",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True signals to re-sort, even if this is already sorted"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the sort can be processed by this job, false if this job is essentially already\n completed and therefor cannot perform the sort job."
+      },
+      "throws": []
+    },
+    {
+      "name": "requestFilter",
+      "comment": "Tells the job that the filter criteria has changed.  This method can be called on\n the currently running job as well as the pending job.  If called on the running job, the \n effect depends on the running job\u0027s state:\n \n \t  If the filter state hasn\u0027t happened yet, then nothing needs to be done as this job \n \t\t\twill filter later anyway. \n    If the filter state has already been started or completed, then this method \n    \t\tattempts to stop the current process phase and cause the state machine to \n    \t\treturn to the filter phase. \n    If the current job has already entered the DONE state, then the filter cannot take\n     \t\teffect in this job and a false value is returned to indicate the filter was \n     \t\tnot handled by this job.\n ",
+      "javadoc": "Tells the job that the filter criteria has changed.  This method can be called on\n the currently running job as well as the pending job.  If called on the running job, the \n effect depends on the running job\u0027s state:\n \u003cul\u003e\n \t  \u003cli\u003eIf the filter state hasn\u0027t happened yet, then nothing needs to be done as this job \n \t\t\twill filter later anyway. \n    \u003cli\u003eIf the filter state has already been started or completed, then this method \n    \t\tattempts to stop the current process phase and cause the state machine to \n    \t\treturn to the filter phase. \n    \u003cli\u003eIf the current job has already entered the DONE state, then the filter cannot take\n     \t\teffect in this job and a false value is returned to indicate the filter was \n     \t\tnot handled by this job.\n \u003c/ul\u003e\n@return true if the filter can be processed by this job, false if this job is essentially already\n completed and therefor cannot perform the filter job.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the filter can be processed by this job, false if this job is essentially already\n completed and therefor cannot perform the filter job."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasSorted",
+      "comment": "Returns true if this job has already started or completed the sort phase.",
+      "javadoc": "Returns true if this job has already started or completed the sort phase.\n@return true if this job has already started or completed the sort phase.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this job has already started or completed the sort phase."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasFiltered",
+      "comment": "Returns true if this job has already started or completed the filter phase.",
+      "javadoc": "Returns true if this job has already started or completed the filter phase.\n@return true if this job has already started or completed the filter phase.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this job has already started or completed the filter phase."
+      },
+      "throws": []
+    },
+    {
+      "name": "gotoNextState",
+      "comment": "Transitions to the next state of this state machine. Handles the special case if the\n monitor has been cancelled by a call to sort() or filter().  In either of these cases,\n the recover state would have been set and indicates that the monitor should be reset and\n the state machine should transition to the recover state instead of the next scheduled\n state. If the monitor has been cancelled, and no recover state has been set, then the\n job was cancelled by the user and the job will end.",
+      "javadoc": "Transitions to the next state of this state machine. Handles the special case if the\n monitor has been cancelled by a call to sort() or filter().  In either of these cases,\n the recover state would have been set and indicates that the monitor should be reset and\n the state machine should transition to the recover state instead of the next scheduled\n state. If the monitor has been cancelled, and no recover state has been set, then the\n job was cancelled by the user and the job will end.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setState",
+      "comment": "YOU SHOULD BE SYNCHRNOIZED WHEN CALLING THIS!",
+      "javadoc": "YOU SHOULD BE SYNCHRNOIZED WHEN CALLING THIS!",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "docking.widgets.table.threaded.TableUpdateJob.JobState",
+          "type_short": "JobState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextState",
+      "comment": "Returns the next state to transition to after the given state.",
+      "javadoc": "Returns the next state to transition to after the given state.\n@param state the current state to transition from.\n@return the next state to be processed after the given state.",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "docking.widgets.table.threaded.TableUpdateJob.JobState",
+          "type_short": "JobState",
+          "comment": "the current state to transition from."
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableUpdateJob.JobState",
+        "type_short": "JobState",
+        "comment": "the next state to be processed after the given state."
+      },
+      "throws": []
+    },
+    {
+      "name": "processState",
+      "comment": "Calls the appropriate method to process the given state.",
+      "javadoc": "Calls the appropriate method to process the given state.\n@param state the state to process.\n@throws CancelledException if the job was cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "docking.widgets.table.threaded.TableUpdateJob.JobState",
+          "type_short": "JobState",
+          "comment": "the state to process."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the job was cancelled"
+        }
+      ]
+    },
+    {
+      "name": "loadData",
+      "comment": "Work method to load data for the follow on states.  If the reloadData flag is set, the data\n will be totally reloaded, else the data will be copied from the model\u0027s current data.",
+      "javadoc": "Work method to load data for the follow on states.  If the reloadData flag is set, the data\n will be totally reloaded, else the data will be copied from the model\u0027s current data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "pickExistingTableData",
+      "comment": "Picks the table data to use for all future states (e.g., filtering, sorting, etc).  Data\n can be reused if its filter is a superset of the pending filter.  Likewise, if the \n pending filter is itself a superset of the current filter, then this code will walk \n backwards, starting at the current table data, until it finds either the root dataset or\n a child of the root whose filter is a superset of the pending filter.\n \n Reusing table data in this way has the potential to consume too much memory (in the case\n where the initial dataset is large and each subsequent filter is a subset of the \n previous filter, where each filter does\u0027t significantly reduce the newly filtered dataset.\n \n Since much memory could be consumed, we provide an option in the tool to disable this\n reuse of filtered data.  When not in use, each filter change will perform a full refilter.\n This is not an issue for tables with moderate to small-sized datasets.",
+      "javadoc": "Picks the table data to use for all future states (e.g., filtering, sorting, etc).  Data\n can be reused if its filter is a superset of the pending filter.  Likewise, if the \n pending filter is itself a superset of the current filter, then this code will walk \n backwards, starting at the current table data, until it finds either the root dataset or\n a child of the root whose filter is a superset of the pending filter.\n \u003cp\u003e\n Reusing table data in this way has the potential to consume too much memory (in the case\n where the initial dataset is large and each subsequent filter is a subset of the \n previous filter, where each filter does\u0027t significantly reduce the newly filtered dataset.\n \u003cp\u003e\n Since much memory could be consumed, we provide an option in the tool to disable this\n reuse of filtered data.  When not in use, each filter change will perform a full refilter.\n This is not an issue for tables with moderate to small-sized datasets.\n@return the initial data to use for future filter and sort operations.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableData\u003cT\u003e",
+        "type_short": "TableData",
+        "comment": "the initial data to use for future filter and sort operations."
+      },
+      "throws": []
+    },
+    {
+      "name": "getReusableFilteredData",
+      "comment": "Gets any existing data that matches the current filter, if any.",
+      "javadoc": "Gets any existing data that matches the current filter, if any.\n@return data that should be the start point for the next filter state; null if there \n          is no filter set or if the current data\u0027s filter does not match the pending filter",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableData\u003cT\u003e",
+        "type_short": "TableData",
+        "comment": "data that should be the start point for the next filter state; null if there \n          is no filter set or if the current data\u0027s filter does not match the pending filter"
+      },
+      "throws": []
+    },
+    {
+      "name": "needsSorting",
+      "comment": "Returns true if the data needs to be sorted.",
+      "javadoc": "Returns true if the data needs to be sorted.\n@return true if the data needs to be sorted.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the data needs to be sorted."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasNewSort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tableSortDiffersFromSourceData",
+      "comment": "True if the sort applied to the table is not the same as that in the source dataset",
+      "javadoc": "True if the sort applied to the table is not the same as that in the source dataset",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCurrentSortReversable",
+      "comment": "Returns true if the sort can take a shortcut and just reverse the order of the data.",
+      "javadoc": "Returns true if the sort can take a shortcut and just reverse the order of the data.\n@return true if the sort can take a shortcut and just reverse the order of the data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the sort can take a shortcut and just reverse the order of the data."
+      },
+      "throws": []
+    },
+    {
+      "name": "sortData",
+      "comment": "Work method to sort the data.",
+      "javadoc": "Work method to sort the data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSortData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybeSortSourceData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doProcessAddRemoves",
+      "comment": "Work method to process the add/remove items.",
+      "javadoc": "Work method to process the add/remove items.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initializeSortCache",
+      "comment": "When sorting we cache column value lookups to increase speed.",
+      "javadoc": "When sorting we cache column value lookups to increase speed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearSortCache",
+      "comment": "Clear the column value lookup cache, to give back memory",
+      "javadoc": "Clear the column value lookup cache, to give back memory",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doFilterData",
+      "comment": "Work method to filter the data.",
+      "javadoc": "Work method to filter the data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "copyCurrentFilterData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canReuseCurrentFilteredData",
+      "comment": "The current data can be re-used when the data and filter have not changed \n (this implies a sort only operation)",
+      "javadoc": "The current data can be re-used when the data and filter have not changed \n (this implies a sort only operation)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentFilteredData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableData\u003cT\u003e",
+        "type_short": "TableData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyData",
+      "comment": "Work method to set the data back into the ThreadTableModel.",
+      "javadoc": "Work method to set the data back into the ThreadTableModel.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStateHistoryString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

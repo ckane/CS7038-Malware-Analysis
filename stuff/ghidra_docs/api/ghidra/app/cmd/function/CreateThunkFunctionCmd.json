@@ -1,0 +1,744 @@
+{
+  "name": "CreateThunkFunctionCmd",
+  "comment": "Command for creating a thunk function at an address.",
+  "javadoc": "Command for creating a thunk function at an address.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.framework.cmd.BackgroundCommand",
+  "fields": [
+    {
+      "name": "entry",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "body",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "referencedFunctionAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "referencedSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.Symbol",
+      "type_short": "Symbol",
+      "constant_value": null
+    },
+    {
+      "name": "thunkFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Function",
+      "type_short": "Function",
+      "constant_value": null
+    },
+    {
+      "name": "referencedFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Function",
+      "type_short": "Function",
+      "constant_value": null
+    },
+    {
+      "name": "referringThunkAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.model.address.Address\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "checkForSideEffects",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "MAX_NUMBER_OF_THUNKING_INSTRUCTIONS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "DEFAULT_FUNCTION_COMMENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a thunk function.",
+      "javadoc": "Constructs a new command for creating a thunk function.\n@param entry entry point address for the function to be created.\n@param body set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n If null, and entry corresponds to an existing function, that function will be\n converted to a thunk, otherwise an error will result.\n@param referencedFunctionAddr the function address to which this thunk refers.  If no function\n exists at that specified referencedFunctionAddr one will be created per the following scheme:\n \u003cbr\u003e\u003cul\u003e\n \u003cli\u003eIf referencedFunctionAddr is not contained within a memory block, an external function will\u003cbr\u003e\n be created (a check will be done to look for an previously defined external location)\u003c/li\u003e\n \u003cli\u003eIf referencedFunctionAddr corresponds to an instruction, a new function will be\u003cbr\u003e\n created at that address.\u003c/li\u003e\n \u003c/ul\u003e",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point address for the function to be created."
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n If null, and entry corresponds to an existing function, that function will be\n converted to a thunk, otherwise an error will result."
+        },
+        {
+          "name": "referencedFunctionAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the function address to which this thunk refers.  If no function\n exists at that specified referencedFunctionAddr one will be created per the following scheme:\n \n If referencedFunctionAddr is not contained within a memory block, an external function will\n be created (a check will be done to look for an previously defined external location)\n If referencedFunctionAddr corresponds to an instruction, a new function will be\n created at that address.\n "
+        },
+        {
+          "name": "referringThunkAddresses",
+          "type_long": "java.util.List\u003cghidra.program.model.address.Address\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a thunk function.",
+      "javadoc": "Constructs a new command for creating a thunk function.\n@param entry entry point address for the function to be created.\n@param body set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n If null, and entry corresponds to an existing function, that function will be\n converted to a thunk, otherwise an error will result.\n@param referencedFunctionAddr the function address to which this thunk refers.  If no function\n exists at that specified referencedFunctionAddr one will be created per the following scheme:\n \u003cbr\u003e\u003cul\u003e\n \u003cli\u003eIf referencedFunctionAddr is not contained within a memory block, an external function will\u003cbr\u003e\n be created (a check will be done to look for an previously defined external location)\u003c/li\u003e\n \u003cli\u003eIf referencedFunctionAddr corresponds to an instruction, a new function will be\u003cbr\u003e\n created at that address.\u003c/li\u003e\n \u003c/ul\u003e",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point address for the function to be created."
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n If null, and entry corresponds to an existing function, that function will be\n converted to a thunk, otherwise an error will result."
+        },
+        {
+          "name": "referencedFunctionAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the function address to which this thunk refers.  If no function\n exists at that specified referencedFunctionAddr one will be created per the following scheme:\n \n If referencedFunctionAddr is not contained within a memory block, an external function will\n be created (a check will be done to look for an previously defined external location)\n If referencedFunctionAddr corresponds to an instruction, a new function will be\n created at that address.\n "
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a thunk function.",
+      "javadoc": "Constructs a new command for creating a thunk function.\n@param entry entry point address for the function to be created.\n@param body set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n If null, and entry corresponds to an existing function, that function will be\n converted to a thunk, otherwise an error will result.\n@param referencedSymbol the symbol which identifies the intended function to which this thunk refers.\n If no function exists at that specified referencedSymbol location, one will be created per the following scheme:\n \u003cbr\u003e\u003cul\u003e\n \u003cli\u003eIf referencedFunctionAddr is not contained within a memory block, an external function will\u003cbr\u003e\n be created (a check will be done to look for an previously defined external location)\u003c/li\u003e\n \u003cli\u003eIf referencedFunctionAddr corresponds to an instruction, a new function will be\u003cbr\u003e\n created at that address.\u003c/li\u003e\n \u003cli\u003eIf referencedSymbol corresponds to an external CODE symbol, it will be converted to an\u003cbr\u003e\n external FUNCTION\u003c/li\u003e\n \u003c/ul\u003e",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point address for the function to be created."
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n If null, and entry corresponds to an existing function, that function will be\n converted to a thunk, otherwise an error will result."
+        },
+        {
+          "name": "referencedSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol which identifies the intended function to which this thunk refers.\n If no function exists at that specified referencedSymbol location, one will be created per the following scheme:\n \n If referencedFunctionAddr is not contained within a memory block, an external function will\n be created (a check will be done to look for an previously defined external location)\n If referencedFunctionAddr corresponds to an instruction, a new function will be\n created at that address.\n If referencedSymbol corresponds to an external CODE symbol, it will be converted to an\n external FUNCTION\n "
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a thunk function that can compute the function this function is thunking to.",
+      "javadoc": "Constructs a new command for creating a thunk function that can compute the function this function is thunking to.\n@param entry entry point address for the function to be created.\n@param checkForSideEffects true to check for side-effects that indicate it is not a pure thunk.\n \n The body may be computed.  References to the thunked to function may be created.\n \n If no function exists at the location being thunked, it will be created based on the above rules.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point address for the function to be created."
+        },
+        {
+          "name": "checkForSideEffects",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to check for side-effects that indicate it is not a pure thunk.\n \n The body may be computed.  References to the thunked to function may be created.\n \n If no function exists at the location being thunked, it will be created based on the above rules."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "computeThunkBody",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferencedFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "autoThunkOK",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveComputableFlow",
+      "comment": "resolve the flow destination by computing to a single value with a restriction to a single basic block.",
+      "javadoc": "resolve the flow destination by computing to a single value with a restriction to a single basic block.\n@return single flow address, null if single flow can\u0027t be resolved",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "location",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "single flow address, null if single flow can\u0027t be resolved"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getThunkFunction",
+      "comment": "",
+      "javadoc": "@return function if create command was successful",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": "function if create command was successful"
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferencedFunction",
+      "comment": "",
+      "javadoc": "@return the function referenced by the newly created thunk function\n is command was successful",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": "the function referenced by the newly created thunk function\n is command was successful"
+      },
+      "throws": []
+    },
+    {
+      "name": "getThunkedAddr",
+      "comment": "if the code starting at entry is a thunk, return the thunked addess if known.",
+      "javadoc": "if the code starting at entry is a thunk, return the thunked addess if known.\n@param program code resides in\n@param entry start of the code\n@return the function address, Address.NO_ADDRESS if thunk but unknonw addr, null otherwise",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "code resides in"
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start of the code"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the function address, Address.NO_ADDRESS if thunk but unknonw addr, null otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "getThunkedAddr",
+      "comment": "Get the address that this function would thunk if it is a valid thunk",
+      "javadoc": "Get the address that this function would thunk if it is a valid thunk\n@param program\n@param entry location to check for a thunk\n@param checkForSideEffects true if there should be no extra registers affected\n@return address that the thunk thunks,Address.NO_ADDRESS if thunk but unknown addr, null otherwise",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "location to check for a thunk"
+        },
+        {
+          "name": "checkForSideEffects",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if there should be no extra registers affected"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "address that the thunk thunks,Address.NO_ADDRESS if thunk but unknown addr, null otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "addSetRegisters",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "setRegisters",
+          "type_long": "java.util.HashSet\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getThunkedExternalFunctionAddress",
+      "comment": "Handle conversion of label within reserved EXTERNAL block to a real \n external function which can be thunked.  This may be necessary when a\n loaded symbol failed to identify itself as a function.  This will \n only handle single symbols contained within the global namespace.",
+      "javadoc": "Handle conversion of label within reserved EXTERNAL block to a real \n external function which can be thunked.  This may be necessary when a\n loaded symbol failed to identify itself as a function.  This will \n only handle single symbols contained within the global namespace.\n@param program\n@param entry function being created\n@return newly created external function address or null",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "function being created"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "newly created external function address or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "isLocalBranch",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "listing",
+          "type_long": "ghidra.program.model.listing.Listing",
+          "type_short": "Listing",
+          "comment": ""
+        },
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "flowType",
+          "type_long": "ghidra.program.model.symbol.FlowType",
+          "type_short": "FlowType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowingAddrFromFinalState",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "flowType",
+          "type_long": "ghidra.program.model.symbol.FlowType",
+          "type_short": "FlowType",
+          "comment": ""
+        },
+        {
+          "name": "checkForSideEffects",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "setRegisters",
+          "type_long": "java.util.HashSet\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        },
+        {
+          "name": "usedRegisters",
+          "type_long": "java.util.HashSet\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSimpleFlow",
+      "comment": "try to get a simple flow address from a single instruction",
+      "javadoc": "try to get a simple flow address from a single instruction\n@param instr to check for simple flow to target\n@return targetAddr if was a simple flow, null otherwise",
+      "static": true,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "to check for simple flow to target"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "targetAddr if was a simple flow, null otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "addRegisterUsage",
+      "comment": "add in all registers used/set in the pcodeop, checking for a register with an unknown input.",
+      "javadoc": "add in all registers used/set in the pcodeop, checking for a register with an unknown input.\n@param program - program this pcode belongs to\n@param setAtStartRegisters - registers that were set at the start of the function\n@param setRegisters - registers that are currently set to a value\n@param usedRegisters - registers that have been used by any pcode op\n@param pcode - pcode operation.\n@param allow8bitNonUse - TRUE to allow setting of 8bit size registers without\n                          eventual use of the value.\n                          8-bit registers are normally flags. For 16-bit or\n                          8-bit processors, this should be FALSE\n@return true if all input registers had a valid input\n         false if input register found that was not initialized",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "- program this pcode belongs to"
+        },
+        {
+          "name": "setAtStartRegisters",
+          "type_long": "java.util.HashSet\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "HashSet",
+          "comment": "- registers that were set at the start of the function"
+        },
+        {
+          "name": "setRegisters",
+          "type_long": "java.util.HashSet\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "HashSet",
+          "comment": "- registers that are currently set to a value"
+        },
+        {
+          "name": "usedRegisters",
+          "type_long": "java.util.HashSet\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "HashSet",
+          "comment": "- registers that have been used by any pcode op"
+        },
+        {
+          "name": "pcode",
+          "type_long": "ghidra.program.model.pcode.PcodeOp",
+          "type_short": "PcodeOp",
+          "comment": "- pcode operation."
+        },
+        {
+          "name": "allow8bitNonUse",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "- TRUE to allow setting of 8bit size registers without\n                          eventual use of the value.\n                          8-bit registers are normally flags. For 16-bit or\n                          8-bit processors, this should be FALSE"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if all input registers had a valid input\n         false if input register found that was not initialized"
+      },
+      "throws": []
+    },
+    {
+      "name": "containsRegister",
+      "comment": "Check if the setRegisters contains the varnode or any of its parents.\n If a parent register has been set, then this varnode is set",
+      "javadoc": "Check if the setRegisters contains the varnode or any of its parents.\n If a parent register has been set, then this varnode is set",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "setRegisters",
+          "type_long": "java.util.HashSet\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        },
+        {
+          "name": "regVarnode",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowingAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isThunk",
+      "comment": "Check if this is a Thunking function.",
+      "javadoc": "Check if this is a Thunking function.\n@return true if this is a function thunking another.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is a function thunking another."
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+{
+  "name": "DBObjectCache",
+  "comment": "Generic cache implementation for objects that extend DatabaseObject. This is a reference based\n cache such that objects are only ever automatically removed from the cache when there are no\n references to that object. It also maintains a small \"hard\" cache so that recently accessed objects\n are not prematurely removed from the cache if there are no references to them.",
+  "javadoc": "Generic cache implementation for objects that extend DatabaseObject. This is a reference based\n cache such that objects are only ever automatically removed from the cache when there are no\n references to that object. It also maintains a small \"hard\" cache so that recently accessed objects\n are not prematurely removed from the cache if there are no references to them.\n@param \u003cT\u003e The type of the object stored in this cache",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "map",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Long,ghidra.program.database.DBObjectCache.KeyedSoftReference\u003cT\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "refQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.ref.ReferenceQueue\u003cT\u003e",
+      "type_short": "ReferenceQueue",
+      "constant_value": null
+    },
+    {
+      "name": "hardCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.LinkedList\u003cT\u003e",
+      "type_short": "LinkedList",
+      "constant_value": null
+    },
+    {
+      "name": "hardCacheSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "invalidateCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new DBObjectCache with a given hard cache size.  The hard cache size is\n the minimum number of objects to keep in the cache. Typically, the cache will contain\n more than this number, but the excess objects are subject to garbage collections",
+      "javadoc": "Constructs a new DBObjectCache with a given hard cache size.  The hard cache size is\n the minimum number of objects to keep in the cache. Typically, the cache will contain\n more than this number, but the excess objects are subject to garbage collections\n@param hardCacheSize the minimum number of objects to keep in the cache.",
+      "static": false,
+      "params": [
+        {
+          "name": "hardCacheSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the minimum number of objects to keep in the cache."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "get",
+      "comment": "Retrieves the database object with the given key from the cache.",
+      "javadoc": "Retrieves the database object with the given key from the cache.\n@param key the key of the object to retrieve.\n@return the cached object or null if the object with that key is not currently cached.",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the key of the object to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": "the cached object or null if the object with that key is not currently cached."
+      },
+      "throws": []
+    },
+    {
+      "name": "get",
+      "comment": "Retrieves the database object with the given record and associated key from the cache.\n This form should be used in conjunction with record iterators to avoid unnecessary\n record query during a possible object refresh.  To benefit from the record the cached\n object must implement the DatabaseObject#refresh(DBRecord) method which by default\n ignores the record and simply calls DatabaseObject#refresh().",
+      "javadoc": "Retrieves the database object with the given record and associated key from the cache.\n This form should be used in conjunction with record iterators to avoid unnecessary\n record query during a possible object refresh.  To benefit from the record the cached\n object must implement the {@link DatabaseObject#refresh(DBRecord)} method which by default\n ignores the record and simply calls {@link DatabaseObject#refresh()}.\n@param objectRecord the valid record corresponding to the object to be retrieved and possibly\n used to refresh the associated object if found in cache\n@return the cached object or null if the object with that key is not currently cached.",
+      "static": false,
+      "params": [
+        {
+          "name": "objectRecord",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "the valid record corresponding to the object to be retrieved and possibly\n used to refresh the associated object if found in cache"
+        }
+      ],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": "the cached object or null if the object with that key is not currently cached."
+      },
+      "throws": []
+    },
+    {
+      "name": "size",
+      "comment": "Returns the number of objects currently in the cache.",
+      "javadoc": "Returns the number of objects currently in the cache.\n@return the number of objects currently in the cache.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of objects currently in the cache."
+      },
+      "throws": []
+    },
+    {
+      "name": "setHardCacheSize",
+      "comment": "Sets the number of objects to protect against garbage collection.",
+      "javadoc": "Sets the number of objects to protect against garbage collection.\n@param size the minimum number of objects to keep in the cache.",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the minimum number of objects to keep in the cache."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "put",
+      "comment": "Adds the given database object to the cache.",
+      "javadoc": "Adds the given database object to the cache.\n@param data the object to add to the cache.",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the object to add to the cache."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCachedObjects",
+      "comment": "Returns an List of all the cached objects.",
+      "javadoc": "Returns an List of all the cached objects.\n@return an List of all the cached objects.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cT\u003e",
+        "type_short": "List",
+        "comment": "an List of all the cached objects."
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "Delete all objects from HashMap whose key is contained\n within the specified keyRanges.",
+      "javadoc": "Delete all objects from HashMap whose key is contained\n within the specified keyRanges.\n@param keyRanges key ranges to delete",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRanges",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": "key ranges to delete"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteSmallKeyRanges",
+      "comment": "Delete all objects from cache whose key is contained\n within the specified keyRanges.  Iteration over all\n keys contained within keyRanges will be performed.",
+      "javadoc": "Delete all objects from cache whose key is contained\n within the specified keyRanges.  Iteration over all\n keys contained within keyRanges will be performed.\n@param keyRanges key ranges to delete",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRanges",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": "key ranges to delete"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteLargeKeyRanges",
+      "comment": "Delete all objects from cache whose key is contained\n within the specified keyRanges.  Iteration over all\n keys contained within map will be performed.",
+      "javadoc": "Delete all objects from cache whose key is contained\n within the specified keyRanges.  Iteration over all\n keys contained within map will be performed.\n@param keyRanges key ranges to delete",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRanges",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": "key ranges to delete"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkRef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.database.DBObjectCache.KeyedSoftReference\u003cT\u003e",
+          "type_short": "KeyedSoftReference",
+          "comment": ""
+        },
+        {
+          "name": "keyRanges",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRangesSize",
+      "comment": "Return total number of keys covered by list of keyRanges.",
+      "javadoc": "Return total number of keys covered by list of keyRanges.\n@param keyRanges key ranges to get the number of keys\n@return number of keys, or -1 if more than Long.MAX_VALUE keys",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRanges",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": "key ranges to get the number of keys"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "number of keys, or -1 if more than Long.MAX_VALUE keys"
+      },
+      "throws": []
+    },
+    {
+      "name": "keyRangesContain",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRanges",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidate",
+      "comment": "Marks all the cached objects as invalid.  Invalid objects will have to refresh themselves\n before they are allowed to be used. If an invalidated object cannot refresh itself, then\n the object is removed from the cache and discarded and the application can no longer use\n that instance of the object.",
+      "javadoc": "Marks all the cached objects as invalid.  Invalid objects will have to refresh themselves\n before they are allowed to be used. If an invalidated object cannot refresh itself, then\n the object is removed from the cache and discarded and the application can no longer use\n that instance of the object.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInvalidateCount",
+      "comment": "Get the current invalidate counter value which corresponds to the number of time\n the entire cache has been invalidated.",
+      "javadoc": "Get the current invalidate counter value which corresponds to the number of time\n the entire cache has been invalidated.\n@return current invalidate counter value.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "current invalidate counter value."
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "Removes the object with the given key from the cache.",
+      "javadoc": "Removes the object with the given key from the cache.\n@param key the key of the object to remove.",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the key of the object to remove."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addToHardCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "keyChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "newKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

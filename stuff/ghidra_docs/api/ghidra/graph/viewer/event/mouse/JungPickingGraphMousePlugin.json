@@ -1,0 +1,411 @@
+{
+  "name": "JungPickingGraphMousePlugin",
+  "comment": "PickingGraphMousePlugin supports the picking of graph elements\n with the mouse. MouseButtonOne picks a single vertex\n or edge, and MouseButtonTwo adds to the set of selected Vertices\n or EdgeType. If a Vertex is selected and the mouse is dragged while\n on the selected Vertex, then that Vertex will be repositioned to\n follow the mouse until the button is released.",
+  "javadoc": "PickingGraphMousePlugin supports the picking of graph elements\n with the mouse. MouseButtonOne picks a single vertex\n or edge, and MouseButtonTwo adds to the set of selected Vertices\n or EdgeType. If a Vertex is selected and the mouse is dragged while\n on the selected Vertex, then that Vertex will be repositioned to\n follow the mouse until the button is released.\n@author Tom Nelson\n \n \n Note: this class was copied completely from Jung 2.   Minimal changes were applied to get\n correct mouse behavior by using {@link MouseEvent#getModifiersEx()}.\n@param \u003cV\u003e the vertex type\n@param \u003cE\u003e the edge type",
+  "static": false,
+  "implements": [
+    "java.awt.event.MouseListener",
+    "java.awt.event.MouseMotionListener"
+  ],
+  "extends": "edu.uci.ics.jung.visualization.control.AbstractGraphMousePlugin",
+  "fields": [
+    {
+      "name": "vertex",
+      "comment": "the picked Vertex, if any",
+      "javadoc": "the picked Vertex, if any",
+      "static": false,
+      "type_long": "V",
+      "type_short": "V",
+      "constant_value": null
+    },
+    {
+      "name": "edge",
+      "comment": "the picked Edge, if any",
+      "javadoc": "the picked Edge, if any",
+      "static": false,
+      "type_long": "E",
+      "type_short": "E",
+      "constant_value": null
+    },
+    {
+      "name": "offsetx",
+      "comment": "the x distance from the picked vertex center to the mouse point",
+      "javadoc": "the x distance from the picked vertex center to the mouse point",
+      "static": false,
+      "type_long": "double",
+      "type_short": "double",
+      "constant_value": null
+    },
+    {
+      "name": "offsety",
+      "comment": "the y distance from the picked vertex center to the mouse point",
+      "javadoc": "the y distance from the picked vertex center to the mouse point",
+      "static": false,
+      "type_long": "double",
+      "type_short": "double",
+      "constant_value": null
+    },
+    {
+      "name": "locked",
+      "comment": "controls whether the Vertices may be moved with the mouse",
+      "javadoc": "controls whether the Vertices may be moved with the mouse",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "addToSelectionModifiers",
+      "comment": "additional modifiers for the action of adding to an existing\n selection",
+      "javadoc": "additional modifiers for the action of adding to an existing\n selection",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "rect",
+      "comment": "used to draw a rectangle to contain picked vertices",
+      "javadoc": "used to draw a rectangle to contain picked vertices",
+      "static": false,
+      "type_long": "java.awt.geom.Rectangle2D",
+      "type_short": "Rectangle2D",
+      "constant_value": null
+    },
+    {
+      "name": "lensPaintable",
+      "comment": "the Paintable for the lens picking rectangle",
+      "javadoc": "the Paintable for the lens picking rectangle",
+      "static": false,
+      "type_long": "edu.uci.ics.jung.visualization.VisualizationServer.Paintable",
+      "type_short": "Paintable",
+      "constant_value": null
+    },
+    {
+      "name": "lensColor",
+      "comment": "color for the picking rectangle",
+      "javadoc": "color for the picking rectangle",
+      "static": false,
+      "type_long": "java.awt.Color",
+      "type_short": "Color",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "create an instance with default settings",
+      "javadoc": "create an instance with default settings",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "create an instance with overrides",
+      "javadoc": "create an instance with overrides\n@param selectionModifiers for primary selection\n@param addToSelectionModifiers for additional selection",
+      "static": false,
+      "params": [
+        {
+          "name": "selectionModifiers",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "for primary selection"
+        },
+        {
+          "name": "addToSelectionModifiers",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "for additional selection"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLensColor",
+      "comment": "",
+      "javadoc": "@return Returns the lensColor.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Color",
+        "type_short": "Color",
+        "comment": "Returns the lensColor."
+      },
+      "throws": []
+    },
+    {
+      "name": "setLensColor",
+      "comment": "",
+      "javadoc": "@param lensColor The lensColor to set.",
+      "static": false,
+      "params": [
+        {
+          "name": "lensColor",
+          "type_long": "java.awt.Color",
+          "type_short": "Color",
+          "comment": "The lensColor to set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mousePressed",
+      "comment": "For primary modifiers (default, MouseButton1):\n pick a single Vertex or Edge that\n is under the mouse pointer. If no Vertex or edge is under\n the pointer, unselect all picked Vertices and edges, and\n set up to draw a rectangle for multiple selection\n of contained Vertices.\n For additional selection (default Shift+MouseButton1):\n Add to the selection, a single Vertex or Edge that is\n under the mouse pointer. If a previously picked Vertex\n or Edge is under the pointer, it is un-picked.\n If no vertex or Edge is under the pointer, set up\n to draw a multiple selection rectangle (as above)\n but do not unpick previously picked elements.",
+      "javadoc": "For primary modifiers (default, MouseButton1):\n pick a single Vertex or Edge that\n is under the mouse pointer. If no Vertex or edge is under\n the pointer, unselect all picked Vertices and edges, and\n set up to draw a rectangle for multiple selection\n of contained Vertices.\n For additional selection (default Shift+MouseButton1):\n Add to the selection, a single Vertex or Edge that is\n under the mouse pointer. If a previously picked Vertex\n or Edge is under the pointer, it is un-picked.\n If no vertex or Edge is under the pointer, set up\n to draw a multiple selection rectangle (as above)\n but do not unpick previously picked elements.\n@param e the event",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": "the event"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mouseReleased",
+      "comment": "If the mouse is dragging a rectangle, pick the\n Vertices contained in that rectangle\n \n clean up settings from mousePressed",
+      "javadoc": "If the mouse is dragging a rectangle, pick the\n Vertices contained in that rectangle\n \n clean up settings from mousePressed",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mouseDragged",
+      "comment": "If the mouse is over a picked vertex, drag all picked\n vertices with the mouse.\n If the mouse is not over a Vertex, draw the rectangle\n to select multiple Vertices",
+      "javadoc": "If the mouse is over a picked vertex, drag all picked\n vertices with the mouse.\n If the mouse is not over a Vertex, draw the rectangle\n to select multiple Vertices",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "heyThatsTooClose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "p",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": ""
+        },
+        {
+          "name": "q",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": ""
+        },
+        {
+          "name": "min",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "pickContainedVertices",
+      "comment": "pick the vertices inside the rectangle created from points \u0027down\u0027 and \u0027out\u0027 (two diagonally\n opposed corners of the rectangle)",
+      "javadoc": "pick the vertices inside the rectangle created from points \u0027down\u0027 and \u0027out\u0027 (two diagonally\n opposed corners of the rectangle)\n@param vv the viewer containing the layout and picked state\n@param down one corner of the rectangle\n@param out the other corner of the rectangle\n@param clear whether to reset existing picked state",
+      "static": false,
+      "params": [
+        {
+          "name": "vv",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationViewer\u003cV,E\u003e",
+          "type_short": "VisualizationViewer",
+          "comment": "the viewer containing the layout and picked state"
+        },
+        {
+          "name": "down",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": "one corner of the rectangle"
+        },
+        {
+          "name": "out",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": "the other corner of the rectangle"
+        },
+        {
+          "name": "clear",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "whether to reset existing picked state"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mouseClicked",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mouseEntered",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mouseExited",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mouseMoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLocked",
+      "comment": "",
+      "javadoc": "@return Returns the locked.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "Returns the locked."
+      },
+      "throws": []
+    },
+    {
+      "name": "setLocked",
+      "comment": "",
+      "javadoc": "@param locked The locked to set.",
+      "static": false,
+      "params": [
+        {
+          "name": "locked",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "The locked to set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

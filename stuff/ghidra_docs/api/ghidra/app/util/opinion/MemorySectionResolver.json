@@ -1,0 +1,846 @@
+{
+  "name": "MemorySectionResolver",
+  "comment": "",
+  "javadoc": "",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "sections",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.app.util.opinion.MemorySection\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "sectionIndexMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Integer\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "sectionMemoryMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.app.util.bin.format.MemoryLoadable,java.util.List\u003cghidra.program.model.address.AddressRange\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "nextNonLoadedSectionInsertionIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "fileLoadMaps",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.model.address.AddressSpace,ghidra.util.datastruct.ObjectRangeMap\u003cghidra.app.util.opinion.MemorySectionResolver.AllocatedFileSectionRange\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addInitializedMemorySection",
+      "comment": "Add initialized memory \"section\" based upon a specified data source fileOffset.\n The last \"section\" defined will take precedence when resolving conflicts. Sections identified \n as loaded will take precedence over those that are non-loaded.\n placed into memory",
+      "javadoc": "Add initialized memory \"section\" based upon a specified data source fileOffset.\n The last \"section\" defined will take precedence when resolving conflicts. Sections identified \n as loaded will take precedence over those that are non-loaded.\n placed into memory\n@param key the loadable section key which corresponds to this memory \"section\"\n@param fileOffset data source file offset.  It is assumed that all initialized\n \"sections\" draw from a single data source.\n@param numberOfBytes number of bytes within \"section\"\n@param startAddress desired physical start address of \"section\" (not overlay address)\n@param sectionName name of \"section\"\n@param isReadable true if \"section\" has read privilege\n@param isWritable true if \"section\" has write privilege\n@param isExecutable true if \"section\" has execute privilege\n@param comment section comment (used as basis for block comment)\n@param isFragmentationOK if true this memory section may be fragmented due to\n@param isLoadedSection if true this memory section will take precedence over non-loaded sections\n conflict/overlap with other memory sections of higher precedence.\n@throws AddressOverflowException",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "ghidra.app.util.bin.format.MemoryLoadable",
+          "type_short": "MemoryLoadable",
+          "comment": "the loadable section key which corresponds to this memory \"section\""
+        },
+        {
+          "name": "fileOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "data source file offset.  It is assumed that all initialized\n \"sections\" draw from a single data source."
+        },
+        {
+          "name": "numberOfBytes",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "number of bytes within \"section\""
+        },
+        {
+          "name": "startAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "desired physical start address of \"section\" (not overlay address)"
+        },
+        {
+          "name": "sectionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of \"section\""
+        },
+        {
+          "name": "isReadable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has read privilege"
+        },
+        {
+          "name": "isWritable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has write privilege"
+        },
+        {
+          "name": "isExecutable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has execute privilege"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "section comment (used as basis for block comment)"
+        },
+        {
+          "name": "isFragmentationOK",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true this memory section may be fragmented due to"
+        },
+        {
+          "name": "isLoadedSection",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true this memory section will take precedence over non-loaded sections\n conflict/overlap with other memory sections of higher precedence."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addUninitializedMemorySection",
+      "comment": "Add uninitialized memory \"section\".\n The last \"section\" defined will take precedence when resolving conflicts.",
+      "javadoc": "Add uninitialized memory \"section\".\n The last \"section\" defined will take precedence when resolving conflicts.\n@param key the loadable section key which corresponds to this memory \"section\"\n@param numberOfBytes number of bytes within \"section\"\n@param startAddress desired physical start address of \"section\" (not overlay address)\n@param sectionName name of \"section\"\n@param isReadable true if \"section\" has read privilege\n@param isWritable true if \"section\" has write privilege\n@param isExecutable true if \"section\" has execute privilege\n@param comment section comment (used as basis for block comment)\n@param isFragmentationOK if true this memory section may be fragmented due to \n conflict/overlap with other memory sections of higher precedence.\n@throws AddressOverflowException",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "ghidra.app.util.bin.format.MemoryLoadable",
+          "type_short": "MemoryLoadable",
+          "comment": "the loadable section key which corresponds to this memory \"section\""
+        },
+        {
+          "name": "numberOfBytes",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "number of bytes within \"section\""
+        },
+        {
+          "name": "startAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "desired physical start address of \"section\" (not overlay address)"
+        },
+        {
+          "name": "sectionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of \"section\""
+        },
+        {
+          "name": "isReadable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has read privilege"
+        },
+        {
+          "name": "isWritable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has write privilege"
+        },
+        {
+          "name": "isExecutable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has execute privilege"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "section comment (used as basis for block comment)"
+        },
+        {
+          "name": "isFragmentationOK",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true this memory section may be fragmented due to \n conflict/overlap with other memory sections of higher precedence."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getUniqueSectionName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "baseName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueSectionChunkName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.opinion.MemorySection",
+          "type_short": "MemorySection",
+          "comment": ""
+        },
+        {
+          "name": "memory",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": ""
+        },
+        {
+          "name": "preferredIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "makeRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "numberOfBytes",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResolvedLoadAddresses",
+      "comment": "Get the address set as a list of ranges which correspond to a \n loaded section.  The key object corresponds to the key object \n provided when the section was added.",
+      "javadoc": "Get the address set as a list of ranges which correspond to a \n loaded section.  The key object corresponds to the key object \n provided when the section was added.\n@param key section key object\n@return list of resolved address ranges or null if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "ghidra.app.util.bin.format.MemoryLoadable",
+          "type_short": "MemoryLoadable",
+          "comment": "section key object"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "List",
+        "comment": "list of resolved address ranges or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFileLoadRangeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "space",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.datastruct.ObjectRangeMap\u003cghidra.app.util.opinion.MemorySectionResolver.AllocatedFileSectionRange\u003e",
+        "type_short": "ObjectRangeMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolve",
+      "comment": "Perform final resolve of all defined memory \"sections\" to establish final memory mappings.\n This method will resolve all conflicts and create memory blocks within the associated program.",
+      "javadoc": "Perform final resolve of all defined memory \"sections\" to establish final memory mappings.\n This method will resolve all conflicts and create memory blocks within the associated program.\n@param monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "resolveSectionMemory",
+      "comment": "Resolve the specified section and create the corresponding memory block(s).\n An entry will be added to the sectionMemoryMap to facilitate subsequent \n MemoryLoadable memory assignment lookups, see #getResolvedLoadAddresses(MemoryLoadable).",
+      "javadoc": "Resolve the specified section and create the corresponding memory block(s).\n An entry will be added to the sectionMemoryMap to facilitate subsequent \n MemoryLoadable memory assignment lookups, see {@link #getResolvedLoadAddresses(MemoryLoadable)}.\n@param section section to be resolved\n@param fileAllocationMap memory mapping of file for those sections already processed.\n Any new file regions claimed by the specified section will be added to this map.\n@param monitor task monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.opinion.MemorySection",
+          "type_short": "MemorySection",
+          "comment": "section to be resolved"
+        },
+        {
+          "name": "fileAllocationMap",
+          "type_long": "ghidra.program.database.register.AddressRangeObjectMap\u003cghidra.app.util.opinion.MemorySectionResolver.AllocatedFileSectionRange\u003e",
+          "type_short": "AddressRangeObjectMap",
+          "comment": "memory mapping of file for those sections already processed.\n Any new file regions claimed by the specified section will be added to this map."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processSectionRanges",
+      "comment": "Complete creation of section memory block(s) based upon the provided\n memoryAllocationList.",
+      "javadoc": "Complete creation of section memory block(s) based upon the provided\n memoryAllocationList.\n@param section section to be allocated and blocks created\n@param memoryAllocationList memory allocation list.\n Matching ranges allocated to other sections are identified using a ProxyAddressRange, \n memory-mapped file range conflicts are identified using an OverlayAddressRange, while\n new file-mapped ranges are identified by an AddressRangeImpl.\n@param monitor\n@return memory address ranges corresponding to the specified section. Memory blocks\n will have been created for these ranges but may be shared by other sections.\n@throws IOException\n@throws AddressOverflowException\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.opinion.MemorySection",
+          "type_short": "MemorySection",
+          "comment": "section to be allocated and blocks created"
+        },
+        {
+          "name": "memoryAllocationList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+          "type_short": "List",
+          "comment": "memory allocation list.\n Matching ranges allocated to other sections are identified using a ProxyAddressRange, \n memory-mapped file range conflicts are identified using an OverlayAddressRange, while\n new file-mapped ranges are identified by an AddressRangeImpl."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "List",
+        "comment": "memory address ranges corresponding to the specified section. Memory blocks\n will have been created for these ranges but may be shared by other sections."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getMemoryConflictSet",
+      "comment": "Determine loaded memory conflict set.  Use physical address of loaded overlay\n blocks to force reconciliation and avoid duplication.",
+      "javadoc": "Determine loaded memory conflict set.  Use physical address of loaded overlay\n blocks to force reconciliation and avoid duplication.\n@param rangeMin minimum physical address of range\n@param rangeMax maximum physical address of range\n@return conflict memory set (physical address ranges only)",
+      "static": false,
+      "params": [
+        {
+          "name": "rangeMin",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "minimum physical address of range"
+        },
+        {
+          "name": "rangeMax",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "maximum physical address of range"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "conflict memory set (physical address ranges only)"
+      },
+      "throws": []
+    },
+    {
+      "name": "allocateSectionMemory",
+      "comment": "Allocate section to memory ranges based upon address-mapping of file offsets.\n The fileAllocationMap is used to map regions of the section to previously processed \n sections or to identify new unclaimed address-mapped file regions.  Those ranges \n which match memory-mapped file ranges are identified using a ProxyAddressRange, \n memory-mapped file range conflicts are identified using an OverlayAddressRange, while\n new ranges will be identified by an AddressRangeImpl.",
+      "javadoc": "Allocate section to memory ranges based upon address-mapping of file offsets.\n The fileAllocationMap is used to map regions of the section to previously processed \n sections or to identify new unclaimed address-mapped file regions.  Those ranges \n which match memory-mapped file ranges are identified using a ProxyAddressRange, \n memory-mapped file range conflicts are identified using an OverlayAddressRange, while\n new ranges will be identified by an AddressRangeImpl.\n@param section new section to be processed\n@param fileAllocationMap address to file region map\n@param monitor task monitor\n@return address range list section memory assignment\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.opinion.MemorySection",
+          "type_short": "MemorySection",
+          "comment": "new section to be processed"
+        },
+        {
+          "name": "fileAllocationMap",
+          "type_long": "ghidra.program.database.register.AddressRangeObjectMap\u003cghidra.app.util.opinion.MemorySectionResolver.AllocatedFileSectionRange\u003e",
+          "type_short": "AddressRangeObjectMap",
+          "comment": "address to file region map"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "List",
+        "comment": "address range list section memory assignment"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addSectionRange",
+      "comment": "Add a new non-conflicting section load memory range to the rangeList.",
+      "javadoc": "Add a new non-conflicting section load memory range to the rangeList.\n@param section\n@param minAddr start of range\n@param maxAddr end of range\n@param fileOffset file offset at start of range\n@param rangeList rangeList accumulation list of sequentially allocated memory address ranges\n which makeup the specified loaded section.  This list will be added to for the new\n range.\n@return updated file offset if section is initialized.",
+      "static": false,
+      "params": [
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.opinion.MemorySection",
+          "type_short": "MemorySection",
+          "comment": ""
+        },
+        {
+          "name": "minAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start of range"
+        },
+        {
+          "name": "maxAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "end of range"
+        },
+        {
+          "name": "fileOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "file offset at start of range"
+        },
+        {
+          "name": "rangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+          "type_short": "List",
+          "comment": "rangeList accumulation list of sequentially allocated memory address ranges\n which makeup the specified loaded section.  This list will be added to for the new\n range."
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "updated file offset if section is initialized."
+      },
+      "throws": []
+    },
+    {
+      "name": "reconcileSectionRangeOverlap",
+      "comment": "Reconcile section load range which has been determined to be in conflict with\n previously resolved section chunks.  Either OverlayAddressRange or \n ProxyAddressRange objects will be added to rangeList to provide advice for\n subsequent memory block creation.",
+      "javadoc": "Reconcile section load range which has been determined to be in conflict with\n previously resolved section chunks.  Either OverlayAddressRange or \n ProxyAddressRange objects will be added to rangeList to provide advice for\n subsequent memory block creation.\n@param section memory section to be loaded which resulted in conflict\n@param minPhysicalAddr start of conflict range physical address\n@param maxPhysicalAddr end of conflict range physical address\n@param fileOffset file offset at start of conflict range\n@param rangeList accumulation list of sequentially allocated memory address ranges\n which makeup the specified loaded section.  This list will be added to as the specified\n conflict range is reconciled.\n@return updated file offset if section is initialized.",
+      "static": false,
+      "params": [
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.opinion.MemorySection",
+          "type_short": "MemorySection",
+          "comment": "memory section to be loaded which resulted in conflict"
+        },
+        {
+          "name": "minPhysicalAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start of conflict range physical address"
+        },
+        {
+          "name": "maxPhysicalAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "end of conflict range physical address"
+        },
+        {
+          "name": "fileOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "file offset at start of conflict range"
+        },
+        {
+          "name": "rangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+          "type_short": "List",
+          "comment": "accumulation list of sequentially allocated memory address ranges\n which makeup the specified loaded section.  This list will be added to as the specified\n conflict range is reconciled."
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "updated file offset if section is initialized."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMemory",
+      "comment": "Get program memory object",
+      "javadoc": "Get program memory object\n@return program memory",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.mem.Memory",
+        "type_short": "Memory",
+        "comment": "program memory"
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "Get program object",
+      "javadoc": "Get program object\n@return program",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "program"
+      },
+      "throws": []
+    },
+    {
+      "name": "createInitializedBlock",
+      "comment": "Create a memory block (possible fragment if conflicts resolved) for the specified loadable \"section\". \n If multiple blocks are created due to size restrictions only the first block will be returned.  The \n returned block\u0027s length can be checked to determine if this has occurred.",
+      "javadoc": "Create a memory block (possible fragment if conflicts resolved) for the specified loadable \"section\". \n If multiple blocks are created due to size restrictions only the first block will be returned.  The \n returned block\u0027s length can be checked to determine if this has occurred.\n@param key the loadable section key which corresponds to this memory block or null for\n an adhoc block\n@param isOverlay true if an overlay should be created\n@param name unique name assignment based upon original \"section\" name\n@param start starting physical address of block\n@param fileOffset starting file offset for initialized data source\n@param length number of bytes in block\n@param comment block comment\n@param r true if \"section\" has read privilege\n@param w true if \"section\" has write privilege\n@param x true if \"section\" has execute privilege\n@return memory block\n@throws IOException\n@throws AddressOverflowException\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "ghidra.app.util.bin.format.MemoryLoadable",
+          "type_short": "MemoryLoadable",
+          "comment": "the loadable section key which corresponds to this memory block or null for\n an adhoc block"
+        },
+        {
+          "name": "isOverlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if an overlay should be created"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "unique name assignment based upon original \"section\" name"
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "starting physical address of block"
+        },
+        {
+          "name": "fileOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "starting file offset for initialized data source"
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "number of bytes in block"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "block comment"
+        },
+        {
+          "name": "r",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has read privilege"
+        },
+        {
+          "name": "w",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has write privilege"
+        },
+        {
+          "name": "x",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has execute privilege"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": "memory block"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createUninitializedBlock",
+      "comment": "Create a memory block (possible fragment if conflicts resolved) for the specified loadable \"section\". \n If multiple blocks are created due to size restrictions only the first block will be returned.  The \n returned block\u0027s length can be checked to determine if this has occurred.",
+      "javadoc": "Create a memory block (possible fragment if conflicts resolved) for the specified loadable \"section\". \n If multiple blocks are created due to size restrictions only the first block will be returned.  The \n returned block\u0027s length can be checked to determine if this has occurred.\n@param key the loadable section key which corresponds to this memory block or null for\n an adhoc block\n@param isOverlay true if an overlay should be created\n@param name unique name assignment based upon original \"section\" name\n@param start starting physical address of block\n@param length number of bytes in block\n@param comment block comment\n@param r true if \"section\" has read privilege\n@param w true if \"section\" has write privilege\n@param x true if \"section\" has execute privilege\n@return memory block\n@throws IOException\n@throws AddressOverflowException\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "ghidra.app.util.bin.format.MemoryLoadable",
+          "type_short": "MemoryLoadable",
+          "comment": "the loadable section key which corresponds to this memory block or null for\n an adhoc block"
+        },
+        {
+          "name": "isOverlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if an overlay should be created"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "unique name assignment based upon original \"section\" name"
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "starting physical address of block"
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "number of bytes in block"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "block comment"
+        },
+        {
+          "name": "r",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has read privilege"
+        },
+        {
+          "name": "w",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has write privilege"
+        },
+        {
+          "name": "x",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if \"section\" has execute privilege"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": "memory block"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

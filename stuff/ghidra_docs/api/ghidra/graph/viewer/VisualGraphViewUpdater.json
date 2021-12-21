@@ -1,0 +1,780 @@
+{
+  "name": "VisualGraphViewUpdater",
+  "comment": "This is the class through which operations travel that manipulate the view and graph while\n plugged-in to the UI.   (Setup and tear down operations performed before the view \n or graph are visible need not pass through this class.)  This class is responsible for \n controlling how to display view and graph changes, including whether to animate.\n \n The animations are categorized into those that mutate the graph and those that are just\n display animations (like hover animations).",
+  "javadoc": "This is the class through which operations travel that manipulate the view and graph \u003cb\u003ewhile\n plugged-in to the UI\u003c/b\u003e.   (Setup and tear down operations performed before the view \n or graph are visible need not pass through this class.)  This class is responsible for \n controlling how to display view and graph changes, including whether to animate.\n \n \u003cP\u003eThe animations are categorized into those that mutate the graph and those that are just\n display animations (like hover animations).\n@param \u003cV\u003e the vertex type\n@param \u003cE\u003e the edge type",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "graph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+      "type_short": "VisualGraph",
+      "constant_value": null
+    },
+    {
+      "name": "jobRunner",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.job.GraphJobRunner",
+      "type_short": "GraphJobRunner",
+      "constant_value": null
+    },
+    {
+      "name": "edgeHoverAnimator",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.graph.job.AbstractAnimator",
+      "type_short": "AbstractAnimator",
+      "constant_value": null
+    },
+    {
+      "name": "vertexTwinkleAnimator",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.graph.job.TwinkleVertexAnimator\u003c?,?\u003e",
+      "type_short": "TwinkleVertexAnimator",
+      "constant_value": null
+    },
+    {
+      "name": "primaryViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+      "type_short": "GraphViewer",
+      "constant_value": null
+    },
+    {
+      "name": "satelliteViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+      "type_short": "SatelliteGraphViewer",
+      "constant_value": null
+    },
+    {
+      "name": "jobStartedListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cutility.function.Callback\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "primaryViewer",
+          "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+          "type_short": "GraphViewer",
+          "comment": ""
+        },
+        {
+          "name": "graph",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSatelliteViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "satelliteViewer",
+          "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+          "type_short": "SatelliteGraphViewer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addJobScheduledListener",
+      "comment": "Add a listener to be notified when a job is started.  Jobs often, but not always, mutate\n the underlying graph.  For this reason, other tasks that use the graph may want to not \n do their work while a job is running.",
+      "javadoc": "Add a listener to be notified when a job is started.  Jobs often, but not always, mutate\n the underlying graph.  For this reason, other tasks that use the graph may want to not \n do their work while a job is running.\n@param c the listener",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": "the listener"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isAnimationEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fitAllGraphsToViewsNow",
+      "comment": "Fits the graph into both the primary and satellite views",
+      "javadoc": "Fits the graph into both the primary and satellite views",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fitGraphToViewerNow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fitGraphToViewerNow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "theViewer",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationServer\u003cV,E\u003e",
+          "type_short": "VisualizationServer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fitGraphToViewerLater",
+      "comment": "Will schedule the fitting work to happen now if now work is being done, or later otherwis",
+      "javadoc": "Will schedule the fitting work to happen now if now work is being done, or later otherwis",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fitGraphToViewerLater",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "theViewer",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationServer\u003cV,E\u003e",
+          "type_short": "VisualizationServer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "zoomInCompletely",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "zoomInCompletely",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "centerOnVertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveVertexToCenterTopWithoutAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveVertexToCenterWithoutAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveVertexToCenterWithAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveVertexToCenterWithAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "callbackListener",
+          "type_long": "ghidra.util.task.BusyListener",
+          "type_short": "BusyListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveVertexToCenterTopWithAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveVertexToCenterTopWithAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "callbackListener",
+          "type_long": "ghidra.util.task.BusyListener",
+          "type_short": "BusyListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveViewerLocationWithoutAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "translation",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "centerViewSpacePointWithAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "point",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "centerViewSpacePointWithoutAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "point",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "centerLayoutSpacePointWithoutAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "point",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLayoutSpacePointWithoutAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "point",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLayoutSpacePointWithAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "point",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ensureVertexVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "area",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ensureVertexAreaVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "area",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": ""
+        },
+        {
+          "name": "callbackListener",
+          "type_long": "ghidra.util.task.BusyListener",
+          "type_short": "BusyListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateEdgeShapes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "edges",
+          "type_long": "java.util.Collection\u003cE\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setGraphPerspective",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "graphInfo",
+          "type_long": "ghidra.graph.viewer.GraphPerspectiveInfo\u003cV,E\u003e",
+          "type_short": "GraphPerspectiveInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "twinkeVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setGraphScale",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "scale",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "animateEdgeHover",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "Returns true if this updater is performing any animations or running any jobs that can\n mutate the graph or view",
+      "javadoc": "Returns true if this updater is performing any animations or running any jobs that can\n mutate the graph or view\n@return true if busy",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if busy"
+      },
+      "throws": []
+    },
+    {
+      "name": "isMutatingGraph",
+      "comment": "Returns true if this updater is running any jobs that can mutate the graph or view",
+      "javadoc": "Returns true if this updater is running any jobs that can mutate the graph or view\n@return true if busy",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if busy"
+      },
+      "throws": []
+    },
+    {
+      "name": "scheduleViewChangeJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "job",
+          "type_long": "ghidra.graph.job.GraphJob",
+          "type_short": "GraphJob",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopEdgeHoverAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopVertexTwinkleAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopAllAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopAllNonMutativeAnimation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

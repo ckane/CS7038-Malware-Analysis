@@ -1,0 +1,819 @@
+{
+  "name": "FunctionTagMerger",
+  "comment": "Class for merging function tag changes. Most tag differences can be easily auto-merged, \n which is to say the result will be the set of all of tags from both program 1 and \n program 2. Conflicts arise when both parties have edited/deleted the same tag.\n \n The specific cases handled by the class are described below, where:\n \n  - X and Y are tags\n  - X(A) means to take A\u0027s version of tag X\n  - ** indicates a conflict\n  - NP means the situation is not possible\n  \n \t\tUser A\t|\tAdd X\tAdd Y\tDelete X\tDelete Y\tEdit X\t\tEdit Y\n \t\t\t\t|\n User B\t\t|\n ---------------------------------------------------------------------------\n Add X\t\t|\tX\t\tX,Y\t\t\tNP\t\t\tX\t\tNP\t\t\tX,Y(A)\n \t\t\t\t|\n Add Y\t\t|\tX,Y\t\tY\t\t\tY\t\t\tNP\t\tX(A),Y\t\tNP\n \t\t\t\t|\n Delete X\t\t|\tNP\t\tY\t\t\t-\t\t\t-\t\t**\t\t\tY(A)\t\t\n \t\t\t\t|\n Delete Y\t\t|\tX\t\tNP\t\t\t-\t\t\t-\t\tX(A)\t\t**\n \t\t\t\t|\n Edit X\t\t|\tNP\t\tX(B),Y\t\t**\t\t\tX(B)\t**\t\t\tX(B),Y(A)\t\n \t\t\t\t|\n Edit Y\t\t|\tX,Y(B)\tNP\t\t\tY(B)\t\t**\t\tX(A),Y(B)\t**",
+  "javadoc": "Class for merging function tag changes. Most tag differences can be easily auto-merged, \n which is to say the result will be the set of all of tags from both program 1 and \n program 2. Conflicts arise when both parties have edited/deleted the same tag.\n \n The specific cases handled by the class are described below, where:\n \n  - X and Y are tags\n  - X(A) means to take A\u0027s version of tag X\n  - ** indicates a conflict\n  - NP means the situation is not possible\n  \n \t\tUser A\t|\tAdd X\tAdd Y\tDelete X\tDelete Y\tEdit X\t\tEdit Y\n \t\t\t\t|\n User B\t\t|\n ---------------------------------------------------------------------------\n Add X\t\t|\tX\t\tX,Y\t\t\tNP\t\t\tX\t\tNP\t\t\tX,Y(A)\n \t\t\t\t|\n Add Y\t\t|\tX,Y\t\tY\t\t\tY\t\t\tNP\t\tX(A),Y\t\tNP\n \t\t\t\t|\n Delete X\t\t|\tNP\t\tY\t\t\t-\t\t\t-\t\t**\t\t\tY(A)\t\t\n \t\t\t\t|\n Delete Y\t\t|\tX\t\tNP\t\t\t-\t\t\t-\t\tX(A)\t\t**\n \t\t\t\t|\n Edit X\t\t|\tNP\t\tX(B),Y\t\t**\t\t\tX(B)\t**\t\t\tX(B),Y(A)\t\n \t\t\t\t|\n Edit Y\t\t|\tX,Y(B)\tNP\t\t\tY(B)\t\t**\t\tX(A),Y(B)\t**",
+  "static": false,
+  "implements": [
+    "ghidra.app.merge.MergeResolver",
+    "ghidra.app.merge.listing.ListingMergeConstants"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "FUNCTION_TAG_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "RESULT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "LATEST",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "MY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "ORIGINAL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "mergeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+      "type_short": "ProgramMultiUserMergeManager",
+      "constant_value": null
+    },
+    {
+      "name": "resultProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "originalProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "latestProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "myProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "latestChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "myChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+      "type_short": "VerticalChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "conflictOption",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "conflictChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "tagConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Long,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "currentlyMergingTagID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor.",
+      "javadoc": "Constructor.\n@param mergeManager the merge manager\n@param resultPgm the program storing the result of the merge\n@param originalPgm the state of the program before any changes\n@param latestPgm the checked in program version\n@param myPgm the checked out program version\n@param latestChanges tag changes in Latest\n@param myChanges tag changes in My",
+      "static": false,
+      "params": [
+        {
+          "name": "mergeManager",
+          "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+          "type_short": "ProgramMultiUserMergeManager",
+          "comment": "the merge manager"
+        },
+        {
+          "name": "resultPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program storing the result of the merge"
+        },
+        {
+          "name": "originalPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the state of the program before any changes"
+        },
+        {
+          "name": "latestPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the checked in program version"
+        },
+        {
+          "name": "myPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the checked out program version"
+        },
+        {
+          "name": "latestChanges",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "tag changes in Latest"
+        },
+        {
+          "name": "myChanges",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "tag changes in My"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "PUBLIC METHODS",
+      "javadoc": "PUBLIC METHODS",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getPhases",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[][]",
+        "type_short": "java.lang.String[][]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleConflicts",
+      "comment": "Displays a conflict resolution panel for each conflict discovered during\n #autoMerge().",
+      "javadoc": "Displays a conflict resolution panel for each conflict discovered during\n {@link #autoMerge()}.\n@param monitor the task monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merges the desired program (based on the provided option) into the Result program.",
+      "javadoc": "Merges the desired program (based on the provided option) into the Result program.\n@param chosenConflictOption conflict option indicating the program version to use.\n@param monitor the task monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "conflict option indicating the program version to use."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merges the tag being currently resolved into the Result program.",
+      "javadoc": "Merges the tag being currently resolved into the Result program.\n@param sourceProgram\n@param monitor\n@throws CancelledException\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getTag",
+      "comment": "Returns the FunctionTag instance for the given program and tag ID.",
+      "javadoc": "Returns the {@link FunctionTag} instance for the given program and tag ID.\n@param program the program version to use\n@param id the tag id\n@return the tag, or null if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program version to use"
+        },
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the tag id"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.FunctionTag",
+        "type_short": "FunctionTag",
+        "comment": "the tag, or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "Attempts to merge all tag changes between My and Latest. Any conflicts\n will be stored in #tagConflicts for later resolution.",
+      "javadoc": "Attempts to merge all tag changes between My and Latest. Any conflicts\n will be stored in {@link #tagConflicts} for later resolution.\n@throws IOException",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeEdits",
+      "comment": "Merges tags that have been edited (name/comment changed). \n \n CONFLICT CASES:\n \t1. The same tag has been edited in both programs, either the name or comment.\n \n Note that the conflict case of a tag being edited in one program and \n deleted in another is handled in #mergeDeletions(FunctionTagManagerDB, List, List, List, List).",
+      "javadoc": "Merges tags that have been edited (name/comment changed). \n \n CONFLICT CASES:\n \t1. The same tag has been edited in both programs, either the name or comment.\n \n Note that the conflict case of a tag being edited in one program and \n deleted in another is handled in {@link #mergeDeletions(FunctionTagManagerDB, List, List, List, List)}.",
+      "static": false,
+      "params": [
+        {
+          "name": "tagManagerMY",
+          "type_long": "ghidra.program.database.function.FunctionTagManagerDB",
+          "type_short": "FunctionTagManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "tagManagerLATEST",
+          "type_long": "ghidra.program.database.function.FunctionTagManagerDB",
+          "type_short": "FunctionTagManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "tagManagerRESULT",
+          "type_long": "ghidra.program.database.function.FunctionTagManagerDB",
+          "type_short": "FunctionTagManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "myEditedIDs",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "latestEditedIDs",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "latestDeletedIDs",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeDeletions",
+      "comment": "Merges tags that have been deleted. \n \n CONFLICT CASES:\n \t1. A tag has been deleted in one program, but edited in the other.",
+      "javadoc": "Merges tags that have been deleted. \n \n CONFLICT CASES:\n \t1. A tag has been deleted in one program, but edited in the other.",
+      "static": false,
+      "params": [
+        {
+          "name": "tagManagerRESULT",
+          "type_long": "ghidra.program.database.function.FunctionTagManagerDB",
+          "type_short": "FunctionTagManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "myEditedIDs",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "latestEditedIDs",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "myDeletedIDs",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "latestDeletedIDs",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeAdditions",
+      "comment": "Merges tags that have been added.\n \n CONFLICT CASES: Name is the same, comment is different.",
+      "javadoc": "Merges tags that have been added.\n \n CONFLICT CASES: Name is the same, comment is different.",
+      "static": false,
+      "params": [
+        {
+          "name": "tagManagerMY",
+          "type_long": "ghidra.program.database.function.FunctionTagManagerDB",
+          "type_short": "FunctionTagManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "tagManagerLATEST",
+          "type_long": "ghidra.program.database.function.FunctionTagManagerDB",
+          "type_short": "FunctionTagManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "tagManagerRESULT",
+          "type_long": "ghidra.program.database.function.FunctionTagManagerDB",
+          "type_short": "FunctionTagManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "myAdditionIDs",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "latestAdditionIDs",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEdits",
+      "comment": "Given a list of tag IDs, returns the subset of those who\u0027s tags have\n been edited. \n \n This is determined by checking the tag attributes in the given\n program version against Original.",
+      "javadoc": "Given a list of tag IDs, returns the subset of those who\u0027s tags have\n been edited. \n \n This is determined by checking the tag attributes in the given\n program version against Original.\n@param ids the full list of ids to check\n@param tagManager the source program tag manager\n@param originalTagManager the Original program tag manager\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "ids",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": "the full list of ids to check"
+        },
+        {
+          "name": "tagManager",
+          "type_long": "ghidra.program.model.listing.FunctionTagManager",
+          "type_short": "FunctionTagManager",
+          "comment": "the source program tag manager"
+        },
+        {
+          "name": "originalTagManager",
+          "type_long": "ghidra.program.model.listing.FunctionTagManager",
+          "type_short": "FunctionTagManager",
+          "comment": "the Original program tag manager"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDeletes",
+      "comment": "Given a list of tag IDs, returns the subset of those who\u0027s tags have\n been deleted.\n \n A delete is identified by comparing the given program version against\n Original; if the tag exists in the latter but not the former, it was\n deleted.",
+      "javadoc": "Given a list of tag IDs, returns the subset of those who\u0027s tags have\n been deleted.\n \n A delete is identified by comparing the given program version against\n Original; if the tag exists in the latter but not the former, it was\n deleted.\n@param ids the full list of ids to check\n@param tagManager the source program tag manager\n@param originalTagManager the Original program tag manager\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "ids",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": "the full list of ids to check"
+        },
+        {
+          "name": "tagManager",
+          "type_long": "ghidra.program.model.listing.FunctionTagManager",
+          "type_short": "FunctionTagManager",
+          "comment": "the source program tag manager"
+        },
+        {
+          "name": "originalTagManager",
+          "type_long": "ghidra.program.model.listing.FunctionTagManager",
+          "type_short": "FunctionTagManager",
+          "comment": "the Original program tag manager"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showMergePanel",
+      "comment": "Displays the conflict panel for a tag.",
+      "javadoc": "Displays the conflict panel for a tag.\n@param id the tag id to merge\n@param monitor task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the tag id to merge"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTag",
+      "comment": "Returns the FunctionTag for the given tag id.",
+      "javadoc": "Returns the {@link FunctionTag} for the given tag id.\n@param id the tag id\n@param program the program version\n@return null function tag, or null if not found\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "java.lang.Long",
+          "type_short": "Long",
+          "comment": "the tag id"
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program version"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.FunctionTag",
+        "type_short": "FunctionTag",
+        "comment": "null function tag, or null if not found"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setConflictResolution",
+      "comment": "For JUnit testing only, set the option for resolving a conflict.",
+      "javadoc": "For JUnit testing only, set the option for resolving a conflict.\n@param option",
+      "static": false,
+      "params": [
+        {
+          "name": "option",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupConflictPanel",
+      "comment": "Builds the UI for the conflict panel. This will show the tag ID that is in\n conflict, the reason for the conflict, and widgets allowing the user to\n select a resolution.",
+      "javadoc": "Builds the UI for the conflict panel. This will show the tag ID that is in\n conflict, the reason for the conflict, and widgets allowing the user to\n select a resolution.\n@param id the tag id\n@param listener listener for handling radio button selects\n@param monitor task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the tag id"
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "listener for handling radio button selects"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictInfo",
+      "comment": "Returns a string containing information about the current conflict. This will be \n displayed in the header of the conflict panel.",
+      "javadoc": "Returns a string containing information about the current conflict. This will be \n displayed in the header of the conflict panel.\n@param monitor the task monitor\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionTagInfo",
+      "comment": "Returns a string containing the tag contents for the program version\n given.\n \n This is what should be displayed for each choice in the conflict panel.",
+      "javadoc": "Returns a string containing the tag contents for the program version\n given.\n \n This is what should be displayed for each choice in the conflict panel.\n@param version the program version (LATEST, MY, ORIGINAL)\n@param name the tag name\n@param comment the tag comment\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the program version (LATEST, MY, ORIGINAL)"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the tag name"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the tag comment"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

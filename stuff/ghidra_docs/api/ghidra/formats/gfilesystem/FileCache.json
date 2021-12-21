@@ -1,0 +1,474 @@
+{
+  "name": "FileCache",
+  "comment": "File caching implementation.\n \n Caches files based on a hash of the contents of the file.\n Files are retrieved using the hash string.\n Cached files are stored in a file with a name that is the hex encoded value of the hash.\n Cached files are obfuscated/de-obfuscated when written/read to/from disk.  See \n ObfuscatedFileByteProvider, ObfuscatedInputStream, \n ObfuscatedOutputStream.\n Cached files are organized into a nested directory structure to prevent\n overwhelming a single directory with thousands of files.\n \n Nested directory structure is based on the file\u0027s name:\n    File: AABBCCDDEEFF...  AA/AABBCCDDEEFF...\n \n Cache size is not bounded.\n \n Cache maintenance is done during startup if interval since last maintenance has been exceeded.\n \n Files are not removed from the cache after being added, except during startup maintenance.",
+  "javadoc": "File caching implementation.\n \u003cp\u003e\n Caches files based on a hash of the contents of the file.\u003cbr\u003e\n Files are retrieved using the hash string.\u003cbr\u003e\n Cached files are stored in a file with a name that is the hex encoded value of the hash.\u003cbr\u003e\n Cached files are obfuscated/de-obfuscated when written/read to/from disk.  See \n {@link ObfuscatedFileByteProvider}, {@link ObfuscatedInputStream}, \n {@link ObfuscatedOutputStream}.\u003cbr\u003e\n Cached files are organized into a nested directory structure to prevent\n overwhelming a single directory with thousands of files.\n \u003cp\u003e\n Nested directory structure is based on the file\u0027s name:\u003cbr\u003e\n \u003cpre\u003e   File: AABBCCDDEEFF... \u0026rarr; AA/AABBCCDDEEFF...\u003c/pre\u003e\n \u003cp\u003e\n Cache size is not bounded.\n \u003cp\u003e\n Cache maintenance is done during startup if interval since last maintenance has been exceeded.\n \u003cp\u003e\n Files are not removed from the cache after being added, except during startup maintenance.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "MAX_INMEM_FILESIZE",
+      "comment": "Max size of a file that will be kept in #memCache (2Mb)",
+      "javadoc": "Max size of a file that will be kept in {@link #memCache} (2Mb)",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2097152"
+    },
+    {
+      "name": "FREESPACE_RESERVE_BYTES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "52428800"
+    },
+    {
+      "name": "NESTING_DIR_NAME_REGEX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.regex.Pattern",
+      "type_short": "Pattern",
+      "constant_value": null
+    },
+    {
+      "name": "FILENAME_REGEX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.regex.Pattern",
+      "type_short": "Pattern",
+      "constant_value": null
+    },
+    {
+      "name": "MD5_BYTE_LEN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16"
+    },
+    {
+      "name": "MD5_HEXSTR_LEN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "32"
+    },
+    {
+      "name": "MAX_FILE_AGE_MS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "86400000"
+    },
+    {
+      "name": "MAINT_INTERVAL_MS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "172800000"
+    },
+    {
+      "name": "cacheDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "cacheDirFileStore",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.nio.file.FileStore",
+      "type_short": "FileStore",
+      "constant_value": null
+    },
+    {
+      "name": "newDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "cleanDaemon",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheMaintenanceDaemon",
+      "type_short": "FileCacheMaintenanceDaemon",
+      "constant_value": null
+    },
+    {
+      "name": "memCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "org.apache.commons.collections4.map.ReferenceMap\u003cjava.lang.String,ghidra.formats.gfilesystem.FileCache.FileCacheEntry\u003e",
+      "type_short": "ReferenceMap",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "performCacheMaintOnOldDirIfNeeded",
+      "comment": "Backwards compatible with previous cache directories to age off the files located\n therein.",
+      "javadoc": "Backwards compatible with previous cache directories to age off the files located\n therein.\n@param oldCacheDir the old 2-level cache directory\n@deprecated Marked as deprecated to ensure this is removed in a few versions after most\n user\u0027s old-style cache dirs have been cleaned up.",
+      "static": true,
+      "params": [
+        {
+          "name": "oldCacheDir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the old 2-level cache directory"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new FileCache instance where files are stored under the specified\n \n ",
+      "javadoc": "Creates a new {@link FileCache} instance where files are stored under the specified\n {@code cacheDir}\n \u003cp\u003e\n@param cacheDir where to store the files\n@throws IOException if there was a problem creating subdirectories under cacheDir or\n when pruning expired files.",
+      "static": false,
+      "params": [
+        {
+          "name": "cacheDir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "where to store the files"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was a problem creating subdirectories under cacheDir or\n when pruning expired files."
+        }
+      ]
+    },
+    {
+      "name": "purge",
+      "comment": "Deletes all stored files from this file cache that are under a \"NN\" two hex digit\n nesting dir.\n \n Will cause other processes which are accessing or updating the cache to error.",
+      "javadoc": "Deletes all stored files from this file cache that are under a \"NN\" two hex digit\n nesting dir.\n \u003cp\u003e\n Will cause other processes which are accessing or updating the cache to error.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasEntry",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ensureAvailableSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sizeHint",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFileCacheEntry",
+      "comment": "Returns a FileCacheEntry for the matching file, based on its MD5, or\n NULL if there is no matching file.\n \n Tweaks the file\u0027s last modified time to implement a LRU.",
+      "javadoc": "Returns a {@link FileCacheEntry} for the matching file, based on its MD5, or\n NULL if there is no matching file.\n \u003cp\u003e\n Tweaks the file\u0027s last modified time to implement a LRU.\n@param md5 md5 string.\n@return {@link FileCacheEntry} with a File and it\u0027s md5 string or {@code null} if no\n matching file exists in cache.",
+      "static": false,
+      "params": [
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "md5 string."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheEntry",
+        "type_short": "FileCacheEntry",
+        "comment": "FileCacheEntry with a File and it\u0027s md5 string or  if no\n matching file exists in cache."
+      },
+      "throws": []
+    },
+    {
+      "name": "releaseFileCacheEntry",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFileByMD5",
+      "comment": "Get a file (by md5) from the cache, returns NULL if not found.\n ",
+      "javadoc": "Get a file (by md5) from the cache, returns NULL if not found.\n \u003cp\u003e\n@param md5 file md5 string.\n@return File or null if not found.",
+      "static": false,
+      "params": [
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "file md5 string."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheEntry",
+        "type_short": "FileCacheEntry",
+        "comment": "File or null if not found."
+      },
+      "throws": []
+    },
+    {
+      "name": "createTempFile",
+      "comment": "Creates a randomly generated file name in the temp directory.",
+      "javadoc": "Creates a randomly generated file name in the temp directory.\n@return randomly generated file name in the cache\u0027s temp directory",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": "randomly generated file name in the cache\u0027s temp directory"
+      },
+      "throws": []
+    },
+    {
+      "name": "createCacheEntryBuilder",
+      "comment": "Creates a new FileCacheEntryBuilder that will accept bytes written to it\n (via its OutputStream methods).  When finished writing, the FileCacheEntryBuilder\n will give the caller a FileCacheEntry.",
+      "javadoc": "Creates a new {@link FileCacheEntryBuilder} that will accept bytes written to it\n (via its {@link OutputStream} methods).  When finished writing, the {@link FileCacheEntryBuilder}\n will give the caller a {@link FileCacheEntry}.\n@param sizeHint a hint about the size of the file being added.  Use -1 if unsure or unknown\n@return new {@link FileCacheEntryBuilder}\n@throws IOException if error",
+      "static": false,
+      "params": [
+        {
+          "name": "sizeHint",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "a hint about the size of the file being added.  Use -1 if unsure or unknown"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheEntryBuilder",
+        "type_short": "FileCacheEntryBuilder",
+        "comment": "new FileCacheEntryBuilder"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        }
+      ]
+    },
+    {
+      "name": "giveFile",
+      "comment": "Adds a plaintext file to this cache, consuming it.\n ",
+      "javadoc": "Adds a plaintext file to this cache, consuming it.\n \u003cp\u003e\n@param file plaintext file\n@param monitor {@link TaskMonitor}\n@return a {@link FileCacheEntry} that controls the contents of the newly added file\n@throws IOException if error\n@throws CancelledException if cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "plaintext file"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheEntry",
+        "type_short": "FileCacheEntry",
+        "comment": "a FileCacheEntry that controls the contents of the newly added file"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if cancelled"
+        }
+      ]
+    },
+    {
+      "name": "addTmpFileToCache",
+      "comment": "Adds an already obfuscated File to this cache, consuming the file.\n \n This method makes some assumptions:\n \n 1) Directories are never removed - when ensuring that a nested directory exists\n before placing a new file into that directory, there is no locking mechanism\n and if another process removed the directory between the check for the directory\u0027s\n existence and the attempt to place the file into the directory.  Solution: no\n process may remove a nested directory after it has been created.\n 2) The source file is co-located with the cache directory to ensure its on the\n same physical filesystem volume, and is already obfuscated.\n ",
+      "javadoc": "Adds an already obfuscated File to this cache, consuming the file.\n \u003cp\u003e\n This method makes some assumptions:\n \u003cp\u003e\n 1) Directories are never removed - when ensuring that a nested directory exists\n before placing a new file into that directory, there is no locking mechanism\n and if another process removed the directory between the check for the directory\u0027s\n existence and the attempt to place the file into the directory.  Solution: no\n process may remove a nested directory after it has been created.\n 2) The source file is co-located with the cache directory to ensure its on the\n same physical filesystem volume, and is already obfuscated.\n \u003cp\u003e\n@param tmpFile the File to add to the cache\n@param md5 hex string md5 of the file\n@return a new {@link FileCacheEntry} with the File\u0027s location and its md5\n@throws IOException if an file error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "tmpFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the File to add to the cache"
+        },
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "hex string md5 of the file"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheEntry",
+        "type_short": "FileCacheEntry",
+        "comment": "a new FileCacheEntry with the File\u0027s location and its md5"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an file error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getCacheRelPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCleaning",
+      "comment": "Returns true if the background thread has been created to clean old cache files and the\n thread is still working",
+      "javadoc": "Returns true if the background thread has been created to clean old cache files and the\n thread is still working\n@return true if removing expired cache files",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if removing expired cache files"
+      },
+      "throws": []
+    },
+    {
+      "name": "performCacheMaintIfNeeded",
+      "comment": "Prunes cache if interval since last maintenance exceeds #MAINT_INTERVAL_MS\n \n Only called during construction, and the only known multi-process conflict that can occur\n is when re-writing the \"lastMaint\" timestamp file, which isn\u0027t a problem as its the\n approximate timestamp of that file that is important, not the contents.",
+      "javadoc": "Prunes cache if interval since last maintenance exceeds {@link #MAINT_INTERVAL_MS}\n \u003cp\u003e\n Only called during construction, and the only known multi-process conflict that can occur\n is when re-writing the \"lastMaint\" timestamp file, which isn\u0027t a problem as its the\n approximate timestamp of that file that is important, not the contents.\n@param cacheDir cache directory location\n@param nestingLevel the depth of directory nesting, 2 for old style, 1 for newer style\n@return {@link FileCacheMaintenanceDaemon} instance if started, null otherwise",
+      "static": true,
+      "params": [
+        {
+          "name": "cacheDir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "cache directory location"
+        },
+        {
+          "name": "nestingLevel",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the depth of directory nesting, 2 for old style, 1 for newer style"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheMaintenanceDaemon",
+        "type_short": "FileCacheMaintenanceDaemon",
+        "comment": "FileCacheMaintenanceDaemon instance if started, null otherwise"
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,414 @@
+{
+  "name": "DyldCacheProgramBuilder",
+  "comment": "Builds up a DYLD Cache Program by parsing the DYLD Cache headers.",
+  "javadoc": "Builds up a DYLD Cache {@link Program} by parsing the DYLD Cache headers.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.util.opinion.MachoProgramBuilder",
+  "fields": [
+    {
+      "name": "shouldProcessSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "shouldCreateDylibSections",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "shouldAddRelocationEntries",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "shouldCombineSplitFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new DyldCacheProgramBuilder based on the given information.",
+      "javadoc": "Creates a new {@link DyldCacheProgramBuilder} based on the given information.\n@param program The {@link Program} to build up\n@param provider The {@link ByteProvider} that contains the DYLD Cache bytes\n@param fileBytes Where the DYLD Cache\u0027s bytes came from\n@param shouldProcessSymbols True if symbols should be processed; otherwise, false\n@param shouldCreateDylibSections True if memory blocks should be created for DYLIB sections; \n   otherwise, false\n@param shouldAddRelocationEntries True to create a relocation entry for each fixed up pointer\n   in pointer chain\n@param shouldCombineSplitFiles True if split DYLD Cache files should be automatically \n   imported and combined into 1 program; otherwise, false\n@param log The log\n@param monitor A cancelable task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "The Program to build up"
+        },
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The ByteProvider that contains the DYLD Cache bytes"
+        },
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": "Where the DYLD Cache\u0027s bytes came from"
+        },
+        {
+          "name": "shouldProcessSymbols",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True if symbols should be processed; otherwise, false"
+        },
+        {
+          "name": "shouldCreateDylibSections",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True if memory blocks should be created for DYLIB sections; \n   otherwise, false"
+        },
+        {
+          "name": "shouldAddRelocationEntries",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True to create a relocation entry for each fixed up pointer\n   in pointer chain"
+        },
+        {
+          "name": "shouldCombineSplitFiles",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True if split DYLD Cache files should be automatically \n   imported and combined into 1 program; otherwise, false"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "The log"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "A cancelable task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildProgram",
+      "comment": "Builds up a DYLD Cache Program.",
+      "javadoc": "Builds up a DYLD Cache {@link Program}.\n@param program The {@link Program} to build up\n@param provider The {@link ByteProvider} that contains the DYLD Cache\u0027s bytes\n@param fileBytes Where the Mach-O\u0027s bytes came from\n@param shouldProcessSymbols True if symbols should be processed; otherwise, false\n@param shouldCreateDylibSections True if memory blocks should be created for DYLIB sections; \n   otherwise, false\n@param addRelocationEntries True to create a relocation entry for each fixed up pointer in \n   pointer chain; otherwise, false\n@param shouldCombineSplitFiles True if split DYLD Cache files should be automatically \n   imported and combined into 1 program; otherwise, false\n@param log The log\n@param monitor A cancelable task monitor\n@throws Exception if a problem occurs",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "The Program to build up"
+        },
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The ByteProvider that contains the DYLD Cache\u0027s bytes"
+        },
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": "Where the Mach-O\u0027s bytes came from"
+        },
+        {
+          "name": "shouldProcessSymbols",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True if symbols should be processed; otherwise, false"
+        },
+        {
+          "name": "shouldCreateDylibSections",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True if memory blocks should be created for DYLIB sections; \n   otherwise, false"
+        },
+        {
+          "name": "addRelocationEntries",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True to create a relocation entry for each fixed up pointer in \n   pointer chain; otherwise, false"
+        },
+        {
+          "name": "shouldCombineSplitFiles",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True if split DYLD Cache files should be automatically \n   imported and combined into 1 program; otherwise, false"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "The log"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "A cancelable task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if a problem occurs"
+        }
+      ]
+    },
+    {
+      "name": "build",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setDyldCacheImageBase",
+      "comment": "Sets the program\u0027s image base.",
+      "javadoc": "Sets the program\u0027s image base.\n@param dyldCacheHeader The \"base\" DYLD Cache header\n@throws Exception if there was problem setting the program\u0027s image base",
+      "static": false,
+      "params": [
+        {
+          "name": "dyldCacheHeader",
+          "type_long": "ghidra.app.util.bin.format.macho.dyld.DyldCacheHeader",
+          "type_short": "DyldCacheHeader",
+          "comment": "The \"base\" DYLD Cache header"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if there was problem setting the program\u0027s image base"
+        }
+      ]
+    },
+    {
+      "name": "processDyldCacheMemoryBlocks",
+      "comment": "Processes the DYLD Cache\u0027s memory mappings and creates memory blocks for them.",
+      "javadoc": "Processes the DYLD Cache\u0027s memory mappings and creates memory blocks for them.\n@param dyldCacheHeader The {@link DyldCacheHeader}\n@param bp The corresponding {@link ByteProvider}\n@throws Exception if there was a problem creating the memory blocks",
+      "static": false,
+      "params": [
+        {
+          "name": "dyldCacheHeader",
+          "type_long": "ghidra.app.util.bin.format.macho.dyld.DyldCacheHeader",
+          "type_short": "DyldCacheHeader",
+          "comment": "The DyldCacheHeader"
+        },
+        {
+          "name": "bp",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The corresponding ByteProvider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if there was a problem creating the memory blocks"
+        }
+      ]
+    },
+    {
+      "name": "markupHeaders",
+      "comment": "Marks up the DYLD Cache headers.",
+      "javadoc": "Marks up the DYLD Cache headers.\n@param dyldCacheHeader The {@link DyldCacheHeader}\n@throws Exception if there was a problem marking up the headers",
+      "static": false,
+      "params": [
+        {
+          "name": "dyldCacheHeader",
+          "type_long": "ghidra.app.util.bin.format.macho.dyld.DyldCacheHeader",
+          "type_short": "DyldCacheHeader",
+          "comment": "The DyldCacheHeader"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if there was a problem marking up the headers"
+        }
+      ]
+    },
+    {
+      "name": "markupBranchIslands",
+      "comment": "Marks up the DYLD Cache branch islands.",
+      "javadoc": "Marks up the DYLD Cache branch islands.\n@param dyldCacheHeader The {@link DyldCacheHeader}\n@param bp The corresponding {@link ByteProvider}\n@throws Exception if there was a problem marking up the branch islands.",
+      "static": false,
+      "params": [
+        {
+          "name": "dyldCacheHeader",
+          "type_long": "ghidra.app.util.bin.format.macho.dyld.DyldCacheHeader",
+          "type_short": "DyldCacheHeader",
+          "comment": "The DyldCacheHeader"
+        },
+        {
+          "name": "bp",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The corresponding ByteProvider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if there was a problem marking up the branch islands."
+        }
+      ]
+    },
+    {
+      "name": "createSymbols",
+      "comment": "Creates the DYLD Cache symbols.",
+      "javadoc": "Creates the DYLD Cache symbols.\n@param dyldCacheHeader The {@link DyldCacheHeader}\n@throws Exception if there was a problem creating the symbols",
+      "static": false,
+      "params": [
+        {
+          "name": "dyldCacheHeader",
+          "type_long": "ghidra.app.util.bin.format.macho.dyld.DyldCacheHeader",
+          "type_short": "DyldCacheHeader",
+          "comment": "The DyldCacheHeader"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if there was a problem creating the symbols"
+        }
+      ]
+    },
+    {
+      "name": "fixPageChains",
+      "comment": "Fixes any chained pointers within each of the data pages.",
+      "javadoc": "Fixes any chained pointers within each of the data pages.\n@param dyldCacheHeader The {@link DyldCacheHeader}\n@throws MemoryAccessException if there was a problem reading/writing memory.\n@throws CancelledException if user cancels",
+      "static": false,
+      "params": [
+        {
+          "name": "dyldCacheHeader",
+          "type_long": "ghidra.app.util.bin.format.macho.dyld.DyldCacheHeader",
+          "type_short": "DyldCacheHeader",
+          "comment": "The DyldCacheHeader"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if there was a problem reading/writing memory."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels"
+        }
+      ]
+    },
+    {
+      "name": "processDylibs",
+      "comment": "Processes the DYLD Cache\u0027s DYLIB files.  This will mark up the DYLIB files, added them to the\n program tree, and make memory blocks for them.",
+      "javadoc": "Processes the DYLD Cache\u0027s DYLIB files.  This will mark up the DYLIB files, added them to the\n program tree, and make memory blocks for them.\n@param dyldCacheHeader The {@link DyldCacheHeader}\n@param bp The corresponding {@link ByteProvider}\n@throws Exception if there was a problem processing the DYLIB files",
+      "static": false,
+      "params": [
+        {
+          "name": "dyldCacheHeader",
+          "type_long": "ghidra.app.util.bin.format.macho.dyld.DyldCacheHeader",
+          "type_short": "DyldCacheHeader",
+          "comment": "The DyldCacheHeader"
+        },
+        {
+          "name": "bp",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The corresponding ByteProvider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if there was a problem processing the DYLIB files"
+        }
+      ]
+    }
+  ]
+}

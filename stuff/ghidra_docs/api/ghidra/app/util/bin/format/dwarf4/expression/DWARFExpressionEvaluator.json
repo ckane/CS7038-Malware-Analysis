@@ -1,0 +1,632 @@
+{
+  "name": "DWARFExpressionEvaluator",
+  "comment": "Evaluates a subset of DWARF expression opcodes.\n \n Limitations:\n Can not access memory during evaluation of expressions.\n Some opcodes must be the last operation in the expression (deref, regX)\n Can only specify offset from register for framebase and stack relative\n \n Result can be a numeric value (ie. static address) or a register \u0027name\u0027 or a stack based offset.\n ",
+  "javadoc": "Evaluates a subset of DWARF expression opcodes.\n \u003cp\u003e\n Limitations:\u003cp\u003e\n Can not access memory during evaluation of expressions.\u003cbr\u003e\n Some opcodes must be the last operation in the expression (deref, regX)\u003cbr\u003e\n Can only specify offset from register for framebase and stack relative\u003cbr\u003e\n \u003cp\u003e\n Result can be a numeric value (ie. static address) or a register \u0027name\u0027 or a stack based offset.\n \u003cp\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DEFAULT_MAX_STEP_COUNT",
+      "comment": "Default limit for the number of execution steps to allow in an expression.",
+      "javadoc": "Default limit for the number of execution steps to allow in an expression.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1000"
+    },
+    {
+      "name": "dwarfFormat",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "maxStepCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "pointerSize",
+      "comment": "Mirror of DWARFCompilationUnit#getPointerSize()",
+      "javadoc": "Mirror of {@link DWARFCompilationUnit#getPointerSize()}",
+      "static": false,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": null
+    },
+    {
+      "name": "isLittleEndian",
+      "comment": "Mirror of DWARFProgram#isLittleEndian()",
+      "javadoc": "Mirror of {@link DWARFProgram#isLittleEndian()}",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "registerMappings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFRegisterMappings",
+      "type_short": "DWARFRegisterMappings",
+      "constant_value": null
+    },
+    {
+      "name": "frameOffset",
+      "comment": "The subprogram\u0027s DW_AT_frame_base value",
+      "javadoc": "The subprogram\u0027s DW_AT_frame_base value",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "lastRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "lastStackRelative",
+      "comment": "The value at the top of the stack is a framebase offset",
+      "javadoc": "The value at the top of the stack is a framebase offset",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "registerLoc",
+      "comment": "Indicates that the result of the expression is held in register #lastRegister",
+      "javadoc": "Indicates that the result of the expression is held in register {@link #lastRegister}",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "isDeref",
+      "comment": "Indicates that the result of the expression is pointed to by the value in\n register {#lastRegister (ie. lastRegister is a pointer to the result)",
+      "javadoc": "Indicates that the result of the expression is pointed to by the value in\n register {{@link #lastRegister} (ie. lastRegister is a pointer to the result)",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "dwarfStackValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "useUnknownRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "stack",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayDeque\u003cjava.lang.Long\u003e",
+      "type_short": "ArrayDeque",
+      "constant_value": null
+    },
+    {
+      "name": "expr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpression",
+      "type_short": "DWARFExpression",
+      "constant_value": null
+    },
+    {
+      "name": "currentOp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionOperation",
+      "type_short": "DWARFExpressionOperation",
+      "constant_value": null
+    },
+    {
+      "name": "currentOpIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "create",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "die",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+          "type_short": "DebugInfoEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionEvaluator",
+        "type_short": "DWARFExpressionEvaluator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pointerSize",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        },
+        {
+          "name": "isLittleEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "dwarfFormat",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "registerMappings",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFRegisterMappings",
+          "type_short": "DWARFRegisterMappings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFrameBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fb",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "push",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "peek",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "pop",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getTerminalRegister",
+      "comment": "Returns the Register that holds the contents of the object that the\n DWARFExpression points to.\n \n Note, you should check #isDeref() to see if the register is just a pointer\n to the object instead of the object itself.\n ",
+      "javadoc": "Returns the {@link Register register} that holds the contents of the object that the\n {@link DWARFExpression expression} points to.\n \u003cp\u003e\n Note, you should check {@link #isDeref()} to see if the register is just a pointer\n to the object instead of the object itself.\n \u003cp\u003e\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDeref",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readExpr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "exprBytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpression",
+        "type_short": "DWARFExpression",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "evaluate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "exprBytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionResult",
+        "type_short": "DWARFExpressionResult",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "evaluate",
+      "comment": "",
+      "javadoc": "@param _expr\n@param stackArgs - pushed 0..N, so stackArgs[0] will be deepest, stackArgs[N] will be topmost.\n@return \n@throws DWARFExpressionException",
+      "static": false,
+      "params": [
+        {
+          "name": "_expr",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpression",
+          "type_short": "DWARFExpression",
+          "comment": ""
+        },
+        {
+          "name": "stackArgs",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": "- pushed 0..N, so stackArgs[0] will be deepest, stackArgs[N] will be topmost."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionResult",
+        "type_short": "DWARFExpressionResult",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "evaluate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "_expr",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpression",
+          "type_short": "DWARFExpression",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionResult",
+        "type_short": "DWARFExpressionResult",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getStackAsString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "_preValidateCurrentOp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "_evaluateCurrentOp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "dw_op_pick",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxStepCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMaxStepCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "maxStepCount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDwarfStackValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "useUnknownRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isRegisterLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRawLastRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isStackRelative",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

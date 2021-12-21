@@ -1,0 +1,4156 @@
+{
+  "name": "MemoryMapDB",
+  "comment": "The database memory map manager.",
+  "javadoc": "The database memory map manager.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.mem.Memory",
+    "ghidra.program.database.ManagerDB",
+    "ghidra.program.model.mem.LiveMemoryListener"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramDB",
+      "type_short": "ProgramDB",
+      "constant_value": null
+    },
+    {
+      "name": "addrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMapDB",
+      "type_short": "AddressMapDB",
+      "constant_value": null
+    },
+    {
+      "name": "adapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.mem.MemoryMapDBAdapter",
+      "type_short": "MemoryMapDBAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "fileBytesAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.mem.FileBytesAdapter",
+      "type_short": "FileBytesAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "BIG_ENDIAN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.util.DataConverter",
+      "type_short": "DataConverter",
+      "constant_value": null
+    },
+    {
+      "name": "LITTLE_ENDIAN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.util.DataConverter",
+      "type_short": "DataConverter",
+      "constant_value": null
+    },
+    {
+      "name": "defaultEndian",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.DataConverter",
+      "type_short": "DataConverter",
+      "constant_value": null
+    },
+    {
+      "name": "blocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.database.mem.MemoryBlockDB\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "addrSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "initializedLoadedAddrSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "allInitializedAddrSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "executeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "lastBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.mem.MemoryBlock",
+      "type_short": "MemoryBlock",
+      "constant_value": null
+    },
+    {
+      "name": "liveMemory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.mem.LiveMemoryHandler",
+      "type_short": "LiveMemoryHandler",
+      "constant_value": null
+    },
+    {
+      "name": "nameBlockMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.program.model.mem.MemoryBlock\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "NoBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.program.model.mem.MemoryBlock",
+      "type_short": "MemoryBlock",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.Lock",
+      "type_short": "Lock",
+      "constant_value": null
+    },
+    {
+      "name": "BLOCK_ADDRESS_COMPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Comparator\u003cjava.lang.Object\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new MemoryMapDB",
+      "javadoc": "Constructs a new MemoryMapDB\n@param handle the open database handle.\n@param addrMap the address map.\n@param openMode the open mode for the program.\n@param isBigEndian endianess flag\n@param lock the program synchronization lock\n@param monitor Task monitor for upgrading\n@throws IOException if a database io error occurs.\n@throws VersionException if the database version is different from the expected version",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "the open database handle."
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMapDB",
+          "type_short": "AddressMapDB",
+          "comment": "the address map."
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the open mode for the program."
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "endianess flag"
+        },
+        {
+          "name": "lock",
+          "type_long": "ghidra.util.Lock",
+          "type_short": "Lock",
+          "comment": "the program synchronization lock"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "Task monitor for upgrading"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a database io error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if the database version is different from the expected version"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMapDB",
+          "type_short": "AddressMapDB",
+          "comment": ""
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "lock",
+          "type_long": "ghidra.util.Lock",
+          "type_short": "Lock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "memoryAdapter",
+          "type_long": "ghidra.program.database.mem.MemoryMapDBAdapter",
+          "type_short": "MemoryMapDBAdapter",
+          "comment": ""
+        },
+        {
+          "name": "bytesAdapter",
+          "type_long": "ghidra.program.database.mem.FileBytesAdapter",
+          "type_short": "FileBytesAdapter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidateCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "buildAddressSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addBlockAddresses",
+      "comment": "Update the allInitializedAddrSet and initializedLoadedAddrSet with\n relevant initialized addresses from the specified memory block. If block is not a\n mapped-block and it may be a source to existing mapped-blocks then\n scanAllMappedBlocksIfNeeded should be passed as true unless all\n mapped blocks will be processed separately.",
+      "javadoc": "Update the \u003ccode\u003eallInitializedAddrSet\u003c/code\u003e and \u003ccode\u003einitializedLoadedAddrSet\u003c/code\u003e with\n relevant initialized addresses from the specified memory block. If block is not a\n mapped-block and it may be a source to existing mapped-blocks then\n \u003ccode\u003escanAllMappedBlocksIfNeeded\u003c/code\u003e should be passed as \u003ccode\u003etrue\u003c/code\u003e unless all\n mapped blocks will be processed separately.\n@param block memory block\n@param scanAllMappedBlocksIfNeeded if true and block is initialized and not a mapped block\n            all mapped blocks will be processed for possible introduction of newly initialized\n            mapped regions.",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": "memory block"
+        },
+        {
+          "name": "scanAllMappedBlocksIfNeeded",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true and block is initialized and not a mapped block\n            all mapped blocks will be processed for possible introduction of newly initialized\n            mapped regions."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateMappedAddresses",
+      "comment": "Update initialized address set for those mapped blocks which map onto the specified block\n which has just completed a transition of its\u0027 initialized state.",
+      "javadoc": "Update initialized address set for those mapped blocks which map onto the specified block\n which has just completed a transition of its\u0027 initialized state.\n@param block block whose initialized state has changed\n@param isInitialized true if block transitioned from uninitialized to initialized, else\n            transition is from initialized to uninitialized.",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": "block whose initialized state has changed"
+        },
+        {
+          "name": "isInitialized",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if block transitioned from uninitialized to initialized, else\n            transition is from initialized to uninitialized."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reloadAll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initializeBlocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setProgram",
+      "comment": "Set the program.",
+      "javadoc": "Set the program.",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.database.ProgramDB",
+          "type_short": "ProgramDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programReady",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentRevision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "dbError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressFactory",
+      "comment": "Returns the address factory for the program.",
+      "javadoc": "Returns the address factory for the program.\n@return program address factory",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressFactory",
+        "type_short": "AddressFactory",
+        "comment": "program address factory"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressMap",
+      "comment": "Returns the AddressMap from the program.",
+      "javadoc": "Returns the AddressMap from the program.\n@return program address map",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.map.AddressMapDB",
+        "type_short": "AddressMapDB",
+        "comment": "program address map"
+      },
+      "throws": []
+    },
+    {
+      "name": "getInitializedAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllInitializedAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLoadedAndInitializedAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkMemoryWrite",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkMemoryWriteMappedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mappedBlock",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkMemoryWriteNonMappedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "nonMappedBlock",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "blockName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBlockDB",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBlockAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newBlock",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBlockSplit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBlockRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "blockStartAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBlockMoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": ""
+        },
+        {
+          "name": "oldStartAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBlocksJoined",
+      "comment": "Two blocks have been joined producing newBlock. The block which was eliminated can be\n identified using the oldBlockStartAddr.",
+      "javadoc": "Two blocks have been joined producing newBlock. The block which was eliminated can be\n identified using the oldBlockStartAddr.\n@param newBlock new joined memory block\n@param oldBlockStartAddr original start address of affected block",
+      "static": false,
+      "params": [
+        {
+          "name": "newBlock",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": "new joined memory block"
+        },
+        {
+          "name": "oldBlockStartAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "original start address of affected block"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBlockSplit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalBlock",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": ""
+        },
+        {
+          "name": "newBlock",
+          "type_long": "ghidra.program.database.mem.MemoryBlockDB",
+          "type_short": "MemoryBlockDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBlockChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireBytesChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "count",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBigEndian",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLiveMemoryHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handler",
+          "type_long": "ghidra.program.model.mem.LiveMemoryHandler",
+          "type_short": "LiveMemoryHandler",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLiveMemoryHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.mem.LiveMemoryHandler",
+        "type_short": "LiveMemoryHandler",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createInitializedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "initialValue",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "overlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createOverlaySpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dataLength",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createInitializedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "is",
+          "type_long": "java.io.InputStream",
+          "type_short": "InputStream",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "overlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createInitializedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "overlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.IndexOutOfBoundsException",
+          "type_short": "IndexOutOfBoundsException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkFileBytesRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createUninitializedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "overlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createBitMappedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "mappedAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "overlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createByteMappedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "mappedAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "byteMappingScheme",
+          "type_long": "ghidra.program.database.mem.ByteMappingScheme",
+          "type_short": "ByteMappingScheme",
+          "comment": ""
+        },
+        {
+          "name": "overlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkBlockName",
+      "comment": "Check new block name for validity",
+      "javadoc": "Check new block name for validity\n@param name new block name\n@throws IllegalArgumentException if invalid block name specified",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new block name"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": "if invalid block name specified"
+        }
+      ]
+    },
+    {
+      "name": "createBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBlocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock[]",
+        "type_short": "ghidra.program.model.mem.MemoryBlock[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        },
+        {
+          "name": "newStartAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryBlockException",
+          "type_short": "MemoryBlockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "split",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryBlockException",
+          "type_short": "MemoryBlockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "join",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "blockOne",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        },
+        {
+          "name": "blockTwo",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryBlockException",
+          "type_short": "MemoryBlockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkPreconditionsForJoining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block1",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        },
+        {
+          "name": "block2",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryBlockException",
+          "type_short": "MemoryBlockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkBlockForJoining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "convertToInitialized",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "unitializedBlock",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        },
+        {
+          "name": "initialValue",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryBlockException",
+          "type_short": "MemoryBlockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "convertToUninitialized",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "initializedBlock",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryBlockException",
+          "type_short": "MemoryBlockException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "findBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "masks",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "masks",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "match",
+      "comment": "Tests if the memory contains a sequence of contiguous bytes that match the given byte array\n at all bit positions where the mask contains an \"on\" bit. The test will be something like\n\n for(int i\u003d0;ibytes.length;i++) { if (bytes[i] !\u003d memory.getByte(addr+i)  masks[i]) {\n return false; } } return false;",
+      "javadoc": "Tests if the memory contains a sequence of contiguous bytes that match the given byte array\n at all bit positions where the mask contains an \"on\" bit. The test will be something like\n\n for(int i\u003d0;i\u003cbytes.length;i++) { if (bytes[i] !\u003d memory.getByte(addr+i) \u0026amp; masks[i]) {\n return false; } } return false;\n@param addr The beginning address in memory to test against.\n@param bytes the array of bytes to test for.\n@param masks the array of masks. (One for each byte in the byte array)\n@param forward if true, the matching is going forward, otherwise backward\n@return 1 if there is a match 0 if there is no match -i if no match is found, this is the\n         number of bytes that can be safely skipped",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "The beginning address in memory to test against."
+        },
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "the array of bytes to test for."
+        },
+        {
+          "name": "masks",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "the array of masks. (One for each byte in the byte array)"
+        },
+        {
+          "name": "data",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the matching is going forward, otherwise backward"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "1 if there is a match 0 if there is no match -i if no match is found, this is the\n         number of bytes that can be safely skipped"
+      },
+      "throws": []
+    },
+    {
+      "name": "getByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "dIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getShort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "short",
+        "type_short": "short",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getShort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "short",
+        "type_short": "short",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getShorts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "short[]",
+          "type_short": "short[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getShorts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "short[]",
+          "type_short": "short[]",
+          "comment": ""
+        },
+        {
+          "name": "dIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nElem",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getShorts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "short[]",
+          "type_short": "short[]",
+          "comment": ""
+        },
+        {
+          "name": "dIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nElem",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        },
+        {
+          "name": "dIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nElem",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        },
+        {
+          "name": "dIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nElem",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLong",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLong",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLongs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLongs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "dIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nElem",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLongs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dest",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "dIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nElem",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "sIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setShort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setShort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setLong",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setLong",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmpty",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "iterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAtFront",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersects",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersects",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersect",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersectRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "union",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "subtract",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "xor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasSameAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkRemoveAddressSpace",
+      "comment": "Tests if the given addressSpace (overlay space) is used by any blocks. If not, it removes the\n space.",
+      "javadoc": "Tests if the given addressSpace (overlay space) is used by any blocks. If not, it removes the\n space.\n@param addressSpace overlay address space to be removed",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": "overlay address space to be removed"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getMappedIntersection",
+      "comment": "Gets the intersected set of addresses between a mapped memory block, and some other address\n set.",
+      "javadoc": "Gets the intersected set of addresses between a mapped memory block, and some other address\n set.\n@param mappedBlock The mapped memory block to use in the intersection.\n@param set Some other address set to use in the intersection.\n@return The intersected set of addresses between \u0027mappedMemoryBlock\u0027 and other address set",
+      "static": false,
+      "params": [
+        {
+          "name": "mappedBlock",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": "The mapped memory block to use in the intersection."
+        },
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "Some other address set to use in the intersection."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "The intersected set of addresses between \u0027mappedMemoryBlock\u0027 and other address set"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMappedRange",
+      "comment": "Converts the given address range back from the source range back to the mapped range. NOTE:\n It is important that the specified mappedSourceRange is restricted to the mapped source area\n of the specified mappedBlock.",
+      "javadoc": "Converts the given address range back from the source range back to the mapped range. NOTE:\n It is important that the specified mappedSourceRange is restricted to the mapped source area\n of the specified mappedBlock.\n@param mappedBlock mapped memory block\n@param mappedSourceRange source range which maps into mappedBlock.\n@return mapped range or null if source range not mapped to block",
+      "static": false,
+      "params": [
+        {
+          "name": "mappedBlock",
+          "type_long": "ghidra.program.model.mem.MemoryBlock",
+          "type_short": "MemoryBlock",
+          "comment": "mapped memory block"
+        },
+        {
+          "name": "mappedSourceRange",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": "source range which maps into mappedBlock."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": "mapped range or null if source range not mapped to block"
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "overlayBlockRenamed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldOverlaySpaceName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExecuteSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "computeExecuteSet",
+      "comment": "",
+      "javadoc": "@return executable address set",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "executable address set"
+      },
+      "throws": []
+    },
+    {
+      "name": "memoryChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFirstRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRangeContaining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "iterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "iterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findFirstAddressInCommon",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressSourceInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.mem.AddressSourceInfo",
+        "type_short": "AddressSourceInfo",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkBlockSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newBlockLength",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "initialized",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createFileBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "is",
+          "type_long": "java.io.InputStream",
+          "type_short": "InputStream",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.mem.FileBytes",
+        "type_short": "FileBytes",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getAllFileBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.database.mem.FileBytes\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkFileBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteFileBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "inUse",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLayeredFileBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fileBytesID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.mem.FileBytes",
+        "type_short": "FileBytes",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBlocks",
+      "comment": "Returns a list of all memory blocks that contain any addresses in the given range",
+      "javadoc": "Returns a list of all memory blocks that contain any addresses in the given range\n@param start the start address\n@param end the end address\n@return a list of all memory blocks that contain any addresses in the given range",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.database.mem.MemoryBlockDB\u003e",
+        "type_short": "List",
+        "comment": "a list of all memory blocks that contain any addresses in the given range"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkRangeForInstructions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

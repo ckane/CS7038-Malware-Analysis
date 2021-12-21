@@ -1,0 +1,3231 @@
+{
+  "name": "SymbolMerger",
+  "comment": "Class for merging symbol changes. This class can merge non-conflicting\n symbol changes that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then manually merge the conflicting symbols.\n Important: This class is intended to be used only for a single program\n version merge. It should be constructed and then merge() should be called on it.\n The merge() will perform an autoMerge() followed by mergeConflicts().\n If symbols were automatically renamed due to conflicts, then a dialog will appear\n that shows this information to the user.",
+  "javadoc": "Class for merging symbol changes. This class can merge non-conflicting\n symbol changes that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then manually merge the conflicting symbols.\n \u003cbr\u003eImportant: This class is intended to be used only for a single program\n version merge. It should be constructed and then merge() should be called on it.\n The merge() will perform an autoMerge() followed by mergeConflicts().\n If symbols were automatically renamed due to conflicts, then a dialog will appear\n that shows this information to the user.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.merge.listing.AbstractListingMerger",
+  "fields": [
+    {
+      "name": "SYMBOLS_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Symbols\""
+    },
+    {
+      "name": "REMOVE_CONFLICT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "RENAME_CONFLICT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "NAMESPACE_CONFLICT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "ADDRESS_CONFLICT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "PRIMARY_CONFLICT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "conflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+      "type_short": "VerticalChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "emptyConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+      "type_short": "VerticalChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "currentSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.Symbol",
+      "type_short": "Symbol",
+      "constant_value": null
+    },
+    {
+      "name": "currentSymbolName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "currentNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.Namespace",
+      "type_short": "Namespace",
+      "constant_value": null
+    },
+    {
+      "name": "currentBackgroundSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "uniqueName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "currentSymbolComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "latestSymTab",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SymbolTable",
+      "type_short": "SymbolTable",
+      "constant_value": null
+    },
+    {
+      "name": "mySymTab",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SymbolTable",
+      "type_short": "SymbolTable",
+      "constant_value": null
+    },
+    {
+      "name": "originalSymTab",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SymbolTable",
+      "type_short": "SymbolTable",
+      "constant_value": null
+    },
+    {
+      "name": "resultSymTab",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SymbolTable",
+      "type_short": "SymbolTable",
+      "constant_value": null
+    },
+    {
+      "name": "latestDetailSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "myDetailSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "addEntryPts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "removeEntryPts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "myAddIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "myChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "myRemoveIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "myModifiedIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "myRenameIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "myPrimaryChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "mySourceChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "myAnchorChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "myPrimaryAddIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.SymbolMerger.LongHashSet",
+      "type_short": "LongHashSet",
+      "constant_value": null
+    },
+    {
+      "name": "mySetPrimary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "latestAddIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestRemoveIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestModifiedIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestRenameIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestPrimaryChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestSourceChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestAnchorChangeIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long[]",
+      "type_short": "long[]",
+      "constant_value": null
+    },
+    {
+      "name": "latestPrimaryAddIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.SymbolMerger.LongHashSet",
+      "type_short": "LongHashSet",
+      "constant_value": null
+    },
+    {
+      "name": "latestSetPrimary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "externalTypeConflictHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "deferredRemoveIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.SymbolMerger.LongHashSet",
+      "type_short": "LongHashSet",
+      "constant_value": null
+    },
+    {
+      "name": "renamedConflictIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.SymbolMerger.LongHashSet",
+      "type_short": "LongHashSet",
+      "constant_value": null
+    },
+    {
+      "name": "removes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cghidra.program.model.address.Address,ghidra.util.datastruct.LongArrayList\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "removeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "renames",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cghidra.program.model.address.Address,ghidra.util.datastruct.LongArrayList\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "renameConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "symbolAddressConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cghidra.program.model.address.Address,java.util.ArrayList\u003cghidra.app.util.SymbolPath\u003e\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "addressConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "addComments",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cghidra.program.model.address.Address,ghidra.util.datastruct.LongArrayList\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "addCommentConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "primaryConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "originalHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "latestHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "myHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "totalConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "conflictNum",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "DEFAULT_PROGRESS_MESSAGE",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "addressSymbolChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "primarySymbolChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "removeSymbolChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "renameSymbolChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "currentConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.SymbolMerger.SymbolConflictType",
+      "type_short": "SymbolConflictType",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a symbol merger.",
+      "javadoc": "Constructs a symbol merger.\n@param listingMergeMgr the listing merge manager that is using this symbol merger.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingMergeMgr",
+          "type_long": "ghidra.app.merge.listing.ListingMergeManager",
+          "type_short": "ListingMergeManager",
+          "comment": "the listing merge manager that is using this symbol merger."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setResolveInformation",
+      "comment": "Puts the LongLongHashtables, that map the symbol IDs from LATEST, MY, and\n ORIGINAL programs to the RESULT program symbol IDs, into the Merge Manager.",
+      "javadoc": "Puts the LongLongHashtables, that map the symbol IDs from LATEST, MY, and\n ORIGINAL programs to the RESULT program symbol IDs, into the Merge Manager.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveSymbolID",
+      "comment": "Gets the symbolID from the result program that is the equivalent symbol\n to the symbol whose ID and program are specified as parameters.",
+      "javadoc": "Gets the symbolID from the result program that is the equivalent symbol\n to the symbol whose ID and program are specified as parameters.\n@param pgm the program the symbol ID is coming from\n@param symbolID the ID of the symbol in pgm\n@return the ID of the corresponding symbol in the result program\n or -1 if there is no corresponding symbol in the result program.",
+      "static": false,
+      "params": [
+        {
+          "name": "pgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program the symbol ID is coming from"
+        },
+        {
+          "name": "symbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the ID of the symbol in pgm"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the ID of the corresponding symbol in the result program\n or -1 if there is no corresponding symbol in the result program."
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveNamespace",
+      "comment": "This method allows other listing merge managers to resolve a namespace\n via the symbol merge manager. This is because the symbol merge manager\n actually merges namespaces and best knows how to resolve them.\n It also keeps track of how they have been resolved.",
+      "javadoc": "This method allows other listing merge managers to resolve a namespace\n via the symbol merge manager. This is because the symbol merge manager\n actually merges namespaces and best knows how to resolve them.\n It also keeps track of how they have been resolved.\n@param srcProgram the program version that the namespace to be resolved is coming from.\n@param srcNamespace the namespace to be resolved\n@return the namespace from the result program version\n@throws DuplicateNameException if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with.\n@throws InvalidInputException if the name space is not validly named\n for the result program.",
+      "static": false,
+      "params": [
+        {
+          "name": "srcProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program version that the namespace to be resolved is coming from."
+        },
+        {
+          "name": "srcNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the namespace to be resolved"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": "the namespace from the result program version"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the name space is not validly named\n for the result program."
+        }
+      ]
+    },
+    {
+      "name": "createNamespace",
+      "comment": "Get/create a uniquely named namespace. If the namespace\u0027s name can\u0027t\n be created because of a name conflict, it will be given a new conflict name.",
+      "javadoc": "Get/create a uniquely named namespace. If the namespace\u0027s name can\u0027t\n be created because of a name conflict, it will be given a new conflict name.\n@param resultProgram the program where the namespace is to be found or created\n@param name the desired name for the namespace\n@param st the symbol type for this namespace\n@param resultAddr the address in the result program for this namespace\n@param resultParentNs the parent of this namespace in the result program\n@param origPgm the program this namespace originated from\n@param origSymID the ID of the namespace in the program it originated from\n@return an equivalent namespace that exists or was created.\n@throws DuplicateNameException if the namespace couldn\u0027t be created\n because of an unresolvable name conflict.\n@throws InvalidInputException if the namespace couldn\u0027t be created\n because of an invalid name.",
+      "static": false,
+      "params": [
+        {
+          "name": "resultProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program where the namespace is to be found or created"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the desired name for the namespace"
+        },
+        {
+          "name": "st",
+          "type_long": "ghidra.program.model.symbol.SymbolType",
+          "type_short": "SymbolType",
+          "comment": "the symbol type for this namespace"
+        },
+        {
+          "name": "resultAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address in the result program for this namespace"
+        },
+        {
+          "name": "resultParentNs",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the parent of this namespace in the result program"
+        },
+        {
+          "name": "srcPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "srcSymID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": "an equivalent namespace that exists or was created."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the namespace couldn\u0027t be created\n because of an unresolvable name conflict."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the namespace couldn\u0027t be created\n because of an invalid name."
+        }
+      ]
+    },
+    {
+      "name": "setupSymbolChanges",
+      "comment": "Determine the type of changes to the symbols in the LATEST and MY (CheckedOut) program.\n Changes can be symbol removed, added, changed, renamed, and set to primary.",
+      "javadoc": "Determine the type of changes to the symbols in the LATEST and MY (CheckedOut) program.\n Changes can be symbol removed, added, changed, renamed, and set to primary.\n@param monitor task monitor for displaying progress to the user\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for displaying progress to the user"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "getNonMatchingIDsInFirst",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "first",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "second",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long[]",
+        "type_short": "long[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getPrimariesAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolAddIDs",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "symTab",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": ""
+        },
+        {
+          "name": "primaryAdds",
+          "type_long": "ghidra.app.merge.listing.SymbolMerger.LongHashSet",
+          "type_short": "LongHashSet",
+          "comment": ""
+        },
+        {
+          "name": "setPrimary",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newSymTab",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "indexOf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolAddIDs",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChoiceForSymbolConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolConflictType",
+          "type_long": "ghidra.app.merge.listing.SymbolMerger.SymbolConflictType",
+          "type_short": "SymbolConflictType",
+          "comment": ""
+        },
+        {
+          "name": "choiceForSymbolConflict",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMinimum",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMaximum",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "loadSymbolMapInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolMapIdentifier",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "mapToLoadInto",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanupIdArrays",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRenamedConflictsInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.StringBuffer",
+        "type_short": "StringBuffer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDeferredRemovesInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.StringBuffer",
+        "type_short": "StringBuffer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processDeferredRemoves",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processRemoves",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processSingleRemove",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "originalSym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processModifies",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isDefaultThunk",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processModifiedFunctionNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "mySym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "resultSym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processModifiedFunctionSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "resultSym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "mySym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processAnchorChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processPrimaryChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processAdds",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processAddedFunctionSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mySym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEntryPtChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateEntryPtChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "renameResultSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mySym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.CircularDependencyException",
+          "type_short": "CircularDependencyException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mySym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "saveRemoveConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveRenameConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveAddressConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "savePrimaryConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIDCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictHashtable",
+          "type_long": "java.util.Hashtable\u003cghidra.program.model.address.Address,ghidra.util.datastruct.LongArrayList\u003e",
+          "type_short": "Hashtable",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCountFromConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMinimum",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMaximum",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handlePrimaryConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handleAddressConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "symbolPath",
+          "type_long": "ghidra.app.util.SymbolPath",
+          "type_short": "SymbolPath",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleRemoveConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handleRenameConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isUnresolvableChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasSymbolWithNameConflict",
+      "comment": "Checks to see if there is a symbol in the otherProgram that conflicts\n with the indicated symbol. A conflict can be one of these types:\n 1) a symbol other than label or function that has the same name and \n namespace as another non label or function.\n 2) a symbol at the same address with the same name and namespace.",
+      "javadoc": "Checks to see if there is a symbol in the otherProgram that conflicts\n with the indicated symbol. A conflict can be one of these types:\n 1) a symbol other than label or function that has the same name and \n namespace as another non label or function.\n 2) a symbol at the same address with the same name and namespace.\n@param program the program that contains the specified symbol\n@param symbol the symbol (Can be original, latest, or my.)\n@param otherProgram the program to be checked for a conflicting symbol\n@param saveConflict if true this will also save the conflict for processing or in\n some cases automatically process the conflict.\n@return true if there is a symbol name conflict",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program that contains the specified symbol"
+        },
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol (Can be original, latest, or my.)"
+        },
+        {
+          "name": "otherProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be checked for a conflicting symbol"
+        },
+        {
+          "name": "saveConflict",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true this will also save the conflict for processing or in\n some cases automatically process the conflict."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is a symbol name conflict"
+      },
+      "throws": []
+    },
+    {
+      "name": "isAddressConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isNamespaceConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sameNamespaceSymbols",
+          "type_long": "java.util.List\u003cghidra.program.model.symbol.Symbol\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveRemoveVsChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.CircularDependencyException",
+          "type_short": "CircularDependencyException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "resolveRename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.CircularDependencyException",
+          "type_short": "CircularDependencyException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultIDFromOriginalID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NoValueException",
+          "type_short": "NoValueException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultSymbolFromMySymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultSymbolFromMyID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultIDFromMyID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mySymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NoValueException",
+          "type_short": "NoValueException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultSymbolFromLatestSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultSymbolFromOriginalSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultIDFromLatestID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NoValueException",
+          "type_short": "NoValueException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "showConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "conflictType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "choice",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "conflictTypeText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.CircularDependencyException",
+          "type_short": "CircularDependencyException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "sourceProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "sourceSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "sourceProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "sourceSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "oldSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "newProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "newSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.CircularDependencyException",
+          "type_short": "CircularDependencyException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "renameSymbol",
+      "comment": "Renames the oldSymbol to have a name and namespace equivalent to that of the newSymbol.",
+      "javadoc": "Renames the oldSymbol to have a name and namespace equivalent to that of the newSymbol.\n@param oldProgram the program containing the old symbol\n@param oldSymbol the old symbol\n@param newProgram the program containing the new symbol\n@param newSymbol the new symbol\n@throws DuplicateNameException\n@throws InvalidInputException\n@throws CircularDependencyException",
+      "static": false,
+      "params": [
+        {
+          "name": "oldProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program containing the old symbol"
+        },
+        {
+          "name": "oldSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the old symbol"
+        },
+        {
+          "name": "newProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program containing the new symbol"
+        },
+        {
+          "name": "newSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the new symbol"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.CircularDependencyException",
+          "type_short": "CircularDependencyException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeMySymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "myID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalOrMySymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "renameToMySymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mySymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getPath",
+      "comment": "Gets an array of strings indicating what the full path  would be if a symbol with\n the indicated name were in the specified namespace.",
+      "javadoc": "Gets an array of strings indicating what the full path  would be if a symbol with\n the indicated name were in the specified namespace.\n@param name the symbol name\n@param namespace the namespace\n@return the path as an array",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the symbol name"
+        },
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the namespace"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "the path as an array"
+      },
+      "throws": []
+    },
+    {
+      "name": "createSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.SymbolType",
+          "type_short": "SymbolType",
+          "comment": ""
+        },
+        {
+          "name": "resultAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "resultParentNs",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "srcPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "srcSymID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateResolveIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "srcPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "srcSymID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "resolveSymID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createResultSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setPrimary",
+      "comment": "Sets the primary symbol at the indicated address to be the one that is\n primary in the program indicated by conflictOption.",
+      "javadoc": "Sets the primary symbol at the indicated address to be the one that is\n primary in the program indicated by conflictOption.\n@param addr the address\n@param conflictOption KEEP_LATEST, KEEP_MY, or KEEP_ORIGINAL.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address"
+        },
+        {
+          "name": "conflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "KEEP_LATEST, KEEP_MY, or KEEP_ORIGINAL."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRemoveConflictPanel",
+      "comment": "Returns the conflict panel for resolving whether to remove or change a symbol.",
+      "javadoc": "Returns the conflict panel for resolving whether to remove or change a symbol.\n@param symbol the symbol\n@param listener listener for handling user selecting an option.\n@return the conflict panel",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol"
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "listener for handling user selecting an option."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": "the conflict panel"
+      },
+      "throws": []
+    },
+    {
+      "name": "getRenameConflictPanel",
+      "comment": "Returns the conflict panel for resolving which name to use when\n Latest and My programs both renamed the symbol.",
+      "javadoc": "Returns the conflict panel for resolving which name to use when\n Latest and My programs both renamed the symbol.\n@param symbol the symbol\n@param listener listener for handling user selecting an option.\n@return the conflict panel",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol"
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "listener for handling user selecting an option."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": "the conflict panel"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNamespaceConflictPanel",
+      "comment": "Returns the conflict panel for resolving different symbols with the\n same name in the same namespace.",
+      "javadoc": "Returns the conflict panel for resolving different symbols with the\n same name in the same namespace.\n@param myNamespace the symbol namespace\n@param symbolName the symbol name\n@param listener listener for handling user selecting an option.\n@return the conflict panel",
+      "static": false,
+      "params": [
+        {
+          "name": "myNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the symbol namespace"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the symbol name"
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "listener for handling user selecting an option."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": "the conflict panel"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressConflictPanel",
+      "comment": "Returns the conflict panel for resolving symbols with the same name and namespace at an address.",
+      "javadoc": "Returns the conflict panel for resolving symbols with the same name and namespace at an address.\n@param address the address\n@param symbolName the name of the conflicting symbol\n@param listener listener for handling user selecting an option.\n@return the conflict panel",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the conflicting symbol"
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "listener for handling user selecting an option."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": "the conflict panel"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrimaryConflictPanel",
+      "comment": "Returns the conflict panel for resolving differences in the symbol\n set to primary at an address.",
+      "javadoc": "Returns the conflict panel for resolving differences in the symbol\n set to primary at an address.\n@param address the address\n@param listener listener for handling user selecting an option.\n@return the conflict panel or null if the conflict no longer exists.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address"
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "listener for handling user selecting an option."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": "the conflict panel or null if the conflict no longer exists."
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolInfo",
+      "comment": "Returns an array of strings to display for a row of symbol information.",
+      "javadoc": "Returns an array of strings to display for a row of symbol information.\n@param pgm the program containing the symbol\n@param id the symbol ID.\n@param prefix prefix for the first column\u0027s info.\n@param suffix suffix for the first column\u0027s info.\n@return the strings of symbol information",
+      "static": false,
+      "params": [
+        {
+          "name": "pgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program containing the symbol"
+        },
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the symbol ID."
+        },
+        {
+          "name": "prefix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "prefix for the first column\u0027s info."
+        },
+        {
+          "name": "suffix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "suffix for the first column\u0027s info."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "the strings of symbol information"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolInfo",
+      "comment": "Returns an array of strings to display for a row of symbol information.",
+      "javadoc": "Returns an array of strings to display for a row of symbol information.\n@param pgm the program containing the symbol\n@param s the symbol\n@return the strings of symbol information",
+      "static": false,
+      "params": [
+        {
+          "name": "pgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program containing the symbol"
+        },
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "the strings of symbol information"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolInfo",
+      "comment": "Returns an array of strings to display for a row of symbol information.",
+      "javadoc": "Returns an array of strings to display for a row of symbol information.\n@param pgm the program containing the symbol\n@param s the symbol\n@param prefix prefix for the first column\u0027s info.\n@param suffix suffix for the first column\u0027s info.\n@return the strings of symbol information",
+      "static": false,
+      "params": [
+        {
+          "name": "pgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program containing the symbol"
+        },
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol"
+        },
+        {
+          "name": "prefix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "prefix for the first column\u0027s info."
+        },
+        {
+          "name": "suffix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "suffix for the first column\u0027s info."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "the strings of symbol information"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrimarySymbolInfo",
+      "comment": "Returns an array of strings to display for a row of symbol information\n for a conflict on which symbol to set as primary.",
+      "javadoc": "Returns an array of strings to display for a row of symbol information\n for a conflict on which symbol to set as primary.\n@param pgm the program containing the symbol\n@param s the symbol\n@param prefix prefix for the first column\u0027s info.\n@param suffix suffix for the first column\u0027s info.\n@return the strings of symbol information",
+      "static": false,
+      "params": [
+        {
+          "name": "pgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program containing the symbol"
+        },
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol"
+        },
+        {
+          "name": "prefix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "prefix for the first column\u0027s info."
+        },
+        {
+          "name": "suffix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "suffix for the first column\u0027s info."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "the strings of symbol information"
+      },
+      "throws": []
+    }
+  ]
+}

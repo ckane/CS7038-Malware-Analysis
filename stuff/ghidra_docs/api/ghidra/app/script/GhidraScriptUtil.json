@@ -1,0 +1,589 @@
+{
+  "name": "GhidraScriptUtil",
+  "comment": "A utility class for managing script directories and ScriptInfo objects.",
+  "javadoc": "A utility class for managing script directories and ScriptInfo objects.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "USER_SCRIPTS_DIR",
+      "comment": "User\u0027s home scripts directory",
+      "javadoc": "User\u0027s home scripts directory",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "bundleHost",
+      "comment": "this instance is Ghidra\u0027s singleton, a reference is held here and in GhidraScriptMgrPlugin",
+      "javadoc": "this instance is Ghidra\u0027s singleton, a reference is held here and in {@link GhidraScriptMgrPlugin}",
+      "static": true,
+      "type_long": "ghidra.app.plugin.core.osgi.BundleHost",
+      "type_short": "BundleHost",
+      "constant_value": null
+    },
+    {
+      "name": "SCRIPTS_SUBDIR_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"ghidra_scripts\""
+    },
+    {
+      "name": "DEV_SCRIPTS_SUBDIR_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"developer_scripts\""
+    },
+    {
+      "name": "providers",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.List\u003cghidra.app.script.GhidraScriptProvider\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "referenceCount",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.concurrent.atomic.AtomicInteger",
+      "type_short": "AtomicInteger",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBundleHost",
+      "comment": "",
+      "javadoc": "@return the bundle host used for scripting",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.core.osgi.BundleHost",
+        "type_short": "BundleHost",
+        "comment": "the bundle host used for scripting"
+      },
+      "throws": []
+    },
+    {
+      "name": "setBundleHost",
+      "comment": "set the bundle host and start the framework",
+      "javadoc": "set the bundle host and start the framework\n@param aBundleHost the bundle host",
+      "static": true,
+      "params": [
+        {
+          "name": "aBundleHost",
+          "type_long": "ghidra.app.plugin.core.osgi.BundleHost",
+          "type_short": "BundleHost",
+          "comment": "the bundle host"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initialize",
+      "comment": "initialize state of GhidraScriptUtil with user, system paths, and optional extra system paths.",
+      "javadoc": "initialize state of GhidraScriptUtil with user, system paths, and optional extra system paths.\n@param aBundleHost the host to use\n@param extraSystemPaths additional system paths for this run, can be null",
+      "static": true,
+      "params": [
+        {
+          "name": "aBundleHost",
+          "type_long": "ghidra.app.plugin.core.osgi.BundleHost",
+          "type_short": "BundleHost",
+          "comment": "the host to use"
+        },
+        {
+          "name": "extraSystemPaths",
+          "type_long": "java.util.List\u003cjava.lang.String\u003e",
+          "type_short": "List",
+          "comment": "additional system paths for this run, can be null"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "dispose of the bundle host and providers list",
+      "javadoc": "dispose of the bundle host and providers list",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getScriptSourceDirectories",
+      "comment": "Returns a list of the current script directories.",
+      "javadoc": "Returns a list of the current script directories.\n@return a list of the current script directories",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cgeneric.jar.ResourceFile\u003e",
+        "type_short": "List",
+        "comment": "a list of the current script directories"
+      },
+      "throws": []
+    },
+    {
+      "name": "findSourceDirectoryContaining",
+      "comment": "Search the currently managed source directories for the given script file.",
+      "javadoc": "Search the currently managed source directories for the given script file.\n@param sourceFile the source file\n@return the source directory if found, or null if not",
+      "static": true,
+      "params": [
+        {
+          "name": "sourceFile",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the source file"
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": "the source directory if found, or null if not"
+      },
+      "throws": []
+    },
+    {
+      "name": "findScriptByName",
+      "comment": "Search the currently managed scripts for one with the given name.",
+      "javadoc": "Search the currently managed scripts for one with the given name.\n@param scriptName the name\n@return the first file found or null if none are found",
+      "static": true,
+      "params": [
+        {
+          "name": "scriptName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name"
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": "the first file found or null if none are found"
+      },
+      "throws": []
+    },
+    {
+      "name": "buildUserScriptsDirectory",
+      "comment": "User\u0027s home scripts directory. Some tests may override the default using the \n SystemUtilities.USER_SCRIPTS_DIR system property.",
+      "javadoc": "User\u0027s home scripts directory. Some tests may override the default using the \n SystemUtilities.USER_SCRIPTS_DIR system property.\n@return the path to the default user scripts directory",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the path to the default user scripts directory"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSystemScriptDirectories",
+      "comment": "Returns a list of the default script directories.",
+      "javadoc": "Returns a list of the default script directories.\n@return a list of the default script directories",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cgeneric.jar.ResourceFile\u003e",
+        "type_short": "List",
+        "comment": "a list of the default script directories"
+      },
+      "throws": []
+    },
+    {
+      "name": "getUserScriptDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addScriptDirectories",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "dirList",
+          "type_long": "java.util.List\u003cgeneric.jar.ResourceFile\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "directoryName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSystemScript",
+      "comment": "Determine if the specified file is contained within the Ghidra installation.",
+      "javadoc": "Determine if the specified file is contained within the Ghidra installation.\n@param file script file or directory\n@return true if file contained within Ghidra installation area",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "script file or directory"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if file contained within Ghidra installation area"
+      },
+      "throws": []
+    },
+    {
+      "name": "isSystemFile",
+      "comment": "Determine if the specified file is contained within the Ghidra installation.",
+      "javadoc": "Determine if the specified file is contained within the Ghidra installation.\n@param file file or directory to check\n@return true if file is contained within Ghidra application root.",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "file or directory to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if file is contained within Ghidra application root."
+      },
+      "throws": []
+    },
+    {
+      "name": "getExplodedCompiledSourceBundlePaths",
+      "comment": "Returns the list of exploded bundle directories",
+      "javadoc": "Returns the list of exploded bundle directories\n@return the list\n@deprecated accessing class file directly precludes OSGi wiring according to requirements and capabilities",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cgeneric.jar.ResourceFile\u003e",
+        "type_short": "List",
+        "comment": "the list"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseName",
+      "comment": "Returns the base name give a script file.\n For example, given \"C:\\Temp\\SomeClass.java\",\n it will return \"SomeClass\".",
+      "javadoc": "Returns the base name give a script file.\n For example, given \"C:\\Temp\\SomeClass.java\",\n it will return \"SomeClass\".\n@param script the script\n@return the base name",
+      "static": true,
+      "params": [
+        {
+          "name": "script",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the script"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the base name"
+      },
+      "throws": []
+    },
+    {
+      "name": "getProviders",
+      "comment": "Returns a list of all Ghidra script providers",
+      "javadoc": "Returns a list of all Ghidra script providers\n@return a list of all Ghidra script providers",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.script.GhidraScriptProvider\u003e",
+        "type_short": "List",
+        "comment": "a list of all Ghidra script providers"
+      },
+      "throws": []
+    },
+    {
+      "name": "getProvider",
+      "comment": "Returns the corresponding Ghidra script providers\n for the specified script file.",
+      "javadoc": "Returns the corresponding Ghidra script providers\n for the specified script file.\n@param scriptFile the script file\n@return the Ghidra script provider",
+      "static": true,
+      "params": [
+        {
+          "name": "scriptFile",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the script file"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.script.GhidraScriptProvider",
+        "type_short": "GhidraScriptProvider",
+        "comment": "the Ghidra script provider"
+      },
+      "throws": []
+    },
+    {
+      "name": "hasScriptProvider",
+      "comment": "Returns true if a provider exists that can process the specified file.",
+      "javadoc": "Returns true if a provider exists that can process the specified file.\n@param scriptFile the script file\n@return true if a provider exists that can process the specified file",
+      "static": true,
+      "params": [
+        {
+          "name": "scriptFile",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the script file"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a provider exists that can process the specified file"
+      },
+      "throws": []
+    },
+    {
+      "name": "findProvider",
+      "comment": "Find the provider whose extension matches the given filename extension.",
+      "javadoc": "Find the provider whose extension matches the given filename extension.\n@param fileName name of script file\n@return the first matching provider or null if no provider matches",
+      "static": true,
+      "params": [
+        {
+          "name": "fileName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of script file"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.script.GhidraScriptProvider",
+        "type_short": "GhidraScriptProvider",
+        "comment": "the first matching provider or null if no provider matches"
+      },
+      "throws": []
+    },
+    {
+      "name": "createNewScript",
+      "comment": "Creates a new script with a unique name using the specified provider in the \n specified directory.",
+      "javadoc": "Creates a new script with a unique name using the specified provider in the \n specified directory.\n@param provider the Ghidra script provider\n@param parentDirectory the directory where the new script will be created.\n@param scriptDirectories The list of directories containing scripts (used to find a \n        unique name).\n@return the newly created script file\n@throws IOException if an i/o error occurs",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.script.GhidraScriptProvider",
+          "type_short": "GhidraScriptProvider",
+          "comment": "the Ghidra script provider"
+        },
+        {
+          "name": "parentDirectory",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the directory where the new script will be created."
+        },
+        {
+          "name": "scriptDirectories",
+          "type_long": "java.util.List\u003cgeneric.jar.ResourceFile\u003e",
+          "type_short": "List",
+          "comment": "The list of directories containing scripts (used to find a \n        unique name)."
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": "the newly created script file"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an i/o error occurs"
+        }
+      ]
+    },
+    {
+      "name": "createNewScript",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "scriptName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extension",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "parentDirctory",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": ""
+        },
+        {
+          "name": "scriptDirectories",
+          "type_long": "java.util.List\u003cgeneric.jar.ResourceFile\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "newScriptInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.script.ScriptInfo",
+        "type_short": "ScriptInfo",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fixupName",
+      "comment": "Fix script name issues for searching in script directories.\n If no provider can be identified, Java is assumed.\n \n This method is part of a poorly specified behavior that is due for future amendment.\n \n It is used by GhidraScript#runScript(String) methods, \n #createNewScript(String, String, ResourceFile, List), and by HeadlessAnalyzer for \n  and .  The intent was to allow some freedom in how a user specifies\n a script in two ways: 1) if the extension is omitted \".java\" is assumed and 2) if a Java class name is\n given it\u0027s converted to a relative path.",
+      "javadoc": "Fix script name issues for searching in script directories.\n If no provider can be identified, Java is assumed.\n \n \u003cp\u003eThis method is part of a poorly specified behavior that is due for future amendment.\n \n \u003cp\u003eIt is used by {@link GhidraScript#runScript(String)} methods, \n {@link #createNewScript(String, String, ResourceFile, List)}, and by {@link HeadlessAnalyzer} for \n {@code preScript} and {@code postScript}.  The intent was to allow some freedom in how a user specifies\n a script in two ways: 1) if the extension is omitted \".java\" is assumed and 2) if a Java class name is\n given it\u0027s converted to a relative path.\n@param name the name of the script\n@return the name as a file path",
+      "static": true,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the script"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the name as a file path"
+      },
+      "throws": []
+    },
+    {
+      "name": "findScriptFileInPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "scriptDirectories",
+          "type_long": "java.util.Collection\u003cgeneric.jar.ResourceFile\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "acquireBundleHostReference",
+      "comment": "When running the GUI, GhidraScriptUtil manages a single BundleHost instance.",
+      "javadoc": "When running the GUI, {@link GhidraScriptUtil} manages a single {@link BundleHost} instance.\n@return the BundleHost singleton",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.core.osgi.BundleHost",
+        "type_short": "BundleHost",
+        "comment": "the BundleHost singleton"
+      },
+      "throws": []
+    },
+    {
+      "name": "releaseBundleHostReference",
+      "comment": "release the reference the BundleHost reference.  When no references remain, \n #dispose() is called.",
+      "javadoc": "release the reference the BundleHost reference.  When no references remain, \n {@link #dispose()} is called.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

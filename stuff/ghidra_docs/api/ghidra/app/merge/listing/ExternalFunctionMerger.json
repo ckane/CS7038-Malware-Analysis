@@ -1,0 +1,4593 @@
+{
+  "name": "ExternalFunctionMerger",
+  "comment": "Class for merging external function and label changes. This class can merge external function\n and label changes that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then allow the user to manually merge the conflicting\n functions and labels. External functions do not have bodies.\n However their signatures, stacks and variables do get merged.\n This class extends the AbstractFunctionMerger to handle merging of function changes when both\n My and Latest have changed functions.\n Note: Externals are uniquely identified by symbol ID and the name (including namespace is\n also used to match externals when the external is transitioned from a label to a function\n and vice versa.\n Important: This class is intended to be used only for a single program\n version merge. It should be constructed, followed by an autoMerge(), and lastly\n each external with a conflict should have mergeConflicts() called on it.",
+  "javadoc": "Class for merging external function and label changes. This class can merge external function\n and label changes that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then allow the user to manually merge the conflicting\n functions and labels. External functions do not have bodies.\n However their signatures, stacks and variables do get merged.\n This class extends the AbstractFunctionMerger to handle merging of function changes when both\n My and Latest have changed functions.\n \u003cbr\u003eNote: Externals are uniquely identified by symbol ID and the name (including namespace is\n also used to match externals when the external is transitioned from a label to a function\n and vice versa.\n \u003cbr\u003eImportant: This class is intended to be used only for a single program\n version merge. It should be constructed, followed by an autoMerge(), and lastly\n each external with a conflict should have mergeConflicts() called on it.",
+  "static": false,
+  "implements": [
+    "ghidra.app.merge.listing.ListingMerger"
+  ],
+  "extends": "ghidra.app.merge.listing.AbstractFunctionMerger",
+  "fields": [
+    {
+      "name": "EXTERNALS_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Externals\""
+    },
+    {
+      "name": "CONFLICT_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Externals\""
+    },
+    {
+      "name": "INFO_TITLE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Externals Merge Information\""
+    },
+    {
+      "name": "ERROR_TITLE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Externals Merge Errors\""
+    },
+    {
+      "name": "EXTERNAL_NAMESPACE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "EXTERNAL_LABEL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "EXTERNAL_ADDRESS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "EXTERNAL_SYMBOL_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16"
+    },
+    {
+      "name": "EXTERNAL_DATA_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "32"
+    },
+    {
+      "name": "EXTERNAL_FUNCTION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "64"
+    },
+    {
+      "name": "HIGHEST_DETAIL_BIT_SHIFT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "6"
+    },
+    {
+      "name": "ALL_EXTERNAL_DIFFERENCES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "119"
+    },
+    {
+      "name": "KEEP_LATEST_ADD",
+      "comment": "Keep the external location added in LATEST to resolve a conflict.",
+      "javadoc": "Keep the external location added in LATEST to resolve a conflict.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "KEEP_MY_ADD",
+      "comment": "Keep the external location added in MY to resolve a conflict.",
+      "javadoc": "Keep the external location added in MY to resolve a conflict.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "KEEP_BOTH_ADDS",
+      "comment": "Keep both of the external locations added in the LATEST and in MY when in conflict.",
+      "javadoc": "Keep both of the external locations added in the LATEST and in MY when in conflict.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "MERGE_BOTH_ADDS",
+      "comment": "Merge both of the external locations added in the LATEST and in MY when in conflict.",
+      "javadoc": "Merge both of the external locations added in the LATEST and in MY when in conflict.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "KEEP_BOTH_BUTTON_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"KeepBothVersionsRB\""
+    },
+    {
+      "name": "MERGE_BOTH_BUTTON_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"MergeBothVersionsRB\""
+    },
+    {
+      "name": "addConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalAddConflictPanel",
+      "type_short": "ExternalAddConflictPanel",
+      "constant_value": null
+    },
+    {
+      "name": "conflictInfoPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalConflictInfoPanel",
+      "type_short": "ExternalConflictInfoPanel",
+      "constant_value": null
+    },
+    {
+      "name": "totalConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "conflictIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "latestChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "myChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "originalToLatestHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "latestToOriginalHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "originalToMyHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "myToOriginalHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "originalResolvedSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "latestResolvedSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "myResolvedSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "mergeMy",
+      "comment": "Used to merge from Checked Out version to Result version.",
+      "javadoc": "Used to merge from Checked Out version to Result version.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "mergeLatest",
+      "comment": "Used to merge from Latest version to Result version.",
+      "javadoc": "Used to merge from Latest version to Result version.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "mergeOriginal",
+      "comment": "Used to merge from Original version to Result version.",
+      "javadoc": "Used to merge from Original version to Result version.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "latestAddIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "latestRemovedOriginalIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "latestModifiedIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "myAddIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "myRemovedOriginalIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "myModifiedIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "removeConflictIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "removeFunctionConflictIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "renamedConflictIDs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "symbolTables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SymbolTable[]",
+      "type_short": "ghidra.program.model.symbol.SymbolTable[]",
+      "constant_value": null
+    },
+    {
+      "name": "externalManagers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.ExternalManager[]",
+      "type_short": "ghidra.program.model.symbol.ExternalManager[]",
+      "constant_value": null
+    },
+    {
+      "name": "conflictListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalFunctionMerger.ConflictListener",
+      "type_short": "ConflictListener",
+      "constant_value": null
+    },
+    {
+      "name": "latestExternalSet",
+      "comment": "addresses of changes to externals between the original and latest versioned program.",
+      "javadoc": "addresses of changes to externals between the original and latest versioned program.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "myExternalSet",
+      "comment": "addresses of changes to externals between the original and my modified program.",
+      "javadoc": "addresses of changes to externals between the original and my modified program.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "externalDetailConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.ObjectIntHashtable\u003cghidra.program.model.address.Address\u003e",
+      "type_short": "ObjectIntHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "externalDataTypeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "externalFunctionVersusDataTypeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "externalAddConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "myAddressTranslator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalsAddressTranslator",
+      "type_short": "ExternalsAddressTranslator",
+      "constant_value": null
+    },
+    {
+      "name": "latestAddressTranslator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalsAddressTranslator",
+      "type_short": "ExternalsAddressTranslator",
+      "constant_value": null
+    },
+    {
+      "name": "originalAddressTranslator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalsAddressTranslator",
+      "type_short": "ExternalsAddressTranslator",
+      "constant_value": null
+    },
+    {
+      "name": "totalChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "changeNum",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "showListingPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "externalFunctionRemovalChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "externalFunctionChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "externalDetailsChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "externalDataTypeChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "externalFunctionVsDataTypeChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "externalAddChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "externalRemoveChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "currentExternalConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalFunctionMerger.ExternalConflictType",
+      "type_short": "ExternalConflictType",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Manages changes and conflicts for externals between the latest versioned\n program and the modified program being checked into version control.",
+      "javadoc": "Manages changes and conflicts for externals between the latest versioned\n program and the modified program being checked into version control.\n@param listingMergeManager the top level merge manager for merging a program version.\n@param showListingPanel true to show the listing panel.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingMergeManager",
+          "type_long": "ghidra.app.merge.listing.ListingMergeManager",
+          "type_short": "ListingMergeManager",
+          "comment": "the top level merge manager for merging a program version."
+        },
+        {
+          "name": "showListingPanel",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to show the listing panel."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupSymbolChanges",
+      "comment": "Determine the type of changes to the symbols in the LATEST and MY (CheckedOut) program.\n Changes can be symbol removed, added, changed, renamed, and set to primary.",
+      "javadoc": "Determine the type of changes to the symbols in the LATEST and MY (CheckedOut) program.\n Changes can be symbol removed, added, changed, renamed, and set to primary.\n@param monitor task monitor for displaying progress to the user\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for displaying progress to the user"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "fillExternalAddSymbolSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": ""
+        },
+        {
+          "name": "symbolIDs",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "externalAddSet",
+          "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fillExternalChangeSymbolSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": ""
+        },
+        {
+          "name": "symbolIDs",
+          "type_long": "long[]",
+          "type_short": "long[]",
+          "comment": ""
+        },
+        {
+          "name": "externalRemoveSet",
+          "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        },
+        {
+          "name": "externalModifySet",
+          "type_long": "java.util.HashSet\u003cjava.lang.Long\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeSymbolTables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeExternalManagers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeMessages",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeChangeSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeProgramMerges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeConflictSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "allChoicesAreResolved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChoiceForExternalConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalConflictType",
+          "type_long": "ghidra.app.merge.listing.ExternalFunctionMerger.ExternalConflictType",
+          "type_short": "ExternalConflictType",
+          "comment": ""
+        },
+        {
+          "name": "choiceForFunctionConflict",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMin",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMax",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initializeAutoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMessage",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "progressMin",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMax",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveInitialIDHashInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddsRemovesChangesForExternals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "fixupLatestChangeIDsMarkedAsRemovesAndAdds",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fixupMyChangeIDsMarkedAsRemovesAndAdds",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNonSymbolChangesForLatestExternals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getNonSymbolChangesForMyExternals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "fixupLatestExternalTypeChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "latestID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fixupMyExternalTypeChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "myID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveExternalDetailConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "externalConflictFlags",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "determineBasicExternalConflict",
+      "comment": "",
+      "javadoc": "@param entry\n@param type (FUNC_RETURN_TYPE, FUNC_RETURN_ADDRESS_OFFSET,\n FUNC_PARAMETER_OFFSET, FUNC_LOCAL_SIZE, FUNC_STACK_PURGE_SIZE, FUNC_NAME, FUNC_INLINE,\n FUNC_NO_RETURN, FUNC_CALLING_CONVENTION)\n@param latestMyChanges\n@param originalLatestChanges\n@param originalMyChanges\n@param monitor\n@return \n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "locations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "(FUNC_RETURN_TYPE, FUNC_RETURN_ADDRESS_OFFSET,\n FUNC_PARAMETER_OFFSET, FUNC_LOCAL_SIZE, FUNC_STACK_PURGE_SIZE, FUNC_NAME, FUNC_INLINE,\n FUNC_NO_RETURN, FUNC_CALLING_CONVENTION)"
+        },
+        {
+          "name": "latestMyChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "originalLatestChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "originalMyChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeExternalDetail",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "resultExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "fromExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBasicExternalDiffs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocation1",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "externalLocation2",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSameDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt1",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dt2",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSameLabel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "label1",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "label2",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "sourceType1",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "sourceType2",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasExternalAddConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocation1",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "externalLocation2",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isNameConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name1",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name2",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "originalName1",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "originalName2",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasExternalFunctionAddConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function1",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "function2",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasDefaultExternalName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasDefinedDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentNamespaces",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "namespace1",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "namespace2",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentExternals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocation1",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "externalLocation2",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "determineExternalRemoveConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "determineExternalChangeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalsChangedInLatest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalsChangedInMy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultIDfromLatestID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultIDfromOriginalID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeChangesAndDetermineConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "determineExternalDataTypeConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "latestMyChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "originalLatestChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "originalMyChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeExternalDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceExternalDataType",
+      "comment": "replaceExternalDataType replaces the data type of the\n external label in program1 with the data type of the external label in program2\n at the specified external space address.",
+      "javadoc": "\u003cCODE\u003ereplaceExternalDataType\u003c/CODE\u003e replaces the data type of the\n external label in program1 with the data type of the external label in program2\n at the specified external space address.\n@param resultExternalLocation\n@param fromExternalLocation\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "resultExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "fromExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "saveExternalDataTypeConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myExternalAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveExternalFunctionVersusDataTypeConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myExternalAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveExternalRemoveFunctionConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "determineExternalFunctionConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "latestMyChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "originalLatestChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "originalMyChanges",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "determineDetailedFunctionConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "determineExternalAddConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isAddConflictSpecialFunctionVsData",
+      "comment": "If there is an external add conflict, but it is between a new external function versus a\n new external data label, we don\u0027t want to give the user the KeepBoth or MergeBoth options.",
+      "javadoc": "If there is an external add conflict, but it is between a new external function versus a\n new external data label, we don\u0027t want to give the user the KeepBoth or MergeBoth options.\n@param latestExternalLocation the external location in the Latest program\n@param myExternalLocation the external location in the My program\n@param monitor a status monitor for feedback and cancelling.\n@return true if this is an external function versus external data label.",
+      "static": false,
+      "params": [
+        {
+          "name": "latestExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": "the external location in the Latest program"
+        },
+        {
+          "name": "myExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": "the external location in the My program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "a status monitor for feedback and cancelling."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is an external function versus external data label."
+      },
+      "throws": []
+    },
+    {
+      "name": "saveExternalAddConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "myExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeAddsAndDetermineConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "myExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultSpaceAddressForLatestLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addExternal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExternal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "programMerge",
+          "type_long": "ghidra.program.util.ProgramMerge",
+          "type_short": "ProgramMerge",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "Performs a manual merge of external program conflicts.",
+      "javadoc": "Performs a manual merge of external program conflicts.\n@param chosenConflictOption ASK_USER means interactively resolve conflicts.\n JUnit testing also allows setting this to LATEST, MY, or ORIGINAL to force\n selection of a particular version change.\n@param monitor task monitor for informing the user of progress.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "ASK_USER means interactively resolve conflicts.\n JUnit testing also allows setting this to LATEST, MY, or ORIGINAL to force\n selection of a particular version change."
+        },
+        {
+          "name": "listingConflictInfoPanel",
+          "type_long": "ghidra.app.merge.listing.ConflictInfoPanel",
+          "type_short": "ConflictInfoPanel",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for informing the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "processExternalRemoveConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalDetailConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalDataTypeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalFunctionVsDataTypeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalFunctionRemoveConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalFunctionDetailConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processExternalAddConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setResolveInformation",
+      "comment": "Puts the LongLongHashtables, that map the symbol IDs from LATEST, MY, and\n ORIGINAL programs to the RESULT program symbol IDs, into the Merge Manager.",
+      "javadoc": "Puts the LongLongHashtables, that map the symbol IDs from LATEST, MY, and\n ORIGINAL programs to the RESULT program symbol IDs, into the Merge Manager.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanupConflictPanels",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleExternalRemoveFunctionConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handleExternalFunctionConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functions",
+          "type_long": "ghidra.program.model.listing.Function[]",
+          "type_short": "ghidra.program.model.listing.Function[]",
+          "comment": ""
+        },
+        {
+          "name": "myEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "currentConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createStorageConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functions",
+          "type_long": "ghidra.program.model.listing.Function[]",
+          "type_short": "ghidra.program.model.listing.Function[]",
+          "comment": ""
+        },
+        {
+          "name": "pair",
+          "type_long": "generic.stl.Pair\u003cjava.util.List\u003cghidra.program.model.listing.Variable\u003e,java.util.List\u003cghidra.program.model.listing.Variable\u003e\u003e",
+          "type_short": "Pair",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.ScrollingListChoicesPanel",
+        "type_short": "ScrollingListChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeVariableStorage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functions",
+          "type_long": "ghidra.program.model.listing.Function[]",
+          "type_short": "ghidra.program.model.listing.Function[]",
+          "comment": ""
+        },
+        {
+          "name": "pair",
+          "type_long": "generic.stl.Pair\u003cjava.util.List\u003cghidra.program.model.listing.Variable\u003e,java.util.List\u003cghidra.program.model.listing.Variable\u003e\u003e",
+          "type_short": "Pair",
+          "comment": ""
+        },
+        {
+          "name": "currentConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getExternalLocationsForFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functions",
+          "type_long": "ghidra.program.model.listing.Function[]",
+          "type_short": "ghidra.program.model.listing.Function[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+        "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateAddressTranslators",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateAddressTranslators",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functions",
+          "type_long": "ghidra.program.model.listing.Function[]",
+          "type_short": "ghidra.program.model.listing.Function[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflictsForAdd",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "resolveOriginalIDFromLatestID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveOriginalIDFromMyID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveLatestIDFromOriginalID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveMyIDFromOriginalID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocationsForMyAddress",
+      "comment": "Gets the external locations (result, latest, my, original) for the specified MY program\n external space address.\n NOTE: Be careful where you call this method from. It is intended to be used for external\n location changes only (not for Adds). It gets the ORIGINAL based on MY and then LATEST and\n RESULT based on the ORIGINAL.",
+      "javadoc": "Gets the external locations (result, latest, my, original) for the specified MY program\n external space address.\u003cbr\u003e\n NOTE: Be careful where you call this method from. It is intended to be used for external\n location changes only (not for Adds). It gets the ORIGINAL based on MY and then LATEST and\n RESULT based on the ORIGINAL.\n@param myAddress the MY program external space address for MY external location\n@return all four program\u0027s external locations.",
+      "static": false,
+      "params": [
+        {
+          "name": "myAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the MY program external space address for MY external location"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+        "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+        "comment": "all four program\u0027s external locations."
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocationsForOriginalID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+        "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleExternalDetailsConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handleExternalDataTypeConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handleExternalFunctionVersusDataTypeConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handleExternalAddConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestExternalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "myExternalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function[]",
+        "type_short": "ghidra.program.model.listing.Function[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleRemoveConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalExternalID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "currentConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateExternalNameInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "programVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createAddConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createRemoveConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExternalDetailConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "myEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VariousChoicesPanel",
+        "type_short": "VariousChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExternalDetailConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "conflicts",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VariousChoicesPanel",
+        "type_short": "VariousChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExternalDataTypeConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExternalRemoveFunctionConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExternalFunctionVsDataTypeConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createParamInfoConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functions",
+          "type_long": "ghidra.program.model.listing.Function[]",
+          "type_short": "ghidra.program.model.listing.Function[]",
+          "comment": ""
+        },
+        {
+          "name": "pc",
+          "type_long": "ghidra.app.merge.listing.AbstractFunctionMerger.ParamInfoConflict",
+          "type_short": "ParamInfoConflict",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VariousChoicesPanel",
+        "type_short": "VariousChoicesPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "programVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "includeNamespace",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveAddConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "choice",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "resolveNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "sourceNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "fromExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "programMerge",
+          "type_long": "ghidra.program.util.ProgramMerge",
+          "type_short": "ProgramMerge",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "fromExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "fromExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "fromExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "programMerge",
+          "type_long": "ghidra.program.util.ProgramMerge",
+          "type_short": "ProgramMerge",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addMyExternal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeLatestAndMyForAddConflict",
+      "comment": "Method called for merging an external that was added in LATEST and one that was added in MY.",
+      "javadoc": "Method called for merging an external that was added in LATEST and one that was added in MY.\n@param externalLocations RESULT, LATEST, and MY locations and ORIGINAL is null.\n@param monitor task monitor for progress and cancelling.\n@throws CancelledException if user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": "RESULT, LATEST, and MY locations and ORIGINAL is null."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for progress and cancelling."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "mergeBasicExternalDetail",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "currentChosenOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "currentChosenOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merges the entire external so that it will match the external as it is in the program\n indicated by the chosen option.",
+      "javadoc": "Merges the entire external so that it will match the external as it is in the program\n indicated by the chosen option.\n@param externalLocations the external locations for the external in Latest, My, and Original.\n (Any of these locations can be null if the external is not in that program.)\n@param chosenConflictOption ListingMergeConstant (KEEP_LATEST, KEEP_MY, KEEP_ORIGINAL)\n indicating which program the resulting external should become.\n@param monitor the task monitor for feedback and cancelling the merge.\n@throws CancelledException if the user cancels the merge.\n@throws InvalidInputException\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": "the external locations for the external in Latest, My, and Original.\n (Any of these locations can be null if the external is not in that program.)"
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "ListingMergeConstant (KEEP_LATEST, KEEP_MY, KEEP_ORIGINAL)\n indicating which program the resulting external should become."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for feedback and cancelling the merge."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "mergeLatest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeMy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeOriginal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "adjustIDMapsForRemove",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenExternal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "adjustIDMapsForAdd",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "resultExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "chosenExternal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "adjustIDMapsForReplace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "chosenExternal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refreshResultPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExternal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultExternalSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExternal",
+      "comment": "Removes the indicated external from the result program.",
+      "javadoc": "Removes the indicated external from the result program.\n@param sourceProgram the program that is the source of the external location\n (Either Latest, My, or Original program.)\n@param sourceExternalLocation the external location that indicates which external\n is to be removed from the result. (External is from Latest, My, or Original program.)",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program that is the source of the external location\n (Either Latest, My, or Original program.)"
+        },
+        {
+          "name": "sourceExternalLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": "the external location that indicates which external\n is to be removed from the result. (External is from Latest, My, or Original program.)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergeLatest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.util.ProgramMerge",
+        "type_short": "ProgramMerge",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergeMy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.util.ProgramMerge",
+        "type_short": "ProgramMerge",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergeOriginal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.util.ProgramMerge",
+        "type_short": "ProgramMerge",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupAddConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addConflictPanel",
+          "type_long": "ghidra.app.merge.listing.ExternalAddConflictPanel",
+          "type_short": "ExternalAddConflictPanel",
+          "comment": ""
+        },
+        {
+          "name": "conflictPanel",
+          "type_long": "javax.swing.JPanel",
+          "type_short": "JPanel",
+          "comment": ""
+        },
+        {
+          "name": "latestLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "myLocation",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "conflictPanel",
+          "type_long": "ghidra.app.merge.listing.ConflictPanel",
+          "type_short": "ConflictPanel",
+          "comment": ""
+        },
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveFunctionDetailConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functions",
+          "type_long": "ghidra.program.model.listing.Function[]",
+          "type_short": "ghidra.program.model.listing.Function[]",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalLocations",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation[]",
+          "type_short": "ghidra.program.model.symbol.ExternalLocation[]",
+          "comment": ""
+        },
+        {
+          "name": "programVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalSpaceAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRenamedConflictsInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.StringBuffer",
+        "type_short": "StringBuffer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumConflictsResolved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "conflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInfoTitle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getErrorTitle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVersionName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "programVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

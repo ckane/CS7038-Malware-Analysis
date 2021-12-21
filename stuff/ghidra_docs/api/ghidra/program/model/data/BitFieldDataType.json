@@ -1,0 +1,694 @@
+{
+  "name": "BitFieldDataType",
+  "comment": "BitFieldDataType provides a means of defining a minimally sized bit-field\n for use within data structures.  The length (i.e., storage size) of this bitfield datatype is\n the minimum number of bytes required to contain the bitfield at its specified offset.\n The effective bit-size of a bitfield will be limited by the size of the base\n datatype whose size may be controlled by its associated datatype manager and data organization\n (e.g., IntegerDataType). \n \n NOTE: Instantiation of this datatype implementation is intended for internal use only.  \n Creating and manipulating bitfields should be accomplished directly via Structure or Union \n bitfield methods.",
+  "javadoc": "\u003ccode\u003eBitFieldDataType\u003c/code\u003e provides a means of defining a minimally sized bit-field\n for use within data structures.  The length (i.e., storage size) of this bitfield datatype is\n the minimum number of bytes required to contain the bitfield at its specified offset.\n The effective bit-size of a bitfield will be limited by the size of the base\n datatype whose size may be controlled by its associated datatype manager and data organization\n (e.g., {@link IntegerDataType}). \n \u003cp\u003e\n NOTE: Instantiation of this datatype implementation is intended for internal use only.  \n Creating and manipulating bitfields should be accomplished directly via Structure or Union \n bitfield methods.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.program.model.data.AbstractDataType",
+  "fields": [
+    {
+      "name": "MAX_BIT_LENGTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "255"
+    },
+    {
+      "name": "baseDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "bitSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "effectiveBitSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "bitOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "storageSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "defaultSettings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.docking.settings.Settings",
+      "type_short": "Settings",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a bit-field type based upon a specified base type.  The baseDataType will\n take precedence if specified.  Either baseType or baseDatatype must be specified.",
+      "javadoc": "Construct a bit-field type based upon a specified base type.  The baseDataType will\n take precedence if specified.  Either baseType or baseDatatype must be specified.\n@param baseDataType base data type (integer/enum type or typedef to same).  This\n bitfield will adopt the same datatype manager as this base type.\n@param bitSize size of bit-field expressed as number of bits (0..255).  The effective \n bit size may be reduced based upon the specified base datatype size.\n@param bitOffset right shift factor within storage unit when viewed as a big-endian dd\n scalar value.  Based upon minimal storage bitOffset should be in the range 0 to 7.\n@throws InvalidDataTypeException",
+      "static": false,
+      "params": [
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "base data type (integer/enum type or typedef to same).  This\n bitfield will adopt the same datatype manager as this base type."
+        },
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "size of bit-field expressed as number of bits (0..255).  The effective \n bit size may be reduced based upon the specified base datatype size."
+        },
+        {
+          "name": "bitOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "right shift factor within storage unit when viewed as a big-endian dd\n scalar value.  Based upon minimal storage bitOffset should be in the range 0 to 7."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a bit-field type based upon a supported baseDataType.",
+      "javadoc": "Construct a bit-field type based upon a supported baseDataType.\n@param baseDataType a supported primitive integer data type or TypeDef to such a type.\n The baseType must already be cloned to the target datatype manager.\n@param bitSize size of bit-field expressed as number of bits\n@throws InvalidDataTypeException if specified baseDataType is not permitted",
+      "static": false,
+      "params": [
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "a supported primitive integer data type or TypeDef to such a type.\n The baseType must already be cloned to the target datatype manager."
+        },
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "size of bit-field expressed as number of bits"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": "if specified baseDataType is not permitted"
+        }
+      ]
+    },
+    {
+      "name": "isZeroLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEffectiveBitSize",
+      "comment": "Get the effective bit-size based upon the specified base type size.  A bit size\n larger than the base type size will truncated to the base type size.",
+      "javadoc": "Get the effective bit-size based upon the specified base type size.  A bit size\n larger than the base type size will truncated to the base type size.\n@param declaredBitSize\n@param baseTypeByteSize\n@return effective bit-size",
+      "static": true,
+      "params": [
+        {
+          "name": "declaredBitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "baseTypeByteSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "effective bit-size"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinimumStorageSize",
+      "comment": "Get the minimum storage size in bytes for a given size in bits.\n This does not consider the bit offset which may increase the required \n storage.",
+      "javadoc": "Get the minimum storage size in bytes for a given size in bits.\n This does not consider the bit offset which may increase the required \n storage.\n@param bitSize number of bits within bitfield\n@return minimum storage size in bytes",
+      "static": true,
+      "params": [
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of bits within bitfield"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "minimum storage size in bytes"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinimumStorageSize",
+      "comment": "Get the minimum storage size in bytes for a given size in bits with \n the specified bitOffset (lsb position within big endian storage)",
+      "javadoc": "Get the minimum storage size in bytes for a given size in bits with \n the specified bitOffset (lsb position within big endian storage)\n@param bitSize number of bits within bitfield\n@param bitOffset normalized bitfield offset within storage (lsb)\n@return minimum storage size in bytes",
+      "static": true,
+      "params": [
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of bits within bitfield"
+        },
+        {
+          "name": "bitOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "normalized bitfield offset within storage (lsb)"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "minimum storage size in bytes"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkBaseDataType",
+      "comment": "Check a bitfield base datatype",
+      "javadoc": "Check a bitfield base datatype\n@param baseDataType bitfield base data type (Enum, AbstractIntegerDataType and derived TypeDefs permitted)\n@throws InvalidDataTypeException if baseDataType is invalid as a bitfield base type.",
+      "static": true,
+      "params": [
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "bitfield base data type (Enum, AbstractIntegerDataType and derived TypeDefs permitted)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": "if baseDataType is invalid as a bitfield base type."
+        }
+      ]
+    },
+    {
+      "name": "isValidBaseDataType",
+      "comment": "Check if a specified baseDataType is valid for use with a bitfield",
+      "javadoc": "Check if a specified baseDataType is valid for use with a bitfield\n@param baseDataType bitfield base data type (Enum, AbstractIntegerDataType and derived TypeDefs permitted)\n@return true if baseDataType is valid else false",
+      "static": true,
+      "params": [
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "bitfield base data type (Enum, AbstractIntegerDataType and derived TypeDefs permitted)"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if baseDataType is valid else false"
+      },
+      "throws": []
+    },
+    {
+      "name": "addParent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseTypeSize",
+      "comment": "Get the size of the base data type based upon the associated data organization.",
+      "javadoc": "Get the size of the base data type based upon the associated data organization.\n@return base type size",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "base type size"
+      },
+      "throws": []
+    },
+    {
+      "name": "getStorageSize",
+      "comment": "Get the packing storage size in bytes associated with this bit-field which may be\n larger than the base type associated with the fields original definition.\n Returned value is the same as #getLength().",
+      "javadoc": "Get the packing storage size in bytes associated with this bit-field which may be\n larger than the base type associated with the fields original definition.\n Returned value is the same as {@link #getLength()}.\n@return packing storage size in bytes",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "packing storage size in bytes"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBitSize",
+      "comment": "Get the effective bit size of this bit-field which may not exceed the size of the\n base datatype.",
+      "javadoc": "Get the effective bit size of this bit-field which may not exceed the size of the\n base datatype.\n@return bit size",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "bit size"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDeclaredBitSize",
+      "comment": "Get the declared bit size of this bit-field which may be larger than the effective\n size which could be truncated.",
+      "javadoc": "Get the declared bit size of this bit-field which may be larger than the effective\n size which could be truncated.\n@return bit size as defined by the field construction/declaration.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "bit size as defined by the field construction/declaration."
+      },
+      "throws": []
+    },
+    {
+      "name": "getBitOffset",
+      "comment": "Get the bit offset of the least-significant bit relative to bit-0 of the\n base datatype (i.e., least significant bit).  This corresponds to the\n right-shift amount within the base data type when viewed as a big-endian value.",
+      "javadoc": "Get the bit offset of the least-significant bit relative to bit-0 of the\n base datatype (i.e., least significant bit).  This corresponds to the\n right-shift amount within the base data type when viewed as a big-endian value.\n@return bit offset",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "bit offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseDataType",
+      "comment": "Get the base datatype associated with this bit-field \n (e.g., int, long, etc., or TypeDef to supported base type)",
+      "javadoc": "Get the base datatype associated with this bit-field \n (e.g., int, long, etc., or TypeDef to supported base type)\n@return base data type",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "base data type"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrimitiveBaseDataType",
+      "comment": "Get the base datatype associated with this bit-field \n (e.g., int, long, etc., or TypeDef to supported base type)",
+      "javadoc": "Get the base datatype associated with this bit-field \n (e.g., int, long, etc., or TypeDef to supported base type)\n@return base data type",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.AbstractIntegerDataType",
+        "type_short": "AbstractIntegerDataType",
+        "comment": "base data type"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSettingsDefinitions",
+      "comment": "Gets a list of all the settingsDefinitions used by this datatype.",
+      "javadoc": "Gets a list of all the settingsDefinitions used by this datatype.\n@return a list of the settingsDefinitions used by this datatype.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.docking.settings.SettingsDefinition[]",
+        "type_short": "ghidra.docking.settings.SettingsDefinition[]",
+        "comment": "a list of the settingsDefinitions used by this datatype."
+      },
+      "throws": []
+    },
+    {
+      "name": "isEquivalent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultSettings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.docking.settings.Settings",
+        "type_short": "Settings",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "copy",
+      "comment": "Returns a clone of this built-in DataType",
+      "javadoc": "Returns a clone of this built-in DataType\n@see ghidra.program.model.data.DataType#copy(ghidra.program.model.data.DataTypeManager)",
+      "static": false,
+      "params": [
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clone",
+      "comment": "Clone this bitfield to a new datatype manager.  This may change the effective bit\n size and storage size of the resulting datatype based upon the data organization\n of the specified dtm.",
+      "javadoc": "Clone this bitfield to a new datatype manager.  This may change the effective bit\n size and storage size of the resulting datatype based upon the data organization\n of the specified dtm.\n@param dtm target datatype manager\n@return new instance or same instance of dtm is unchanged.",
+      "static": false,
+      "params": [
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "target datatype manager"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.BitFieldDataType",
+        "type_short": "BitFieldDataType",
+        "comment": "new instance or same instance of dtm is unchanged."
+      },
+      "throws": []
+    },
+    {
+      "name": "getLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBigIntegerValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "isSigned",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValueClass",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Class\u003c?\u003e",
+        "type_short": "Class",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRepresentation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDefaultSettings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAlignment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

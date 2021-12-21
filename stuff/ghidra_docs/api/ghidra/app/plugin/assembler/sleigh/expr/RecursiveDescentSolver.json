@@ -1,0 +1,325 @@
+{
+  "name": "RecursiveDescentSolver",
+  "comment": "This singleton class seeks solutions to PatternExpressions\n \n It is called naive, because it does not perform algebraic transformations. Rather, it attempts to\n fold constants, assuming there is a single variable in the expression, modifying the goal as it\n descends toward that variable. If it finds a variable, i.e., token or context field, it encodes\n the solution, positioned in the field. If the expression is constant, it checks that the goal\n agrees. If not, an error is returned.\n \n TODO This whole mechanism ought to just be factored directly into PatternExpression.",
+  "javadoc": "This singleton class seeks solutions to {@link PatternExpression}s\n \n It is called naive, because it does not perform algebraic transformations. Rather, it attempts to\n fold constants, assuming there is a single variable in the expression, modifying the goal as it\n descends toward that variable. If it finds a variable, i.e., token or context field, it encodes\n the solution, positioned in the field. If the expression is constant, it checks that the goal\n agrees. If not, an error is returned.\n \n TODO This whole mechanism ought to just be factored directly into {@link PatternExpression}.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "dbg",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.util.DbgTimer",
+      "type_short": "DbgTimer",
+      "constant_value": null
+    },
+    {
+      "name": "solver",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.expr.RecursiveDescentSolver",
+      "type_short": "RecursiveDescentSolver",
+      "constant_value": null
+    },
+    {
+      "name": "registry",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Class\u003c?\u003e,ghidra.app.plugin.assembler.sleigh.expr.AbstractExpressionSolver\u003c?\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSolver",
+      "comment": "Obtain an instance of the naive solver",
+      "javadoc": "Obtain an instance of the naive solver\n@return the singleton instance",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.expr.RecursiveDescentSolver",
+        "type_short": "RecursiveDescentSolver",
+        "comment": "the singleton instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "register",
+      "comment": "Register a solver for a particular subclass of PatternExpression",
+      "javadoc": "Register a solver for a particular subclass of {@link PatternExpression}\n@param tcls the subclass the solver can handle\n@param s the solver for the subclass",
+      "static": false,
+      "params": [
+        {
+          "name": "tcls",
+          "type_long": "java.lang.Class\u003cT\u003e",
+          "type_short": "Class",
+          "comment": "the subclass the solver can handle"
+        },
+        {
+          "name": "s",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.AbstractExpressionSolver\u003cT\u003e",
+          "type_short": "AbstractExpressionSolver",
+          "comment": "the solver for the subclass"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegistered",
+      "comment": "Retrieve the registered solver for a given subclass of PatternExpression",
+      "javadoc": "Retrieve the registered solver for a given subclass of {@link PatternExpression}\n@param tcls the subclass to solve\n@return the registered solver",
+      "static": false,
+      "params": [
+        {
+          "name": "tcls",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "the subclass to solve"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.expr.AbstractExpressionSolver\u003cT\u003e",
+        "type_short": "AbstractExpressionSolver",
+        "comment": "the registered solver"
+      },
+      "throws": []
+    },
+    {
+      "name": "solve",
+      "comment": "Solve a given expression, passing hints",
+      "javadoc": "Solve a given expression, passing hints\n@param exp the expression to solve\n@param goal the desired output (modulo a mask) of the expression\n@param vals any defined symbols (usually {@code inst_start}, and {@code inst_next})\n@param res resolved subconstructors, by operand index (see method details)\n@param hints describes techniques applied by calling solvers\n@param description a description to attached to the encoded solution\n@return the encoded solution\n@throws NeedsBackfillException a solution may exist, but a required symbol is missing",
+      "static": false,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.PatternExpression",
+          "type_short": "PatternExpression",
+          "comment": "the expression to solve"
+        },
+        {
+          "name": "goal",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+          "type_short": "MaskedLong",
+          "comment": "the desired output (modulo a mask) of the expression"
+        },
+        {
+          "name": "vals",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": "any defined symbols (usually , and )"
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": "resolved subconstructors, by operand index (see method details)"
+        },
+        {
+          "name": "cur",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": ""
+        },
+        {
+          "name": "hints",
+          "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.expr.SolverHint\u003e",
+          "type_short": "Set",
+          "comment": "describes techniques applied by calling solvers"
+        },
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a description to attached to the encoded solution"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolution",
+        "type_short": "AssemblyResolution",
+        "comment": "the encoded solution"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.NeedsBackfillException",
+          "type_short": "NeedsBackfillException",
+          "comment": "a solution may exist, but a required symbol is missing"
+        }
+      ]
+    },
+    {
+      "name": "solve",
+      "comment": "Solve a given expression, assuming it outputs a given masked value\n \n From a simplified perspective, we need only the expression and the desired value to solve it.\n Generally speaking, the expression may have only contain a single variable, and the encoded\n result represents that single variable. It must be absorbed into the overall instruction\n and/or context encoding.\n \n More realistically, however, these expressions may depend on quite a bit of extra\n information. For example, PC-relative encodings (i.e., those involving  or\n , need to know the starting address of the resulting instruction.  must be provided to the solver by the assembler.  cannot be\n known until the instruction length is known. Thus, expressions using it always result in a\n NeedsBackfillException. The symbols, when known, are provided to the solver via the\n  parameter.\n \n Expressions involving OperandValueSolvers are a little more complicated, because they\n specify an offset that affects its encoding in the instruction. To compute this offset, the\n lengths of other surrounding operands must be known. Thus, when solving a context change for\n a given constructor, its resolved subconstructors must be provided to the solver via the\n  parameter.",
+      "javadoc": "Solve a given expression, assuming it outputs a given masked value\n \n From a simplified perspective, we need only the expression and the desired value to solve it.\n Generally speaking, the expression may have only contain a single variable, and the encoded\n result represents that single variable. It must be absorbed into the overall instruction\n and/or context encoding.\n \n More realistically, however, these expressions may depend on quite a bit of extra\n information. For example, PC-relative encodings (i.e., those involving {@code inst_start} or\n {@code inst_next}, need to know the starting address of the resulting instruction. {@code\n inst_start} must be provided to the solver by the assembler. {@code inst_next} cannot be\n known until the instruction length is known. Thus, expressions using it always result in a\n {@link NeedsBackfillException}. The symbols, when known, are provided to the solver via the\n {@code vals} parameter.\n \n Expressions involving {@link OperandValueSolver}s are a little more complicated, because they\n specify an offset that affects its encoding in the instruction. To compute this offset, the\n lengths of other surrounding operands must be known. Thus, when solving a context change for\n a given constructor, its resolved subconstructors must be provided to the solver via the\n {@code res} parameter.\n@param exp the expression to solve\n@param goal the desired output (modulo a mask) of the expression\n@param vals any defined symbols (usually {@code inst_start}, and {@code inst_next})\n@param res resolved subconstructors, by operand index (see method details)\n@param description a description to attached to the encoded solution\n@return the encoded solution\n@throws NeedsBackfillException a solution may exist, but a required symbol is missing",
+      "static": false,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.PatternExpression",
+          "type_short": "PatternExpression",
+          "comment": "the expression to solve"
+        },
+        {
+          "name": "goal",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+          "type_short": "MaskedLong",
+          "comment": "the desired output (modulo a mask) of the expression"
+        },
+        {
+          "name": "vals",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": "any defined symbols (usually , and )"
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": "resolved subconstructors, by operand index (see method details)"
+        },
+        {
+          "name": "cur",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": ""
+        },
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a description to attached to the encoded solution"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolution",
+        "type_short": "AssemblyResolution",
+        "comment": "the encoded solution"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.NeedsBackfillException",
+          "type_short": "NeedsBackfillException",
+          "comment": "a solution may exist, but a required symbol is missing"
+        }
+      ]
+    },
+    {
+      "name": "getValue",
+      "comment": "Attempt to fold a given expression (or sub-expression) into a single constant.",
+      "javadoc": "Attempt to fold a given expression (or sub-expression) into a single constant.\n@param exp the (sub-)expression to fold\n@param vals any defined symbols (usually {@code inst_start}, and {@code inst_next})\n@param res resolved subconstructors, by operand index (see\n        {@link #solve(PatternExpression, MaskedLong, Map, Map, AssemblyResolvedConstructor, String)})\n@return the masked solution\n@throws NeedsBackfillException it may be folded, but a required symbol is missing",
+      "static": false,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the (sub-)expression to fold"
+        },
+        {
+          "name": "vals",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": "any defined symbols (usually , and )"
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": "resolved subconstructors, by operand index (see\n        #solve(PatternExpression, MaskedLong, Map, Map, AssemblyResolvedConstructor, String))"
+        },
+        {
+          "name": "cur",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+        "type_short": "MaskedLong",
+        "comment": "the masked solution"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.NeedsBackfillException",
+          "type_short": "NeedsBackfillException",
+          "comment": "it may be folded, but a required symbol is missing"
+        }
+      ]
+    },
+    {
+      "name": "getInstructionLength",
+      "comment": "Determine the length of the instruction part of the encoded solution to the given expression\n \n This is used to keep operands in their appropriate position when backfilling becomes\n applicable. Normally, the instruction length is taken from the encoding of a solution, but if\n the solution cannot be determined yet, the instruction length must still be obtained.\n \n The length can be determined by finding token fields in the expression.",
+      "javadoc": "Determine the length of the instruction part of the encoded solution to the given expression\n \n This is used to keep operands in their appropriate position when backfilling becomes\n applicable. Normally, the instruction length is taken from the encoding of a solution, but if\n the solution cannot be determined yet, the instruction length must still be obtained.\n \n The length can be determined by finding token fields in the expression.\n@param exp the expression, presumably containing a token field\n@param res resolved subconstructors, by operand index (see\n            {@link #solve(PatternExpression, MaskedLong, Map, Map, AssemblyResolvedConstructor, String)})\n@return the anticipated length, in bytes, of the instruction encoding",
+      "static": false,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.PatternExpression",
+          "type_short": "PatternExpression",
+          "comment": "the expression, presumably containing a token field"
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": "resolved subconstructors, by operand index (see\n            #solve(PatternExpression, MaskedLong, Map, Map, AssemblyResolvedConstructor, String))"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the anticipated length, in bytes, of the instruction encoding"
+      },
+      "throws": []
+    },
+    {
+      "name": "valueForResolution",
+      "comment": "Compute the value of an expression given a (possibly-intermediate) resolution",
+      "javadoc": "Compute the value of an expression given a (possibly-intermediate) resolution\n@param exp the expression to evaluate\n@param rc the resolution on which to evalute it\n@return the result",
+      "static": false,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.PatternExpression",
+          "type_short": "PatternExpression",
+          "comment": "the expression to evaluate"
+        },
+        {
+          "name": "rc",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": "the resolution on which to evalute it"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+        "type_short": "MaskedLong",
+        "comment": "the result"
+      },
+      "throws": []
+    }
+  ]
+}

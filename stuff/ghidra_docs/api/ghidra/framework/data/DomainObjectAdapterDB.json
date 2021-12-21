@@ -1,0 +1,1037 @@
+{
+  "name": "DomainObjectAdapterDB",
+  "comment": "Database version of the DomainObjectAdapter; this version adds the\n concept of starting a transaction before a change is made to the\n domain object and ending the transaction. The transaction allows for\n undo/redo changes.\n  \n The implementation class must also satisfy the following requirements:\n \n \n 1. The following constructor signature must be implemented:\n \n \t\t **\n\t\t * Constructs new Domain Object\n\t\t * @param dbh a handle to an open domain object database.\n\t\t * @param openMode one of:\n\t\t * \t\tREAD_ONLY: the original database will not be modified\n\t\t * \t\tUPDATE: the database can be written to.\n\t\t * \t\tUPGRADE: the database is upgraded to the latest schema as it is opened.\n\t\t * @param monitor TaskMonitor that allows the open to be cancelled.\n\t     * @param consumer the object that keeping the program open.\n\t\t *     \n\t\t * @throws IOException if an error accessing the database occurs.\n\t\t * @throws VersionException if database version does not match implementation. UPGRADE may be possible.\n\t\t **\n\t\t public DomainObjectAdapterDB(DBHandle dbh, int openMode, TaskMonitor monitor, Object consumer) throws IOException, VersionException \n\n 2. The following static field must be provided:\n \n \t\t public static final String CONTENT_TYPE\n \n ",
+  "javadoc": "Database version of the DomainObjectAdapter; this version adds the\n concept of starting a transaction before a change is made to the\n domain object and ending the transaction. The transaction allows for\n undo/redo changes.\n  \n The implementation class must also satisfy the following requirements:\n \u003cpre\u003e\n \n 1. The following constructor signature must be implemented:\n \n \t\t **\n\t\t * Constructs new Domain Object\n\t\t * @param dbh a handle to an open domain object database.\n\t\t * @param openMode one of:\n\t\t * \t\tREAD_ONLY: the original database will not be modified\n\t\t * \t\tUPDATE: the database can be written to.\n\t\t * \t\tUPGRADE: the database is upgraded to the latest schema as it is opened.\n\t\t * @param monitor TaskMonitor that allows the open to be cancelled.\n\t     * @param consumer the object that keeping the program open.\n\t\t *     \n\t\t * @throws IOException if an error accessing the database occurs.\n\t\t * @throws VersionException if database version does not match implementation. UPGRADE may be possible.\n\t\t **\n\t\t public DomainObjectAdapterDB(DBHandle dbh, int openMode, TaskMonitor monitor, Object consumer) throws IOException, VersionException \n\n 2. The following static field must be provided:\n \n \t\t public static final String CONTENT_TYPE\n \n \u003c/pre\u003e",
+  "static": false,
+  "implements": [
+    "ghidra.framework.model.UndoableDomainObject",
+    "db.util.ErrorHandler",
+    "db.DBConstants"
+  ],
+  "extends": "ghidra.framework.data.DomainObjectAdapter",
+  "fields": [
+    {
+      "name": "NUM_UNDOS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "50"
+    },
+    {
+      "name": "dbh",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.DBHandle",
+      "type_short": "DBHandle",
+      "constant_value": null
+    },
+    {
+      "name": "changeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.data.DomainObjectDBChangeSet",
+      "type_short": "DomainObjectDBChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "options",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.data.OptionsDB",
+      "type_short": "OptionsDB",
+      "constant_value": null
+    },
+    {
+      "name": "closed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "fatalErrorOccurred",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "transactionMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.data.AbstractTransactionManager",
+      "type_short": "AbstractTransactionManager",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new DomainObjectAdapterDB object.\n If construction of this object fails, be sure to release with consumer",
+      "javadoc": "Construct a new DomainObjectAdapterDB object.\n If construction of this object fails, be sure to release with consumer\n@param dbh database handle\n@param name name of the domain object\n@param timeInterval the time (in milliseconds) to wait before the\n event queue is flushed.  If a new event comes in before the time expires,\n the timer is reset.\n@param bufSize initial size of event buffer\n@param consumer the object that created this domain object",
+      "static": false,
+      "params": [
+        {
+          "name": "dbh",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "database handle"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the domain object"
+        },
+        {
+          "name": "timeInterval",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the time (in milliseconds) to wait before the\n event queue is flushed.  If a new event comes in before the time expires,\n the timer is reset."
+        },
+        {
+          "name": "bufSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "initial size of event buffer"
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that created this domain object"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTransactionManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "transactionMgr",
+          "type_long": "ghidra.framework.data.AbstractTransactionManager",
+          "type_short": "AbstractTransactionManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTransactionManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.data.AbstractTransactionManager",
+        "type_short": "AbstractTransactionManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flushWriteCache",
+      "comment": "Flush any pending database changes.\n This method will be invoked by the transaction manager \n prior to closing a transaction.",
+      "javadoc": "Flush any pending database changes.\n This method will be invoked by the transaction manager \n prior to closing a transaction.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidateWriteCache",
+      "comment": "Invalidate (i.e., clear) any pending database changes not yet written.\n This method will be invoked by the transaction manager \n prior to aborting a transaction.",
+      "javadoc": "Invalidate (i.e., clear) any pending database changes not yet written.\n This method will be invoked by the transaction manager \n prior to aborting a transaction.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSynchronizedDomainObjects",
+      "comment": "Return array of all domain objects synchronized with a \n shared transaction manager.",
+      "javadoc": "Return array of all domain objects synchronized with a \n shared transaction manager.\n@return returns array of synchronized domain objects or\n null if this domain object is not synchronized with others.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainObject[]",
+        "type_short": "ghidra.framework.model.DomainObject[]",
+        "comment": "returns array of synchronized domain objects or\n null if this domain object is not synchronized with others."
+      },
+      "throws": []
+    },
+    {
+      "name": "addSynchronizedDomainObject",
+      "comment": "Synchronize the specified domain object with this domain object\n using a shared transaction manager.  If either or both is already shared, \n a transition to a single shared transaction manager will be \n performed.",
+      "javadoc": "Synchronize the specified domain object with this domain object\n using a shared transaction manager.  If either or both is already shared, \n a transition to a single shared transaction manager will be \n performed.\n@param domainObj\n@throws LockException if lock or open transaction is active on either\n this or the specified domain object",
+      "static": false,
+      "params": [
+        {
+          "name": "domainObj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if lock or open transaction is active on either\n this or the specified domain object"
+        }
+      ]
+    },
+    {
+      "name": "releaseSynchronizedDomainObject",
+      "comment": "Release this domain object from a shared transaction manager.  If\n this object has not been synchronized with others via a shared\n transaction manager, this method will have no affect.",
+      "javadoc": "Release this domain object from a shared transaction manager.  If\n this object has not been synchronized with others via a shared\n transaction manager, this method will have no affect.\n@throws LockException if lock or open transaction is active",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if lock or open transaction is active"
+        }
+      ]
+    },
+    {
+      "name": "getDBHandle",
+      "comment": "Returns the open handle to the underlying database.",
+      "javadoc": "Returns the open handle to the underlying database.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.DBHandle",
+        "type_short": "DBHandle",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUserData",
+      "comment": "Returns the user data object or null if not supported by this domain object.",
+      "javadoc": "Returns the user data object or null if not supported by this domain object.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.data.DomainObjectAdapterDB",
+        "type_short": "DomainObjectAdapterDB",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getChangeSet",
+      "comment": "Returns the change set corresponding to all unsaved changes in this domain object.",
+      "javadoc": "Returns the change set corresponding to all unsaved changes in this domain object.\n@return the change set corresponding to all unsaved changes in this domain object",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.data.DomainObjectDBChangeSet",
+        "type_short": "DomainObjectDBChangeSet",
+        "comment": "the change set corresponding to all unsaved changes in this domain object"
+      },
+      "throws": []
+    },
+    {
+      "name": "dbError",
+      "comment": "",
+      "javadoc": "@see db.util.ErrorHandler#dbError(java.io.IOException)",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOptionsNames",
+      "comment": "Returns all properties lists contained by this domain object.",
+      "javadoc": "Returns all properties lists contained by this domain object.\n@return all property lists contained by this domain object.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.String\u003e",
+        "type_short": "List",
+        "comment": "all property lists contained by this domain object."
+      },
+      "throws": []
+    },
+    {
+      "name": "getOptions",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#getOptions(java.lang.String)",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyListName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.options.Options",
+        "type_short": "Options",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "performPropertyListAlterations",
+      "comment": "This method can be used to perform property list alterations resulting from renamed or obsolete \n property paths.  This should only be invoked during an upgrade.\n WARNING! Should only be called during construction of domain object",
+      "javadoc": "This method can be used to perform property list alterations resulting from renamed or obsolete \n property paths.  This should only be invoked during an upgrade.\n WARNING! Should only be called during construction of domain object\n@see OptionsDB#performAlterations(Map)",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyAlterations",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "canLock",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#canLock()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLocked",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#isLocked()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#lock(String)",
+      "static": false,
+      "params": [
+        {
+          "name": "reason",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "prepareToSave",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lockForSnapshot",
+      "comment": "Attempt to obtain a modification lock on the domain object when generating a\n background snapshot.",
+      "javadoc": "Attempt to obtain a modification lock on the domain object when generating a\n background snapshot.\n@param hasProgress true if monitor has progress indicator\n@param title title to be used for monitor\n@return monitor object if lock obtained successfully, else null which indicates that a\n modification is in process.",
+      "static": false,
+      "params": [
+        {
+          "name": "hasProgress",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if monitor has progress indicator"
+        },
+        {
+          "name": "title",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "title to be used for monitor"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.data.LockingTaskMonitor",
+        "type_short": "LockingTaskMonitor",
+        "comment": "monitor object if lock obtained successfully, else null which indicates that a\n modification is in process."
+      },
+      "throws": []
+    },
+    {
+      "name": "forceLock",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#forceLock(boolean, String)",
+      "static": false,
+      "params": [
+        {
+          "name": "rollback",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "reason",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unlock",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#unlock()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unlock",
+      "comment": "Release the modification lock which is associated with the specified LockingTaskHandler.",
+      "javadoc": "Release the modification lock which is associated with the specified LockingTaskHandler.",
+      "static": false,
+      "params": [
+        {
+          "name": "handler",
+          "type_long": "ghidra.framework.data.LockingTaskMonitor",
+          "type_short": "LockingTaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "startTransaction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "startTransaction",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.UndoableDomainObject#startTransaction(java.lang.String)",
+      "static": false,
+      "params": [
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.AbortedTransactionListener",
+          "type_short": "AbortedTransactionListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "endTransaction",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.UndoableDomainObject#endTransaction(int, boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "transactionID",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "commit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTransactionListener",
+      "comment": "Adds the given transaction listener to this domain object",
+      "javadoc": "Adds the given transaction listener to this domain object\n@param listener the new transaction listener to add",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.TransactionListener",
+          "type_short": "TransactionListener",
+          "comment": "the new transaction listener to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTransactionListener",
+      "comment": "Removes the given transaction listener from this domain object.",
+      "javadoc": "Removes the given transaction listener from this domain object.\n@param listener the transaction listener to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.TransactionListener",
+          "type_short": "TransactionListener",
+          "comment": "the transaction listener to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUndoStackDepth",
+      "comment": "Returns the undo stack depth.\n (The number of items on the undo stack)\n This method is for JUnits.",
+      "javadoc": "Returns the undo stack depth.\n (The number of items on the undo stack)\n This method is for JUnits.\n@return the undo stack depth",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the undo stack depth"
+      },
+      "throws": []
+    },
+    {
+      "name": "canRedo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.Undoable#canRedo()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canUndo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.Undoable#canUndo()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRedoName",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.Undoable#getRedoName()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUndoName",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.Undoable#getUndoName()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentTransaction",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.UndoableDomainObject#getCurrentTransaction()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.Transaction",
+        "type_short": "Transaction",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "redo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.Undoable#redo()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "undo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.Undoable#undo()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isChanged",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#isChanged()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertyChanged",
+      "comment": "Notification of property change",
+      "javadoc": "Notification of property change\n@param propertyName\n@param oldValue\n@param newValue\n@return true if change is OK, false value should be reverted",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if change is OK, false value should be reverted"
+      },
+      "throws": []
+    },
+    {
+      "name": "clearUndo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.Undoable#clearUndo()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearUndo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "notifyListeners",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canSave",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#canSave()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "save",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#save(java.lang.String, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "saveToPackedFile",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#saveToPackedFile(java.io.File, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "outputFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateMetadata",
+      "comment": "This method is called before a save, saveAs, or saveToPackedFile \n to update common meta data",
+      "javadoc": "This method is called before a save, saveAs, or saveToPackedFile \n to update common meta data\n@throws IOException",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isClosed",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#isClosed()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasTerminatedTransaction",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.UndoableDomainObject#hasTerminatedTransaction()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "saveMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

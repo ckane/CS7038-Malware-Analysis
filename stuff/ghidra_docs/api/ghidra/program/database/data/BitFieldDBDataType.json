@@ -1,0 +1,271 @@
+{
+  "name": "BitFieldDBDataType",
+  "comment": "BitFieldDBDataType extends BitFieldDataType for DataTypeManagerDB use.\n This class provides the ability to generate a datatype ID and reconstruct a bit-field\n datatype from an ID.",
+  "javadoc": "\u003ccode\u003eBitFieldDBDataType\u003c/code\u003e extends BitFieldDataType for DataTypeManagerDB use.\n This class provides the ability to generate a datatype ID and reconstruct a bit-field\n datatype from an ID.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.program.model.data.BitFieldDataType",
+  "fields": [
+    {
+      "name": "BIT_OFFSET_SHIFT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "BASE_TYPE_SHIFT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16"
+    },
+    {
+      "name": "DATATYPE_INDEX_SHIFT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "24"
+    },
+    {
+      "name": "MAX_DATATYPE_INDEX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "4294967295"
+    },
+    {
+      "name": "ID_TO_INDEX_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "72057594037927935"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct DB resident bitfield.  Minimal storage size and effective bit size will \n be computed based upon specified parameters.",
+      "javadoc": "Construct DB resident bitfield.  Minimal storage size and effective bit size will \n be computed based upon specified parameters.\n@param baseDataType base data type (integer/enum type or typedef to same).  This\n bitfield will adopt the same datatype manager as this base type.\n@param bitSize size of bit-field expressed as number of bits (0..255).  The effective \n bit size may be reduced based upon the specified base datatype size.\n@param bitOffset right shift factor within storage unit when viewed as a big-endian dd\n scalar value.  Based upon minimal storage bitOffset should be in the range 0 to 7.\n@throws InvalidDataTypeException",
+      "static": false,
+      "params": [
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "base data type (integer/enum type or typedef to same).  This\n bitfield will adopt the same datatype manager as this base type."
+        },
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "size of bit-field expressed as number of bits (0..255).  The effective \n bit size may be reduced based upon the specified base datatype size."
+        },
+        {
+          "name": "bitOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "right shift factor within storage unit when viewed as a big-endian dd\n scalar value.  Based upon minimal storage bitOffset should be in the range 0 to 7."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getId",
+      "comment": "Get a generated ID for this bit-field which is suitable for reconstruction\n via the #getBitFieldDataType(long) method.  This ID encodes the base\n datatype (including typedef/enum and packing data), \n bit-size and bit-offset.  The upper byte of the ID will always be zero and \n is reserved for use by the DataTypeManager.\n \n The ability to reference base datatypes (e.g., TypeDef, Enum) is currently limited \n (i.e. 32-bit base datatype ID).",
+      "javadoc": "Get a generated ID for this bit-field which is suitable for reconstruction\n via the {@link #getBitFieldDataType(long)} method.  This ID encodes the base\n datatype (including typedef/enum and packing data), \n bit-size and bit-offset.  The upper byte of the ID will always be zero and \n is reserved for use by the DataTypeManager.\n \u003cp\u003e\n The ability to reference base datatypes (e.g., TypeDef, Enum) is currently limited \n (i.e. 32-bit base datatype ID).\n@param bitfieldDt the resolved bitfield datatype whose ID is needed.  This must first be\n resolved by a DataTypeManagerDB.\n@return bit-field ID",
+      "static": true,
+      "params": [
+        {
+          "name": "bitfieldDt",
+          "type_long": "ghidra.program.model.data.BitFieldDataType",
+          "type_short": "BitFieldDataType",
+          "comment": "the resolved bitfield datatype whose ID is needed.  This must first be\n resolved by a DataTypeManagerDB."
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "bit-field ID"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseTypeEncodedField",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "bitFieldDt",
+          "type_long": "ghidra.program.model.data.BitFieldDataType",
+          "type_short": "BitFieldDataType",
+          "comment": ""
+        },
+        {
+          "name": "dataTypeKind",
+          "type_long": "ghidra.program.database.data.BitFieldDBDataType.BaseDatatypeKind",
+          "type_short": "BaseDatatypeKind",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBitFieldDataType",
+      "comment": "Get a bit-field datatype instance for a given ID.  The upper byte of the ID will be ignored.",
+      "javadoc": "Get a bit-field datatype instance for a given ID.  The upper byte of the ID will be ignored.\n@param id bit-field datatype ID\n@param dtm data type manager\n@return bit-field data type",
+      "static": true,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "bit-field datatype ID"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.database.data.DataTypeManagerDB",
+          "type_short": "DataTypeManagerDB",
+          "comment": "data type manager"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.BitFieldDataType",
+        "type_short": "BitFieldDataType",
+        "comment": "bit-field data type"
+      },
+      "throws": []
+    },
+    {
+      "name": "getResolvedDataTypeIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.database.data.DataTypeManagerDB",
+          "type_short": "DataTypeManagerDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTypeDef",
+      "comment": "Get the TypeDef which corresponds to the specified typeDefIndex and the \n specified data type manager.",
+      "javadoc": "Get the TypeDef which corresponds to the specified typeDefIndex and the \n specified data type manager.\n@param typeDefIndex base data type index used by bit-field\n@param primitiveBaseDataType expected primitive base datatype\n@param dtm data type manager\n@return TypeDef data type or null if not found",
+      "static": true,
+      "params": [
+        {
+          "name": "typeDefIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "base data type index used by bit-field"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "data type manager"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.TypeDef",
+        "type_short": "TypeDef",
+        "comment": "TypeDef data type or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getEnum",
+      "comment": "Get the Enum which corresponds to the specified enumIndex and the \n specified data type manager.",
+      "javadoc": "Get the Enum which corresponds to the specified enumIndex and the \n specified data type manager.\n@param enumIndex enum data type index used by bit-field\n@param dtm data type manager\n@return Enum data type or null if not found",
+      "static": true,
+      "params": [
+        {
+          "name": "enumIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "enum data type index used by bit-field"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "data type manager"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.Enum",
+        "type_short": "Enum",
+        "comment": "Enum data type or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getIntegerType",
+      "comment": "Get the integer base type which corresponds to the specified intTypeIndex and the \n specified data type manager.",
+      "javadoc": "Get the integer base type which corresponds to the specified intTypeIndex and the \n specified data type manager.\n@param intTypeIndex base data type index used by bit-field\n@param dtm data type manager\n@return integer data type or null if not found",
+      "static": true,
+      "params": [
+        {
+          "name": "intTypeIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "base data type index used by bit-field"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "data type manager"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.AbstractIntegerDataType",
+        "type_short": "AbstractIntegerDataType",
+        "comment": "integer data type or null if not found"
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,519 @@
+{
+  "name": "KeyBindingOverrideKeyEventDispatcher",
+  "comment": "Allows Ghidra to give preference to its key event processing over the default Java key event\n processing.  See #dispatchKeyEvent(KeyEvent) for a more detailed explanation of how\n Ghidra processes key events.\n \n #install() must be called in order to install this Singleton into Java\u0027s\n key event processing system.",
+  "javadoc": "Allows Ghidra to give preference to its key event processing over the default Java key event\n processing.  See {@link #dispatchKeyEvent(KeyEvent)} for a more detailed explanation of how\n Ghidra processes key events.\n \u003cp\u003e\n {@link #install()} must be called in order to install this \u003ccode\u003eSingleton\u003c/code\u003e into Java\u0027s\n key event processing system.",
+  "static": false,
+  "implements": [
+    "java.awt.KeyEventDispatcher"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "instance",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "docking.KeyBindingOverrideKeyEventDispatcher",
+      "type_short": "KeyBindingOverrideKeyEventDispatcher",
+      "constant_value": null
+    },
+    {
+      "name": "inProgressAction",
+      "comment": "We use this action as a signal that we intend to process a key\n binding and that no other Java component should try to handle it (sometimes Java processes\n bindings on key typed, after we have processed a binding on key pressed, which is not\n what we want).\n \n This action is one that is triggered by a key pressed, but will be processed on a\n key released.  We need to do this for because on some systems, when we perform the\n action on a key pressed, we do not get the follow-on key events, which we need to reset\n our state (SCR 7040).\n \n Posterity Note: While debugging we will not get a KeyEvent.KEY_RELEASED event if\n the focus changes from the application to the debugger tool.",
+      "javadoc": "We use this action as a signal that we intend to process a key\n binding and that no other Java component should try to handle it (sometimes Java processes\n bindings on key typed, after we have processed a binding on key pressed, which is not\n what we want).\n \u003cp\u003e\n This action is one that is triggered by a key pressed, but will be processed on a\n key released.  We need to do this for because on some systems, when we perform the\n action on a key pressed, we do not get the follow-on key events, which we need to reset\n our state (SCR 7040).\n \u003cp\u003e\n \u003cb\u003ePosterity Note:\u003c/b\u003e While debugging we will not get a KeyEvent.KEY_RELEASED event if\n the focus changes from the application to the debugger tool.",
+      "static": false,
+      "type_long": "docking.DockingKeyBindingAction",
+      "type_short": "DockingKeyBindingAction",
+      "constant_value": null
+    },
+    {
+      "name": "focusProvider",
+      "comment": "Provides the current focus owner.  This allows for dependency injection.",
+      "javadoc": "Provides the current focus owner.  This allows for dependency injection.",
+      "static": false,
+      "type_long": "docking.FocusOwnerProvider",
+      "type_short": "FocusOwnerProvider",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "install",
+      "comment": "Installs this key event dispatcher into Java\u0027s key event processing system.  Calling this\n method more than once has no effect.",
+      "javadoc": "Installs this key event dispatcher into Java\u0027s key event processing system.  Calling this\n method more than once has no effect.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispatchKeyEvent",
+      "comment": "Overridden to change the Java\u0027s key event processing to insert Ghidra\u0027s top level tool\n key bindings into the event processing.  Java\u0027s normal key event processing is:\n \n     KeyListeners on the focused Component\n     InputMap and ActionMap actions for the Component\n     InputMap and ActionMap actions for the Component\u0027s parent, and so on up the\n         Swing hierarchy\n \n Ghidra has altered this flow to be:\n \n     Reserved keybinding actions\n     KeyListeners on the focused Component\n     InputMap and ActionMap actions for the Component\n     Ghidra tool-level actions\n     InputMap and ActionMap actions for the Component\u0027s parent, and so on up the\n         Swing hierarchy\n \n This updated key event processing allows individual components to handle key events first,\n but then allows global Ghidra key bindings to be processed, allowing normal Java processing\n after Ghidra has had its chance to process the event.\n \n There are some exceptions to this processing chain:\n \n      We don\u0027t do any processing when the focused component is an instance of\n          JTextComponent.\n      We don\u0027t do any processing if the active window is an instance of\n          DockingDialog.\n ",
+      "javadoc": "Overridden to change the Java\u0027s key event processing to insert Ghidra\u0027s top level tool\n key bindings into the event processing.  Java\u0027s normal key event processing is:\n \u003col\u003e\n     \u003cli\u003eKeyListeners on the focused Component\u003c/li\u003e\n     \u003cli\u003eInputMap and ActionMap actions for the Component\u003c/li\u003e\n     \u003cli\u003eInputMap and ActionMap actions for the Component\u0027s parent, and so on up the\n         Swing hierarchy\u003c/li\u003e\n \u003c/ol\u003e\n Ghidra has altered this flow to be:\n \u003col\u003e\n     \u003cli\u003e\u003cb\u003eReserved keybinding actions\u003c/b\u003e\n     \u003cli\u003eKeyListeners on the focused Component\u003c/li\u003e\n     \u003cli\u003eInputMap and ActionMap actions for the Component\u003c/li\u003e\n     \u003cli\u003e\u003cb\u003eGhidra tool-level actions\u003c/b\u003e\u003c/li\u003e\n     \u003cli\u003eInputMap and ActionMap actions for the Component\u0027s parent, and so on up the\n         Swing hierarchy\u003c/li\u003e\n \u003c/ol\u003e\n This updated key event processing allows individual components to handle key events first,\n but then allows global Ghidra key bindings to be processed, allowing normal Java processing\n after Ghidra has had its chance to process the event.\n \u003cP\u003e\n There are some exceptions to this processing chain:\n \u003col\u003e\n      \u003cli\u003eWe don\u0027t do any processing when the focused component is an instance of\n          \u003ccode\u003eJTextComponent\u003c/code\u003e.\u003c/li\u003e\n      \u003cli\u003eWe don\u0027t do any processing if the active window is an instance of\n          \u003ccode\u003eDockingDialog\u003c/code\u003e.\u003c/li\u003e\n \u003c/ol\u003e\n@see java.awt.KeyEventDispatcher#dispatchKeyEvent(java.awt.event.KeyEvent)",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValidKeyBindingPrecedence",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.DockingKeyBindingAction",
+          "type_short": "DockingKeyBindingAction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.KeyBindingPrecedence",
+        "type_short": "KeyBindingPrecedence",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "blockKeyInput",
+      "comment": "Returns true if the given key event should be blocked (i.e., not processed by us or Java).",
+      "javadoc": "Returns true if the given key event should be blocked (i.e., not processed by us or Java).",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "actionInProgress",
+      "comment": "Used to clear the flag that signals we are in the middle of processing a Ghidra action.",
+      "javadoc": "Used to clear the flag that signals we are in the middle of processing a Ghidra action.",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidContextForKeyStroke",
+      "comment": "A check to see if a given keystroke is something that should not be processed, depending\n upon the current state of the system.",
+      "javadoc": "A check to see if a given keystroke is something that should not be processed, depending\n upon the current state of the system.\n@param keyStroke The keystroke to check.\n@return true if the caller of this method should handle the keystroke; false if the\n         keystroke should be ignored.",
+      "static": false,
+      "params": [
+        {
+          "name": "keyStroke",
+          "type_long": "javax.swing.KeyStroke",
+          "type_short": "KeyStroke",
+          "comment": "The keystroke to check."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the caller of this method should handle the keystroke; false if the\n         keystroke should be ignored."
+      },
+      "throws": []
+    },
+    {
+      "name": "willBeHandledByTextComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isModified",
+      "comment": "A test to see if the given event is modified in such a way as a text component would not\n handle the event",
+      "javadoc": "A test to see if the given event is modified in such a way as a text component would not\n handle the event\n@param e the event\n@return true if modified",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": "the event"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if modified"
+      },
+      "throws": []
+    },
+    {
+      "name": "hasRegisteredKeyBinding",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": ""
+        },
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "throwAssertException",
+      "comment": "This method should only be called if a programmer adds a new precedence to\n KeyBindingPrecedence and does not update the algorithm of\n #dispatchKeyEvent(KeyEvent) to take into account the new precedence.",
+      "javadoc": "This method should only be called if a programmer adds a new precedence to\n {@link KeyBindingPrecedence} and does not update the algorithm of\n {@link #dispatchKeyEvent(KeyEvent)} to take into account the new precedence.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processReservedKeyActionsPrecedence",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.DockingKeyBindingAction",
+          "type_short": "DockingKeyBindingAction",
+          "comment": ""
+        },
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processKeyListenerPrecedence",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.DockingKeyBindingAction",
+          "type_short": "DockingKeyBindingAction",
+          "comment": ""
+        },
+        {
+          "name": "keyBindingPrecedence",
+          "type_long": "docking.KeyBindingPrecedence",
+          "type_short": "KeyBindingPrecedence",
+          "comment": ""
+        },
+        {
+          "name": "e",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processComponentActionMapPrecedence",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.DockingKeyBindingAction",
+          "type_short": "DockingKeyBindingAction",
+          "comment": ""
+        },
+        {
+          "name": "keyBindingPrecedence",
+          "type_long": "docking.KeyBindingPrecedence",
+          "type_short": "KeyBindingPrecedence",
+          "comment": ""
+        },
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processActionAtPrecedence",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "precedence",
+          "type_long": "docking.KeyBindingPrecedence",
+          "type_short": "KeyBindingPrecedence",
+          "comment": ""
+        },
+        {
+          "name": "keyBindingPrecedence",
+          "type_long": "docking.KeyBindingPrecedence",
+          "type_short": "KeyBindingPrecedence",
+          "comment": ""
+        },
+        {
+          "name": "action",
+          "type_long": "docking.DockingKeyBindingAction",
+          "type_short": "DockingKeyBindingAction",
+          "comment": ""
+        },
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processComponentKeyListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "keyEvent",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processInputAndActionMaps",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "keyEvent",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        },
+        {
+          "name": "keyStroke",
+          "type_long": "javax.swing.KeyStroke",
+          "type_short": "KeyStroke",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getJavaActionForComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "jComponent",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": ""
+        },
+        {
+          "name": "keyStroke",
+          "type_long": "javax.swing.KeyStroke",
+          "type_short": "KeyStroke",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.Action",
+        "type_short": "Action",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDockingKeyBindingActionForEvent",
+      "comment": "Gets a DockingKeyBindingAction that is registered for the given key event.  This\n method is aware of context for things like DockingWindowManager and active windows.",
+      "javadoc": "Gets a {@link DockingKeyBindingAction} that is registered for the given key event.  This\n method is aware of context for things like {@link DockingWindowManager} and active windows.\n@param event The key event to check.\n@return An action, if one is available for the given key event, in the current context.",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": "The key event to check."
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockingKeyBindingAction",
+        "type_short": "DockingKeyBindingAction",
+        "comment": "An action, if one is available for the given key event, in the current context."
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveDockingWindowManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.DockingWindowManager",
+        "type_short": "DockingWindowManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDockingWindowManagerForWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "activeWindow",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockingWindowManager",
+        "type_short": "DockingWindowManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFocusOwnerProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "focusProvider",
+          "type_long": "docking.FocusOwnerProvider",
+          "type_short": "FocusOwnerProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

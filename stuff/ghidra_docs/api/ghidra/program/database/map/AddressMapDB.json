@@ -1,0 +1,1526 @@
+{
+  "name": "AddressMapDB",
+  "comment": "Class used to map addresses to longs and longs to addresses. Several different encodings\n are depending on the nature of the address to be converted.\n The upper 4 bits in the long are used to specify the encoding used. Currently the encoding are:\n 0 - use the original ghidra encoding - used for backwards compatibility.\n 1 - absolute encoding - ignores the image base - used only by the memory map.\n 2 - relocatable - most common encoding - allows address to move with the image base.\n 3 - register - used to encode register addresses\n 4 - stack - used to encode stack addresses (includes namespace information to make them unique between functions)\n 5 - external - used to encode addresses in another program\n 15 - no address - used to represent the null address or a meaningless address.",
+  "javadoc": "Class used to map addresses to longs and longs to addresses. Several different encodings\n are depending on the nature of the address to be converted.\n The upper 4 bits in the long are used to specify the encoding used. Currently the encoding are:\n 0 - use the original ghidra encoding - used for backwards compatibility.\n 1 - absolute encoding - ignores the image base - used only by the memory map.\n 2 - relocatable - most common encoding - allows address to move with the image base.\n 3 - register - used to encode register addresses\n 4 - stack - used to encode stack addresses (includes namespace information to make them unique between functions)\n 5 - external - used to encode addresses in another program\n 15 - no address - used to represent the null address or a meaningless address.",
+  "static": false,
+  "implements": [
+    "ghidra.program.database.map.AddressMap"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "ADDR_TYPE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "ADDR_TYPE_SHIFT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "60"
+    },
+    {
+      "name": "ADDR_TYPE_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "15"
+    },
+    {
+      "name": "ADDR_OFFSET_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "32"
+    },
+    {
+      "name": "MAX_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "4294967295"
+    },
+    {
+      "name": "ADDR_OFFSET_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "4294967295"
+    },
+    {
+      "name": "BASE_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "-4294967296"
+    },
+    {
+      "name": "HASH_OFFSET_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "HASH_OFFSET_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "ID_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "28"
+    },
+    {
+      "name": "ID_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "268435455"
+    },
+    {
+      "name": "OLD_ADDRESS_KEY_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "ABSOLUTE_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "RELOCATABLE_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "REGISTER_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "STACK_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "EXTERNAL_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "VARIABLE_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "6"
+    },
+    {
+      "name": "HASH_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "7"
+    },
+    {
+      "name": "NO_ADDR_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "15"
+    },
+    {
+      "name": "RELOCATABLE_ADDR_TYPE_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "2305843009213693952"
+    },
+    {
+      "name": "ABSOLUTE_ADDR_TYPE_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "1152921504606846976"
+    },
+    {
+      "name": "REGISTER_ADDR_TYPE_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "3458764513820540928"
+    },
+    {
+      "name": "STACK_ADDR_TYPE_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "4611686018427387904"
+    },
+    {
+      "name": "EXTERNAL_ADDR_TYPE_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "5764607523034234880"
+    },
+    {
+      "name": "VARIABLE_ADDR_TYPE_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "6917529027641081856"
+    },
+    {
+      "name": "HASH_ADDR_TYPE_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "8070450532247928832"
+    },
+    {
+      "name": "addrFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressFactory",
+      "type_short": "AddressFactory",
+      "constant_value": null
+    },
+    {
+      "name": "readOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "oldAddrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMap",
+      "type_short": "AddressMap",
+      "constant_value": null
+    },
+    {
+      "name": "useOldAddrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "defaultAddrSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSpace",
+      "type_short": "AddressSpace",
+      "constant_value": null
+    },
+    {
+      "name": "adapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMapDBAdapter",
+      "type_short": "AddressMapDBAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "baseAddrs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address[]",
+      "type_short": "ghidra.program.model.address.Address[]",
+      "constant_value": null
+    },
+    {
+      "name": "sortedBaseStartAddrs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address[]",
+      "type_short": "ghidra.program.model.address.Address[]",
+      "constant_value": null
+    },
+    {
+      "name": "sortedBaseEndAddrs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address[]",
+      "type_short": "ghidra.program.model.address.Address[]",
+      "constant_value": null
+    },
+    {
+      "name": "allKeyRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "addrToIndexMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cghidra.program.model.address.Address,java.lang.Integer\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "baseImageOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "segmentedRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "EXT_FROM_ADDRESS_LONG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "-2"
+    },
+    {
+      "name": "INDEX_CREATE",
+      "comment": "Index Operation: get index match or create if needed",
+      "javadoc": "Index Operation: get index match or create if needed\n@see #getBaseAddressIndex(Address, boolean, int)",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "INDEX_MATCH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "INDEX_MATCH_OR_NEXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "INDEX_MATCH_OR_PREVIOUS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "normalizingAddressComparator",
+      "comment": "Comparator used to search the sorted normalized base address list with a de-normalized address.",
+      "javadoc": "Comparator used to search the sorted normalized base address list with a de-normalized address.",
+      "static": false,
+      "type_long": "java.util.Comparator\u003cghidra.program.model.address.Address\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    },
+    {
+      "name": "addressInsertionKeyRangeComparator",
+      "comment": "Comparator used to identify if an addr occurs before or after the \n start of a key range.",
+      "javadoc": "Comparator used to identify if an addr occurs before or after the \n start of a key range.",
+      "static": false,
+      "type_long": "java.util.Comparator\u003cjava.lang.Object\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    },
+    {
+      "name": "ADDRESS_RANGE_COMPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Comparator\u003cjava.lang.Object\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new AddressMapDB object",
+      "javadoc": "Constructs a new AddressMapDB object\n@param handle the handle to the database\n@param openMode the mode that program was opened.\n@param factory the address factory containing all the address spaces for the program.\n@param baseImageOffset the current image base offset.\n@param monitor the progress monitory used for upgrading.\n@throws IOException thrown if a dabase io error occurs.\n@throws VersionException if the database version does not match the expected version.",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "the handle to the database"
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the mode that program was opened."
+        },
+        {
+          "name": "factory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "the address factory containing all the address spaces for the program."
+        },
+        {
+          "name": "baseImageOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the current image base offset."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the progress monitory used for upgrading."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if a dabase io error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if the database version does not match the expected version."
+        }
+      ]
+    },
+    {
+      "name": "memoryMapChanged",
+      "comment": "Notification when the memory map changes.  If we are segemented, we need to update our\n list of address ranges used for address normalization.",
+      "javadoc": "Notification when the memory map changes.  If we are segemented, we need to update our\n list of address ranges used for address normalization.\n@param mem the changed memory map.",
+      "static": false,
+      "params": [
+        {
+          "name": "mem",
+          "type_long": "ghidra.program.database.mem.MemoryMapDB",
+          "type_short": "MemoryMapDB",
+          "comment": "the changed memory map."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rebuildAddrToIndexMap",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidateCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getOldAddressMap",
+      "comment": "Returns an address map which may be used during the upgrade of old address\n encodings.  If the address map is up-to-date, then this method will return\n this instance of AddressMapDB.",
+      "javadoc": "Returns an address map which may be used during the upgrade of old address\n encodings.  If the address map is up-to-date, then this method will return\n this instance of AddressMapDB.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.map.AddressMap",
+        "type_short": "AddressMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUpgraded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInDefaultAddressSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNormalizedOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAbsoluteEncoding",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "encodeAbsolute",
+      "comment": "Get absolute key encoding for the specified address",
+      "javadoc": "Get absolute key encoding for the specified address\n@param addr address\n@param indexOperation see INDEX_CREATE, INDEX_MATCH, INDEX_MATCH_OR_NEXT or INDEX_MATCH_OR_PREVIOUS\n@return address key or INVALID_ADDRESS_KEY if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address"
+        },
+        {
+          "name": "indexOperation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "see INDEX_CREATE, INDEX_MATCH, INDEX_MATCH_OR_NEXT or INDEX_MATCH_OR_PREVIOUS"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "address key or INVALID_ADDRESS_KEY if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseAddressIndex",
+      "comment": "Get base address index",
+      "javadoc": "Get base address index\n@param addr address\n@param normalize if true image base offset will be applied to addr\n@param indexOperation see INDEX_CREATE, INDEX_MATCH, INDEX_MATCH_OR_NEXT or INDEX_MATCH_OR_PREVIOUS\n@return base address index or Integer.MIN_VALUE if index not found and create is false.  A negative \n value other than Integer.MIN_VALUE indicates a NEXT or PREVIOUS base index \u003d -(return_value)-1.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address"
+        },
+        {
+          "name": "normalize",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true image base offset will be applied to addr"
+        },
+        {
+          "name": "indexOperation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "see INDEX_CREATE, INDEX_MATCH, INDEX_MATCH_OR_NEXT or INDEX_MATCH_OR_PREVIOUS"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "base address index or Integer.MIN_VALUE if index not found and create is false.  A negative \n value other than Integer.MIN_VALUE indicates a NEXT or PREVIOUS base index \u003d -(return_value)-1."
+      },
+      "throws": []
+    },
+    {
+      "name": "checkAddressSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decodeAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decodeAddress",
+      "comment": "Returns the address that was used to generate the given long key. (If the image base was\n moved, then a different address is returned unless the value was encoded using the\n \"absoluteEncoding\" method",
+      "javadoc": "Returns the address that was used to generate the given long key. (If the image base was\n moved, then a different address is returned unless the value was encoded using the\n \"absoluteEncoding\" method\n@param value the long value to convert to an address.\n@param useMemorySegmentation if true and the program\u0027s default address space is segmented (i.e., SegmentedAddressSpace).\n the address returned will be normalized to defined segmented memory blocks if possible.  This parameter should \n generally always be true except when used by the Memory map objects to avoid recursion problems.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the long value to convert to an address."
+        },
+        {
+          "name": "useMemorySegmentation",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true and the program\u0027s default address space is segmented (i.e., SegmentedAddressSpace).\n the address returned will be normalized to defined segmented memory blocks if possible.  This parameter should \n generally always be true except when used by the Memory map objects to avoid recursion problems."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "normalize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "truncateStackOffset",
+      "comment": "Stack space changed from a common 32-bit space to a compiler-specific\n stack space.  This makes bad stack addresses which previously existed\n impossible to decode.  Instead of return NO_ADDRESS, we will simply truncate such \n bad stack offsets to the MIN or MAX offsets.",
+      "javadoc": "Stack space changed from a common 32-bit space to a compiler-specific\n stack space.  This makes bad stack addresses which previously existed\n impossible to decode.  Instead of return NO_ADDRESS, we will simply truncate such \n bad stack offsets to the MIN or MAX offsets.\n@param offset\n@param stackSpace\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "stackSpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasSameKeyBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrKey1",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "addrKey2",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isKeyRangeMax",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isKeyRangeMin",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "encodeRelative",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "addrIsNormalized",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "indexOperation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "encodeOldNamespaceAddr",
+      "comment": "Provide absolute encoding of an old namespace address for upgrade use.",
+      "javadoc": "Provide absolute encoding of an old namespace address for upgrade use.\n@param addr old namespace address for stack, register or external\n@return encoded address key",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.OldGenericNamespaceAddress",
+          "type_short": "OldGenericNamespaceAddress",
+          "comment": "old namespace address for stack, register or external"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "encoded address key"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressFactory",
+        "type_short": "AddressFactory",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setImageBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "base",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findKeyRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "absolute",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllMemoryAndExternalAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "absolute",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRangesForAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "absolute",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "keyRangeList",
+          "type_long": "java.util.ArrayList\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createBaseSegments",
+      "comment": "Create all memory base segments within the specified range.\n NOTE: minAddress and maxAddress must have the same address space!",
+      "javadoc": "Create all memory base segments within the specified range.\n NOTE: minAddress and maxAddress must have the same address space!\n@param minAddress\n@param maxAddress",
+      "static": false,
+      "params": [
+        {
+          "name": "minAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "maxAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addKeyRanges",
+      "comment": "Add simple key ranges where the address range lies within a single base segment for a single space.\n NOTE: start and end addresses must have the same address space!",
+      "javadoc": "Add simple key ranges where the address range lies within a single base segment for a single space.\n NOTE: start and end addresses must have the same address space!\n@param keyRangeList\n@param start\n@param end\n@param absolute\n@param create",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "absolute",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addNormalizedRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "normalizedStart",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "normalizedEnd",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "absolute",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "min",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "a1",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "a2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "max",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "a1",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "a2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getShiftedAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getImageBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        },
+        {
+          "name": "addrFactory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": ""
+        },
+        {
+          "name": "translator",
+          "type_long": "ghidra.program.util.LanguageTranslator",
+          "type_short": "LanguageTranslator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "renameOverlaySpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteOverlaySpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

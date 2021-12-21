@@ -1,0 +1,610 @@
+{
+  "name": "ExtensionUtils",
+  "comment": "Utility class for managing Ghidra Extensions. \n \n Extensions are defined as any archive or folder that contains an extension.properties\n file. This properties file can contain the following attributes:\n \n name (required)\n description\n author\n createdOn (format: mm/dd/yyyy)\n \n \n  Extensions may be installed/uninstalled by users at runtime, using the ExtensionTableProvider. \n  Installation consists of unzipping the extension archive to an installation folder, currently \n  Ghidra/Extensions. To uninstall, the unpacked folder is simply removed.",
+  "javadoc": "Utility class for managing Ghidra Extensions. \n \u003cp\u003e\n Extensions are defined as any archive or folder that contains an \u003ccode\u003eextension.properties\u003c/code\u003e\n file. This properties file can contain the following attributes:\n \u003cul\u003e\n \u003cli\u003ename (required)\u003c/li\u003e\n \u003cli\u003edescription\u003c/li\u003e\n \u003cli\u003eauthor\u003c/li\u003e\n \u003cli\u003ecreatedOn (format: mm/dd/yyyy)\u003c/li\u003e\n \u003c/ul\u003e\n \n  Extensions may be installed/uninstalled by users at runtime, using the {@link ExtensionTableProvider}. \n  Installation consists of unzipping the extension archive to an installation folder, currently \n  \u003ccode\u003eGhidra/Extensions\u003c/code\u003e. To uninstall, the unpacked folder is simply removed.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "ZIPFILE",
+      "comment": "Magic number that identifies the first bytes of a ZIP archive. This is used to verify \n\t \tthat a file is a zip rather than just checking the extension.",
+      "javadoc": "Magic number that identifies the first bytes of a ZIP archive. This is used to verify \n\t \tthat a file is a zip rather than just checking the extension.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1347093252"
+    },
+    {
+      "name": "PROPERTIES_FILE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "PROPERTIES_FILE_NAME_UNINSTALLED",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExtensions",
+      "comment": "Returns a set of all extensions known to Ghidra, represented by\n ExtensionDetails objects. This will include all installed\n AND archived extensions.\n \n Note that this method will only look in the known extension folder locations:\n \n ApplicationLayout#getExtensionArchiveDir\n ApplicationLayout#getExtensionInstallationDirs\n \n If users install extensions from other locations, the installed version of \n the extension will be known, but the source archive location will not be retained.",
+      "javadoc": "Returns a set of all extensions known to Ghidra, represented by\n {@link ExtensionDetails} objects. This will include all installed\n AND archived extensions.\n \u003cp\u003e\n Note that this method will only look in the known extension folder locations:\n \u003cul\u003e\n \u003cli\u003e{@link ApplicationLayout#getExtensionArchiveDir}\u003c/li\u003e\n \u003cli\u003e{@link ApplicationLayout#getExtensionInstallationDirs}\u003c/li\u003e\n \u003c/ul\u003e\n If users install extensions from other locations, the installed version of \n the extension will be known, but the source archive location will not be retained.\n@return list of unique extensions\n@throws ExtensionException if extensions cannot be retrieved",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.framework.plugintool.dialog.ExtensionDetails\u003e",
+        "type_short": "Set",
+        "comment": "list of unique extensions"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if extensions cannot be retrieved"
+        }
+      ]
+    },
+    {
+      "name": "getInstalledExtensions",
+      "comment": "Returns all installed extensions. These are all the extensions found in\n ApplicationLayout#getExtensionInstallationDirs.",
+      "javadoc": "Returns all installed extensions. These are all the extensions found in\n {@link ApplicationLayout#getExtensionInstallationDirs}.\n@param includeUninstalled if true, include extensions that have been marked for removal\n@return set of installed extensions\n@throws ExtensionException if the extension details cannot be retrieved",
+      "static": true,
+      "params": [
+        {
+          "name": "includeUninstalled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, include extensions that have been marked for removal"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.framework.plugintool.dialog.ExtensionDetails\u003e",
+        "type_short": "Set",
+        "comment": "set of installed extensions"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if the extension details cannot be retrieved"
+        }
+      ]
+    },
+    {
+      "name": "getArchivedExtensions",
+      "comment": "Returns all archived extensions. These are all the extensions found in\n ApplicationLayout#getExtensionArchiveDir.",
+      "javadoc": "Returns all archived extensions. These are all the extensions found in\n {@link ApplicationLayout#getExtensionArchiveDir}.\n@return set of archived extensions\n@throws ExtensionException if the extension details cannot be retrieved",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.framework.plugintool.dialog.ExtensionDetails\u003e",
+        "type_short": "Set",
+        "comment": "set of archived extensions"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if the extension details cannot be retrieved"
+        }
+      ]
+    },
+    {
+      "name": "isInstalled",
+      "comment": "Returns true if an extension with the given name exists in the install folder.",
+      "javadoc": "Returns true if an extension with the given name exists in the install folder.\n@param extensionName the name of the extension\n@return true if installed",
+      "static": true,
+      "params": [
+        {
+          "name": "extensionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the extension"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if installed"
+      },
+      "throws": []
+    },
+    {
+      "name": "install",
+      "comment": "Installs the given extension file. This can be either an archive (zip) or a \n directory that contains an extension.properties file.",
+      "javadoc": "Installs the given extension file. This can be either an archive (zip) or a \n directory that contains an extension.properties file.\n@param rFile the extension to install\n@return true if the extension was successfully installed",
+      "static": true,
+      "params": [
+        {
+          "name": "rFile",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the extension to install"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the extension was successfully installed"
+      },
+      "throws": []
+    },
+    {
+      "name": "install",
+      "comment": "Installs the given extension.",
+      "javadoc": "Installs the given extension.\n@param extension the extension to install\n@param overwrite if true, any existing extension will be overwritten\n@return true if the install was successful",
+      "static": true,
+      "params": [
+        {
+          "name": "extension",
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionDetails",
+          "type_short": "ExtensionDetails",
+          "comment": "the extension to install"
+        },
+        {
+          "name": "overwrite",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, any existing extension will be overwritten"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the install was successful"
+      },
+      "throws": []
+    },
+    {
+      "name": "uninstall",
+      "comment": "Uninstalls a given extension.",
+      "javadoc": "Uninstalls a given extension.\n@param extension the extension to uninstall\n@return true if successfully uninstalled",
+      "static": true,
+      "params": [
+        {
+          "name": "extension",
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionDetails",
+          "type_short": "ExtensionDetails",
+          "comment": "the extension to uninstall"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if successfully uninstalled"
+      },
+      "throws": []
+    },
+    {
+      "name": "isExtension",
+      "comment": "Returns true if the given file or directory is a valid ghidra extension.\n \n Note: This means that the zip or directory contains an extension.properties file.",
+      "javadoc": "Returns true if the given file or directory is a valid ghidra extension.\n \u003cp\u003e\n Note: This means that the zip or directory contains an extension.properties file.\n@param rFile the resource zip or directory to inspect\n@return true if the given file represents a valid extension\n@throws ExtensionException if there\u0027s an error processing a zip file",
+      "static": true,
+      "params": [
+        {
+          "name": "rFile",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the resource zip or directory to inspect"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the given file represents a valid extension"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if there\u0027s an error processing a zip file"
+        }
+      ]
+    },
+    {
+      "name": "isZip",
+      "comment": "Returns true if the given file is a valid .zip archive.",
+      "javadoc": "Returns true if the given file is a valid .zip archive.\n@param file the file to test\n@return true if file is a valid zip\n@throws ExtensionException if there\u0027s an error reading the zip file",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the file to test"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if file is a valid zip"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if there\u0027s an error reading the zip file"
+        }
+      ]
+    },
+    {
+      "name": "findExtensionPropertyFiles",
+      "comment": "Returns a list of files representing all the extension.properties files found\n under a given directory. This will ONLY search the given directory and its immediate children. \n The conops are as follows:\n \n If sourceFile is a directory and it contains an extension.properties file, then that file is returned\n If sourceFile does not contain an extension.properties file, then any immediate directories are searched (ignoring Skeleton directory)\n \n \n Note: This will NOT search zip files. If you have a zip, call #getPropertiesFromArchive(File) \n instead.",
+      "javadoc": "Returns a list of files representing all the \u003ccode\u003eextension.properties\u003c/code\u003e files found\n under a given directory. This will ONLY search the given directory and its immediate children. \n The conops are as follows:\n \u003cul\u003e\n \u003cli\u003eIf sourceFile is a directory and it contains an extension.properties file, then that file is returned\u003c/li\u003e\n \u003cli\u003eIf sourceFile does not contain an extension.properties file, then any immediate directories are searched (ignoring Skeleton directory)\u003c/li\u003e\n \u003c/ul\u003e\n \u003cp\u003e\n Note: This will NOT search zip files. If you have a zip, call {@link #getPropertiesFromArchive(File)} \n instead.\n@param sourceFile the directory to inspect\n@param includeUninstalled if true, include extensions that have been marked for removal\n@return list of extension.properties files",
+      "static": true,
+      "params": [
+        {
+          "name": "sourceFile",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the directory to inspect"
+        },
+        {
+          "name": "includeUninstalled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, include extensions that have been marked for removal"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cgeneric.jar.ResourceFile\u003e",
+        "type_short": "List",
+        "comment": "list of extension.properties files"
+      },
+      "throws": []
+    },
+    {
+      "name": "findExtensionPropertyFile",
+      "comment": "Returns an extension.properties file if the given directory contains one at the\n top level.",
+      "javadoc": "Returns an extension.properties file if the given directory contains one at the\n top level.\n@param dir the directory to search\n@return a ResourceFile representing the extension.properties file, or null if doesn\u0027t exist",
+      "static": true,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the directory to search"
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": "a ResourceFile representing the extension.properties file, or null if doesn\u0027t exist"
+      },
+      "throws": []
+    },
+    {
+      "name": "runInstallTask",
+      "comment": "Uses the TaskLauncher to run a separate task to perform the unzipping/copying\n part of the install task. These operations are potentially long-running and need to be\n cancelable.",
+      "javadoc": "Uses the {@link TaskLauncher} to run a separate task to perform the unzipping/copying\n part of the install task. These operations are potentially long-running and need to be\n cancelable.\n@param file the file to install (either a zip or directory)\n@return true if the install was successful",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the file to install (either a zip or directory)"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the install was successful"
+      },
+      "throws": []
+    },
+    {
+      "name": "removeStateFiles",
+      "comment": "Recursively searches a given directory for any module manifest and extension \n properties files that are in an installed state and converts them to an uninstalled\n state.\n \n Specifically, the following will be renamed:\n \n Module.manifest to Module.manifest.uninstalled\n extension.properties \u003d extension.properties.uninstalled\n ",
+      "javadoc": "Recursively searches a given directory for any module manifest and extension \n properties files that are in an installed state and converts them to an uninstalled\n state.\n \n Specifically, the following will be renamed:\n \u003cUL\u003e\n \u003cLI\u003eModule.manifest to Module.manifest.uninstalled\u003c/LI\u003e\n \u003cLI\u003eextension.properties \u003d extension.properties.uninstalled\u003c/LI\u003e\n \u003c/UL\u003e\n@param extension the extension to modify\n@return false if any renames fail",
+      "static": true,
+      "params": [
+        {
+          "name": "extension",
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionDetails",
+          "type_short": "ExtensionDetails",
+          "comment": "the extension to modify"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "false if any renames fail"
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreStateFiles",
+      "comment": "Recursively searches a given directory for any module manifest and extension \n properties files that are in an uninstalled state and restores them.\n \n Specifically, the following will be renamed:\n \n Module.manifest.uninstalled to Module.manifest\n extension.properties.uninstalled \u003d extension.properties\n ",
+      "javadoc": "Recursively searches a given directory for any module manifest and extension \n properties files that are in an uninstalled state and restores them.\n \n Specifically, the following will be renamed:\n \u003cUL\u003e\n \u003cLI\u003eModule.manifest.uninstalled to Module.manifest\u003c/LI\u003e\n \u003cLI\u003eextension.properties.uninstalled \u003d extension.properties\u003c/LI\u003e\n \u003c/UL\u003e\n@param rootDir the directory to search\n@return false if any renames fail",
+      "static": true,
+      "params": [
+        {
+          "name": "rootDir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the directory to search"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "false if any renames fail"
+      },
+      "throws": []
+    },
+    {
+      "name": "findFilesWithName",
+      "comment": "",
+      "javadoc": "@param root the starting directory to search recursively\n@param fileName the file name search for\n@param foundFiles list of all matching files",
+      "static": true,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the starting directory to search recursively"
+        },
+        {
+          "name": "fileName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the file name search for"
+        },
+        {
+          "name": "foundFiles",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": "list of all matching files"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPropertiesFromArchive",
+      "comment": "Given a zip file, returns the Properties defined in the embedded extension.properties file.",
+      "javadoc": "Given a zip file, returns the {@link Properties} defined in the embedded extension.properties file.\n@param file the extension archive file\n@return the properties file, or null if doesn\u0027t exist\n@throws ExtensionException if there\u0027s a problem unpacking the zip file",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the extension archive file"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Properties",
+        "type_short": "Properties",
+        "comment": "the properties file, or null if doesn\u0027t exist"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if there\u0027s a problem unpacking the zip file"
+        }
+      ]
+    },
+    {
+      "name": "copyToInstallationFolder",
+      "comment": "Copies the given folder to the extension install location. Any existing folder at that\n location will be deleted.\n \n Note: Any existing folder with the same name will be overwritten.",
+      "javadoc": "Copies the given folder to the extension install location. Any existing folder at that\n location will be deleted.\n \u003cp\u003e\n Note: Any existing folder with the same name will be overwritten.\n@param extension the extension folder\n@param monitor the task monitor\n@throws ExtensionException if the delete or copy fails\n@throws CancelledException if the user cancels the copy",
+      "static": true,
+      "params": [
+        {
+          "name": "extension",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the extension folder"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if the delete or copy fails"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the copy"
+        }
+      ]
+    },
+    {
+      "name": "unzipToInstallationFolder",
+      "comment": "Unpacks a given zip file to ApplicationLayout#getExtensionInstallationDirs. The \n file permissions in the original zip will be retained.\n \n Note: This method uses the Apache zip files since they keep track of permissions info; \n the built-in java objects (e.g., ZipEntry) do not.",
+      "javadoc": "Unpacks a given zip file to {@link ApplicationLayout#getExtensionInstallationDirs}. The \n file permissions in the original zip will be retained.\n \u003cp\u003e\n Note: This method uses the Apache zip files since they keep track of permissions info; \n the built-in java objects (e.g., ZipEntry) do not.\n@param zipFile the zip file to unpack\n@param monitor the task monitor\n@throws ExtensionException if any part of the unzipping fails, or if the target location is invalid\n@throws CancelledException if the user cancels the unzip\n@throws IOException if error unzipping zip file",
+      "static": true,
+      "params": [
+        {
+          "name": "zipFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the zip file to unpack"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.plugintool.dialog.ExtensionException",
+          "type_short": "ExtensionException",
+          "comment": "if any part of the unzipping fails, or if the target location is invalid"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the unzip"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error unzipping zip file"
+        }
+      ]
+    },
+    {
+      "name": "createExtensionDetailsFromPropertyFile",
+      "comment": "Extracts information from a Java Properties file to create an ExtensionDetails\n object.",
+      "javadoc": "Extracts information from a Java Properties file to create an {@link ExtensionDetails}\n object.\n@param file the file to parse\n@return a new extension details object",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the file to parse"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.dialog.ExtensionDetails",
+        "type_short": "ExtensionDetails",
+        "comment": "a new extension details object"
+      },
+      "throws": []
+    },
+    {
+      "name": "getExtensionsInstalledSinceLastToolLaunch",
+      "comment": "Finds any extensions that have been installed since the last time a given tool was launched.",
+      "javadoc": "Finds any extensions that have been installed since the last time a given tool was launched.\n@param tool the tool to check\n@return set of new extensions",
+      "static": true,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "the tool to check"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.framework.plugintool.dialog.ExtensionDetails\u003e",
+        "type_short": "Set",
+        "comment": "set of new extensions"
+      },
+      "throws": []
+    },
+    {
+      "name": "createExtensionDetailsFromPropertyFile",
+      "comment": "Extracts information from a Java Properties file to create an ExtensionDetails\n object.",
+      "javadoc": "Extracts information from a Java Properties file to create an {@link ExtensionDetails}\n object.\n@param resourceFile the resource file file to parse\n@return a new extension details object",
+      "static": true,
+      "params": [
+        {
+          "name": "resourceFile",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": "the resource file file to parse"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.dialog.ExtensionDetails",
+        "type_short": "ExtensionDetails",
+        "comment": "a new extension details object"
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanupUninstalledExtensions",
+      "comment": "Attempts to delete any extension directories that do not contain a Module.manifest \n file. This indicates that the extension was slated to be uninstalled by the user.",
+      "javadoc": "Attempts to delete any extension directories that do not contain a Module.manifest \n file. This indicates that the extension was slated to be uninstalled by the user.\n@see #uninstall",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExtensionDetailsFromProperties",
+      "comment": "Extracts properties from a Java Properties file to create an ExtensionDetails\n object.",
+      "javadoc": "Extracts properties from a Java Properties file to create an {@link ExtensionDetails}\n object.\n@param props the java properties object\n@return a new extension details object",
+      "static": true,
+      "params": [
+        {
+          "name": "props",
+          "type_long": "java.util.Properties",
+          "type_short": "Properties",
+          "comment": "the java properties object"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.dialog.ExtensionDetails",
+        "type_short": "ExtensionDetails",
+        "comment": "a new extension details object"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPermissions",
+      "comment": "Converts Unix permissions to a set of PosixFilePermissions.",
+      "javadoc": "Converts Unix permissions to a set of {@link PosixFilePermission}s.\n@param unixMode integer representation of file permissions\n@return set of POSIX file permissions",
+      "static": true,
+      "params": [
+        {
+          "name": "unixMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "integer representation of file permissions"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cjava.nio.file.attribute.PosixFilePermission\u003e",
+        "type_short": "Set",
+        "comment": "set of POSIX file permissions"
+      },
+      "throws": []
+    }
+  ]
+}

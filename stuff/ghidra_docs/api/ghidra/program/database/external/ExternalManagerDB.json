@@ -1,0 +1,1654 @@
+{
+  "name": "ExternalManagerDB",
+  "comment": "Manages the database for external references.",
+  "javadoc": "Manages the database for external references.",
+  "static": false,
+  "implements": [
+    "ghidra.program.database.ManagerDB",
+    "ghidra.program.model.symbol.ExternalManager"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "addrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMap",
+      "type_short": "AddressMap",
+      "constant_value": null
+    },
+    {
+      "name": "scopeMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.symbol.NamespaceManager",
+      "type_short": "NamespaceManager",
+      "constant_value": null
+    },
+    {
+      "name": "symbolMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.symbol.SymbolManager",
+      "type_short": "SymbolManager",
+      "constant_value": null
+    },
+    {
+      "name": "functionMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.function.FunctionManagerDB",
+      "type_short": "FunctionManagerDB",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramDB",
+      "type_short": "ProgramDB",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.Lock",
+      "type_short": "Lock",
+      "constant_value": null
+    },
+    {
+      "name": "oldNameAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.external.OldExtNameAdapter",
+      "type_short": "OldExtNameAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "oldExtRefAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.external.OldExtRefAdapter",
+      "type_short": "OldExtRefAdapter",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new ExternalManagerDB",
+      "javadoc": "Constructs a new ExternalManagerDB\n@param handle the open database handle\n@param addrMap the address map\n@param openMode the program open mode.\n@param lock the program synchronization lock\n@param monitor the progress monitor used when upgrading\n@throws CancelledException if the user cancelled while an upgrade was occurring\n@throws IOException if a database io error occurs.\n@throws VersionException if the database version does not match the expected version",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "the open database handle"
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMap",
+          "type_short": "AddressMap",
+          "comment": "the address map"
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the program open mode."
+        },
+        {
+          "name": "lock",
+          "type_long": "ghidra.util.Lock",
+          "type_short": "Lock",
+          "comment": "the program synchronization lock"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the progress monitor used when upgrading"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled while an upgrade was occurring"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a database io error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if the database version does not match the expected version"
+        }
+      ]
+    },
+    {
+      "name": "initializeOldAdapters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.database.ProgramDB",
+          "type_short": "ProgramDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programReady",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentRevision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "upgradeOldExtRefAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "invalidateCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExtLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extLibraryName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExtLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extParentNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExtLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extParentNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "reuseExisting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExtFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extLibraryName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExtFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extParentNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExtFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "reuseExisting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkExternalLabel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.SourceType",
+        "type_short": "SourceType",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExtLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "isFunction",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "reuseExisting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getExtLocation",
+      "comment": "Get the external location which best matches the specified parameters.\n Preference is given to extLabel over extAddr",
+      "javadoc": "Get the external location which best matches the specified parameters.\n Preference is given to extLabel over extAddr\n@param libScope , the library namespace containing this external location.\n@param extLabel the name of the external location. Can be null.\n@param extAddr the address of function in the external program.  Can be null\n@return the best matching ExternalLocation or null.\n@throws InvalidInputException if the extLabel name contains illegal characters (i.e. space)",
+      "static": false,
+      "params": [
+        {
+          "name": "library",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the external location. Can be null."
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of function in the external program.  Can be null"
+        },
+        {
+          "name": "reuseExisting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": "the best matching ExternalLocation or null."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the extLabel name contains illegal characters (i.e. space)"
+        }
+      ]
+    },
+    {
+      "name": "findMatchingLocationByOriginalImportName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locations",
+          "type_long": "java.util.List\u003cghidra.program.model.symbol.ExternalLocation\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "library",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.ExternalLocation\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findMatchingLocationByName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "libScope",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "reuseExisting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findMatchingLocationByAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locations",
+          "type_long": "java.util.List\u003cghidra.program.model.symbol.ExternalLocation\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "reuseExisting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "libScope",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.ExternalLocation\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "libraryName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "label",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.ExternalLocation\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "label",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "libraryName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "label",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultExternalName",
+      "comment": "Get the default name for an external function or code symbol",
+      "javadoc": "Get the default name for an external function or code symbol\n@param sym\n@return default name",
+      "static": true,
+      "params": [
+        {
+          "name": "sym",
+          "type_long": "ghidra.program.database.symbol.SymbolDB",
+          "type_short": "SymbolDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "default name"
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.ProgramDB",
+        "type_short": "ProgramDB",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExtLocation",
+      "comment": "Returns the external location associated with the given external address",
+      "javadoc": "Returns the external location associated with the given external address\n@param externalAddr the external address.",
+      "static": false,
+      "params": [
+        {
+          "name": "externalAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the external address."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExternalLocation",
+      "comment": "Removes the external location at the given external address",
+      "javadoc": "Removes the external location at the given external address\n@param externalAddr the address at which to remove the external location.",
+      "static": false,
+      "params": [
+        {
+          "name": "externalAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to remove the external location."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.SymbolManager",
+        "type_short": "SymbolManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExternalLibrary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateExternalLibraryName",
+      "comment": "Update the external program for all references.",
+      "javadoc": "Update the external program for all references.\n@param oldName old external program name\n@param newName new external program name\n@param source the source of this external library:\n Symbol.DEFAULT, Symbol.ANALYSIS, Symbol.IMPORTED, or Symbol.USER_DEFINED\n@throws DuplicateNameException\n@throws InvalidInputException",
+      "static": false,
+      "params": [
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "old external program name"
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new external program name"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "the source of this external library:\n Symbol.DEFAULT, Symbol.ANALYSIS, Symbol.IMPORTED, or Symbol.USER_DEFINED"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExternalLibraryName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Library",
+        "type_short": "Library",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExternalName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "pathname",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Library",
+        "type_short": "Library",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLibraryScope",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "libraryName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLibraryNames",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLibrary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Library",
+        "type_short": "Library",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLibraryPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setExternalPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "externalPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "userDefined",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "validateExternalPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "extLoc",
+          "type_long": "ghidra.program.database.external.ExternalLocationDB",
+          "type_short": "ExternalLocationDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.map.AddressMap",
+        "type_short": "AddressMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "memoryAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocationIterator",
+        "type_short": "ExternalLocationIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "externalName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocationIterator",
+        "type_short": "ExternalLocationIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "translator",
+          "type_long": "ghidra.program.util.LanguageTranslator",
+          "type_short": "LanguageTranslator",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createSymbolForOriginalName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "oldType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.SymbolDB",
+        "type_short": "SymbolDB",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

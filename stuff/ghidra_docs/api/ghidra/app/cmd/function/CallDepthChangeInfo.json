@@ -1,0 +1,843 @@
+{
+  "name": "CallDepthChangeInfo",
+  "comment": "Given a function in a program or the start of a function, record information\n about the change to a stack pointer from a subroutine call. The routine\n getCallChange() can be called with the address of a call instruction. If the\n stack could be tracked, the call instruction will return the change in the\n stack pointer that would result from a call to the function.\n \n The computation is based on a set of equations that are generated and solved.\n Each equation represents the stack change for a given basic flow block or\n call instruction within the function.",
+  "javadoc": "Given a function in a program or the start of a function, record information\n about the change to a stack pointer from a subroutine call. The routine\n getCallChange() can be called with the address of a call instruction. If the\n stack could be tracked, the call instruction will return the change in the\n stack pointer that would result from a call to the function.\n \n The computation is based on a set of equations that are generated and solved.\n Each equation represents the stack change for a given basic flow block or\n call instruction within the function.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "codeBlocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.block.CodeBlock\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "callLocs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.address.Address\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "changeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.util.IntPropertyMap",
+      "type_short": "IntPropertyMap",
+      "constant_value": null
+    },
+    {
+      "name": "depthMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.util.IntPropertyMap",
+      "type_short": "IntPropertyMap",
+      "constant_value": null
+    },
+    {
+      "name": "overrideMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cghidra.program.model.address.Address,java.lang.Integer\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "trans",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.pcode.VarnodeTranslator",
+      "type_short": "VarnodeTranslator",
+      "constant_value": null
+    },
+    {
+      "name": "stackReg",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register",
+      "type_short": "Register",
+      "constant_value": null
+    },
+    {
+      "name": "frameReg",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register",
+      "type_short": "Register",
+      "constant_value": null
+    },
+    {
+      "name": "symEval",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.SymbolicPropogator",
+      "type_short": "SymbolicPropogator",
+      "constant_value": null
+    },
+    {
+      "name": "stackPurge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "STACK_DEPTH_CHANGE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"StackDepthChange\""
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new CallDepthChangeInfo object.",
+      "javadoc": "Construct a new CallDepthChangeInfo object.\n@param func function to examine",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "function to examine"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new CallDepthChangeInfo object.",
+      "javadoc": "Construct a new CallDepthChangeInfo object.\n@param func function to examine\n@param monitor monitor used to cancel the operation\n@throws CancelledException if the operation was canceled",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "function to examine"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "monitor used to cancel the operation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the operation was canceled"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new CallDepthChangeInfo object.",
+      "javadoc": "Construct a new CallDepthChangeInfo object.\n@param function function to examine\n@param restrictSet set of addresses to restrict flow flowing to.\n@param frameReg register that is to have it\u0027s depth(value) change tracked\n@param monitor monitor used to cancel the operation\n@throws CancelledException if the operation was canceled",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "function to examine"
+        },
+        {
+          "name": "restrictSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to restrict flow flowing to."
+        },
+        {
+          "name": "frameReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "register that is to have it\u0027s depth(value) change tracked"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "monitor used to cancel the operation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the operation was canceled"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new CallDepthChangeInfo object.",
+      "javadoc": "Construct a new CallDepthChangeInfo object.\n@param program program containing the function to examime\n@param addr address within the function to examine\n@param restrictSet set of addresses to restrict flow flowing to.\n@param frameReg register that is to have it\u0027s depth(value) change tracked\n@param monitor monitor used to cancel the operation\n@throws CancelledException if the operation was canceled",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program containing the function to examime"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address within the function to examine"
+        },
+        {
+          "name": "restrictSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to restrict flow flowing to."
+        },
+        {
+          "name": "frameReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "register that is to have it\u0027s depth(value) change tracked"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "monitor used to cancel the operation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the operation was canceled"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "comment": "initialize codeblocks and call locations.",
+      "javadoc": "initialize codeblocks and call locations.\n@param addressSetView\n@param monitor\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "restrictSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "reg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getCallChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDepth",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "depth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDepth",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "depth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDepth",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInstructionStackDepthChange",
+      "comment": "Inspect the instruction and return how it affects the stack depth. If the\n depth cannot be determined, then return that the stack depth change is\n unknown.",
+      "javadoc": "Inspect the instruction and return how it affects the stack depth. If the\n depth cannot be determined, then return that the stack depth change is\n unknown.\n@param instr instruction to analyze\n@return int change to stack depth if it can be determined,\n         Function.UNKNOWN_STACK_DEPTH_CHANGE otherwise.",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "instruction to analyze"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int change to stack depth if it can be determined,\n         Function.UNKNOWN_STACK_DEPTH_CHANGE otherwise."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInstructionStackDepthChange",
+      "comment": "Inspect the instruction and return how it affects the stack depth. If the\n depth cannot be determined, then return that the stack depth change is\n unknown.",
+      "javadoc": "Inspect the instruction and return how it affects the stack depth. If the\n depth cannot be determined, then return that the stack depth change is\n unknown.\n@param instr instruction to analyze\n@return int change to stack depth if it can be determined,\n         Function.UNKNOWN_STACK_DEPTH_CHANGE otherwise.",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "instruction to analyze"
+        },
+        {
+          "name": "procContext",
+          "type_long": "ghidra.program.model.lang.ProcessorContext",
+          "type_short": "ProcessorContext",
+          "comment": ""
+        },
+        {
+          "name": "currentStackDepth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int change to stack depth if it can be determined,\n         Function.UNKNOWN_STACK_DEPTH_CHANGE otherwise."
+      },
+      "throws": []
+    },
+    {
+      "name": "isStackPointer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "output",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultStackDepthChange",
+      "comment": "Get the default/assumed stack depth change for this language",
+      "javadoc": "Get the default/assumed stack depth change for this language\n@param depth stack depth to return if the default is unknown for the language\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "depth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "stack depth to return if the default is unknown for the language"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStackDepthChange",
+      "comment": "Gets the stack depth change value that has been set at the indicated address.",
+      "javadoc": "Gets the stack depth change value that has been set at the indicated address.\n@param program the program to be checked\n@param address the program address\n@return the stack depth change value or null if value has not been set",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be checked"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the program address"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Integer",
+        "type_short": "Integer",
+        "comment": "the stack depth change value or null if value has not been set"
+      },
+      "throws": []
+    },
+    {
+      "name": "setStackDepthChange",
+      "comment": "Sets a new value for the stack depth change at the indicated address.",
+      "javadoc": "Sets a new value for the stack depth change at the indicated address.\n@param program the program where the value will be set\n@param address the program address\n@param stackDepthChange the new stack depth change value\n@throws DuplicateNameException if the property name for stack depth changes conflicted \n with another property tha has the same name.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program where the value will be set"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the program address"
+        },
+        {
+          "name": "stackDepthChange",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the new stack depth change value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the property name for stack depth changes conflicted \n with another property tha has the same name."
+        }
+      ]
+    },
+    {
+      "name": "removeStackDepthChange",
+      "comment": "Removes the value for the stack depth change at the indicated address.",
+      "javadoc": "Removes the value for the stack depth change at the indicated address.\n@param program the program where the value will be removed\n@param address the program address\n@return true if a stack depth change existed at the indicated at the address and it was removed.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program where the value will be removed"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the program address"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a stack depth change existed at the indicated at the address and it was removed."
+      },
+      "throws": []
+    },
+    {
+      "name": "getStackDepthChanges",
+      "comment": "Gets an iterator indicating all the addresses that have a stack depth change value specified\n within a program\u0027s indicated address set.",
+      "javadoc": "Gets an iterator indicating all the addresses that have a stack depth change value specified\n within a program\u0027s indicated address set.\n@param program the program to be checked\n@param addressSet the set of addresses to check for a stack depth change value\n@return the address iterator indicating where stack depth change values have been set",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be checked"
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses to check for a stack depth change value"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": "the address iterator indicating where stack depth change values have been set"
+      },
+      "throws": []
+    },
+    {
+      "name": "smoothDepth",
+      "comment": "Do a better job of tracking the stack by attempting to follow the data\n flow of the stack pointer as it moves in and out of other variables.",
+      "javadoc": "Do a better job of tracking the stack by attempting to follow the data\n flow of the stack pointer as it moves in and out of other variables.\n@param program1 -\n            program containing the function to analyze\n@param func -\n            function to analyze stack pointer references",
+      "static": false,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "-\n            program containing the function to analyze"
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "-\n            function to analyze stack pointer references"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "followFlows",
+      "comment": "Follow the flows of the subroutine, accumulating information about the\n stack pointer and any other register the stack pointer is assigned to.",
+      "javadoc": "Follow the flows of the subroutine, accumulating information about the\n stack pointer and any other register the stack pointer is assigned to.\n@param func function to analyze\n@param monitor monitor to provide feedback and cancel\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "function to analyze"
+        },
+        {
+          "name": "restrictSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "monitor to provide feedback and cancel"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getStackPurge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStackOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "cu",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSPDepth",
+      "comment": "",
+      "javadoc": "@param addr the address to get the stack pointer depth at.\n@return the stack pointer depth at the address.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to get the stack pointer depth at."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the stack pointer depth at the address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegDepth",
+      "comment": "",
+      "javadoc": "@param addr the address to get the register depth at.\n@param reg the register to get the depth of.\n@return the depth of the register at the address.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to get the register depth at."
+        },
+        {
+          "name": "reg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register to get the depth of."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the depth of the register at the address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegValueRepresentation",
+      "comment": "",
+      "javadoc": "@param addr the address of the register value to get the representation of.\n@param reg the register to get the representation of.\n@return the string representation of the register value.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the register value to get the representation of."
+        },
+        {
+          "name": "reg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register to get the representation of."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the string representation of the register value."
+      },
+      "throws": []
+    },
+    {
+      "name": "smoothPcodeDepth",
+      "comment": "Create locals and parameters based on references involving purely the\n stack pointer. Pushes, Pops, and arithmetic manipulation of the stack\n pointer must be tracked.",
+      "javadoc": "Create locals and parameters based on references involving purely the\n stack pointer. Pushes, Pops, and arithmetic manipulation of the stack\n pointer must be tracked.\n@param program1 -\n            program containing the function to analyze\n@param func -\n            function to analyze stack pointer references",
+      "static": false,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "-\n            program containing the function to analyze"
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "-\n            function to analyze stack pointer references"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCallPurge",
+      "comment": "",
+      "javadoc": "@param instr",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

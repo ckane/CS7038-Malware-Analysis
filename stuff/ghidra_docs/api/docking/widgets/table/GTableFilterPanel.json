@@ -1,0 +1,1182 @@
+{
+  "name": "GTableFilterPanel",
+  "comment": "This class is a panel that provides a label and text field that allows users to input text that\n filters the contents of the table.\n \n This class also handles restoring selection for the client when the table has been filtered.\n See below for a caveat.\n \n\n Filter Reminder\n The filter text will flash as the table (by default) gains focus.  This is done to remind the\n user that the data has been filtered.  To change the component that triggers the flashing use\n #setFocusComponent(Component), where the Component parameter is the\n component that will trigger focus flashing when it gains focus.  To disable focus flashing,\n pass in null to #setFocusComponent(Component).\n \n\n Filtering\n The filtering behavior is controlled by the filter button displayed to the right of this \n panel\u0027s text field.\n \n\n Important Usage Notes\n \n     You must translate row values retrieved from the table using\n     this panel.\n     \n     Since this class wraps the given table with a new model, you must use this class to\n     translate row number values.  For example, when getting the selected row, the normal Java\n     code snippet below will give the incorrect value:\n     \n         JTable table \u003d ...\n         int selectedRowNumber \u003d table.getSelectedRow();\n     \n     Instead, you must translate the returned value from above, as in the following snippet:\n     \n         JTable table \u003d ...\n         \n         int selectedRowNumber \u003d table.getSelectedRow();\n         int modelRowNumber \u003d tableFilterPanel.getModelRow( selectedRowNumber );  // see #getModelRow(int)\n         \n     \n\n     This class may set a new model on the given table, which can affect how tables are sized.\n     \n      If JTable#getAutoCreateColumnsFromModel() returns true, then the columns will\n      be recreated and resized when this class is constructed.\n     The TableFilter used by this class will be passed the empty string (\"\") when\n     TableFilter#acceptsRow(Object) is called.\n     You cannot rely on JTable#getRowCount() to access all of the table data,\n     since the data may be filtered.\n     \n     To get a row count that is always all of the model\u0027s data, call\n     #getUnfilteredRowCount().\n ",
+  "javadoc": "This class is a panel that provides a label and text field that allows users to input text that\n filters the contents of the table.\n \u003cp\u003e\n This class also handles restoring selection for the client when the table has been filtered.\n See \u003ca href\u003d\"#restore_selection\"\u003ebelow\u003c/a\u003e for a caveat.\n \u003cp\u003e\n\n \u003cu\u003eFilter Reminder\u003c/u\u003e\u003cbr\u003e\n The filter text will flash as the table (by default) gains focus.  This is done to remind the\n user that the data has been filtered.  To change the component that triggers the flashing use\n {@link #setFocusComponent(Component)}, where the \u003ccode\u003eComponent\u003c/code\u003e parameter is the\n component that will trigger focus flashing when it gains focus.  To disable focus flashing,\n pass in null to {@link #setFocusComponent(Component)}.\n \u003cp\u003e\n\n \u003cu\u003eFiltering\u003c/u\u003e\u003cbr\u003e\n The filtering behavior is controlled by the filter button displayed to the right of this \n panel\u0027s text field.\n \u003cp\u003e\n\n \u003cb\u003e\u003cu\u003eImportant Usage Notes\u003c/u\u003e\u003c/b\u003e\n \u003cul\u003e\n     \u003cli\u003e\u003cb\u003e\u003ca id\u003d\"translation\"\u003e\u003c/a\u003eYou must translate row values retrieved from the table using\n     this panel.\u003c/b\u003e\n     \u003cp\u003e\n     Since this class wraps the given table with a new model, you must use this class to\n     translate row number values.  For example, when getting the selected row, the normal Java\n     code snippet below will give the incorrect value:\n     \u003cpre\u003e\n         JTable table \u003d ...\n         \u003cspan style\u003d\"color:red\"\u003eint selectedRowNumber \u003d table.getSelectedRow();\u003c/span\u003e\n     \u003c/pre\u003e\n     Instead, you must translate the returned value from above, as in the following snippet:\n     \u003cpre\u003e\n         JTable table \u003d ...\n         \u003cspan style\u003d\"color:green\"\u003e\n         int selectedRowNumber \u003d table.getSelectedRow();\n         int modelRowNumber \u003d tableFilterPanel.getModelRow( selectedRowNumber );  // see {@link #getModelRow(int)}\n         \u003c/span\u003e\n     \u003c/pre\u003e\n\n     \u003cli\u003e\u003cb\u003eThis class may set a new model on the given table, which can affect how tables are sized.\u003c/b\u003e\n     \u003cp\u003e\n      If {@link JTable#getAutoCreateColumnsFromModel()} returns true, then the columns will\n      be recreated and resized when this class is constructed.\n     \u003cli\u003eThe {@link TableFilter} used by this class will be passed the empty string (\"\") when\n     {@link TableFilter#acceptsRow(Object)} is called.\n     \u003cli\u003e\u003cb\u003eYou cannot rely on {@link JTable#getRowCount()} to access all of the table data,\n     since the data may be filtered.\u003c/b\u003e\n     \u003cp\u003e\n     To get a row count that is always all of the model\u0027s data, call\n     {@link #getUnfilteredRowCount()}.\n \u003c/ul\u003e\n@param \u003cROW_OBJECT\u003e the row object type for this given table and model",
+  "static": false,
+  "implements": [],
+  "extends": "javax.swing.JPanel",
+  "fields": [
+    {
+      "name": "FILTER_TEXTFIELD_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"filter.panel.textfield\""
+    },
+    {
+      "name": "FILTER_STATE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"FILTER_STATE\""
+    },
+    {
+      "name": "FILTER_EXTENSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".FilterExtension\""
+    },
+    {
+      "name": "FILTER_ON_ICON",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "FILTER_OFF_ICON",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "APPLY_FILTER_ICON",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "CLEAR_FILTER_ICON",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTable",
+      "type_short": "JTable",
+      "constant_value": null
+    },
+    {
+      "name": "textFilterModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.RowObjectFilterModel\u003cROW_OBJECT\u003e",
+      "type_short": "RowObjectFilterModel",
+      "constant_value": null
+    },
+    {
+      "name": "searchLabel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JLabel",
+      "type_short": "JLabel",
+      "constant_value": null
+    },
+    {
+      "name": "filterField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filter.FilterTextField",
+      "type_short": "FilterTextField",
+      "constant_value": null
+    },
+    {
+      "name": "filterListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filter.FilterListener",
+      "type_short": "FilterListener",
+      "constant_value": null
+    },
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cutility.function.Callback\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "filterOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filter.FilterOptions",
+      "type_short": "FilterOptions",
+      "constant_value": null
+    },
+    {
+      "name": "filterFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableTextFilterFactory\u003cROW_OBJECT\u003e",
+      "type_short": "TableTextFilterFactory",
+      "constant_value": null
+    },
+    {
+      "name": "transformer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.RowFilterTransformer\u003cROW_OBJECT\u003e",
+      "type_short": "RowFilterTransformer",
+      "constant_value": null
+    },
+    {
+      "name": "secondaryTableFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+      "type_short": "TableFilter",
+      "constant_value": null
+    },
+    {
+      "name": "columnTableFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e",
+      "type_short": "ColumnBasedTableFilter",
+      "constant_value": null
+    },
+    {
+      "name": "savedFilters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "filterStateButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "uniquePreferenceKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "columnFilterAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.menu.MultiStateDockingAction\u003cdocking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e\u003e",
+      "type_short": "MultiStateDockingAction",
+      "constant_value": null
+    },
+    {
+      "name": "columnFilterDialog",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.constraint.dialog.ColumnFilterDialog\u003cROW_OBJECT\u003e",
+      "type_short": "ColumnFilterDialog",
+      "constant_value": null
+    },
+    {
+      "name": "lastUsedColumnFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e",
+      "type_short": "ColumnBasedTableFilter",
+      "constant_value": null
+    },
+    {
+      "name": "updateManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.SwingUpdateManager",
+      "type_short": "SwingUpdateManager",
+      "constant_value": null
+    },
+    {
+      "name": "columnModelListener",
+      "comment": "I\u0027m a field so that my weak reference won\u0027t go away",
+      "javadoc": "I\u0027m a field so that my weak reference won\u0027t go away",
+      "static": false,
+      "type_long": "javax.swing.event.TableColumnModelListener",
+      "type_short": "TableColumnModelListener",
+      "constant_value": null
+    },
+    {
+      "name": "badProgrammingPropertyChangeListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.beans.PropertyChangeListener",
+      "type_short": "PropertyChangeListener",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a table filter panel that filters the contents of the given table.",
+      "javadoc": "Creates a table filter panel that filters the contents of the given table.\n@param table The table whose contents will be filtered.\n@param tableModel The table model used by the table--passed in by the type that we require",
+      "static": false,
+      "params": [
+        {
+          "name": "table",
+          "type_long": "javax.swing.JTable",
+          "type_short": "JTable",
+          "comment": "The table whose contents will be filtered."
+        },
+        {
+          "name": "tableModel",
+          "type_long": "docking.widgets.table.RowObjectTableModel\u003cROW_OBJECT\u003e",
+          "type_short": "RowObjectTableModel",
+          "comment": "The table model used by the table--passed in by the type that we require"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "table",
+          "type_long": "javax.swing.JTable",
+          "type_short": "JTable",
+          "comment": ""
+        },
+        {
+          "name": "tableModel",
+          "type_long": "docking.widgets.table.RowObjectTableModel\u003cROW_OBJECT\u003e",
+          "type_short": "RowObjectTableModel",
+          "comment": ""
+        },
+        {
+          "name": "filterLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initialize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "windowManager",
+          "type_long": "docking.DockingWindowManager",
+          "type_short": "DockingWindowManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadFilterPreference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dockingWindowManager",
+          "type_long": "docking.DockingWindowManager",
+          "type_short": "DockingWindowManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSaveState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveToXML",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "org.jdom.Element",
+        "type_short": "Element",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreFromXML",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "xmlElement",
+          "type_long": "org.jdom.Element",
+          "type_short": "Element",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCombinedTableFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filter1",
+          "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "TableFilter",
+          "comment": ""
+        },
+        {
+          "name": "filter2",
+          "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "TableFilter",
+          "comment": ""
+        },
+        {
+          "name": "filter3",
+          "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "TableFilter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+        "type_short": "TableFilter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFilterChagnedListener",
+      "comment": "Adds a listener that gets notified when the filter is changed\n\n Note: this listener cannot be anonymous, as the underlying storage mechanism may be\n using a weak data structure.  This means that you will need to store the listener in\n a field inside of your class.",
+      "javadoc": "Adds a listener that gets notified when the filter is changed\n\n \u003cP\u003eNote: this listener cannot be anonymous, as the underlying storage mechanism may be\n using a weak data structure.  This means that you will need to store the listener in\n a field inside of your class.\n@param l the listener",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "docking.widgets.filter.FilterListener",
+          "type_short": "FilterListener",
+          "comment": "the listener"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEnterListener",
+      "comment": "Adds a listener to this widget that is called when the user presses enter in the\n filtering area.\n\n Note: this listener cannot be anonymous, as the underlying storage mechanism may be\n using a weak data structure.  This means that you will need to store the listener in\n a field inside of your class.",
+      "javadoc": "Adds a listener to this widget that is called when the user presses enter in the\n filtering area.\n\n \u003cP\u003eNote: this listener cannot be anonymous, as the underlying storage mechanism may be\n using a weak data structure.  This means that you will need to store the listener in\n a field inside of your class.\n@param callback the listener",
+      "static": false,
+      "params": [
+        {
+          "name": "callback",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": "the listener"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setColumnTableFilter",
+      "comment": "Sets a ColumnTableFilter on this panel.",
+      "javadoc": "Sets a ColumnTableFilter on this panel.\n@param newFilter the ColumnTableFilter to use for filtering this table.",
+      "static": false,
+      "params": [
+        {
+          "name": "newFilter",
+          "type_long": "docking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "ColumnBasedTableFilter",
+          "comment": "the ColumnTableFilter to use for filtering this table."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilterRowTransformer",
+      "comment": "Sets a custom RowFilterTransformer.  The default row transformer will gather strings\n for each column in the table and use those strings for filtering.  This method allows\n the user to have complete control on generating the strings used to filter a table row;\n for example, to only filter on some columns but not others.",
+      "javadoc": "Sets a custom RowFilterTransformer.  The default row transformer will gather strings\n for each column in the table and use those strings for filtering.  This method allows\n the user to have complete control on generating the strings used to filter a table row;\n for example, to only filter on some columns but not others.\n@param transformer the custom row to string transformer used to generate strings from a\n row to be used for filtering.",
+      "static": false,
+      "params": [
+        {
+          "name": "transformer",
+          "type_long": "docking.widgets.table.RowFilterTransformer\u003cROW_OBJECT\u003e",
+          "type_short": "RowFilterTransformer",
+          "comment": "the custom row to string transformer used to generate strings from a\n row to be used for filtering."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSecondaryFilter",
+      "comment": "Sets a secondary filter that users can use to filter table rows by other criteria other than\n the text typed in at the bottom of a table.  This filter is an additional filter that will\n be applied with the typed text filter.",
+      "javadoc": "Sets a secondary filter that users can use to filter table rows by other criteria other than\n the text typed in at the bottom of a table.  This filter is an additional filter that will\n be applied with the typed text filter.\n@param tableFilter the additional filter to use for the table.",
+      "static": false,
+      "params": [
+        {
+          "name": "tableFilter",
+          "type_long": "docking.widgets.table.TableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "TableFilter",
+          "comment": "the additional filter to use for the table."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilterOptions",
+      "comment": "Sets the filter options used by the filter factory. The options are items like \"starts with\",\n \"contains\", \"regex\", etc.",
+      "javadoc": "Sets the filter options used by the filter factory. The options are items like \"starts with\",\n \"contains\", \"regex\", etc.\n@param filterOptions the filter options to be used by the filter factory.",
+      "static": false,
+      "params": [
+        {
+          "name": "filterOptions",
+          "type_long": "docking.widgets.filter.FilterOptions",
+          "type_short": "FilterOptions",
+          "comment": "the filter options to be used by the filter factory."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filterLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildFilterStateButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isTableColumnFilterableModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildColumnFilterStateButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeSavedFilters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateColumnFilterButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActionStates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cdocking.menu.ActionState\u003cdocking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e\u003e\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showFilterDialog",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tableModel",
+          "type_long": "docking.widgets.table.RowObjectFilterModel\u003cROW_OBJECT\u003e",
+          "type_short": "RowObjectFilterModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateFilterFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "installTableModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "currentModel",
+          "type_long": "docking.widgets.table.RowObjectTableModel\u003cROW_OBJECT\u003e",
+          "type_short": "RowObjectTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.RowObjectFilterModel\u003cROW_OBJECT\u003e",
+        "type_short": "RowObjectFilterModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createTextFilterModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.RowObjectTableModel\u003cROW_OBJECT\u003e",
+          "type_short": "RowObjectTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.RowObjectFilterModel\u003cROW_OBJECT\u003e",
+        "type_short": "RowObjectFilterModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JTable",
+        "type_short": "JTable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableFilterModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.RowObjectFilterModel\u003cROW_OBJECT\u003e",
+        "type_short": "RowObjectFilterModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateTableContents",
+      "comment": "Convenience method to refilter the table\u0027s contents",
+      "javadoc": "Convenience method to refilter the table\u0027s contents",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyFilterChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFocusComponent",
+      "comment": "Setting this component will trigger the filter field to flash when the component gains focus.\n If you do not want the filter field to flash as focus returns to the client,\n then pass in null.",
+      "javadoc": "Setting this component will trigger the filter field to flash when the component gains focus.\n If you do not want the filter field to flash as focus returns to the client,\n then pass in null.\n@param component The component that will trigger the filter field to flash when it gains\n        focus.",
+      "static": false,
+      "params": [
+        {
+          "name": "component",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "The component that will trigger the filter field to flash when it gains\n        focus."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "requestFocus",
+      "comment": "Overridden to focus the text field if requestFocus() is called on this panel",
+      "javadoc": "Overridden to focus the text field if requestFocus() is called on this panel",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setToolTipText",
+      "comment": "Allows the caller to set tooltip text on the filter\u0027s search label.  This can be used\n to provide an indication as to exactly how the filter text field will filter the table.",
+      "javadoc": "Allows the caller to set tooltip text on the filter\u0027s search label.  This can be used\n to provide an indication as to exactly how the filter text field will filter the table.\n@param text The tooltip text.",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The tooltip text."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilterText",
+      "comment": "Sets the contents of the filter\u0027s text field to the given text.",
+      "javadoc": "Sets the contents of the filter\u0027s text field to the given text.\n@param text The text to set.",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The text to set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilterText",
+      "comment": "Gets the contents of the filter\u0027s text field.",
+      "javadoc": "Gets the contents of the filter\u0027s text field.\n@return The filter text field text.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "The filter text field text."
+      },
+      "throws": []
+    },
+    {
+      "name": "getModelRow",
+      "comment": "Returns a row number for this panel\u0027s underlying table model that is tied to the given\n row number that represents a row in a table\u0027s display.  For example, if a user clicks a\n table row in a filtered table, then this method can be used to return the table\u0027s\n underlying TableModel row index for that row. Click here for more\n information.\n \n Update: The simpler way of getting the selected object is to call the newly\n added #getSelectedItem() method(s), which saves the client from having to get the\n index and then lookup the data.  Further, it handles differences in filtering across\n different model implementations.\n \n This method is used as a means for models to translate user actions on a table to the\n underlying data model, since table models maintain a complete list of data, some of which\n may not be displayed, due to user filtering.\n \n This is the companion method to #getViewRow(int)",
+      "javadoc": "Returns a row number for this panel\u0027s underlying table model that is tied to the given\n row number that represents a row in a table\u0027s display.  For example, if a user clicks a\n table row in a filtered table, then this method can be used to return the table\u0027s\n underlying TableModel row index for that row. \u003ca href\u003d\"#translation\"\u003eClick here\u003c/a\u003e for more\n information.\n \u003cp\u003e\n \u003cb\u003eUpdate\u003c/b\u003e: The simpler way of getting the selected object is to call the newly\n added {@link #getSelectedItem()} method(s), which saves the client from having to get the\n index and then lookup the data.  Further, it handles differences in filtering across\n different model implementations.\n \u003cp\u003e\n This method is used as a means for models to translate user actions on a table to the\n underlying data model, since table models maintain a complete list of data, some of which\n may not be displayed, due to user filtering.\n \u003cp\u003e\n This is the companion method to {@link #getViewRow(int)}\n@param viewRow The table\u0027s row, as seen in the display.\n@return the corresponding model row, based upon the table\u0027s row.\n@see #getSelectedItem()\n@see #getSelectedItems()",
+      "static": false,
+      "params": [
+        {
+          "name": "viewRow",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "The table\u0027s row, as seen in the display."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the corresponding model row, based upon the table\u0027s row."
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewRow",
+      "comment": "Returns a row number in the table (the view) for the given table model row number (the\n model).  The given value is the unfiltered row value and the returned value is the\n filtered value.\n \n This is the companion method to #getModelRow(int)",
+      "javadoc": "Returns a row number in the table (the view) for the given table model row number (the\n model).  The given value is the \u003cb\u003eunfiltered\u003c/b\u003e row value and the returned value is the\n \u003cb\u003efiltered\u003c/b\u003e value.\n \u003cp\u003e\n This is the companion method to {@link #getModelRow(int)}\n@param modelRow the row number in the unfiltered model.\n@return the row in the table for the given model row.",
+      "static": false,
+      "params": [
+        {
+          "name": "modelRow",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the row number in the unfiltered model."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the row in the table for the given model row."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowObject",
+      "comment": "Returns the row object for the given view row index.",
+      "javadoc": "Returns the row object for the given view row index.\n@param viewRow the desired row in terms of the UI (e.g., the table\u0027s row index)\n@return the row object matching the given index",
+      "static": false,
+      "params": [
+        {
+          "name": "viewRow",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the desired row in terms of the UI (e.g., the table\u0027s row index)"
+        }
+      ],
+      "return": {
+        "type_long": "ROW_OBJECT",
+        "type_short": "ROW_OBJECT",
+        "comment": "the row object matching the given index"
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedItem",
+      "comment": "Select the given row object.  No selection will be made if the object is filtered out of\n view.",
+      "javadoc": "Select the given row object.  No selection will be made if the object is filtered out of\n view.\n@param t the row object to select",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": "the row object to select"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scrollToSelectedRow",
+      "comment": "Scrolls the view to the currently selected item.",
+      "javadoc": "Scrolls the view to the currently selected item.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedItem",
+      "comment": "Returns the currently selected row object or null if there is no table selection.",
+      "javadoc": "Returns the currently selected row object or null if there is no table selection.\n@return the currently selected row object or null if there is no table selection.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ROW_OBJECT",
+        "type_short": "ROW_OBJECT",
+        "comment": "the currently selected row object or null if there is no table selection."
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedItems",
+      "comment": "Returns the currently selected row objects or an empty list if there is no selection.",
+      "javadoc": "Returns the currently selected row objects or an empty list if there is no selection.\n@return the currently selected row objects or an empty list if there is no selection.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cROW_OBJECT\u003e",
+        "type_short": "List",
+        "comment": "the currently selected row objects or an empty list if there is no selection."
+      },
+      "throws": []
+    },
+    {
+      "name": "isInView",
+      "comment": "Returns true if the given row object is currently in the view of the table; false implies\n the object has been filtered out of view.",
+      "javadoc": "Returns true if the given row object is currently in the view of the table; false implies\n the object has been filtered out of view.\n@param o the row object\n@return true if in the view",
+      "static": false,
+      "params": [
+        {
+          "name": "o",
+          "type_long": "ROW_OBJECT",
+          "type_short": "ROW_OBJECT",
+          "comment": "the row object"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if in the view"
+      },
+      "throws": []
+    },
+    {
+      "name": "isFiltered",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnfilteredRowCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createUniqueFilterPreferenceKey",
+      "comment": "Generates a key used to store user filter configuration state.  You can override this\n method to generate unique keys yourself.  You are required to override this method if\n you create multiple versions of a filter panel from the same place in your code, as\n multiple instances created in the same place will cause them all to share the same key and\n thus to have the same filter settings when they are created initially.\n \n As an example, consider a plugin that creates n providers.  If each provider uses\n a filter panel, then each provider will share the same filter settings when that provider\n is created.  If this is not what you want, then you need to override this method to\n generate a unique key for each provider.",
+      "javadoc": "Generates a key used to store user filter configuration state.  You can override this\n method to generate unique keys yourself.  You are required to override this method if\n you create multiple versions of a filter panel from the same place in your code, as\n multiple instances created in the same place will cause them all to share the same key and\n thus to have the same filter settings when they are created initially.\n \u003cp\u003e\n As an example, consider a plugin that creates \u003ccode\u003en\u003c/code\u003e providers.  If each provider uses\n a filter panel, then each provider will share the same filter settings when that provider\n is created.  If this is not what you want, then you need to override this method to\n generate a unique key for each provider.\n@param jTable the table\n@return a key used to store user filter configuration state.",
+      "static": false,
+      "params": [
+        {
+          "name": "jTable",
+          "type_long": "javax.swing.JTable",
+          "type_short": "JTable",
+          "comment": "the table"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "a key used to store user filter configuration state."
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnTableFilter",
+      "comment": "Returns the ColumnTableFilter that has been set on this GTableFilterPanel or null if there\n is none.",
+      "javadoc": "Returns the ColumnTableFilter that has been set on this GTableFilterPanel or null if there\n is none.\n@return the ColumnTableFilter that has been set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e",
+        "type_short": "ColumnBasedTableFilter",
+        "comment": "the ColumnTableFilter that has been set."
+      },
+      "throws": []
+    },
+    {
+      "name": "getPreferenceKey",
+      "comment": "Return a unique key that can be used to store preferences for this table.",
+      "javadoc": "Return a unique key that can be used to store preferences for this table.\n@return a unique key that can be used to store preferences for this table.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "a unique key that can be used to store preferences for this table."
+      },
+      "throws": []
+    },
+    {
+      "name": "updateSavedFilters",
+      "comment": "Updates the \"quick filter\" multistate button.",
+      "javadoc": "Updates the \"quick filter\" multistate button.\n@param filter the filter to add or remove.\n@param add if true, the filter is added to the quick list. Otherwise, it is removed.",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "docking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "ColumnBasedTableFilter",
+          "comment": "the filter to add or remove."
+        },
+        {
+          "name": "add",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the filter is added to the quick list. Otherwise, it is removed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "generateFilterPreferenceKey",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "jTable",
+          "type_long": "javax.swing.JTable",
+          "type_short": "JTable",
+          "comment": ""
+        },
+        {
+          "name": "extension",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInceptionInformationFromTheFirstClassThatIsNotUs",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilterName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "docking.widgets.table.columnfilter.ColumnBasedTableFilter\u003cROW_OBJECT\u003e",
+          "type_short": "ColumnBasedTableFilter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

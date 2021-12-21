@@ -1,0 +1,559 @@
+{
+  "name": "RunManager",
+  "comment": "Helper class to execute a Runnable in a separate thread and provides a\n progress monitor component that is shown as needed. This class can support several\n different scheduling models described below.\n \n 1) Only allow one runnable at any given time.  In this model, a new runnable will cause any running\n runnable to be cancelled and the new runnable will begin running. Because of this, there will\n never be any runnables waiting in the queue. Use the #runNow(MonitoredRunnable, String) \n method to get this behavior.\n \n 2) Allow one running runnable and one pending runnable.  In this mode, any running runnable will be\n allowed to complete, but any currently pending runnable will be replaced by the new runnable. Use\n the #runNext(MonitoredRunnable, String) method to get this behavior.\n \n 3) Run all scheduled runnables in the order they are scheduled.  Use the \n #runLater(MonitoredRunnable, String, int) for this behavior.\n \n If the given runnable has Swing work to perform after the main Runnable.run() method completes\n (e.g., updating Swing components),\n the runnable should implement the SwingRunnable interface and perform this work in\n SwingRunnable#swingRun(boolean).\n \n The progress monitor component, retrieved via #getMonitorComponent(), can be placed\n into a Swing widget.  This RunManager will show and hide this progress component as necessary\n when runnables are being run.",
+  "javadoc": "Helper class to execute a Runnable in a separate thread and provides a\n progress monitor component that is shown as needed. This class can support several\n different scheduling models described below.\n \u003cp\u003e\n 1) Only allow one runnable at any given time.  In this model, a new runnable will cause any running\n runnable to be cancelled and the new runnable will begin running. Because of this, there will\n never be any runnables waiting in the queue. Use the {@link #runNow(MonitoredRunnable, String)} \n method to get this behavior.\n \u003cp\u003e\n 2) Allow one running runnable and one pending runnable.  In this mode, any running runnable will be\n allowed to complete, but any currently pending runnable will be replaced by the new runnable. Use\n the {@link #runNext(MonitoredRunnable, String)} method to get this behavior.\n \u003cp\u003e\n 3) Run all scheduled runnables in the order they are scheduled.  Use the \n {@link #runLater(MonitoredRunnable, String, int)} for this behavior.\n \u003cp\u003e\n If the given runnable has Swing work to perform after the main Runnable.run() method completes\n (e.g., updating Swing components),\n the runnable should implement the {@link SwingRunnable} interface and perform this work in\n {@link SwingRunnable#swingRun(boolean)}.\n \u003cp\u003e\n The progress monitor component, retrieved via {@link #getMonitorComponent()}, can be placed\n into a Swing widget.  This RunManager will show and hide this progress component as necessary\n when runnables are being run.\n@see SwingRunnable",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "SHOW_PROGRESS_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "500"
+    },
+    {
+      "name": "DEFAULT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Default Panel\""
+    },
+    {
+      "name": "PROGRESS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Progress Panel\""
+    },
+    {
+      "name": "cardLayout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.CardLayout",
+      "type_short": "CardLayout",
+      "constant_value": null
+    },
+    {
+      "name": "progressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "defaultComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.Component",
+      "type_short": "Component",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitorComponent",
+      "type_short": "TaskMonitorComponent",
+      "constant_value": null
+    },
+    {
+      "name": "worker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.worker.Worker",
+      "type_short": "Worker",
+      "constant_value": null
+    },
+    {
+      "name": "runManagerName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "taskListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskListener",
+      "type_short": "TaskListener",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.util.task.TaskListener",
+          "type_short": "TaskListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "defaultComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "defaultComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.util.task.TaskListener",
+          "type_short": "TaskListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "showProgress",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelRunnables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMonitorComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelAllRunnables",
+      "comment": "A convenience method to cancel the any currently running job and any scheduled jobs.  Note:\n this method does not block or wait for the currently running job to finish.",
+      "javadoc": "A convenience method to cancel the any currently running job and any scheduled jobs.  Note:\n this method does not block or wait for the currently running job to finish.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "waitForNotBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "maxWaitMillis",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runNow",
+      "comment": "Cancels any currently running runnable, clears any queued runnables, and then runs the given\n runnable.\n \n See the class header for more info.",
+      "javadoc": "Cancels any currently running runnable, clears any queued runnables, and then runs the given\n runnable.\n \u003cp\u003e\n See the class header for more info.\n@param runnable Runnable to execute\n@param taskName name of runnable; may be null (this will appear in the progress panel)",
+      "static": false,
+      "params": [
+        {
+          "name": "runnable",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": "Runnable to execute"
+        },
+        {
+          "name": "taskName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of runnable; may be null (this will appear in the progress panel)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runNow",
+      "comment": "Cancels any currently running runnable, clears any queued runnables, and then runs the given\n runnable.\n \n See the class header for more info.",
+      "javadoc": "Cancels any currently running runnable, clears any queued runnables, and then runs the given\n runnable.\n \u003cp\u003e\n See the class header for more info.\n@param runnable Runnable to execute\n@param taskName name of runnable; may be null (this will appear in the progress panel)\n@param showProgressDelay the amount of time (in milliseconds) before showing the progress\n        panel",
+      "static": false,
+      "params": [
+        {
+          "name": "runnable",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": "Runnable to execute"
+        },
+        {
+          "name": "taskName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of runnable; may be null (this will appear in the progress panel)"
+        },
+        {
+          "name": "showProgressDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the amount of time (in milliseconds) before showing the progress\n        panel"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runNext",
+      "comment": "Allows any currently running runnable to finish, clears any queued runnables,\n and then queues the given runnable to be run after the current runnable finishes.\n \n This call will use the default #SHOW_PROGRESS_DELAY of\n .\n \n See the class header for more info.",
+      "javadoc": "Allows any currently running runnable to finish, clears any queued runnables,\n and then queues the given runnable to be run after the current runnable finishes.\n \u003cp\u003e\n This call will use the default {@link #SHOW_PROGRESS_DELAY delay} of\n {@value #SHOW_PROGRESS_DELAY}.\n \u003cp\u003e\n See the class header for more info.\n@param runnable Runnable to execute\n@param taskName name of runnable; may be null (this will appear in the progress panel)",
+      "static": false,
+      "params": [
+        {
+          "name": "runnable",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": "Runnable to execute"
+        },
+        {
+          "name": "taskName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of runnable; may be null (this will appear in the progress panel)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runNext",
+      "comment": "Allows any currently running runnable to finish, clears any queued runnables,\n and then queues the given runnable to be run after the current runnable finishes.\n \n See the class header for more info.",
+      "javadoc": "Allows any currently running runnable to finish, clears any queued runnables,\n and then queues the given runnable to be run after the current runnable finishes.\n \u003cp\u003e\n See the class header for more info.\n@param runnable Runnable to execute\n@param taskName name of runnable; may be null (this will appear in the progress panel)\n@param showProgressDelay the amount of time (in milliseconds) before showing the progress\n        panel",
+      "static": false,
+      "params": [
+        {
+          "name": "runnable",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": "Runnable to execute"
+        },
+        {
+          "name": "taskName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of runnable; may be null (this will appear in the progress panel)"
+        },
+        {
+          "name": "showProgressDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the amount of time (in milliseconds) before showing the progress\n        panel"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runLater",
+      "comment": "Schedules this runnable to be run after all runnables currently queued.\n \n This method differs from the #runNow(MonitoredRunnable, String, int) methods in that it will\n not cancel any currently running jobs.  This allows you to add new jobs to this run\n manager, which lets them queue up. See header docs for details.",
+      "javadoc": "Schedules this runnable to be run after all runnables currently queued.\n \u003cP\u003e\n This method differs from the {@link #runNow(MonitoredRunnable, String, int)} methods in that it will\n not cancel any currently running jobs.  This allows you to add new jobs to this run\n manager, which lets them queue up. See header docs for details.\n@param runnable The runnable to run\n@param taskName The name of the task to run\n@param showProgressDelay The amount of time to wait before showing a progress monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "runnable",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": "The runnable to run"
+        },
+        {
+          "name": "taskName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The name of the task to run"
+        },
+        {
+          "name": "showProgressDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "The amount of time to wait before showing a progress monitor."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInProgress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showCancelButton",
+      "comment": "Show the cancel button according to the showCancel parameter.",
+      "javadoc": "Show the cancel button according to the showCancel parameter.\n@param showCancel true means to show the cancel button",
+      "static": false,
+      "params": [
+        {
+          "name": "showCancel",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means to show the cancel button"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showProgressBar",
+      "comment": "Show the progress bar according to the showProgress parameter.",
+      "javadoc": "Show the progress bar according to the showProgress parameter.\n@param showProgress true means to show the progress bar",
+      "static": false,
+      "params": [
+        {
+          "name": "showProgress",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means to show the progress bar"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showProgressIcon",
+      "comment": "Show the progress icon according to the showIcon parameter.",
+      "javadoc": "Show the progress icon according to the showIcon parameter.\n@param showIcon true means to show the progress icon",
+      "static": false,
+      "params": [
+        {
+          "name": "showIcon",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means to show the progress icon"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyTaskCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitoredRunnable",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyTaskCancelled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitoredRunnable",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

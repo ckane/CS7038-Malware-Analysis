@@ -1,0 +1,681 @@
+{
+  "name": "MultEntSubModel",
+  "comment": "MultEntSubModel (M-model) defines subroutines which do not share code with\n any other subroutine and may have one or more entry points. Each entry-\n points represent either a source or called entry-point.\n \n MODEL-M subroutines should be used to determine which subroutine(s) contains\n a particular instruction.\n Since model-M subroutines yield the largest subroutines, they should be particular useful\n in the process of program slicing -- the process of splitting the program into modules\n or subroutine cliques -- in order to begin to understand the structure and functionality\n of the program.",
+  "javadoc": "\u003cCODE\u003eMultEntSubModel\u003c/CODE\u003e (M-model) defines subroutines which do not share code with\n any other subroutine and may have one or more entry points. Each entry-\n points represent either a source or called entry-point.\n \u003cP\u003e\n MODEL-M subroutines should be used to determine which subroutine(s) contains\n a particular instruction.\n Since model-M subroutines yield the largest subroutines, they should be particular useful\n in the process of program slicing -- the process of splitting the program into modules\n or subroutine cliques -- in order to begin to understand the structure and functionality\n of the program.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.block.SubroutineBlockModel"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Multiple Entry\""
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "listing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "foundMSubs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressObjectMap",
+      "type_short": "AddressObjectMap",
+      "constant_value": null
+    },
+    {
+      "name": "bbModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.block.CodeBlockModel",
+      "type_short": "CodeBlockModel",
+      "constant_value": null
+    },
+    {
+      "name": "includeExternals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a MultEntSubModel for a program.",
+      "javadoc": "Construct a \u003cCODE\u003eMultEntSubModel\u003c/CODE\u003e for a program.\n@param program program to create blocks from.",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program to create blocks from."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a MultEntSubModel for a program.",
+      "javadoc": "Construct a \u003cCODE\u003eMultEntSubModel\u003c/CODE\u003e for a program.\n@param program program to create blocks from.\n@param includeExternals external blocks will be included if true",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program to create blocks from."
+        },
+        {
+          "name": "includeExternals",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "external blocks will be included if true"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCodeBlockAt",
+      "comment": "Get the code block that has an entry point at addr.",
+      "javadoc": "Get the code block that has an entry point at addr.\n@param addr one of the entry points for a Model-M subroutine\n@param monitor task monitor which allows user to cancel operation.\n@return null if there is no subroutine with an entry at addr.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "one of the entry points for a Model-M subroutine"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor which allows user to cancel operation."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlock",
+        "type_short": "CodeBlock",
+        "comment": "null if there is no subroutine with an entry at addr."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "getAddressSetContaining",
+      "comment": "Get the M-Model subroutine address set which contains the specified address.\n This method also identifies the entry points and caches the resulting CodeBlock.",
+      "javadoc": "Get the M-Model subroutine address set which contains the specified address.\n This method also identifies the entry points and caches the resulting CodeBlock.\n@param addr Address inside the subroutine that we are seeking\n@param monitor task monitor which allows user to cancel operation.\n@return The \u003cCODE\u003eCodeBlock\u003c/CODE\u003e for a\n                  \u003cCODE\u003eMultEntSubModel\u003c/CODE\u003e Subroutine.\n \t\t\t\t\tNull is returned if there is no instruction at addr.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "Address inside the subroutine that we are seeking"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor which allows user to cancel operation."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlock",
+        "type_short": "CodeBlock",
+        "comment": "The CodeBlock for a\n                  MultEntSubModel Subroutine.\n \t\t\t\t\tNull is returned if there is no instruction at addr."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "addDestinations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "todoList",
+          "type_long": "java.util.LinkedList\u003cghidra.program.model.address.Address\u003e",
+          "type_short": "LinkedList",
+          "comment": ""
+        },
+        {
+          "name": "bblock",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addSources",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "entryPtList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.Address\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "todoList",
+          "type_long": "java.util.LinkedList\u003cghidra.program.model.address.Address\u003e",
+          "type_short": "LinkedList",
+          "comment": ""
+        },
+        {
+          "name": "bblock",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFirstCodeBlockContaining",
+      "comment": "Get the MultEntSubModel Code Block that contains the address.",
+      "javadoc": "Get the MultEntSubModel Code Block that contains the address.\n@param addr Address to find a containing block.\n@param monitor task monitor which allows user to cancel operation.\n@return A CodeBlock if any block contains the address.\n         null otherwise.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "Address to find a containing block."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor which allows user to cancel operation."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlock",
+        "type_short": "CodeBlock",
+        "comment": "A CodeBlock if any block contains the address.\n         null otherwise."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "getCodeBlocksContaining",
+      "comment": "Returns the one code block contained by addr (only for\n  a model that has shared subroutines would this method\n  return more than one code block)",
+      "javadoc": "Returns the one code block contained by addr (only for\n  a model that has shared subroutines would this method\n  return more than one code block)\n@param addr Address to find a containing block.\n@param monitor task monitor which allows user to cancel operation.\n@return A CodeBlock if any block contains the address.\n         empty array otherwise.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "Address to find a containing block."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor which allows user to cancel operation."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlock[]",
+        "type_short": "ghidra.program.model.block.CodeBlock[]",
+        "comment": "A CodeBlock if any block contains the address.\n         empty array otherwise."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "getCodeBlocks",
+      "comment": "Get an iterator over the code blocks in the entire program.",
+      "javadoc": "Get an iterator over the code blocks in the entire program.\n@param monitor task monitor which allows user to cancel operation.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor which allows user to cancel operation."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlockIterator",
+        "type_short": "CodeBlockIterator",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "getCodeBlocksContaining",
+      "comment": "Get an iterator over CodeBlocks which overlap the specified address set.",
+      "javadoc": "Get an iterator over CodeBlocks which overlap the specified address set.\n@param addrSet an address set within program\n@param monitor task monitor which allows user to cancel operation.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "an address set within program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor which allows user to cancel operation."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlockIterator",
+        "type_short": "CodeBlockIterator",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#getProgram()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getListing",
+      "comment": "Returns the listing associated with this block model.",
+      "javadoc": "Returns the listing associated with this block model.\n@return the listing associated with this block model.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Listing",
+        "type_short": "Listing",
+        "comment": "the listing associated with this block model."
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#getName(ghidra.program.model.block.CodeBlock)",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowType",
+      "comment": "Return in general how things flow out of this node.\n This method exists for the SIMPLEBLOCK model.\n\n \n Since it doesn\u0027t make a great deal of sense to ask for this method\n in the case of subroutines, we return FlowType.UNKNOWN\n as long as the block exists.\n\n \n If this block has no valid instructions, it can\u0027t flow,\n so FlowType.INVALID is returned.",
+      "javadoc": "Return in general how things flow out of this node.\n This method exists for the SIMPLEBLOCK model.\n\n \u003cp\u003e\n Since it doesn\u0027t make a great deal of sense to ask for this method\n in the case of subroutines, we return FlowType.UNKNOWN\n as long as the block exists.\n\n \u003cp\u003e\n If this block has no valid instructions, it can\u0027t flow,\n so FlowType.INVALID is returned.\n@return flow type of this node",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.FlowType",
+        "type_short": "FlowType",
+        "comment": "flow type of this node"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSources",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#getSources(ghidra.program.model.block.CodeBlock, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlockReferenceIterator",
+        "type_short": "CodeBlockReferenceIterator",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getNumSources",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#getNumSources(ghidra.program.model.block.CodeBlock, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getDestinations",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#getDestinations(ghidra.program.model.block.CodeBlock, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlockReferenceIterator",
+        "type_short": "CodeBlockReferenceIterator",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getNumDestinations",
+      "comment": "Get number of destination references flowing out of this subroutine (block).\n All Calls from this block, and all external FlowType block references\n from this block are counted.",
+      "javadoc": "Get number of destination references flowing out of this subroutine (block).\n All Calls from this block, and all external FlowType block references\n from this block are counted.\n@param block code block to get the number of destination references from.\n@param monitor task monitor which allows user to cancel operation.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": "code block to get the number of destination references from."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor which allows user to cancel operation."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "getAddressSet",
+      "comment": "Compute an address set that represents all the addresses contained\n  in all instructions that are part of this block",
+      "javadoc": "Compute an address set that represents all the addresses contained\n  in all instructions that are part of this block\n@param block code block to compute address set for.",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": "code block to compute address set for."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSubFromCache",
+      "comment": "Gets a subroutine from the cache containing addr.  If none there, returns null.\n  It is assumed that an address will only occur within a single MSub",
+      "javadoc": "Gets a subroutine from the cache containing addr.  If none there, returns null.\n  It is assumed that an address will only occur within a single MSub",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlock",
+        "type_short": "CodeBlock",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBasicBlockModel",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#getBasicBlockModel()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.block.CodeBlockModel",
+        "type_short": "CodeBlockModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#getName()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseSubroutineModel",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.SubroutineBlockModel#getBaseSubroutineModel()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.block.SubroutineBlockModel",
+        "type_short": "SubroutineBlockModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "allowsBlockOverlap",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#allowsBlockOverlap()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "externalsIncluded",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.block.CodeBlockModel#externalsIncluded()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

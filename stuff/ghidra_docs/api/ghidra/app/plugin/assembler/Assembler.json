@@ -1,0 +1,369 @@
+{
+  "name": "Assembler",
+  "comment": "The primary interface for performing assembly in Ghidra.\n \n \n Use the Assemblers class to obtain a suitable implementation for a given program or\n language.",
+  "javadoc": "The primary interface for performing assembly in Ghidra.\n \n \u003cp\u003e\n Use the {@link Assemblers} class to obtain a suitable implementation for a given program or\n language.",
+  "static": false,
+  "implements": [],
+  "fields": [],
+  "methods": [
+    {
+      "name": "assemble",
+      "comment": "Assemble a sequence of instructions and place them at the given address.\n \n \n This method is only valid if the assembler is bound to a program. An instance may optionally\n implement this method without a program binding. In that case, the returned iterator will\n refer to pseudo instructions.\n \n \n NOTE: There must be an active transaction on the bound program for this method to succeed.",
+      "javadoc": "Assemble a sequence of instructions and place them at the given address.\n \n \u003cp\u003e\n This method is only valid if the assembler is bound to a program. An instance may optionally\n implement this method without a program binding. In that case, the returned iterator will\n refer to pseudo instructions.\n \n \u003cp\u003e\n NOTE: There must be an active transaction on the bound program for this method to succeed.\n@param at the location where the resulting instructions should be placed\n@param listing a new-line separated or array sequence of instructions\n@return an iterator over the resulting instructions\n@throws AssemblySyntaxException a textual instruction is non well-formed\n@throws AssemblySemanticException a well-formed instruction cannot be assembled\n@throws MemoryAccessException there is an issue writing the result to program memory\n@throws AddressOverflowException the resulting block is beyond the valid address range",
+      "static": false,
+      "params": [
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location where the resulting instructions should be placed"
+        },
+        {
+          "name": "listing",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": "a new-line separated or array sequence of instructions"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.InstructionIterator",
+        "type_short": "InstructionIterator",
+        "comment": "an iterator over the resulting instructions"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySyntaxException",
+          "type_short": "AssemblySyntaxException",
+          "comment": "a textual instruction is non well-formed"
+        },
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySemanticException",
+          "type_short": "AssemblySemanticException",
+          "comment": "a well-formed instruction cannot be assembled"
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "there is an issue writing the result to program memory"
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": "the resulting block is beyond the valid address range"
+        }
+      ]
+    },
+    {
+      "name": "assembleLine",
+      "comment": "Assemble a line instruction at the given address.\n \n \n This method is valid with or without a bound program. Even if bound, the program is not\n modified; however, the appropriate context information is taken from the bound program.\n Without a program, the language\u0027s default context is taken at the given location.",
+      "javadoc": "Assemble a line instruction at the given address.\n \n \u003cp\u003e\n This method is valid with or without a bound program. Even if bound, the program is not\n modified; however, the appropriate context information is taken from the bound program.\n Without a program, the language\u0027s default context is taken at the given location.\n@param at the location of the start of the instruction\n@param line the textual assembly code\n@return the binary machine code, suitable for placement at the given address\n@throws AssemblySyntaxException the textual instruction is not well-formed\n@throws AssemblySemanticException the the well-formed instruction cannot be assembled",
+      "static": false,
+      "params": [
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        },
+        {
+          "name": "line",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the textual assembly code"
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": "the binary machine code, suitable for placement at the given address"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySyntaxException",
+          "type_short": "AssemblySyntaxException",
+          "comment": "the textual instruction is not well-formed"
+        },
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySemanticException",
+          "type_short": "AssemblySemanticException",
+          "comment": "the the well-formed instruction cannot be assembled"
+        }
+      ]
+    },
+    {
+      "name": "assembleLine",
+      "comment": "Assemble a line instruction at the given address, assuming the given context.\n \n \n This method works like #assembleLine(Address, String) except that it allows you to\n override the assumed context at that location.",
+      "javadoc": "Assemble a line instruction at the given address, assuming the given context.\n \n \u003cp\u003e\n This method works like {@link #assembleLine(Address, String)} except that it allows you to\n override the assumed context at that location.\n@param at the location of the start of the instruction\n@param line the textual assembly code\n@param ctx the context register value at the start of the instruction\n@return the results of semantic resolution (from all parse results)\n@throws AssemblySyntaxException the textual instruction is not well-formed\n@throws AssemblySemanticException the well-formed instruction cannot be assembled",
+      "static": false,
+      "params": [
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        },
+        {
+          "name": "line",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the textual assembly code"
+        },
+        {
+          "name": "ctx",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": "the context register value at the start of the instruction"
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": "the results of semantic resolution (from all parse results)"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySemanticException",
+          "type_short": "AssemblySemanticException",
+          "comment": "the well-formed instruction cannot be assembled"
+        },
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySyntaxException",
+          "type_short": "AssemblySyntaxException",
+          "comment": "the textual instruction is not well-formed"
+        }
+      ]
+    },
+    {
+      "name": "parseLine",
+      "comment": "Parse a line instruction.\n \n \n Generally, you should just use #assembleLine(Address, String), but if you\u0027d like\n access to the parse trees outside of an AssemblySelector, then this may be an\n acceptable option. Most notably, this is an excellent way to obtain suggestions for\n auto-completion.\n \n \n Each item in the returned collection is either a complete parse tree, or a syntax error\n Because all parse paths are attempted, it\u0027s possible to get many mixed results. For example,\n The input line may be a valid instruction; however, there may be suggestions to continue the\n line toward another valid instruction.",
+      "javadoc": "Parse a line instruction.\n \n \u003cp\u003e\n Generally, you should just use {@link #assembleLine(Address, String)}, but if you\u0027d like\n access to the parse trees outside of an {@link AssemblySelector}, then this may be an\n acceptable option. Most notably, this is an excellent way to obtain suggestions for\n auto-completion.\n \n \u003cp\u003e\n Each item in the returned collection is either a complete parse tree, or a syntax error\n Because all parse paths are attempted, it\u0027s possible to get many mixed results. For example,\n The input line may be a valid instruction; however, there may be suggestions to continue the\n line toward another valid instruction.\n@param line the line (or partial line) to parse\n@return the results of parsing",
+      "static": false,
+      "params": [
+        {
+          "name": "line",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the line (or partial line) to parse"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseResult\u003e",
+        "type_short": "Collection",
+        "comment": "the results of parsing"
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveTree",
+      "comment": "Resolve a given parse tree at the given address, assuming the given context\n \n \n Each item in the returned collection is either a completely resolved instruction, or a\n semantic error. Because all resolutions are attempted, it\u0027s possible to get many mixed\n results.\n \n \n NOTE: The resolved instructions are given as masks and values. Where the mask does not cover,\n you can choose any value.",
+      "javadoc": "Resolve a given parse tree at the given address, assuming the given context\n \n \u003cp\u003e\n Each item in the returned collection is either a completely resolved instruction, or a\n semantic error. Because all resolutions are attempted, it\u0027s possible to get many mixed\n results.\n \n \u003cp\u003e\n NOTE: The resolved instructions are given as masks and values. Where the mask does not cover,\n you can choose any value.\n@param parse a parse result giving a valid tree\n@param at the location of the start of the instruction\n@param ctx the context register value at the start of the instruction\n@return the results of semantic resolution",
+      "static": false,
+      "params": [
+        {
+          "name": "parse",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseResult",
+          "type_short": "AssemblyParseResult",
+          "comment": "a parse result giving a valid tree"
+        },
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        },
+        {
+          "name": "ctx",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": "the context register value at the start of the instruction"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the results of semantic resolution"
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveTree",
+      "comment": "Resolve a given parse tree at the given address.\n \n \n Each item in the returned collection is either a completely resolved instruction, or a\n semantic error. Because all resolutions are attempted, it\u0027s possible to get many mixed\n results.\n \n \n NOTE: The resolved instructions are given as masks and values. Where the mask does not cover,\n you can choose any value.",
+      "javadoc": "Resolve a given parse tree at the given address.\n \n \u003cp\u003e\n Each item in the returned collection is either a completely resolved instruction, or a\n semantic error. Because all resolutions are attempted, it\u0027s possible to get many mixed\n results.\n \n \u003cp\u003e\n NOTE: The resolved instructions are given as masks and values. Where the mask does not cover,\n you can choose any value.\n@param parse a parse result giving a valid tree\n@param at the location of the start of the instruction\n@return the results of semantic resolution",
+      "static": false,
+      "params": [
+        {
+          "name": "parse",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseResult",
+          "type_short": "AssemblyParseResult",
+          "comment": "a parse result giving a valid tree"
+        },
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the results of semantic resolution"
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveLine",
+      "comment": "Assemble a line instruction at the given address.\n \n \n This method works like #resolveLine(Address, String, AssemblyPatternBlock), except\n that it derives the context using #getContextAt(Address).",
+      "javadoc": "Assemble a line instruction at the given address.\n \n \u003cp\u003e\n This method works like {@link #resolveLine(Address, String, AssemblyPatternBlock)}, except\n that it derives the context using {@link #getContextAt(Address)}.\n@param at the location of the start of the instruction\n@param line the textual assembly code\n@return the collection of semantic resolution results\n@throws AssemblySyntaxException the textual instruction is not well-formed",
+      "static": false,
+      "params": [
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        },
+        {
+          "name": "line",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the textual assembly code"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the collection of semantic resolution results"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySyntaxException",
+          "type_short": "AssemblySyntaxException",
+          "comment": "the textual instruction is not well-formed"
+        }
+      ]
+    },
+    {
+      "name": "resolveLine",
+      "comment": "Assemble a line instruction at the given address, assuming the given context.\n \n \n This method works like #assembleLine(Address, String, AssemblyPatternBlock), except\n that it returns all possible resolutions for the parse trees that pass the\n AssemblySelector.",
+      "javadoc": "Assemble a line instruction at the given address, assuming the given context.\n \n \u003cp\u003e\n This method works like {@link #assembleLine(Address, String, AssemblyPatternBlock)}, except\n that it returns all possible resolutions for the parse trees that pass the\n {@link AssemblySelector}.\n@param at the location of the start of the instruction\n@param line the textual assembly code\n@param ctx the context register value at the start of the instruction\n@return the collection of semantic resolution results\n@throws AssemblySyntaxException the textual instruction is not well-formed",
+      "static": false,
+      "params": [
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        },
+        {
+          "name": "line",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the textual assembly code"
+        },
+        {
+          "name": "ctx",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": "the context register value at the start of the instruction"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the collection of semantic resolution results"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.assembler.AssemblySyntaxException",
+          "type_short": "AssemblySyntaxException",
+          "comment": "the textual instruction is not well-formed"
+        }
+      ]
+    },
+    {
+      "name": "patchProgram",
+      "comment": "Place a resolved (and fully-masked) instruction into the bound program.\n \n \n This method is not valid without a program binding. Also, this method must be called during a\n program database transaction.",
+      "javadoc": "Place a resolved (and fully-masked) instruction into the bound program.\n \n \u003cp\u003e\n This method is not valid without a program binding. Also, this method must be called during a\n program database transaction.\n@param res the resolved and fully-masked instruction\n@param at the location of the start of the instruction\n@return the new {@link Instruction} code unit\n@throws MemoryAccessException there is an issue writing the result to program memory",
+      "static": false,
+      "params": [
+        {
+          "name": "res",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": "the resolved and fully-masked instruction"
+        },
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Instruction",
+        "type_short": "Instruction",
+        "comment": "the new Instruction code unit"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "there is an issue writing the result to program memory"
+        }
+      ]
+    },
+    {
+      "name": "patchProgram",
+      "comment": "Place instruction bytes into the bound program.\n \n \n This method is not valid without a program binding. Also, this method must be called during a\n program database transaction.",
+      "javadoc": "Place instruction bytes into the bound program.\n \n \u003cp\u003e\n This method is not valid without a program binding. Also, this method must be called during a\n program database transaction.\n@param insbytes the instruction data\n@param at the location of the start of the instruction\n@return an iterator over the disassembled instructions\n@throws MemoryAccessException there is an issue writing the result to program memory",
+      "static": false,
+      "params": [
+        {
+          "name": "insbytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "the instruction data"
+        },
+        {
+          "name": "at",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the location of the start of the instruction"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.InstructionIterator",
+        "type_short": "InstructionIterator",
+        "comment": "an iterator over the disassembled instructions"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "there is an issue writing the result to program memory"
+        }
+      ]
+    },
+    {
+      "name": "getContextAt",
+      "comment": "Get the context at a given address\n \n \n If there is a program binding, this will extract the actual context at the given address.\n Otherwise, it will obtain the default context at the given address for the language.",
+      "javadoc": "Get the context at a given address\n \n \u003cp\u003e\n If there is a program binding, this will extract the actual context at the given address.\n Otherwise, it will obtain the default context at the given address for the language.\n@param addr the address\n@return the context",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the context"
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,580 @@
+{
+  "name": "EquateMerger",
+  "comment": "Class for merging equate changes. This class can merge equate changes \n that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then manually merge the conflicting equates.\n The EquateMerger takes into account anywhere that code units have been merged.\n If code units were merged, then this will not try to merge at those addresses.\n The code unit merger should have already merged the equates where it \n merged code units.\n Important: This class is intended to be used only for a single program \n version merge. It should be constructed, followed by an autoMerge(), and lastly\n each address with a conflict should have mergeConflicts() called on it.",
+  "javadoc": "Class for merging equate changes. This class can merge equate changes \n that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then manually merge the conflicting equates.\n \u003cbr\u003eThe EquateMerger takes into account anywhere that code units have been merged.\n If code units were merged, then this will not try to merge at those addresses.\n The code unit merger should have already merged the equates where it \n merged code units.\n \u003cbr\u003eImportant: This class is intended to be used only for a single program \n version merge. It should be constructed, followed by an autoMerge(), and lastly\n each address with a conflict should have mergeConflicts() called on it.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.merge.listing.AbstractListingMerger",
+  "fields": [
+    {
+      "name": "EQUATES_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Equates\""
+    },
+    {
+      "name": "currentConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.EquateMerger.EquateConflict",
+      "type_short": "EquateConflict",
+      "constant_value": null
+    },
+    {
+      "name": "latestEquateTab",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.EquateTable",
+      "type_short": "EquateTable",
+      "constant_value": null
+    },
+    {
+      "name": "myEquateTab",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.EquateTable",
+      "type_short": "EquateTable",
+      "constant_value": null
+    },
+    {
+      "name": "originalEquateTab",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.EquateTable",
+      "type_short": "EquateTable",
+      "constant_value": null
+    },
+    {
+      "name": "latestDetailSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "myDetailSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "conflictSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cghidra.program.model.address.Address,java.util.ArrayList\u003cghidra.app.merge.listing.EquateMerger.EquateConflict\u003e\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "conflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+      "type_short": "VerticalChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "equateChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs an equate merger.",
+      "javadoc": "Constructs an equate merger.\n@param listingMergeMgr the listing merge manager that owns this merger.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingMergeMgr",
+          "type_long": "ghidra.app.merge.listing.ListingMergeManager",
+          "type_short": "ListingMergeManager",
+          "comment": "the listing merge manager that owns this merger."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMin",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMax",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getOperandScalarConflicts",
+      "comment": "Auto-merges equate changes for a scalar value at a particular address and operand.\n It also determines the equate conflicts for this scalar at this address and operand.",
+      "javadoc": "Auto-merges equate changes for a scalar value at a particular address and operand.\n It also determines the equate conflicts for this scalar at this address and operand.\n@param addr the address of the code unit.\n@param opIndex the operand index\n@param scalar the scalar value.\n@throws MemoryAccessException",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the code unit."
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the operand index"
+        },
+        {
+          "name": "scalar",
+          "type_long": "ghidra.program.model.scalar.Scalar",
+          "type_short": "Scalar",
+          "comment": "the scalar value."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sameEquates",
+      "comment": "Compares two equates to determine if they are equal.",
+      "javadoc": "Compares two equates to determine if they are equal.\n@param equate1 the first equate or null.\n@param equate2 the second equate or null.\n@return true if the equates are equal.",
+      "static": false,
+      "params": [
+        {
+          "name": "equate1",
+          "type_long": "ghidra.program.model.symbol.Equate",
+          "type_short": "Equate",
+          "comment": "the first equate or null."
+        },
+        {
+          "name": "equate2",
+          "type_long": "ghidra.program.model.symbol.Equate",
+          "type_short": "Equate",
+          "comment": "the second equate or null."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the equates are equal."
+      },
+      "throws": []
+    },
+    {
+      "name": "getScalars",
+      "comment": "Gets an array with all the scalar values at a code unit and operand index.\n There can be multiple sub-operands and therefore multiple scalars for an operand.",
+      "javadoc": "Gets an array with all the scalar values at a code unit and operand index.\n There can be multiple sub-operands and therefore multiple scalars for an operand.\n@param codeUnit the code unit\n@param opIndex the index of the operand\n@return the array of scalars.",
+      "static": false,
+      "params": [
+        {
+          "name": "codeUnit",
+          "type_long": "ghidra.program.model.listing.CodeUnit",
+          "type_short": "CodeUnit",
+          "comment": "the code unit"
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the operand"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.scalar.Scalar[]",
+        "type_short": "ghidra.program.model.scalar.Scalar[]",
+        "comment": "the array of scalars."
+      },
+      "throws": []
+    },
+    {
+      "name": "saveConflict",
+      "comment": "Saves off the indicated equate conflict.",
+      "javadoc": "Saves off the indicated equate conflict.\n@param address the address of the conflict\n@param opIndex the operand index of the conflict\n@param scalar the scalar value of the conflict.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the conflict"
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the operand index of the conflict"
+        },
+        {
+          "name": "scalar",
+          "type_long": "ghidra.program.model.scalar.Scalar",
+          "type_short": "Scalar",
+          "comment": "the scalar value of the conflict."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "Performs the actual eqaute merge into the result program using the indicated program version as the source.",
+      "javadoc": "Performs the actual eqaute merge into the result program using the indicated program version as the source.\n@param address the address of the equate\n@param opIndex the operand index of the equate\n@param scalar the scalar value of the equate\n@param chosenConflictOption conflict option indicating whether to keep the latest, my, or original version.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the equate"
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the operand index of the equate"
+        },
+        {
+          "name": "scalar",
+          "type_long": "ghidra.program.model.scalar.Scalar",
+          "type_short": "Scalar",
+          "comment": "the scalar value of the equate"
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "conflict option indicating whether to keep the latest, my, or original version."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeAllEquates",
+      "comment": "Merges all the equates for the address set. It merges into the result version from the\n version indicated by the conflict option.",
+      "javadoc": "Merges all the equates for the address set. It merges into the result version from the\n version indicated by the conflict option.\n@param addressSet the address set\n@param chosenConflictOption conflict option indicating whether to keep the latest, my, or original version.\n@param monitor task monitor providing user with status or allowing merge to be canceled.\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "the address set"
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "conflict option indicating whether to keep the latest, my, or original version."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor providing user with status or allowing merge to be canceled."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setupConflictPanel",
+      "comment": "Sets up the equate conflict panel to present a choice to the user.",
+      "javadoc": "Sets up the equate conflict panel to present a choice to the user.\n@param listingPanel the listing merge panel.\n@param equateConflict the equate conflict to resolve.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": "the listing merge panel."
+        },
+        {
+          "name": "equateConflict",
+          "type_long": "ghidra.app.merge.listing.EquateMerger.EquateConflict",
+          "type_short": "EquateConflict",
+          "comment": "the equate conflict to resolve."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateInfo",
+      "comment": "Gets the strings for presenting a row of equate information as column data.\n This is used to present the conflict in a table format.",
+      "javadoc": "Gets the strings for presenting a row of equate information as column data.\n This is used to present the conflict in a table format.\n@param version the program version\n@param equate the equate to display from that version.\n@return the array of column strings.",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the program version"
+        },
+        {
+          "name": "equate",
+          "type_long": "ghidra.program.model.symbol.Equate",
+          "type_short": "Equate",
+          "comment": "the equate to display from that version."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "the array of column strings."
+      },
+      "throws": []
+    },
+    {
+      "name": "getChoice",
+      "comment": "Creates the string for the option or choice column of a row.",
+      "javadoc": "Creates the string for the option or choice column of a row.\n@param version the program version.\n@param equate the equate\n@return the option string.",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the program version."
+        },
+        {
+          "name": "equate",
+          "type_long": "ghidra.program.model.symbol.Equate",
+          "type_short": "Equate",
+          "comment": "the equate"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the option string."
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

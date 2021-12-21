@@ -1,0 +1,3369 @@
+{
+  "name": "DockingWindowManager",
+  "comment": "Manages the \"Docking\" arrangement of a set of components and actions. The components can be \"docked\"\n together or exist in their own window.  Actions can be associated with components so they\n \"move\" with the component as it moved from one location to another.\n \n Components are added via ComponentProviders.  A ComponentProvider is an interface for getting\n a component and its related information.  The docking window manager will get the component\n from the provider as needed.  It is up to the provider if it wants to reuse the component or\n recreate a new one when the component is requested.  When the user hides a component (by using\n the x button on the component header), the docking window manager removes all\n knowledge of the component and will request it again from the provider if the component\n is again shown.  The provider is also notified whenever a component is hidden and shown.",
+  "javadoc": "Manages the \"Docking\" arrangement of a set of components and actions. The components can be \"docked\"\n together or exist in their own window.  Actions can be associated with components so they\n \"move\" with the component as it moved from one location to another.\n \u003cP\u003e\n Components are added via ComponentProviders.  A ComponentProvider is an interface for getting\n a component and its related information.  The docking window manager will get the component\n from the provider as needed.  It is up to the provider if it wants to reuse the component or\n recreate a new one when the component is requested.  When the user hides a component (by using\n the x button on the component header), the docking window manager removes all\n knowledge of the component and will request it again from the provider if the component\n is again shown.  The provider is also notified whenever a component is hidden and shown.",
+  "static": false,
+  "implements": [
+    "java.beans.PropertyChangeListener",
+    "docking.PlaceholderInstaller"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "COMPONENT_MENU_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Window\""
+    },
+    {
+      "name": "actionUnderMouse",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "docking.action.DockingActionIf",
+      "type_short": "DockingActionIf",
+      "constant_value": null
+    },
+    {
+      "name": "objectUnderMouse",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Object",
+      "type_short": "Object",
+      "constant_value": null
+    },
+    {
+      "name": "DOCKING_WINDOWS_OWNER",
+      "comment": "The owner name for docking windows actions.\n Warning: Any action with this owner will get removed every time the \u0027Window\u0027 menu is\n rebuilt, with the exception if reserved key bindings.",
+      "javadoc": "The owner name for docking windows actions.\n \u003cp\u003eWarning: Any action with this owner will get removed every time the \u0027Window\u0027 menu is\n rebuilt, with the exception if reserved key bindings.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"DockingWindows\""
+    },
+    {
+      "name": "TOOL_PREFERENCES_XML_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"PREFERENCES\""
+    },
+    {
+      "name": "helpService",
+      "comment": "The helpService field should be set to the appropriate help service provider.",
+      "javadoc": "The helpService field should be set to the appropriate help service provider.",
+      "static": true,
+      "type_long": "docking.help.HelpService",
+      "type_short": "HelpService",
+      "constant_value": null
+    },
+    {
+      "name": "instances",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.List\u003cdocking.DockingWindowManager\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "tool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.Tool",
+      "type_short": "Tool",
+      "constant_value": null
+    },
+    {
+      "name": "root",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.RootNode",
+      "type_short": "RootNode",
+      "constant_value": null
+    },
+    {
+      "name": "placeholderManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.PlaceholderManager",
+      "type_short": "PlaceholderManager",
+      "constant_value": null
+    },
+    {
+      "name": "lastFocusedPlaceholders",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LRUSet\u003cdocking.ComponentPlaceholder\u003e",
+      "type_short": "LRUSet",
+      "constant_value": null
+    },
+    {
+      "name": "activatedInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.DockingWindowManager.ActivatedInfo",
+      "type_short": "ActivatedInfo",
+      "constant_value": null
+    },
+    {
+      "name": "focusedPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.ComponentPlaceholder",
+      "type_short": "ComponentPlaceholder",
+      "constant_value": null
+    },
+    {
+      "name": "nextFocusedPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.ComponentPlaceholder",
+      "type_short": "ComponentPlaceholder",
+      "constant_value": null
+    },
+    {
+      "name": "defaultProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.ComponentProvider",
+      "type_short": "ComponentProvider",
+      "constant_value": null
+    },
+    {
+      "name": "pendingRequestFocusComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.awt.Component",
+      "type_short": "Component",
+      "constant_value": null
+    },
+    {
+      "name": "providerNameCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,docking.ComponentProvider\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "preferenceStateMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.framework.options.PreferenceState\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "actionToGuiMapper",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.ActionToGuiMapper",
+      "type_short": "ActionToGuiMapper",
+      "constant_value": null
+    },
+    {
+      "name": "popupActionProviders",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cdocking.actions.PopupActionProvider\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "contextListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cdocking.DockingContextListener\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "rebuildUpdater",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.SwingUpdateManager",
+      "type_short": "SwingUpdateManager",
+      "constant_value": null
+    },
+    {
+      "name": "isVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "isDocking",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "hasStatusBar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "editWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.EditWindow",
+      "type_short": "EditWindow",
+      "constant_value": null
+    },
+    {
+      "name": "windowsOnTop",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "lastActiveWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.Window",
+      "type_short": "Window",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new DockingWindowManager",
+      "javadoc": "Constructs a new DockingWindowManager\n@param tool the tool\n@param images the images to use for windows in this window manager",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "docking.Tool",
+          "type_short": "Tool",
+          "comment": "the tool"
+        },
+        {
+          "name": "images",
+          "type_long": "java.util.List\u003cjava.awt.Image\u003e",
+          "type_short": "List",
+          "comment": "the images to use for windows in this window manager"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new DockingWindowManager",
+      "javadoc": "Constructs a new DockingWindowManager\n@param tool the tool\n@param images the list of icons to set on the window\n@param modal if true then the root window will be a modal dialog instead of a frame\n@param isDocking true for normal operation, false to suppress docking support(removes\n component headers and window menu)\n@param hasStatusBar if true a status bar will be created for the main window\n@param factory the drop target factory",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "docking.Tool",
+          "type_short": "Tool",
+          "comment": "the tool"
+        },
+        {
+          "name": "images",
+          "type_long": "java.util.List\u003cjava.awt.Image\u003e",
+          "type_short": "List",
+          "comment": "the list of icons to set on the window"
+        },
+        {
+          "name": "modal",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true then the root window will be a modal dialog instead of a frame"
+        },
+        {
+          "name": "isDocking",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true for normal operation, false to suppress docking support(removes\n component headers and window menu)"
+        },
+        {
+          "name": "hasStatusBar",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true a status bar will be created for the main window"
+        },
+        {
+          "name": "factory",
+          "type_long": "docking.DropTargetFactory",
+          "type_short": "DropTargetFactory",
+          "comment": "the drop target factory"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setHelpService",
+      "comment": "Sets the help service for the all docking window managers.",
+      "javadoc": "Sets the help service for the all docking window managers.\n@param helpSvc the help service to use.",
+      "static": true,
+      "params": [
+        {
+          "name": "helpSvc",
+          "type_long": "docking.help.HelpService",
+          "type_short": "HelpService",
+          "comment": "the help service to use."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHelpService",
+      "comment": "Returns the global help service.",
+      "javadoc": "Returns the global help service.\n@return the global help service.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "docking.help.HelpService",
+        "type_short": "HelpService",
+        "comment": "the global help service."
+      },
+      "throws": []
+    },
+    {
+      "name": "addInstance",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "winMgr",
+          "type_long": "docking.DockingWindowManager",
+          "type_short": "DockingWindowManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeInstance",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "winMgr",
+          "type_long": "docking.DockingWindowManager",
+          "type_short": "DockingWindowManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInstanceForWindow",
+      "comment": "Get the docking window manager instance which corresponds to the specified window.",
+      "javadoc": "Get the docking window manager instance which corresponds to the specified window.\n@param win the window for which to find its parent docking window manager.\n@return docking window manager or null if unknown.",
+      "static": true,
+      "params": [
+        {
+          "name": "win",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": "the window for which to find its parent docking window manager."
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockingWindowManager",
+        "type_short": "DockingWindowManager",
+        "comment": "docking window manager or null if unknown."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInstance",
+      "comment": "A convenience method for getting the window for component and then calling\n #getInstanceForWindow(Window).",
+      "javadoc": "A convenience method for getting the window for \u003ccode\u003ecomponent\u003c/code\u003e and then calling\n {@link #getInstanceForWindow(Window)}.\n@param component The component for which to get the associated {@link DockingWindowManager}\n        instance.\n@return The {@link DockingWindowManager} instance associated with \u003ccode\u003ecomponent\u003c/code\u003e",
+      "static": true,
+      "params": [
+        {
+          "name": "component",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "The component for which to get the associated DockingWindowManager\n        instance."
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockingWindowManager",
+        "type_short": "DockingWindowManager",
+        "comment": "The DockingWindowManager instance associated with component"
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveInstance",
+      "comment": "Returns the last active docking window manager which is visible.",
+      "javadoc": "Returns the last active docking window manager which is visible.\n@return the last active docking window manager which is visible.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "docking.DockingWindowManager",
+        "type_short": "DockingWindowManager",
+        "comment": "the last active docking window manager which is visible."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllDockingWindowManagers",
+      "comment": "Returns a new list of all DockingWindowManager instances know to exist.",
+      "javadoc": "Returns a new list of all DockingWindowManager instances know to exist.\n@return a new list of all DockingWindowManager instances know to exist.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cdocking.DockingWindowManager\u003e",
+        "type_short": "List",
+        "comment": "a new list of all DockingWindowManager instances know to exist."
+      },
+      "throws": []
+    },
+    {
+      "name": "setActiveManager",
+      "comment": "The specified docking window manager has just become active",
+      "javadoc": "The specified docking window manager has just become active\n@param mgr the window manager that became active.",
+      "static": true,
+      "params": [
+        {
+          "name": "mgr",
+          "type_long": "docking.DockingWindowManager",
+          "type_short": "DockingWindowManager",
+          "comment": "the window manager that became active."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setHelpLocation",
+      "comment": "Register a specific Help content URL for a component.\n The DocWinListener will be notified with the helpURL if the specified\n component \u0027c\u0027 has focus and the help key is pressed.",
+      "javadoc": "Register a specific Help content URL for a component.\n The DocWinListener will be notified with the helpURL if the specified\n component \u0027c\u0027 has focus and the help key is pressed.\n@param c component on which to set help.\n@param helpLocation help content location",
+      "static": true,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": "component on which to set help."
+        },
+        {
+          "name": "helpLocation",
+          "type_long": "ghidra.util.HelpLocation",
+          "type_short": "HelpLocation",
+          "comment": "help content location"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setToolName",
+      "comment": "Set the tool name which is displayed as the title\n for all windows.",
+      "javadoc": "Set the tool name which is displayed as the title\n for all windows.\n@param toolName tool name / title",
+      "static": false,
+      "params": [
+        {
+          "name": "toolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "tool name / title"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setIcon",
+      "comment": "Set the Icon for all windows.",
+      "javadoc": "Set the Icon for all windows.\n@param icon image icon",
+      "static": false,
+      "params": [
+        {
+          "name": "icon",
+          "type_long": "javax.swing.ImageIcon",
+          "type_short": "ImageIcon",
+          "comment": "image icon"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "containsProvider",
+      "comment": "Returns true if this manager contains the given provider.",
+      "javadoc": "Returns true if this manager contains the given provider.\n@param provider the provider for which to check\n@return true if this manager contains the given provider.",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the provider for which to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this manager contains the given provider."
+      },
+      "throws": []
+    },
+    {
+      "name": "getPlaceholderManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.PlaceholderManager",
+        "type_short": "PlaceholderManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActionToGuiMapper",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ActionToGuiMapper",
+        "type_short": "ActionToGuiMapper",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRootNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.RootNode",
+        "type_short": "RootNode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTool",
+      "comment": "Returns the tool that owns this manager",
+      "javadoc": "Returns the tool that owns this manager\n@return the tool",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.Tool",
+        "type_short": "Tool",
+        "comment": "the tool"
+      },
+      "throws": []
+    },
+    {
+      "name": "getRootFrame",
+      "comment": "Returns the root window frame.",
+      "javadoc": "Returns the root window frame.\n@return the root window frame.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JFrame",
+        "type_short": "JFrame",
+        "comment": "the root window frame."
+      },
+      "throws": []
+    },
+    {
+      "name": "setDefaultComponent",
+      "comment": "Sets the provider that should get the default focus when no component has focus.",
+      "javadoc": "Sets the provider that should get the default focus when no component has focus.\n@param provider the provider that should get the default focus when no component has focus.",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the provider that should get the default focus when no component has focus."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProviderWindow",
+      "comment": "Get the window that contains the specified Provider\u0027s component",
+      "javadoc": "Get the window that contains the specified Provider\u0027s component\n@param provider component provider\n@return window or null if component is not visible or not found",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "component provider"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": "window or null if component is not visible or not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getProvider",
+      "comment": "Get the provider that contains the specified component",
+      "javadoc": "Get the provider that contains the specified component\n@param c the component\n@return the provider; null if now containing provider is found",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component"
+        }
+      ],
+      "return": {
+        "type_long": "docking.ComponentProvider",
+        "type_short": "ComponentProvider",
+        "comment": "the provider; null if now containing provider is found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getActivePlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.ComponentPlaceholder",
+        "type_short": "ComponentPlaceholder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveWindow",
+      "comment": "Returns the active window (or the root window if nobody has yet been made active).",
+      "javadoc": "Returns the active window (or the root window if nobody has yet been made active).\n@return the active window.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": "the active window."
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveComponent",
+      "comment": "Returns the current active component.",
+      "javadoc": "Returns the current active component.\n@return the current active component.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": "the current active component."
+      },
+      "throws": []
+    },
+    {
+      "name": "getFocusedComponent",
+      "comment": "Returns the component which has focus",
+      "javadoc": "Returns the component which has focus\n@return the placeholder",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ComponentPlaceholder",
+        "type_short": "ComponentPlaceholder",
+        "comment": "the placeholder"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultFocusComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ComponentPlaceholder",
+        "type_short": "ComponentPlaceholder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isActiveProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVisible",
+      "comment": "Sets the visible state of the set of docking windows.",
+      "javadoc": "Sets the visible state of the set of docking windows.\n@param state if true the main window and all sub-windows are set to be visible.  If\n state is false, then all windows are set to be invisible.",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the main window and all sub-windows are set to be visible.  If\n state is false, then all windows are set to be invisible."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isVisible",
+      "comment": "Returns true if the set of windows associated with this window manager are visible.",
+      "javadoc": "Returns true if the set of windows associated with this window manager are visible.\n@return true if the set of windows associated with this window manager are visible.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the set of windows associated with this window manager are visible."
+      },
+      "throws": []
+    },
+    {
+      "name": "isVisible",
+      "comment": "Returns true if the specified provider\u0027s component is visible",
+      "javadoc": "Returns true if the specified provider\u0027s component is visible\n@param provider component provider\n@return true if the specified provider\u0027s component is visible",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "component provider"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the specified provider\u0027s component is visible"
+      },
+      "throws": []
+    },
+    {
+      "name": "addComponent",
+      "comment": "Adds a new component (via the provider) to be managed by this docking window manager.\n The component is initially hidden.",
+      "javadoc": "Adds a new component (via the provider) to be managed by this docking window manager.\n The component is initially hidden.\n@param provider the component provider",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the component provider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addComponent",
+      "comment": "Adds a new component (vial the provider) to be managed by this docking window manager.\n The component will be initially shown or hidden based on the the \"show\" parameter.",
+      "javadoc": "Adds a new component (vial the provider) to be managed by this docking window manager.\n The component will be initially shown or hidden based on the the \"show\" parameter.\n@param provider the component provider.\n@param show indicates whether or not the component should be initially shown.",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the component provider."
+        },
+        {
+          "name": "show",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "indicates whether or not the component should be initially shown."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerHelpLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "helpLocation",
+          "type_long": "ghidra.util.HelpLocation",
+          "type_short": "HelpLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkIfAlreadyAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponentProvider",
+      "comment": "Returns the ComponentProvider with the given name.  If more than one provider exists with the name,\n one will be returned, but it could be any one of them.",
+      "javadoc": "Returns the ComponentProvider with the given name.  If more than one provider exists with the name,\n one will be returned, but it could be any one of them.\n@param name the name of the provider to return.\n@return a provider with the given name, or null if no providers with that name exist.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the provider to return."
+        }
+      ],
+      "return": {
+        "type_long": "docking.ComponentProvider",
+        "type_short": "ComponentProvider",
+        "comment": "a provider with the given name, or null if no providers with that name exist."
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponentProvider",
+      "comment": "The first provider instance with a class equal to that of the given class",
+      "javadoc": "The \u003cb\u003efirst\u003c/b\u003e provider instance with a class equal to that of the given class\n@param clazz the class of the desired provider\n@return the \u003cb\u003efirst\u003c/b\u003e provider instance with a class equal to that of the given class.\n@see #getComponentProviders(Class)",
+      "static": false,
+      "params": [
+        {
+          "name": "clazz",
+          "type_long": "java.lang.Class\u003cT\u003e",
+          "type_short": "Class",
+          "comment": "the class of the desired provider"
+        }
+      ],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": "the first provider instance with a class equal to that of the given class."
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponentProviders",
+      "comment": "Gets all components providers with a matching class.  Some component providers will have\n multiple instances in the tool",
+      "javadoc": "Gets all components providers with a matching class.  Some component providers will have\n multiple instances in the tool\n@param clazz The class of the provider\n@return all found provider instances",
+      "static": false,
+      "params": [
+        {
+          "name": "clazz",
+          "type_long": "java.lang.Class\u003cT\u003e",
+          "type_short": "Class",
+          "comment": "The class of the provider"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cT\u003e",
+        "type_short": "List",
+        "comment": "all found provider instances"
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponentProvider",
+      "comment": "Returns the component provider that is the conceptual parent of the given component.  More\n precisely, this will return the component provider whose\n ComponentProvider#getComponent() is the parent of the given component.",
+      "javadoc": "Returns the component provider that is the conceptual parent of the given component.  More\n precisely, this will return the component provider whose\n {@link ComponentProvider#getComponent() component} is the parent of the given component.\n@param component the component for which to find a provider\n@return the provider; null if the component is not the child of a provider",
+      "static": false,
+      "params": [
+        {
+          "name": "component",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component for which to find a provider"
+        }
+      ],
+      "return": {
+        "type_long": "docking.ComponentProvider",
+        "type_short": "ComponentProvider",
+        "comment": "the provider; null if the component is not the child of a provider"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDockableComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockableComponent",
+        "type_short": "DockableComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.ComponentPlaceholder",
+        "type_short": "ComponentPlaceholder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showComponentHeader",
+      "comment": "Set whether a component\u0027s header should be shown; the header is the\n component that is dragged in order to move the component within the\n tool, or out of the tool into a separate window.",
+      "javadoc": "Set whether a component\u0027s header should be shown; the header is the\n component that is dragged in order to move the component within the\n tool, or out of the tool into a separate window.\n@param provider provider of the visible component in the tool\n@param b true means to show the header",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "provider of the visible component in the tool"
+        },
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means to show the header"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "icon",
+          "type_long": "javax.swing.Icon",
+          "type_short": "Icon",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateTitle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSubTitle",
+      "comment": "Returns the current subtitle for the component for the given provider.",
+      "javadoc": "Returns the current subtitle for the component for the given provider.\n@param provider the component provider of the component for which to get its subtitle.\n@return the current subtitle for the component for the given provider.",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the component provider of the component for which to get its subtitle."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the current subtitle for the component for the given provider."
+      },
+      "throws": []
+    },
+    {
+      "name": "removeComponent",
+      "comment": "Removes the ComponentProvider (component) from the docking windows manager.  The location\n of the window will be remember and reused if the provider is added back in later.",
+      "javadoc": "Removes the ComponentProvider (component) from the docking windows manager.  The location\n of the window will be remember and reused if the provider is added back in later.\n@param provider the provider to be removed.",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the provider to be removed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponentActions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Iterator\u003cdocking.action.DockingActionIf\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeProviderAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addLocalAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addToolAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeToolAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActionForKeyStroke",
+      "comment": "Returns any action that is bound to the given keystroke for the tool associated with this\n DockingWindowManager instance.",
+      "javadoc": "Returns any action that is bound to the given keystroke for the tool associated with this\n DockingWindowManager instance.\n@param keyStroke The keystroke to check for key bindings.\n@return The action that is bound to the keystroke, or null of there is no binding for the\n         given keystroke.",
+      "static": false,
+      "params": [
+        {
+          "name": "keyStroke",
+          "type_long": "javax.swing.KeyStroke",
+          "type_short": "KeyStroke",
+          "comment": "The keystroke to check for key bindings."
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.Action",
+        "type_short": "Action",
+        "comment": "The action that is bound to the keystroke, or null of there is no binding for the\n         given keystroke."
+      },
+      "throws": []
+    },
+    {
+      "name": "ownerRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "owner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showComponent",
+      "comment": "Hides or shows the component associated with the given provider.\n \n Note:  This method will not show the given provider if it has not previously been\n added via addComponent(...).",
+      "javadoc": "Hides or shows the component associated with the given provider.\n \u003cp\u003e\u003cbr\u003e\n \u003cb\u003eNote: \u003c/b\u003e This method will not show the given provider if it has not previously been\n added via \u003ccode\u003eaddComponent(...)\u003c/code\u003e.\n@param provider the provider of the component to be hidden or shown.\n@param visibleState true to show the component, false to hide it.\n@see #addComponent(ComponentProvider)\n@see #addComponent(ComponentProvider, boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the provider of the component to be hidden or shown."
+        },
+        {
+          "name": "visibleState",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to show the component, false to hide it."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toFront",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toFront",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "window",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Releases all resources used by this docking window manager.  Once the dispose method\n is called, no other calls to this object should be made.",
+      "javadoc": "Releases all resources used by this docking window manager.  Once the dispose method\n is called, no other calls to this object should be made.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "visibleState",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "shouldEmphasize",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showComponent",
+      "comment": "Shows or hides the component associated with the given placeholder object.",
+      "javadoc": "Shows or hides the component associated with the given placeholder object.\n@param placeholder the component placeholder object for the component to be shown or hidden.\n@param visibleState true to show or false to hide.\n@param requestFocus True signals that the system should request focus on the component.",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": "the component placeholder object for the component to be shown or hidden."
+        },
+        {
+          "name": "visibleState",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to show or false to hide."
+        },
+        {
+          "name": "requestFocus",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True signals that the system should request focus on the component."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        },
+        {
+          "name": "visibleState",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "requestFocus",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "shouldEmphasize",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "movePlaceholderToFront",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        },
+        {
+          "name": "emphasisze",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveToXML",
+      "comment": "Generates a JDOM element object for saving the window managers state to XML.",
+      "javadoc": "Generates a JDOM element object for saving the window managers state to XML.\n@param rootXMLElement The root element to which to save XML data.",
+      "static": false,
+      "params": [
+        {
+          "name": "rootXMLElement",
+          "type_long": "org.jdom.Element",
+          "type_short": "Element",
+          "comment": "The root element to which to save XML data."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveWindowingDataToXml",
+      "comment": "Save this docking window manager\u0027s window layout and positioning information as XML.",
+      "javadoc": "Save this docking window manager\u0027s window layout and positioning information as XML.\n@return An XML element with the above information.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "org.jdom.Element",
+        "type_short": "Element",
+        "comment": "An XML element with the above information."
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreFromXML",
+      "comment": "Restores the docking window managers state from the XML information.",
+      "javadoc": "Restores the docking window managers state from the XML information.\n@param rootXMLElement JDOM element from which to extract the state information.",
+      "static": false,
+      "params": [
+        {
+          "name": "rootXMLElement",
+          "type_long": "org.jdom.Element",
+          "type_short": "Element",
+          "comment": "JDOM element from which to extract the state information."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreWindowDataFromXml",
+      "comment": "Restore to the docking window manager the layout and positioning information from XML.",
+      "javadoc": "Restore to the docking window manager the layout and positioning information from XML.\n@param rootXMLElement JDOM element from which to extract the state information.",
+      "static": false,
+      "params": [
+        {
+          "name": "rootXMLElement",
+          "type_long": "org.jdom.Element",
+          "type_short": "Element",
+          "comment": "JDOM element from which to extract the state information."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreSavedFocusedPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "focusOwner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "focusName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "focusTitle",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "bestFocusReplacementPlaceholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sortActiveProviders",
+      "comment": "Sorts the active providers by window group.  This ensures that the dependent window groups\n are loaded after their dependencies have been.",
+      "javadoc": "Sorts the active providers by window group.  This ensures that the dependent window groups\n are loaded after their dependencies have been.",
+      "static": false,
+      "params": [
+        {
+          "name": "activeProviders",
+          "type_long": "java.util.Map\u003cdocking.ComponentProvider,docking.ComponentPlaceholder\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.util.Map.Entry\u003cdocking.ComponentProvider,docking.ComponentPlaceholder\u003e\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "installPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        },
+        {
+          "name": "position",
+          "type_long": "docking.WindowPosition",
+          "type_short": "WindowPosition",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "uninstallPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        },
+        {
+          "name": "keepAround",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposePlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        },
+        {
+          "name": "keepAround",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearCurrentOrPendingFocusForRemovedPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "movePlaceholder",
+      "comment": "Moves the component associated with the given source placeholder object from its current\n docked location to its own window that will be anchored at the given point.",
+      "javadoc": "Moves the component associated with the given source placeholder object from its current\n docked location to its own window that will be anchored at the given point.\n@param source the component placeholder containing the component to be moved.\n@param p the location at which to create a new window for the component.",
+      "static": false,
+      "params": [
+        {
+          "name": "source",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": "the component placeholder containing the component to be moved."
+        },
+        {
+          "name": "p",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": "the location at which to create a new window for the component."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "movePlaceholder",
+      "comment": "Moves the component associated with the given source placeholder object to a new docked\n location relative to the given destination placeholder object",
+      "javadoc": "Moves the component associated with the given source placeholder object to a new docked\n location relative to the given destination placeholder object\n@param source the component placeholder for the component being moved\n@param destination the component placeholder object used to base to move\n@param windowPosition a code specifying the docking relationship between two placeholders",
+      "static": false,
+      "params": [
+        {
+          "name": "source",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": "the component placeholder for the component being moved"
+        },
+        {
+          "name": "destination",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": "the component placeholder object used to base to move"
+        },
+        {
+          "name": "windowPosition",
+          "type_long": "docking.WindowPosition",
+          "type_short": "WindowPosition",
+          "comment": "a code specifying the docking relationship between two placeholders"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "Notifies the docking windows listener that the close button has been pressed on\n the main window frame.",
+      "javadoc": "Notifies the docking windows listener that the close button has been pressed on\n the main window frame.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDocking",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildComponentMenu",
+      "comment": "Builds the window menu containing a menu item for each component.",
+      "javadoc": "Builds the window menu containing a menu item for each component.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isWindowMenuShowing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMenuForSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "selectedPath",
+          "type_long": "javax.swing.MenuElement[]",
+          "type_short": "javax.swing.MenuElement[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.JMenu",
+        "type_short": "JMenu",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createActions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "map",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.util.List\u003cdocking.ComponentPlaceholder\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "promoteSingleMenuGroups",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "lazyMap",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.util.List\u003cdocking.ComponentPlaceholder\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createWindowActions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scheduleUpdate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updatePending",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doUpdate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateFocus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setNextFocusPlaceholder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybeGetPlaceholderToFocus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ComponentPlaceholder",
+        "type_short": "ComponentPlaceholder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateFocus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showEditWindow",
+      "comment": "Display an text edit box on top of the specified component.",
+      "javadoc": "Display an text edit box on top of the specified component.\n@param defaultText initial text to be displayed in edit box\n@param c component over which the edit box will be placed\n@param r specifies the bounds of the edit box relative to the\n component.  The height is ignored.  The default text field height\n is used as the preferred height.\n@param listener when the edit is complete, this listener is notified\n with the new text.  The edit box is dismissed prior to notifying\n the listener.",
+      "static": false,
+      "params": [
+        {
+          "name": "defaultText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "initial text to be displayed in edit box"
+        },
+        {
+          "name": "c",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "component over which the edit box will be placed"
+        },
+        {
+          "name": "r",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": "specifies the bounds of the edit box relative to the\n component.  The height is ignored.  The default text field height\n is used as the preferred height."
+        },
+        {
+          "name": "listener",
+          "type_long": "docking.EditListener",
+          "type_short": "EditListener",
+          "comment": "when the edit is complete, this listener is notified\n with the new text.  The edit box is dismissed prior to notifying\n the listener."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreFocusOwner",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "focusOwner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "focusName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFocusedComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "placeholder",
+          "type_long": "docking.ComponentPlaceholder",
+          "type_short": "ComponentPlaceholder",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findNextFocusedComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ComponentPlaceholder",
+        "type_short": "ComponentPlaceholder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearFocusedComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setActive",
+      "comment": "Invoked by associated docking windows when they become active or inactive",
+      "javadoc": "Invoked by associated docking windows when they become active or inactive\n@param window the active window\n@param active true signals that this DockingWindowManager has become active",
+      "static": false,
+      "params": [
+        {
+          "name": "window",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": "the active window"
+        },
+        {
+          "name": "active",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true signals that this DockingWindowManager has become active"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "requestFocus",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "component",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertyChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "evt",
+          "type_long": "java.beans.PropertyChangeEvent",
+          "type_short": "PropertyChangeEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ensureDockableComponentContainsFocusOwner",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newFocusComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        },
+        {
+          "name": "dockableComponent",
+          "type_long": "docking.DockableComponent",
+          "type_short": "DockableComponent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFocusComponentInEditingWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newFocusComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDockableComponentForFocusOwner",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "window",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": ""
+        },
+        {
+          "name": "focusedComp",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockableComponent",
+        "type_short": "DockableComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDockableComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "comp",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockableComponent",
+        "type_short": "DockableComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "savePreferencesToXML",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "org.jdom.Element",
+        "type_short": "Element",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restorePreferencesFromXML",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rootElement",
+          "type_long": "org.jdom.Element",
+          "type_short": "Element",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "putPreferenceState",
+      "comment": "Adds a PreferenceState object to this window manager instance that is bound to the given\n key.  When the state of the tool using this window manager is saved, then the mapped\n preferences will also be saved.",
+      "javadoc": "Adds a PreferenceState object to this window manager instance that is bound to the given\n key.  When the state of the tool using this window manager is saved, then the mapped\n preferences will also be saved.\n@param key The key with which to store the preferences.\n@param state The state object to store.\n@see #getPreferenceState(String)",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The key with which to store the preferences."
+        },
+        {
+          "name": "state",
+          "type_long": "ghidra.framework.options.PreferenceState",
+          "type_short": "PreferenceState",
+          "comment": "The state object to store."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPreferenceState",
+      "comment": "Gets a preferences state object stored with the given key.  The state objects are loaded\n from persistent storage when the tool using this window manager has its state loaded.",
+      "javadoc": "Gets a preferences state object stored with the given key.  The state objects are loaded\n from persistent storage when the tool using this window manager has its state loaded.\n@param key The key with which to store the preferences.\n@return the PrefrenceState object stored by the given key, or null if one does not exist\n@see #putPreferenceState(String, PreferenceState)",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The key with which to store the preferences."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.options.PreferenceState",
+        "type_short": "PreferenceState",
+        "comment": "the PrefrenceState object stored by the given key, or null if one does not exist"
+      },
+      "throws": []
+    },
+    {
+      "name": "removePreferenceState",
+      "comment": "Removes the Preferences state for the given key.",
+      "javadoc": "Removes the Preferences state for the given key.\n@param key the key to the preference state to be removed",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the key to the preference state to be removed"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isMyWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "win",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showDialog",
+      "comment": "Shows the dialog using the tool\u0027s currently active window as a parent",
+      "javadoc": "Shows the dialog using the tool\u0027s currently active window as a parent\n@param dialogComponent the DialogComponentProvider object to be shown in a dialog",
+      "static": true,
+      "params": [
+        {
+          "name": "dialogComponent",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": "the DialogComponentProvider object to be shown in a dialog"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showDialog",
+      "comment": "Shows the dialog using the window containing the given componentProvider as its\n parent window",
+      "javadoc": "Shows the dialog using the window containing the given componentProvider as its\n parent window\n@param dialogComponent the DialogComponentProvider object to be shown in a dialog.\n@param centeredOnProvider the component provider that is used to find a parent\n        window for this dialog.   The dialog is centered on this component\n        provider\u0027s component.",
+      "static": false,
+      "params": [
+        {
+          "name": "dialogComponent",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": "the DialogComponentProvider object to be shown in a dialog."
+        },
+        {
+          "name": "centeredOnProvider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": "the component provider that is used to find a parent\n        window for this dialog.   The dialog is centered on this component\n        provider\u0027s component."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showDialog",
+      "comment": "Shows the dialog using the given parent component to find a parent window and to\n position the dialog. If a Window can be found containing the given component, it\n will be used as the parent window for the dialog.  If the component is null or not\n contained in a window, the current active window manager will be used to parent\n the dialog.  If there are no active tools, then a frame will be created to parent\n the dialog.",
+      "javadoc": "Shows the dialog using the given parent component to find a parent window and to\n position the dialog. If a Window can be found containing the given component, it\n will be used as the parent window for the dialog.  If the component is null or not\n contained in a window, the current active window manager will be used to parent\n the dialog.  If there are no active tools, then a frame will be created to parent\n the dialog.\n@param parent the component whose window over which the given dialog will be shown; null\n        signals to use the active window\n@param dialogComponent the DialogComponentProvider object to be shown in a dialog.\n@see #getParentWindow(Component) for parenting notes",
+      "static": true,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component whose window over which the given dialog will be shown; null\n        signals to use the active window"
+        },
+        {
+          "name": "dialogComponent",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": "the DialogComponentProvider object to be shown in a dialog."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showDialog",
+      "comment": "Shows the dialog using the given parent window using the optional component for\n positioning.\n \n Warning: this method allows user to explicitly pass a parent window and component over\n which to be centered.   There is no reason to use this method in the standard workflow.\n This method exists strictly to handle future unforeseen use cases.   Use at your own\n risk of incorrectly parenting dialogs.",
+      "javadoc": "Shows the dialog using the given parent window using the optional component for\n positioning.\n \n \u003cp\u003eWarning: this method allows user to explicitly pass a parent window and component over\n which to be centered.   There is no reason to use this method in the standard workflow.\n This method exists strictly to handle future unforeseen use cases.   Use at your own\n risk of incorrectly parenting dialogs.\n@param parent the component whose window over which the given dialog will be shown; cannot\n        be null\n@param dialogComponent the DialogComponentProvider object to be shown in a dialog\n@param centeredOnComponent the component over which the dialog will be centered; cannot\n        be null",
+      "static": true,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": "the component whose window over which the given dialog will be shown; cannot\n        be null"
+        },
+        {
+          "name": "dialogComponent",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": "the DialogComponentProvider object to be shown in a dialog"
+        },
+        {
+          "name": "centeredOnComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component over which the dialog will be centered; cannot\n        be null"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doShowDialog",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "centeredOnComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBestParent",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "component",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBestNonModalParent",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "providerToShow",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "bestParent",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doShowDialog",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.DialogComponentProvider",
+          "type_short": "DialogComponentProvider",
+          "comment": ""
+        },
+        {
+          "name": "parent",
+          "type_long": "java.awt.Window",
+          "type_short": "Window",
+          "comment": ""
+        },
+        {
+          "name": "centeredOnComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParentWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isNonTransientWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getJavaActiveWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveNonTransientWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActiveComponentProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ComponentProvider",
+        "type_short": "ComponentProvider",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setHomeButton",
+      "comment": "Sets the icon for this window\u0027s \u0027home button\u0027. This button, when pressed,\n will show the tool\u0027s main application window.",
+      "javadoc": "Sets the icon for this window\u0027s \u0027home button\u0027. This button, when pressed,\n will show the tool\u0027s main application window.\n@param icon the button\u0027s icon\n@param callback the callback to execute when the button is pressed by the user",
+      "static": false,
+      "params": [
+        {
+          "name": "icon",
+          "type_long": "javax.swing.Icon",
+          "type_short": "Icon",
+          "comment": "the button\u0027s icon"
+        },
+        {
+          "name": "callback",
+          "type_long": "java.lang.Runnable",
+          "type_short": "Runnable",
+          "comment": "the callback to execute when the button is pressed by the user"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasStatusBar",
+      "comment": "Returns true if a status bar is present.",
+      "javadoc": "Returns true if a status bar is present.\n@return true if a status bar is present.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a status bar is present."
+      },
+      "throws": []
+    },
+    {
+      "name": "addStatusItem",
+      "comment": "Add a new status item component to the status area.  The preferred height and border\n for the component will be altered.  The components preferred width will be\n preserved.",
+      "javadoc": "Add a new status item component to the status area.  The preferred height and border\n for the component will be altered.  The components preferred width will be\n preserved.\n@param c the status item component to add\n@param addBorder True signals to add a border to the status area\n@param rightSide component will be added to the right-side of the status\n area if true, else it will be added immediately after the status text area\n if false.",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": "the status item component to add"
+        },
+        {
+          "name": "addBorder",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True signals to add a border to the status area"
+        },
+        {
+          "name": "rightSide",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "component will be added to the right-side of the status\n area if true, else it will be added immediately after the status text area\n if false."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeStatusItem",
+      "comment": "Remove the specified status item.",
+      "javadoc": "Remove the specified status item.\n@param c status component previously added.",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": "status component previously added."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setStatusText",
+      "comment": "Set the status text in the active component window",
+      "javadoc": "Set the status text in the active component window\n@param text status text",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "status text"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setStatusText",
+      "comment": "Set the status text in the active component window",
+      "javadoc": "Set the status text in the active component window\n@param text string to be displayed in the Status display area\n@param beep whether to beep or not",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "string to be displayed in the Status display area"
+        },
+        {
+          "name": "beep",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "whether to beep or not"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "beep",
+      "comment": "A convenience method to make an attention-grabbing noise to the user",
+      "javadoc": "A convenience method to make an attention-grabbing noise to the user",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetMenuGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "menuPath",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        },
+        {
+          "name": "group",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMenuGroup",
+      "comment": "Set the menu group associated with a cascaded submenu.  This allows\n a cascading menu item to be grouped with a specific set of actions.\n \n The default group for a cascaded submenu is the name of the submenu.\n ",
+      "javadoc": "Set the menu group associated with a cascaded submenu.  This allows\n a cascading menu item to be grouped with a specific set of actions.\n \u003cp\u003e\n The default group for a cascaded submenu is the name of the submenu.\n \u003cp\u003e\n@param menuPath menu name path where the last element corresponds to the specified group name.\n@param group group name\n@param menuSubGroup the name used to sort the cascaded menu within other menu items at\n                     its level",
+      "static": false,
+      "params": [
+        {
+          "name": "menuPath",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": "menu name path where the last element corresponds to the specified group name."
+        },
+        {
+          "name": "group",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "group name"
+        },
+        {
+          "name": "menuSubGroup",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name used to sort the cascaded menu within other menu items at\n                     its level"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "excludeFocus",
+      "comment": "Tests if the given component is one of a known list of component classes that we\n don\u0027t ever want to get keyboard focus.  Currently excluded is JScrollPane",
+      "javadoc": "Tests if the given component is one of a known list of component classes that we\n don\u0027t ever want to get keyboard focus.  Currently excluded is JScrollPane\n@param c the component to test for exclusion\n@return true if the component should not be allowed to have keyboard focus.",
+      "static": true,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component to test for exclusion"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the component should not be allowed to have keyboard focus."
+      },
+      "throws": []
+    },
+    {
+      "name": "setWindowsOnTop",
+      "comment": "Sets the mode such that all satellite docking windows always appear on top of the root window",
+      "javadoc": "Sets the mode such that all satellite docking windows always appear on top of the root window\n@param windowsOnTop true to set mode to on top, false to disable on top mode.",
+      "static": false,
+      "params": [
+        {
+          "name": "windowsOnTop",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to set mode to on top, false to disable on top mode."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isWindowsOnTop",
+      "comment": "Returns true if the window mode is \"satellite windows always on top of root window\".",
+      "javadoc": "Returns true if the window mode is \"satellite windows always on top of root window\".\n@return true if the window mode is \"satellite windows always on top of root window\".",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the window mode is \"satellite windows always on top of root window\"."
+      },
+      "throws": []
+    },
+    {
+      "name": "getWindows",
+      "comment": "Returns a list with all the windows in the windowStack. Used for testing.",
+      "javadoc": "Returns a list with all the windows in the windowStack. Used for testing.\n@param includeMain if true, include the main root window.\n@return a list with all the windows in the windowStack. Used for testing.",
+      "static": false,
+      "params": [
+        {
+          "name": "includeMain",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, include the main root window."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.awt.Window\u003e",
+        "type_short": "List",
+        "comment": "a list with all the windows in the windowStack. Used for testing."
+      },
+      "throws": []
+    },
+    {
+      "name": "iconify",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deIconify",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMainWindow",
+      "comment": "Returns the root window.",
+      "javadoc": "Returns the root window.\n@return the root window.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Window",
+        "type_short": "Window",
+        "comment": "the root window."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMouseOverAction",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "docking.action.DockingActionIf",
+        "type_short": "DockingActionIf",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMouseOverAction",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMouseOverObject",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMouseOverObject",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "object",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearMouseOverHelp",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showContextMenu",
+      "comment": "Shows a popup menu over the given component.  If this given component is not part of the\n docking windows hierarchy, then no action is taken.",
+      "javadoc": "Shows a popup menu over the given component.  If this given component is not part of the\n docking windows hierarchy, then no action is taken.\n@param component the component",
+      "static": true,
+      "params": [
+        {
+          "name": "component",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "contextChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.ComponentProvider",
+          "type_short": "ComponentProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addPopupActionProvider",
+      "comment": "Adds the given popup action provider to this tool.   This provider will be called each\n time the popup menu is about to be shown.",
+      "javadoc": "Adds the given popup action provider to this tool.   This provider will be called each\n time the popup menu is about to be shown.\n@param provider the provider",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.actions.PopupActionProvider",
+          "type_short": "PopupActionProvider",
+          "comment": "the provider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removePopupActionProvider",
+      "comment": "Removes the given popup action provider",
+      "javadoc": "Removes the given popup action provider\n@param provider the provider",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "docking.actions.PopupActionProvider",
+          "type_short": "PopupActionProvider",
+          "comment": "the provider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTemporaryPopupActions",
+      "comment": "Returns a list of temporary popup actions to be returned.  Only those actions which have\n a suitable popup menu path will be considered.  This mechanism allows clients to\n add transient actions to be added to the tool without the accompanying management overhead.",
+      "javadoc": "Returns a list of temporary popup actions to be returned.  Only those actions which have\n a suitable popup menu path will be considered.  This mechanism allows clients to\n add transient actions to be added to the tool without the accompanying management overhead.\n@param context the ActionContext\n@return list of temporary actions\n@see #addPopupActionProvider(PopupActionProvider)",
+      "static": false,
+      "params": [
+        {
+          "name": "context",
+          "type_long": "docking.ActionContext",
+          "type_short": "ActionContext",
+          "comment": "the ActionContext"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cdocking.action.DockingActionIf\u003e",
+        "type_short": "List",
+        "comment": "list of temporary actions"
+      },
+      "throws": []
+    },
+    {
+      "name": "addContextListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.DockingContextListener",
+          "type_short": "DockingContextListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeContextListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.DockingContextListener",
+          "type_short": "DockingContextListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultToolContext",
+      "comment": "Returns the default action context for the tool",
+      "javadoc": "Returns the default action context for the tool\n@return the default action context for the tool",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ActionContext",
+        "type_short": "ActionContext",
+        "comment": "the default action context for the tool"
+      },
+      "throws": []
+    },
+    {
+      "name": "getActionContext",
+      "comment": "Gets the ActionContext appropriate for the given action.  This will normally\n be the context from the currently focused ComponentProvider.  If that\n context is not valid for the given action and the action supports using the default\n tool context, then the default tool context will be returned.  Otherwise, returns null.",
+      "javadoc": "Gets the {@link ActionContext} appropriate for the given action.  This will normally\n be the context from the currently focused {@link ComponentProvider}.  If that\n context is not valid for the given action and the action supports using the default\n tool context, then the default tool context will be returned.  Otherwise, returns null.\n@param action the action for which to get an {@link ActionContext}\n@return the {@link ActionContext} appropriate for the given action or null",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": "the action for which to get an ActionContext"
+        }
+      ],
+      "return": {
+        "type_long": "docking.ActionContext",
+        "type_short": "ActionContext",
+        "comment": "the ActionContext appropriate for the given action or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "doContextChanged",
+      "comment": "This call will notify any context listeners that the context has changed.\n \n Our #contextChanged(ComponentProvider) method will eventually call back into this\n method after any buffering has taken place.",
+      "javadoc": "This call will notify any context listeners that the context has changed.\n \n \u003cp\u003eOur {@link #contextChanged(ComponentProvider)} method will eventually call back into this\n method after any buffering has taken place.\n@param context the context",
+      "static": false,
+      "params": [
+        {
+          "name": "context",
+          "type_long": "docking.ActionContext",
+          "type_short": "ActionContext",
+          "comment": "the context"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerComponentLoadedListener",
+      "comment": "Registers a callback to be notified when the given component has been parented to\n a docking window manager",
+      "javadoc": "Registers a callback to be notified when the given component has been parented to\n a docking window manager\n@param component the component that will be parented in a docking window system\n@param listener the listener to be notified the component was parented",
+      "static": true,
+      "params": [
+        {
+          "name": "component",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component that will be parented in a docking window system"
+        },
+        {
+          "name": "listener",
+          "type_long": "docking.ComponentLoadedListener",
+          "type_short": "ComponentLoadedListener",
+          "comment": "the listener to be notified the component was parented"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

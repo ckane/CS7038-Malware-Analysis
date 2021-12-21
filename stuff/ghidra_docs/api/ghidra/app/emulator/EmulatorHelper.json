@@ -1,0 +1,1199 @@
+{
+  "name": "EmulatorHelper",
+  "comment": "",
+  "javadoc": "",
+  "static": false,
+  "implements": [
+    "ghidra.pcode.memstate.MemoryFaultHandler",
+    "ghidra.app.emulator.EmulatorConfiguration"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "emulator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.emulator.Emulator",
+      "type_short": "Emulator",
+      "constant_value": null
+    },
+    {
+      "name": "stackPtrReg",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register",
+      "type_short": "Register",
+      "constant_value": null
+    },
+    {
+      "name": "stackMemorySpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSpace",
+      "type_short": "AddressSpace",
+      "constant_value": null
+    },
+    {
+      "name": "lastError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "memoryWriteTracker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.emulator.EmulatorHelper.MemoryWriteTracker",
+      "type_short": "MemoryWriteTracker",
+      "constant_value": null
+    },
+    {
+      "name": "faultHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.pcode.memstate.MemoryFaultHandler",
+      "type_short": "MemoryFaultHandler",
+      "constant_value": null
+    },
+    {
+      "name": "converter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.DataConverter",
+      "type_short": "DataConverter",
+      "constant_value": null
+    },
+    {
+      "name": "addressBreak",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.pcode.emulate.BreakCallBack",
+      "type_short": "BreakCallBack",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMemoryFaultHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.pcode.memstate.MemoryFaultHandler",
+        "type_short": "MemoryFaultHandler",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLoadData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.emulator.memory.EmulatorLoadData",
+        "type_short": "EmulatorLoadData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Language",
+        "type_short": "Language",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPCRegister",
+      "comment": "Get Program Counter (PC) register defined by applicable processor specification",
+      "javadoc": "Get Program Counter (PC) register defined by applicable processor specification\n@return Program Counter register",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": "Program Counter register"
+      },
+      "throws": []
+    },
+    {
+      "name": "getStackPointerRegister",
+      "comment": "Get Stack Pointer register defined by applicable compiler specification",
+      "javadoc": "Get Stack Pointer register defined by applicable compiler specification\n@return Stack Pointer register",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": "Stack Pointer register"
+      },
+      "throws": []
+    },
+    {
+      "name": "setMemoryFaultHandler",
+      "comment": "Provides ability to install a low-level memory fault handler. \n The handler methods should generally return \u0027false\u0027 to allow \n the default handler to generate the appropriate target error. \n Within the fault handler, the EmulateExecutionState can be used \n to distinguish the pcode-emit state and the actual execution state\n since an attempt to execute an instruction at an uninitialized \n memory location will cause an uninitializedRead during the PCODE_EMIT\n state.",
+      "javadoc": "Provides ability to install a low-level memory fault handler. \n The handler methods should generally return \u0027false\u0027 to allow \n the default handler to generate the appropriate target error. \n Within the fault handler, the EmulateExecutionState can be used \n to distinguish the pcode-emit state and the actual execution state\n since an attempt to execute an instruction at an uninitialized \n memory location will cause an uninitializedRead during the PCODE_EMIT\n state.\n@param handler memory fault handler.",
+      "static": false,
+      "params": [
+        {
+          "name": "handler",
+          "type_long": "ghidra.pcode.memstate.MemoryFaultHandler",
+          "type_short": "MemoryFaultHandler",
+          "comment": "memory fault handler."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEmulateExecutionState",
+      "comment": "",
+      "javadoc": "@return the low-level emulator execution state",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.pcode.emulate.EmulateExecutionState",
+        "type_short": "EmulateExecutionState",
+        "comment": "the low-level emulator execution state"
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "regName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "regName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "regName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "regName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readNullTerminatedString",
+      "comment": "Read string from memory state.",
+      "javadoc": "Read string from memory state.\n@param addr memory address\n@param maxLength limit string read to this length.  If return string is\n truncated, \"...\" will be appended.\n@return string read from memory state",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "memory address"
+        },
+        {
+          "name": "maxLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "limit string read to this length.  If return string is\n truncated, \"...\" will be appended."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "string read from memory state"
+      },
+      "throws": []
+    },
+    {
+      "name": "readMemoryByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readMemory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeMemory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeMemoryValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readStackValue",
+      "comment": "Read a stack value from the memory state.",
+      "javadoc": "Read a stack value from the memory state.\n@param relativeOffset offset relative to current stack pointer\n@param size data size in bytes\n@param signed true if value read is signed, false if unsigned\n@return value\n@throws Exception error occurs reading stack pointer",
+      "static": false,
+      "params": [
+        {
+          "name": "relativeOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset relative to current stack pointer"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data size in bytes"
+        },
+        {
+          "name": "signed",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if value read is signed, false if unsigned"
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "value"
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "error occurs reading stack pointer"
+        }
+      ]
+    },
+    {
+      "name": "writeStackValue",
+      "comment": "Write a value onto the stack",
+      "javadoc": "Write a value onto the stack\n@param relativeOffset offset relative to current stack pointer\n@param size data size in bytes\n@param value\n@throws Exception error occurs reading stack pointer",
+      "static": false,
+      "params": [
+        {
+          "name": "relativeOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset relative to current stack pointer"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data size in bytes"
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "error occurs reading stack pointer"
+        }
+      ]
+    },
+    {
+      "name": "writeStackValue",
+      "comment": "Write a value onto the stack",
+      "javadoc": "Write a value onto the stack\n@param relativeOffset offset relative to current stack pointer\n@param size data size in bytes\n@param value\n@throws Exception error occurs reading stack pointer",
+      "static": false,
+      "params": [
+        {
+          "name": "relativeOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset relative to current stack pointer"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data size in bytes"
+        },
+        {
+          "name": "value",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "error occurs reading stack pointer"
+        }
+      ]
+    },
+    {
+      "name": "setBreakpoint",
+      "comment": "Establish breakpoint",
+      "javadoc": "Establish breakpoint\n@param addr memory address for new breakpoint",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "memory address for new breakpoint"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearBreakpoint",
+      "comment": "Clear breakpoint",
+      "javadoc": "Clear breakpoint\n@param addr memory address for breakpoint to be cleared",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "memory address for breakpoint to be cleared"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setContextRegister",
+      "comment": "Set current context register value.\n Keep in mind that any non-flowing context values will be stripped.",
+      "javadoc": "Set current context register value.\n Keep in mind that any non-flowing context values will be stripped.\n@param ctxRegValue",
+      "static": false,
+      "params": [
+        {
+          "name": "ctxRegValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setContextRegister",
+      "comment": "Set current context register value.\n Keep in mind that any non-flowing context values will be stripped.",
+      "javadoc": "Set current context register value.\n Keep in mind that any non-flowing context values will be stripped.\n@param ctxReg context register\n@param value context value",
+      "static": false,
+      "params": [
+        {
+          "name": "ctxReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "context register"
+        },
+        {
+          "name": "value",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": "context value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getContextRegister",
+      "comment": "Get the current context register value",
+      "javadoc": "Get the current context register value\n@return context register value or null if not set or unknown",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "context register value or null if not set or unknown"
+      },
+      "throws": []
+    },
+    {
+      "name": "registerCallOtherCallback",
+      "comment": "Register callback for language defined pcodeop (call other).\n WARNING! Using this method may circumvent the default CALLOTHER emulation support\n when supplied by the Processor module.",
+      "javadoc": "Register callback for language defined pcodeop (call other).\n WARNING! Using this method may circumvent the default CALLOTHER emulation support\n when supplied by the Processor module.\n@param pcodeOpName the name of the pcode op\n@param callback the callback to register",
+      "static": false,
+      "params": [
+        {
+          "name": "pcodeOpName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the pcode op"
+        },
+        {
+          "name": "callback",
+          "type_long": "ghidra.pcode.emulate.BreakCallBack",
+          "type_short": "BreakCallBack",
+          "comment": "the callback to register"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerDefaultCallOtherCallback",
+      "comment": "Register default callback for language defined pcodeops (call other).\n WARNING! Using this method may circumvent the default CALLOTHER emulation support\n when supplied by the Processor module.",
+      "javadoc": "Register default callback for language defined pcodeops (call other).\n WARNING! Using this method may circumvent the default CALLOTHER emulation support\n when supplied by the Processor module.\n@param callback the default callback to register",
+      "static": false,
+      "params": [
+        {
+          "name": "callback",
+          "type_long": "ghidra.pcode.emulate.BreakCallBack",
+          "type_short": "BreakCallBack",
+          "comment": "the default callback to register"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unregisterCallOtherCallback",
+      "comment": "Unregister callback for language defined pcodeop (call other).",
+      "javadoc": "Unregister callback for language defined pcodeop (call other).\n@param pcodeOpName the name of the pcode op",
+      "static": false,
+      "params": [
+        {
+          "name": "pcodeOpName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the pcode op"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unregisterDefaultCallOtherCallback",
+      "comment": "Unregister default callback for language defined pcodeops (call other).\n WARNING! Using this method may circumvent the default CALLOTHER emulation support\n when supplied by the Processor module.",
+      "javadoc": "Unregister default callback for language defined pcodeops (call other).\n WARNING! Using this method may circumvent the default CALLOTHER emulation support\n when supplied by the Processor module.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExecutionAddress",
+      "comment": "Get current execution address",
+      "javadoc": "Get current execution address\n@return current execution address",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "current execution address"
+      },
+      "throws": []
+    },
+    {
+      "name": "run",
+      "comment": "Start execution at the specified address using the initial context specified.\n Method will block until execution stops.  This method will initialize context\n register based upon the program stored context if not already done.  In addition,\n both general register value and the context register may be further modified\n via the context parameter if specified.",
+      "javadoc": "Start execution at the specified address using the initial context specified.\n Method will block until execution stops.  This method will initialize context\n register based upon the program stored context if not already done.  In addition,\n both general register value and the context register may be further modified\n via the context parameter if specified.\n@param addr initial program address\n@param context optional context settings which override current program context\n@param monitor\n@return true if execution completes without error (i.e., is at breakpoint)\n@throws CancelledException if execution cancelled via monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "initial program address"
+        },
+        {
+          "name": "context",
+          "type_long": "ghidra.program.model.lang.ProcessorContext",
+          "type_short": "ProcessorContext",
+          "comment": "optional context settings which override current program context"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if execution completes without error (i.e., is at breakpoint)"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if execution cancelled via monitor"
+        }
+      ]
+    },
+    {
+      "name": "run",
+      "comment": "Continue execution from the current execution address.\n No adjustment will be made to the context beyond the normal \n context flow behavior defined by the language.\n Method will block until execution stops.",
+      "javadoc": "Continue execution from the current execution address.\n No adjustment will be made to the context beyond the normal \n context flow behavior defined by the language.\n Method will block until execution stops.\n@param monitor\n@return true if execution completes without error (i.e., is at breakpoint)\n@throws CancelledException if execution cancelled via monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if execution completes without error (i.e., is at breakpoint)"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if execution cancelled via monitor"
+        }
+      ]
+    },
+    {
+      "name": "continueExecution",
+      "comment": "Continue execution and block until either a breakpoint hits or error occurs.",
+      "javadoc": "Continue execution and block until either a breakpoint hits or error occurs.\n@throws CancelledException if execution was cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if execution was cancelled"
+        }
+      ]
+    },
+    {
+      "name": "executeInstruction",
+      "comment": "Execute instruction at current address",
+      "javadoc": "Execute instruction at current address\n@param stopAtBreakpoint if true and breakpoint hits at current execution address\n execution will halt without executing instruction.\n@throws CancelledException if execution was cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "stopAtBreakpoint",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true and breakpoint hits at current execution address\n execution will halt without executing instruction."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if execution was cancelled"
+        }
+      ]
+    },
+    {
+      "name": "setProcessorContext",
+      "comment": "Used when the emulator has had the execution address changed to\n make sure it has a context consistent with the program context\n if there is one.",
+      "javadoc": "Used when the emulator has had the execution address changed to\n make sure it has a context consistent with the program context\n if there is one.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastError",
+      "comment": "",
+      "javadoc": "@return last error message associated with execution failure",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "last error message associated with execution failure"
+      },
+      "throws": []
+    },
+    {
+      "name": "step",
+      "comment": "Step execution one instruction which may consist of multiple\n pcode operations.  No adjustment will be made to the context beyond the normal \n context flow behavior defined by the language.\n Method will block until execution stops.",
+      "javadoc": "Step execution one instruction which may consist of multiple\n pcode operations.  No adjustment will be made to the context beyond the normal \n context flow behavior defined by the language.\n Method will block until execution stops.\n@return true if execution completes without error\n@throws CancelledException if execution cancelled via monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if execution completes without error"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if execution cancelled via monitor"
+        }
+      ]
+    },
+    {
+      "name": "createMemoryBlockFromMemoryState",
+      "comment": "Create a new initialized memory block using the current emulator memory state",
+      "javadoc": "Create a new initialized memory block using the current emulator memory state\n@param name block name\n@param start start address of the block\n@param length the size of the block\n@param overlay if true, the block will be created as an OVERLAY which means that a new \n overlay address space will be created and the block will have a starting address at the same\n offset as the given start address parameter, but in the new address space.\n@param monitor\n@return new memory block\n@throws LockException if exclusive lock not in place (see haveLock())\n@throws MemoryConflictException if the new block overlaps with a\n previous block\n@throws AddressOverflowException if the start is beyond the\n address space\n@throws CancelledException user cancelled operation\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "block name"
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start address of the block"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the size of the block"
+        },
+        {
+          "name": "overlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the block will be created as an OVERLAY which means that a new \n overlay address space will be created and the block will have a starting address at the same\n offset as the given start address parameter, but in the new address space."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": "new memory block"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": "if the new block overlaps with a\n previous block"
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": "if the start is beyond the\n address space"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "user cancelled operation"
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if exclusive lock not in place (see haveLock())"
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "enableMemoryWriteTracking",
+      "comment": "Enable/Disable tracking of memory writes in the form of an\n address set.",
+      "javadoc": "Enable/Disable tracking of memory writes in the form of an\n address set.\n@param enable",
+      "static": false,
+      "params": [
+        {
+          "name": "enable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTrackedMemoryWriteSet",
+      "comment": "",
+      "javadoc": "@return address set of memory locations written by the emulator\n if memory write tracking is enabled, otherwise null is returned.\n The address set returned will continue to be updated unless\n memory write tracking becomes disabled.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "address set of memory locations written by the emulator\n if memory write tracking is enabled, otherwise null is returned.\n The address set returned will continue to be updated unless\n memory write tracking becomes disabled."
+      },
+      "throws": []
+    },
+    {
+      "name": "unknownAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "write",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "uninitializedRead",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "buf",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "bufOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEmulator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.emulator.Emulator",
+        "type_short": "Emulator",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

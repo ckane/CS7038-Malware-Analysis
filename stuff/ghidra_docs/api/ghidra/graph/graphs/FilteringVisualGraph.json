@@ -1,0 +1,785 @@
+{
+  "name": "FilteringVisualGraph",
+  "comment": "A graph implementation that allows clients to mark vertices and edges as filtered.  When\n filtered, a vertex is removed from this graph, but kept around for later unfiltering. Things\n of note:\n \n \t\tAs vertices are filtered, so to will be their edges\n \t\t\n \t\tIf additions are made to the graph while it is filtered, the new additions will\n          not be added to the current graph, but will be kept in the background for later \n          restoring\n \t\t\n  \t\t\n \t\t\n \n\n Implementation Note: this class engages in some odd behavior when removals and additions\n are need to this graph.  A distinction is made between events that are generated from \n external clients and those that happen due to filtering and restoring.  This distinction\n allows this class to know when to update this graph, based upon whether or not data has\n been filtered.   Implementation of this is achieved by using a flag.  Currently, this flag\n is thread-safe.  If this graph is to be multi-threaded (such as if changes are to be \n made by multiple threads, then this update flag will have to be revisited to ensure thread\n visibility.",
+  "javadoc": "A graph implementation that allows clients to mark vertices and edges as filtered.  When\n filtered, a vertex is removed from this graph, but kept around for later unfiltering. Things\n of note:\n \u003cUL\u003e\n \t\t\u003cLI\u003eAs vertices are filtered, so to will be their edges\n \t\t\u003c/LI\u003e\n \t\t\u003cLI\u003eIf additions are made to the graph while it is filtered, the new additions will\n          not be added to the current graph, but will be kept in the background for later \n          restoring\n \t\t\u003c/LI\u003e\n  \t\t\u003cLI\u003e\n \t\t\u003c/LI\u003e\n \u003c/UL\u003e\n\n \u003cP\u003eImplementation Note: this class engages in some odd behavior when removals and additions\n are need to this graph.  A distinction is made between events that are generated from \n external clients and those that happen due to filtering and restoring.  This distinction\n allows this class to know when to update this graph, based upon whether or not data has\n been filtered.   Implementation of this is achieved by using a flag.  Currently, this flag\n is thread-safe.  If this graph is to be multi-threaded (such as if changes are to be \n made by multiple threads, then this update flag will have to be revisited to ensure thread\n visibility.\n@param \u003cV\u003e the vertex type\n@param \u003cE\u003e the edge type",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.graph.graphs.DefaultVisualGraph",
+  "fields": [
+    {
+      "name": "completeGraph",
+      "comment": "A graph that always holds the unfiltered, complete graph data.  We use this to restore\n filtered items.",
+      "javadoc": "A graph that always holds the unfiltered, complete graph data.  We use this to restore\n filtered items.",
+      "static": false,
+      "type_long": "ghidra.graph.graphs.FilteringVisualGraph\u003cV,E\u003e.UnfilteredGraph",
+      "type_short": "UnfilteredGraph",
+      "constant_value": null
+    },
+    {
+      "name": "internalCallCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "filterVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toFilter",
+          "type_long": "java.util.Collection\u003cV\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "filterEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toFilter",
+          "type_long": "java.util.Collection\u003cE\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unfilterVertices",
+      "comment": "Restores the given filtered vertices into the graph.  This will only happen if both\n endpoints are in the graph.",
+      "javadoc": "Restores the given filtered vertices into the graph.  This will only happen if both\n endpoints are in the graph.\n@param toUnfilter the edges to restore",
+      "static": false,
+      "params": [
+        {
+          "name": "toUnfilter",
+          "type_long": "java.util.Collection\u003cV\u003e",
+          "type_short": "Collection",
+          "comment": "the edges to restore"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unfilterEdges",
+      "comment": "Restores the given filtered edges into the graph.  This will only happen if both\n endpoints are in the graph.",
+      "javadoc": "Restores the given filtered edges into the graph.  This will only happen if both\n endpoints are in the graph.\n@param toUnfilter the edges to restore",
+      "static": false,
+      "params": [
+        {
+          "name": "toUnfilter",
+          "type_long": "java.util.Collection\u003cE\u003e",
+          "type_short": "Collection",
+          "comment": "the edges to restore"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cV\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cE\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilteredVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cV\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilteredEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cE\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnfilteredVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cV\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnfilteredEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cE\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFiltered",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllReachableVertices",
+      "comment": "Returns all vertices that are reachable by the given vertices.\n \n This method is needed if you wish to find relationships that have been filtered \n out.",
+      "javadoc": "Returns all vertices that are reachable by the given vertices.\n \n \u003cP\u003eThis method is needed if you wish to find relationships that have been filtered \n out.\n@param sourceVertices the vertices for which to find the other reachable vertices\n@return the reachable vertices",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceVertices",
+          "type_long": "java.util.Set\u003cV\u003e",
+          "type_short": "Set",
+          "comment": "the vertices for which to find the other reachable vertices"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cV\u003e",
+        "type_short": "Set",
+        "comment": "the reachable vertices"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllEdges",
+      "comment": "Returns all edges connected to the given vertices.\n \n This method is needed if you wish to find relationships that have been filtered \n out.",
+      "javadoc": "Returns all edges connected to the given vertices.\n \n \u003cP\u003eThis method is needed if you wish to find relationships that have been filtered \n out.\n@param sourceVertices the vertices for which to get the edges\n@return the reachable edges",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceVertices",
+          "type_long": "java.util.Set\u003cV\u003e",
+          "type_short": "Set",
+          "comment": "the vertices for which to get the edges"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": "the reachable edges"
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreAllVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreAllEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybeRestoreVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toRestore",
+          "type_long": "java.util.Collection\u003cV\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybeRestoreEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toUnfilter",
+          "type_long": "java.util.Collection\u003cE\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybeRestoreRelatedEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toUnfilter",
+          "type_long": "java.util.Collection\u003cV\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeVertexFromView",
+      "comment": "This method is to be called internally to remove a vertex from this graph, but not the\n underlying \u0027complete graph\u0027.",
+      "javadoc": "This method is to be called internally to remove a vertex from this graph, but not the\n underlying \u0027complete graph\u0027.\n@param v the vertex",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": "the vertex"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEdgeFromView",
+      "comment": "This method is to be called internally to remove an edge from this graph, but not the\n underlying \u0027complete graph\u0027.",
+      "javadoc": "This method is to be called internally to remove an edge from this graph, but not the\n underlying \u0027complete graph\u0027.\n@param e the edge",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": "the edge"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "performInternalUpdate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybePerformRemove",
+      "comment": "Performs a remove only if this graph is not in the process of an internal update",
+      "javadoc": "Performs a remove only if this graph is not in the process of an internal update\n@param c the callback to perform the remove",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": "the callback to perform the remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInternalUpdate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybePerformAdd",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "verticesToRemove",
+          "type_long": "java.lang.Iterable\u003cV\u003e",
+          "type_short": "Iterable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toRemove",
+          "type_long": "java.lang.Iterable\u003cE\u003e",
+          "type_short": "Iterable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "endpoints",
+          "type_long": "edu.uci.ics.jung.graph.util.Pair\u003c? extends V\u003e",
+          "type_short": "Pair",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "edu.uci.ics.jung.graph.util.EdgeType",
+          "type_short": "EdgeType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "edgeVertices",
+          "type_long": "java.util.Collection\u003c? extends V\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "edgeVertices",
+          "type_long": "java.util.Collection\u003c? extends V\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "edu.uci.ics.jung.graph.util.EdgeType",
+          "type_short": "EdgeType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "v1",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "v2",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "v1",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "v2",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "edgeType",
+          "type_long": "edu.uci.ics.jung.graph.util.EdgeType",
+          "type_short": "EdgeType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "endpoints",
+          "type_long": "edu.uci.ics.jung.graph.util.Pair\u003c? extends V\u003e",
+          "type_short": "Pair",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

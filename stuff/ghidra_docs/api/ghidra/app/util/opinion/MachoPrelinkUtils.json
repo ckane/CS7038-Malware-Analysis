@@ -1,0 +1,231 @@
+{
+  "name": "MachoPrelinkUtils",
+  "comment": "Utilities methods for working with Mach-O PRELINK binaries.",
+  "javadoc": "Utilities methods for working with Mach-O PRELINK binaries.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parsePrelinkXml",
+      "comment": "Parses the provider looking for PRELINK XML.",
+      "javadoc": "Parses the provider looking for PRELINK XML.\n@param provider The provider to parse.\n@param monitor A monitor.\n@return A list of discovered {@link PrelinkMap}s.  An empty list indicates that the provider\n   did not represent valid Mach-O PRELINK binary.\n@throws IOException if there was an IO-related issue.\n@throws JDOMException if there was a issue parsing the PRELINK XML.",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The provider to parse."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "A monitor."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.bin.format.macho.prelink.PrelinkMap\u003e",
+        "type_short": "List",
+        "comment": "A list of discovered PrelinkMaps.  An empty list indicates that the provider\n   did not represent valid Mach-O PRELINK binary."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an IO-related issue."
+        },
+        {
+          "type_long": "org.jdom.JDOMException",
+          "type_short": "JDOMException",
+          "comment": "if there was a issue parsing the PRELINK XML."
+        }
+      ]
+    },
+    {
+      "name": "hasChainedLoadCommand",
+      "comment": "Check if the Macho has a DYLD_CHAINED_FIXUPS_COMMAND",
+      "javadoc": "Check if the Macho has a DYLD_CHAINED_FIXUPS_COMMAND\n@param provider The provider to parse.\n@param monitor A monitor.\n@return A list of discovered {@link PrelinkMap}s.  An empty list indicates that the provider\n   did not represent valid Mach-O PRELINK binary.\n@throws IOException if there was an IO-related issue.\n@throws JDOMException if there was a issue parsing the PRELINK XML.",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The provider to parse."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "A monitor."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "A list of discovered PrelinkMaps.  An empty list indicates that the provider\n   did not represent valid Mach-O PRELINK binary."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an IO-related issue."
+        },
+        {
+          "type_long": "org.jdom.JDOMException",
+          "type_short": "JDOMException",
+          "comment": "if there was a issue parsing the PRELINK XML."
+        }
+      ]
+    },
+    {
+      "name": "findPrelinkMachoHeaderOffsets",
+      "comment": "Scans the provider looking for PRELINK Mach-O headers.  \n \n NOTE: The \"System\" Mach-O at offset 0 is not considered a PRELINK Mach-O.\n \n NOTE: We used to scan on 0x1000, and then 0x10 byte boundaries.  Now iOS 12 seems to \n put them on 0x8-byte boundaries.",
+      "javadoc": "Scans the provider looking for PRELINK Mach-O headers.  \n \u003cp\u003e\n NOTE: The \"System\" Mach-O at offset 0 is not considered a PRELINK Mach-O.\n \u003cp\u003e\n NOTE: We used to scan on 0x1000, and then 0x10 byte boundaries.  Now iOS 12 seems to \n put them on 0x8-byte boundaries.\n@param provider The provider to scan.\n@param monitor A monitor.\n@return A list of provider offsets where PRELINK Mach-O headers start (not including the\n   \"System\" Mach-O at offset 0).\n@throws IOException If there was an IO-related issue searching for PRELINK Mach-O headers.",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The provider to scan."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "A monitor."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+        "type_short": "List",
+        "comment": "A list of provider offsets where PRELINK Mach-O headers start (not including the\n   \"System\" Mach-O at offset 0)."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "If there was an IO-related issue searching for PRELINK Mach-O headers."
+        }
+      ]
+    },
+    {
+      "name": "matchPrelinkToMachoHeaderOffsets",
+      "comment": "Forms a bidirectional mapping of PRELINK XML to Mach-O header offset in the given provider.",
+      "javadoc": "Forms a bidirectional mapping of PRELINK XML to Mach-O header offset in the given provider.\n@param provider The PRELINK Mach-O provider.\n@param prelinkList A list of {@link PrelinkMap}s.\n@param machoHeaderOffsets A list of provider offsets where PRELINK Mach-O headers start (not \n   including the \"System\" Mach-O at offset 0).\n@param monitor A monitor\n@return A bidirectional mapping of PRELINK XML to Mach-O header offset in the given provider.\n@throws MachException If there was a problem parsing a Mach-O header.\n@throws IOException If there was an IO-related issue mapping PRELINK XML to Mach-O headers.",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The PRELINK Mach-O provider."
+        },
+        {
+          "name": "prelinkList",
+          "type_long": "java.util.List\u003cghidra.app.util.bin.format.macho.prelink.PrelinkMap\u003e",
+          "type_short": "List",
+          "comment": "A list of PrelinkMaps."
+        },
+        {
+          "name": "machoHeaderOffsets",
+          "type_long": "java.util.List\u003cjava.lang.Long\u003e",
+          "type_short": "List",
+          "comment": "A list of provider offsets where PRELINK Mach-O headers start (not \n   including the \"System\" Mach-O at offset 0)."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "A monitor"
+        }
+      ],
+      "return": {
+        "type_long": "org.apache.commons.collections4.BidiMap\u003cghidra.app.util.bin.format.macho.prelink.PrelinkMap,java.lang.Long\u003e",
+        "type_short": "BidiMap",
+        "comment": "A bidirectional mapping of PRELINK XML to Mach-O header offset in the given provider."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.bin.format.macho.MachException",
+          "type_short": "MachException",
+          "comment": "If there was a problem parsing a Mach-O header."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "If there was an IO-related issue mapping PRELINK XML to Mach-O headers."
+        }
+      ]
+    },
+    {
+      "name": "getPrelinkStartAddr",
+      "comment": "Gets the start address of the PRELINK Mach-O\u0027s in memory.\n \n NOTE: This method only works for pre iOS 12 binaries.  If called on an iOS 12 binary, it will\n fail and return 0 because the __PRELINK_TEXT segment has a size of 0.  In this case, some\n other means of computing the start address of the PRELINK Mach-O\u0027s must be used.",
+      "javadoc": "Gets the start address of the PRELINK Mach-O\u0027s in memory.\n \u003cp\u003e\n NOTE: This method only works for pre iOS 12 binaries.  If called on an iOS 12 binary, it will\n fail and return 0 because the __PRELINK_TEXT segment has a size of 0.  In this case, some\n other means of computing the start address of the PRELINK Mach-O\u0027s must be used.\n@param header The Mach-O header.\n@return The start address of the PRELINK Mach-O\u0027s in memory, or 0 if it could not be found.",
+      "static": true,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.macho.MachHeader",
+          "type_short": "MachHeader",
+          "comment": "The Mach-O header."
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "The start address of the PRELINK Mach-O\u0027s in memory, or 0 if it could not be found."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMachoLoadSpec",
+      "comment": "Checks to see if the provider at the given offset represents a valid Mach-O file that we can\n load (ie, we support the processor).  If it does, a valid LoadSpec for the Mach-O is \n returned.",
+      "javadoc": "Checks to see if the provider at the given offset represents a valid Mach-O file that we can\n load (ie, we support the processor).  If it does, a valid {@link LoadSpec} for the Mach-O is \n returned.\n@param provider The provider.\n@param offset The offset within the provider to check.\n@return True A valid {@link LoadSpec} for the Mach-O at the given provider\u0027s offset, or null \n   if it is not a Mach-O or a valid {@link LoadSpec} could not be found.\n@throws IOException if there was an IO-related problem.",
+      "static": true,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "The provider."
+        },
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The offset within the provider to check."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.opinion.LoadSpec",
+        "type_short": "LoadSpec",
+        "comment": "True A valid LoadSpec for the Mach-O at the given provider\u0027s offset, or null \n   if it is not a Mach-O or a valid LoadSpec could not be found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an IO-related problem."
+        }
+      ]
+    }
+  ]
+}

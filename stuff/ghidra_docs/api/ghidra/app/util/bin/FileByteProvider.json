@@ -1,0 +1,654 @@
+{
+  "name": "FileByteProvider",
+  "comment": "A ByteProvider that reads its bytes from a file.",
+  "javadoc": "A {@link ByteProvider} that reads its bytes from a file.",
+  "static": false,
+  "implements": [
+    "ghidra.app.util.bin.ByteProvider",
+    "ghidra.app.util.bin.MutableByteProvider"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "BUFFER_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "65536"
+    },
+    {
+      "name": "BUFFERS_TO_PIN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "fsrl",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FSRL",
+      "type_short": "FSRL",
+      "constant_value": null
+    },
+    {
+      "name": "file",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "raf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.RandomAccessFile",
+      "type_short": "RandomAccessFile",
+      "constant_value": null
+    },
+    {
+      "name": "buffers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "org.apache.commons.collections4.map.ReferenceMap\u003cjava.lang.Long,ghidra.app.util.bin.FileByteProvider.Buffer\u003e",
+      "type_short": "ReferenceMap",
+      "constant_value": null
+    },
+    {
+      "name": "lruBuffers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LRUMap\u003cjava.lang.Long,ghidra.app.util.bin.FileByteProvider.Buffer\u003e",
+      "type_short": "LRUMap",
+      "constant_value": null
+    },
+    {
+      "name": "currentLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "accessMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.nio.file.AccessMode",
+      "type_short": "AccessMode",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new instance.",
+      "javadoc": "Creates a new instance.\n@param file {@link File} to open\n@param fsrl {@link FSRL} identity of the file\n@param accessMode {@link AccessMode#READ} or {@link AccessMode#WRITE}\n@throws IOException if error",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "File to open"
+        },
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL identity of the file"
+        },
+        {
+          "name": "accessMode",
+          "type_long": "java.nio.file.AccessMode",
+          "type_short": "AccessMode",
+          "comment": "AccessMode#READ or AccessMode#WRITE"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        }
+      ]
+    },
+    {
+      "name": "getAccessMode",
+      "comment": "Returns the access mode the file was opened with.",
+      "javadoc": "Returns the access mode the file was opened with.\n@return {@link AccessMode} used to open file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.nio.file.AccessMode",
+        "type_short": "AccessMode",
+        "comment": "AccessMode used to open file"
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAbsolutePath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "length",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isValidIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readBytes",
+      "comment": "Read bytes at the specified index into the given byte array.\n \n See InputStream#read(byte[], int, int).\n ",
+      "javadoc": "Read bytes at the specified index into the given byte array.\n \u003cp\u003e\n See {@link InputStream#read(byte[], int, int)}.\n \u003cp\u003e\n@param index file offset to start reading\n@param buffer byte array that will receive the bytes\n@param offset offset inside the byte array to place the bytes\n@param length number of bytes to read\n@return number of actual bytes read\n@throws IOException if error",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "file offset to start reading"
+        },
+        {
+          "name": "buffer",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "byte array that will receive the bytes"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset inside the byte array to place the bytes"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of bytes to read"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of actual bytes read"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        }
+      ]
+    },
+    {
+      "name": "finalize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeBytes",
+      "comment": "Writes bytes to the specified offset in the file.",
+      "javadoc": "Writes bytes to the specified offset in the file.\n@param index the location in the file to starting writing\n@param buffer bytes to write\n@param offset offset in the buffer byte array to start\n@param length number of bytes to write\n@throws IOException if bad {@link AccessMode} or other io error",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the location in the file to starting writing"
+        },
+        {
+          "name": "buffer",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "bytes to write"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset in the buffer byte array to start"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of bytes to write"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if bad AccessMode or other io error"
+        }
+      ]
+    },
+    {
+      "name": "writeByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "writeBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "values",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "doReadBytes",
+      "comment": "Reads bytes from the file.\n \n Protected by synchronized lock.  (See #getBufferFor(long)).",
+      "javadoc": "Reads bytes from the file.\n \u003cp\u003e\n Protected by synchronized lock.  (See {@link #getBufferFor(long)}).\n@param index file position of where to read\n@param buffer byte array that will receive bytes\n@return actual number of byte read\n@throws IOException if error",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "file position of where to read"
+        },
+        {
+          "name": "buffer",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "byte array that will receive bytes"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "actual number of byte read"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        }
+      ]
+    },
+    {
+      "name": "doWriteBytes",
+      "comment": "Writes the specified bytes to the file.\n \n Protected by synchronized lock (See #writeBytes(long, byte[], int, int))",
+      "javadoc": "Writes the specified bytes to the file.\n \u003cp\u003e\n Protected by synchronized lock (See {@link #writeBytes(long, byte[], int, int)})\n@param index file position of where to write\n@param buffer byte array containing bytes to write\n@param offset offset inside of byte array to start\n@param length number of bytes from buffer to write\n@throws IOException if error",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "file position of where to write"
+        },
+        {
+          "name": "buffer",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "byte array containing bytes to write"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset inside of byte array to start"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of bytes from buffer to write"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        }
+      ]
+    },
+    {
+      "name": "ensureBounds",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBufferPos",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBufferFor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pos",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.FileByteProvider.Buffer",
+        "type_short": "Buffer",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "accessModeToString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mode",
+          "type_long": "java.nio.file.AccessMode",
+          "type_short": "AccessMode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

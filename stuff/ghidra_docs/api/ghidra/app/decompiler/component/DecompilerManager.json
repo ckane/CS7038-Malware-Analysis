@@ -1,0 +1,357 @@
+{
+  "name": "DecompilerManager",
+  "comment": "Manages the threading involved with dealing with the decompiler. It uses a simpler approach\n than previous versions.  Currently, there is only one Runnable ever scheduled to the RunManager.\n If a new Decompile request comes in while a decompile is in progress, the new request is\n first checked to see if it going to result in the same function being decompile. If so, then the\n location is updated and the current decompile is allowed to continue.  If the new request is\n a new function or the \"forceDecompile\" option is on, then the current decompile is stopped\n and a new one is scheduled.  A SwingUpdateManger is used to prevent lots of decompile requests\n from coming to quickly.",
+  "javadoc": "Manages the threading involved with dealing with the decompiler. It uses a simpler approach\n than previous versions.  Currently, there is only one Runnable ever scheduled to the RunManager.\n If a new Decompile request comes in while a decompile is in progress, the new request is\n first checked to see if it going to result in the same function being decompile. If so, then the\n location is updated and the current decompile is allowed to continue.  If the new request is\n a new function or the \"forceDecompile\" option is on, then the current decompile is stopped\n and a new one is scheduled.  A SwingUpdateManger is used to prevent lots of decompile requests\n from coming to quickly.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "decompilerController",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.DecompilerController",
+      "type_short": "DecompilerController",
+      "constant_value": null
+    },
+    {
+      "name": "decompiler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.Decompiler",
+      "type_short": "Decompiler",
+      "constant_value": null
+    },
+    {
+      "name": "currentDecompileRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.DecompileRunnable",
+      "type_short": "DecompileRunnable",
+      "constant_value": null
+    },
+    {
+      "name": "pendingDecompileRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.DecompileRunnable",
+      "type_short": "DecompileRunnable",
+      "constant_value": null
+    },
+    {
+      "name": "runManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.RunManager",
+      "type_short": "RunManager",
+      "constant_value": null
+    },
+    {
+      "name": "updateManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.SwingUpdateManager",
+      "type_short": "SwingUpdateManager",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "decompilerController",
+          "type_long": "ghidra.app.decompiler.component.DecompilerController",
+          "type_short": "DecompilerController",
+          "comment": ""
+        },
+        {
+          "name": "options",
+          "type_long": "ghidra.app.decompiler.DecompileOptions",
+          "type_short": "DecompileOptions",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setOptions",
+      "comment": "Set the decompiler options for future decompiles.",
+      "javadoc": "Set the decompiler options for future decompiles.",
+      "static": false,
+      "params": [
+        {
+          "name": "decompilerOptions",
+          "type_long": "ghidra.app.decompiler.DecompileOptions",
+          "type_short": "DecompileOptions",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTaskMonitorComponent",
+      "comment": "Returns the TaskMonitorComponent created by the RunManager and to be used in the\n DecompilerPanel.",
+      "javadoc": "Returns the TaskMonitorComponent created by the RunManager and to be used in the\n DecompilerPanel.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resetDecompiler",
+      "comment": "Resets the native decompiler process.  Call this method when the decompiler\u0027s view\n of a program has been invalidated, such as when a new overlay space has been added.",
+      "javadoc": "Resets the native decompiler process.  Call this method when the decompiler\u0027s view\n of a program has been invalidated, such as when a new overlay space has been added.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decompile",
+      "comment": "Requests a new decompile be scheduled.  If a current decompile is already in progress,\n the new request is checked to see if represents the same function. If so, only the\n location of the current decompile is updated and the current decompile is allowed to continue.\n Otherwise a new DecompileRunnable is created and scheduled to run using the updateManager.\n When the updateMangers runs, it will stop any current decompiles and begin the new decompile.",
+      "javadoc": "Requests a new decompile be scheduled.  If a current decompile is already in progress,\n the new request is checked to see if represents the same function. If so, only the\n location of the current decompile is updated and the current decompile is allowed to continue.\n Otherwise a new DecompileRunnable is created and scheduled to run using the updateManager.\n When the updateMangers runs, it will stop any current decompiles and begin the new decompile.\n@param program The program containing the function to be decompiled.\n@param location the location in the program to be decompiled and positioned to.\n@param debugFile if non-null, creates decompile debug output to this file.\n@param forceDecompile true forces a new decompile to be scheduled even if the current job\n is the same function.",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "The program containing the function to be decompiled."
+        },
+        {
+          "name": "location",
+          "type_long": "ghidra.program.util.ProgramLocation",
+          "type_short": "ProgramLocation",
+          "comment": "the location in the program to be decompiled and positioned to."
+        },
+        {
+          "name": "viewerPosition",
+          "type_long": "docking.widgets.fieldpanel.support.ViewerPosition",
+          "type_short": "ViewerPosition",
+          "comment": ""
+        },
+        {
+          "name": "debugFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "if non-null, creates decompile debug output to this file."
+        },
+        {
+          "name": "forceDecompile",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true forces a new decompile to be scheduled even if the current job\n is the same function."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPendingRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newDecompileRunnable",
+          "type_long": "ghidra.app.decompiler.component.DecompileRunnable",
+          "type_short": "DecompileRunnable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateCurrentRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newDecompileRunnable",
+          "type_long": "ghidra.app.decompiler.component.DecompileRunnable",
+          "type_short": "DecompileRunnable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelAll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelCurrentRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doPendingDecompile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decompile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "functionToDecompile",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "debugFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.decompiler.DecompileResults",
+        "type_short": "DecompileResults",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.decompiler.DecompileException",
+          "type_short": "DecompileException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setDecompileData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "runnable",
+          "type_long": "ghidra.app.decompiler.component.DecompileRunnable",
+          "type_short": "DecompileRunnable",
+          "comment": ""
+        },
+        {
+          "name": "decompileData",
+          "type_long": "ghidra.app.decompiler.component.DecompileData",
+          "type_short": "DecompileData",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

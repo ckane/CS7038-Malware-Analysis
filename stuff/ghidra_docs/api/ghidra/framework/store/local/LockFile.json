@@ -1,0 +1,720 @@
+{
+  "name": "LockFile",
+  "comment": "Provides for the creation and management of a named lock file. Keep in mind\n that if a lock expires it may be removed without notice.  Care should be\n taken to renew a lock file in a timely manner.",
+  "javadoc": "Provides for the creation and management of a named lock file. Keep in mind\n that if a lock expires it may be removed without notice.  Care should be\n taken to renew a lock file in a timely manner.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DEFAULT_MAX_LOCK_LEASE_PERIOD_MS",
+      "comment": "The maximum lock lease period in seconds.  To retain a \n lock longer than this period of time, the renewLock() method must be \n invoked before the lock expires.  This is the amount of time a user will have to \n wait for a stuck lock to be removed.",
+      "javadoc": "The maximum lock lease period in seconds.  To retain a \n lock longer than this period of time, the renewLock() method must be \n invoked before the lock expires.  This is the amount of time a user will have to \n wait for a stuck lock to be removed.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "15000"
+    },
+    {
+      "name": "DEFAULT_LOCK_RENEWAL_PERIOD",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "13000"
+    },
+    {
+      "name": "DEFAULT_TIMEOUT_MS",
+      "comment": "The default timeout for obtaining a lock.",
+      "javadoc": "The default timeout for obtaining a lock.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "30000"
+    },
+    {
+      "name": "MAX_DELETE_TRIES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "maxLockLeasePeriod",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "lockRenewalPeriod",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "lockTimeout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "LOCK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"lock\""
+    },
+    {
+      "name": "nextInstanceId",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "instanceId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "debugId",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "lockFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "deltaTime",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "waitLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Object",
+      "type_short": "Object",
+      "constant_value": null
+    },
+    {
+      "name": "waitTimerMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.timer.GTimerMonitor",
+      "type_short": "GTimerMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "waitTask",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.local.LockFile.WaitForLockRunnable",
+      "type_short": "WaitForLockRunnable",
+      "constant_value": null
+    },
+    {
+      "name": "holdLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Object",
+      "type_short": "Object",
+      "constant_value": null
+    },
+    {
+      "name": "holdTimerMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.timer.GTimerMonitor",
+      "type_short": "GTimerMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "lockCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "myLockTime",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "getDebugId",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "maxLockLeasePeriod",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "lockRenewalPeriod",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "lockTimeout",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor.",
+      "javadoc": "Constructor.\n@param dir directory containing lock file\n@param name unmangled name of entity which this lock is associated with.",
+      "static": false,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "directory containing lock file"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "unmangled name of entity which this lock is associated with."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor.",
+      "javadoc": "Constructor.\n@param dir directory containing lock file\n@param name unmangled name of entity which this lock is associated with.\n@param lockType unique lock identifier (may not contain a \u0027.\u0027)",
+      "static": false,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "directory containing lock file"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "unmangled name of entity which this lock is associated with."
+        },
+        {
+          "name": "lockType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "unique lock identifier (may not contain a \u0027.\u0027)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor.",
+      "javadoc": "Constructor.\n@param file file whose lock state will be controlled with this lock file.",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "file whose lock state will be controlled with this lock file."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasAnyLock",
+      "comment": "",
+      "javadoc": "@param dir directory containing lock file\n@param mangledName mangled name of file or entity which this lock is associated with.\n@return true if any lock exists within dir for the given entity name.",
+      "static": true,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "directory containing lock file"
+        },
+        {
+          "name": "mangledName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "mangled name of file or entity which this lock is associated with."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if any lock exists within dir for the given entity name."
+      },
+      "throws": []
+    },
+    {
+      "name": "isLocked",
+      "comment": "",
+      "javadoc": "@param dir directory containing lock file\n@param name of entity which this lock is associated with.\n@return true if any lock exists within dir for the given entity name.",
+      "static": true,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "directory containing lock file"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "of entity which this lock is associated with."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if any lock exists within dir for the given entity name."
+      },
+      "throws": []
+    },
+    {
+      "name": "isLocked",
+      "comment": "",
+      "javadoc": "@param file file whose lock state is controlled with this lock file.\n@return true if any lock exists within dir for the given entity name.",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "file whose lock state is controlled with this lock file."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if any lock exists within dir for the given entity name."
+      },
+      "throws": []
+    },
+    {
+      "name": "containsLock",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextInstanceId",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextDebugId",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "haveLock",
+      "comment": "Determine if lock file was successfully created by this instance.\n This does not quarentee that the lock is still present if more\n than MAX_LOCK_LEASE_PERIOD has lapsed since lock was created.",
+      "javadoc": "Determine if lock file was successfully created by this instance.\n This does not quarentee that the lock is still present if more\n than MAX_LOCK_LEASE_PERIOD has lapsed since lock was created.\n@return true if lock has been created, otherwise false.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if lock has been created, otherwise false."
+      },
+      "throws": []
+    },
+    {
+      "name": "haveLock",
+      "comment": "Determine if lock is still in place.\n Verifying the lock may be necessary when slow processes are holding \n the lock without timely renewals.",
+      "javadoc": "Determine if lock is still in place.\n Verifying the lock may be necessary when slow processes are holding \n the lock without timely renewals.\n@return true if lock is still in place, otherwise false.",
+      "static": false,
+      "params": [
+        {
+          "name": "verify",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if lock is still in place, otherwise false."
+      },
+      "throws": []
+    },
+    {
+      "name": "renewLock",
+      "comment": "Renew the lease on a lock.\n This is accomplished by changing its last modification time.",
+      "javadoc": "Renew the lease on a lock.\n This is accomplished by changing its last modification time.\n@return true if lock extension granted, else false.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if lock extension granted, else false."
+      },
+      "throws": []
+    },
+    {
+      "name": "getLockOwner",
+      "comment": "Return the name of the current lock owner\n or  if not locked or could not be determined.",
+      "javadoc": "Return the name of the current lock owner\n or {@code \"\u003cUnknown\u003e\"} if not locked or could not be determined.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLockOwner",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "includeId",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLockOwner",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLockID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeLock",
+      "comment": "Remove the lock file.\n This method should be invoked when the corresponding transaction is complete.",
+      "javadoc": "Remove the lock file.\n This method should be invoked when the corresponding transaction is complete.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createLock",
+      "comment": "Create the lock file using the default timeout.\n Lock is guaranteed for MAX_LOCK_LEASE_PERIOD seconds.",
+      "javadoc": "Create the lock file using the default timeout.\n Lock is guaranteed for MAX_LOCK_LEASE_PERIOD seconds.\n@return true if lock creation was successful.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if lock creation was successful."
+      },
+      "throws": []
+    },
+    {
+      "name": "createLock",
+      "comment": "Create the lock file.\n If another lock file already exists, wait for it to expire\n within the specified timeout period.  Method will block\n until either the lock is obtained or the timeout period lapses.",
+      "javadoc": "Create the lock file.\n If another lock file already exists, wait for it to expire\n within the specified timeout period.  Method will block\n until either the lock is obtained or the timeout period lapses.\n@param timeout maximum time in milliseconds to wait for lock.\n@param hold if true the lock will be held and maintained until\n removed, otherwise it is only guaranteed for MAX_LOCK_LEASE_PERIOD seconds.\n@return true if lock creation was successful.",
+      "static": false,
+      "params": [
+        {
+          "name": "timeout",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum time in milliseconds to wait for lock."
+        },
+        {
+          "name": "hold",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the lock will be held and maintained until\n removed, otherwise it is only guaranteed for MAX_LOCK_LEASE_PERIOD seconds."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if lock creation was successful."
+      },
+      "throws": []
+    },
+    {
+      "name": "createLockFileNoWait",
+      "comment": "Attempt once to create a lock file.",
+      "javadoc": "Attempt once to create a lock file.\n@param testLock if true an expiration check will be performed on the lock\n@return true if the lock file successfully created, else false.",
+      "static": false,
+      "params": [
+        {
+          "name": "testLock",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true an expiration check will be performed on the lock"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the lock file successfully created, else false."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "startWaitTimer",
+      "comment": "Start the wait task if it is not already running.\n Set the create flag within the wait task.",
+      "javadoc": "Start the wait task if it is not already running.\n Set the create flag within the wait task.\n@param create an attempt to create a lock file will be done if true, \n otherwise only attempt to remove stale lock file.",
+      "static": false,
+      "params": [
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "an attempt to create a lock file will be done if true, \n otherwise only attempt to remove stale lock file."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "endWaitTimer",
+      "comment": "Cancel the current wait timer.",
+      "javadoc": "Cancel the current wait timer.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "holdLock",
+      "comment": "Initiate lock hold.\n Lock will continue to be renewed until holdLockThread is interrupted.",
+      "javadoc": "Initiate lock hold.\n Lock will continue to be renewed until holdLockThread is interrupted.",
+      "static": false,
+      "params": [
+        {
+          "name": "hold",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Cleanup lock resources and tasks.\n Invoking this method could prevent stale locks from being removed\n if createLock was invoked with a very short timeout.\n Use of dispose is optional - the associated wait task should \n stop by it self allowing the LockFile object to be finalized.",
+      "javadoc": "Cleanup lock resources and tasks.\n Invoking this method could prevent stale locks from being removed\n if createLock was invoked with a very short timeout.\n Use of dispose is optional - the associated wait task should \n stop by it self allowing the LockFile object to be finalized.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "finalize",
+      "comment": "Cleanup during garbage collection.",
+      "javadoc": "Cleanup during garbage collection.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,2601 @@
+{
+  "name": "GhidraFileChooser",
+  "comment": "An implementation of a file chooser dialog.\n This class is designed to emulate the JFileChooser,\n but it removes the network locking issue.\n When a network drive is down, the JFileChooser can\n take several minutes to come up.\n\n Why use this file chooser over JFileChooser??\n Let me enumerate the reasons...\n \n  JFileChooser cannot show hidden/system files, but we can!\n  JFileChooser does not properly consume key strokes (global actions in docking windows)\n  This class is threaded, so loading delays do not lock the GUI\n  This class provides shortcut buttons similar to those of the Windows native chooser\n ",
+  "javadoc": "An implementation of a file chooser dialog.\n This class is designed to emulate the JFileChooser,\n but it removes the network locking issue.\n When a network drive is down, the JFileChooser can\n take several minutes to come up.\n\n Why use this file chooser over JFileChooser??\n Let me enumerate the reasons...\n \u003col\u003e\n  \u003cli\u003eJFileChooser cannot show hidden/system files, but we can!\u003c/li\u003e\n  \u003cli\u003eJFileChooser does not properly consume key strokes (global actions in docking windows)\u003c/li\u003e\n  \u003cli\u003eThis class is threaded, so loading delays do not lock the GUI\u003c/li\u003e\n  \u003cli\u003eThis class provides shortcut buttons similar to those of the Windows native chooser\u003c/li\u003e\n \u003c/ol\u003e",
+  "static": false,
+  "implements": [
+    "ghidra.util.filechooser.GhidraFileChooserListener",
+    "java.io.FileFilter"
+  ],
+  "extends": "docking.DialogComponentProvider",
+  "fields": [
+    {
+      "name": "UP_BUTTON_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"UP_BUTTON\""
+    },
+    {
+      "name": "FOREROUND_COLOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.awt.Color",
+      "type_short": "Color",
+      "constant_value": null
+    },
+    {
+      "name": "BACKGROUND_COLOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.awt.Color",
+      "type_short": "Color",
+      "constant_value": null
+    },
+    {
+      "name": "PREFERENCES_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"G_FILE_CHOOSER\""
+    },
+    {
+      "name": "WIDTH_PREFERENCE_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"G_FILE_CHOOSER.WIDTH.\""
+    },
+    {
+      "name": "HEIGHT_PREFERENCE_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"G_FILE_CHOOSER.HEIGHT.\""
+    },
+    {
+      "name": "VIEW_STYLE_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"G_FILE_CHOOSER.VIEW_STYLE.\""
+    },
+    {
+      "name": "DETAILS_VIEW_STYLE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"DetailsView\""
+    },
+    {
+      "name": "SIMPLE_VIEW_STYLE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"SimpleView\""
+    },
+    {
+      "name": "CARD_LIST",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"LIST\""
+    },
+    {
+      "name": "CARD_TABLE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"TABLE\""
+    },
+    {
+      "name": "CARD_WAIT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"WAIT\""
+    },
+    {
+      "name": "TITLE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"File Chooser\""
+    },
+    {
+      "name": "DOT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".\""
+    },
+    {
+      "name": "DOTDOT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"..\""
+    },
+    {
+      "name": "NEW_FOLDER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"New Folder\""
+    },
+    {
+      "name": "INVALID_FILENAME_PATTERN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.regex.Pattern",
+      "type_short": "Pattern",
+      "constant_value": null
+    },
+    {
+      "name": "PAD",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "refreshIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "backIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "forwardIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "detailsIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "optionsIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "newFolderIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "upIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "FILES_ONLY",
+      "comment": "Instruction to display only files.",
+      "javadoc": "Instruction to display only files.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "DIRECTORIES_ONLY",
+      "comment": "Instruction to display only directories.",
+      "javadoc": "Instruction to display only directories.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "FILES_AND_DIRECTORIES",
+      "comment": "Instruction to display both files and directories.",
+      "javadoc": "Instruction to display both files and directories.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "MY_COMPUTER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "RECENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "MAX_RECENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    },
+    {
+      "name": "fileChooserModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.filechooser.GhidraFileChooserModel",
+      "type_short": "GhidraFileChooserModel",
+      "constant_value": null
+    },
+    {
+      "name": "fileSelectionMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GhidraFileChooserMode",
+      "type_short": "GhidraFileChooserMode",
+      "constant_value": null
+    },
+    {
+      "name": "initialized",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "recentList",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.List\u003cdocking.widgets.filechooser.RecentGhidraFile\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "history",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "util.HistoryList\u003cdocking.widgets.filechooser.GhidraFileChooser.HistoryEntry\u003e",
+      "type_short": "HistoryList",
+      "constant_value": null
+    },
+    {
+      "name": "initialFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "initialFileToSelect",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "selectedFiles",
+      "comment": "Files selected by the user, but not yet validated.",
+      "javadoc": "Files selected by the user, but not yet validated.",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GhidraFileChooser.FileList",
+      "type_short": "FileList",
+      "constant_value": null
+    },
+    {
+      "name": "validatedFiles",
+      "comment": "Selected files that have passed as acceptable.  These will be given back to the user.  When\n we say validation, we mean files that exist.  If the user chooses a file from the GUI by\n clicking it, then that file is valid, as it exists.  Alternatively, if the user types in\n a filename we need to perform validation on the entered value to make sure it is valid\n for the given context.  For example, if the chooser is in #FILES_ONLY mode,\n then we must not allow a directory to be chosen.",
+      "javadoc": "Selected files that have passed as acceptable.  These will be given back to the user.  When\n we say validation, we mean files that exist.  If the user chooses a file from the GUI by\n clicking it, then that file is valid, as it exists.  Alternatively, if the user types in\n a filename we need to perform validation on the entered value to make sure it is valid\n for the given context.  For example, if the chooser is in {@link #FILES_ONLY} mode,\n then we must not allow a directory to be chosen.",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GhidraFileChooser.FileList",
+      "type_short": "FileList",
+      "constant_value": null
+    },
+    {
+      "name": "parent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.Component",
+      "type_short": "Component",
+      "constant_value": null
+    },
+    {
+      "name": "waitPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "backButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "forwardButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "upLevelButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "newFolderButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "refreshButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "detailsButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.EmptyBorderToggleButton",
+      "type_short": "EmptyBorderToggleButton",
+      "constant_value": null
+    },
+    {
+      "name": "shortCutButtonGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GhidraFileChooser.UnselectableButtonGroup",
+      "type_short": "UnselectableButtonGroup",
+      "constant_value": null
+    },
+    {
+      "name": "myComputerButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.FileChooserToggleButton",
+      "type_short": "FileChooserToggleButton",
+      "constant_value": null
+    },
+    {
+      "name": "desktopButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.FileChooserToggleButton",
+      "type_short": "FileChooserToggleButton",
+      "constant_value": null
+    },
+    {
+      "name": "homeButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.FileChooserToggleButton",
+      "type_short": "FileChooserToggleButton",
+      "constant_value": null
+    },
+    {
+      "name": "recentButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.FileChooserToggleButton",
+      "type_short": "FileChooserToggleButton",
+      "constant_value": null
+    },
+    {
+      "name": "currentPathTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTextField",
+      "type_short": "JTextField",
+      "constant_value": null
+    },
+    {
+      "name": "filenameTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.DropDownSelectionTextField\u003cjava.io.File\u003e",
+      "type_short": "DropDownSelectionTextField",
+      "constant_value": null
+    },
+    {
+      "name": "directoryTableModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.DirectoryTableModel",
+      "type_short": "DirectoryTableModel",
+      "constant_value": null
+    },
+    {
+      "name": "directoryTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.DirectoryTable",
+      "type_short": "DirectoryTable",
+      "constant_value": null
+    },
+    {
+      "name": "directoryListModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.DirectoryListModel",
+      "type_short": "DirectoryListModel",
+      "constant_value": null
+    },
+    {
+      "name": "directoryList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.DirectoryList",
+      "type_short": "DirectoryList",
+      "constant_value": null
+    },
+    {
+      "name": "directoryModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GhidraFileChooserDirectoryModelIf",
+      "type_short": "GhidraFileChooserDirectoryModelIf",
+      "constant_value": null
+    },
+    {
+      "name": "directoryScroll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JScrollPane",
+      "type_short": "JScrollPane",
+      "constant_value": null
+    },
+    {
+      "name": "card",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.CardLayout",
+      "type_short": "CardLayout",
+      "constant_value": null
+    },
+    {
+      "name": "cardPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "filterModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.DefaultComboBoxModel\u003cghidra.util.filechooser.GhidraFileFilter\u003e",
+      "type_short": "DefaultComboBoxModel",
+      "constant_value": null
+    },
+    {
+      "name": "filterCombo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JComboBox\u003cghidra.util.filechooser.GhidraFileFilter\u003e",
+      "type_short": "JComboBox",
+      "constant_value": null
+    },
+    {
+      "name": "showDetails",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "wasCancelled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "multiSelectionEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "actionManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.FileChooserActionManager",
+      "type_short": "FileChooserActionManager",
+      "constant_value": null
+    },
+    {
+      "name": "lastInputFocus",
+      "comment": "The last input component to take focus (the text field or file view). \n \n This may annoy users that are using the keyboard to perform navigation operations via \n the toolbar buttons, as we will keep putting focus back into the last input item.  We\n may need a way to set this field to null when the user is working in this fashion.",
+      "javadoc": "The last input component to take focus (the text field or file view). \n \n \u003cp\u003eThis may annoy users that are using the keyboard to perform navigation operations via \n the toolbar buttons, as we will keep putting focus back into the last input item.  We\n may need a way to set this field to null when the user is working in this fashion.",
+      "static": false,
+      "type_long": "java.awt.Component",
+      "type_short": "Component",
+      "constant_value": null
+    },
+    {
+      "name": "worker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.worker.Worker",
+      "type_short": "Worker",
+      "constant_value": null
+    },
+    {
+      "name": "optionsDialog",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GFileChooserOptionsDialog",
+      "type_short": "GFileChooserOptionsDialog",
+      "constant_value": null
+    },
+    {
+      "name": "optionsButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "showDotFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "selectionListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GhidraFileChooser.SelectionListener\u003cjava.io.File\u003e",
+      "type_short": "SelectionListener",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "getIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "iconName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.Icon",
+        "type_short": "Icon",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new ghidra file chooser.",
+      "javadoc": "Constructs a new ghidra file chooser.\n@param parent the parent component",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the parent component"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new ghidra file chooser",
+      "javadoc": "Constructs a new ghidra file chooser\n@param model the file chooser model\n@param parent the parent component",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "ghidra.util.filechooser.GhidraFileChooserModel",
+          "type_short": "GhidraFileChooserModel",
+          "comment": "the file chooser model"
+        },
+        {
+          "name": "parent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the parent component"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newModel",
+          "type_long": "ghidra.util.filechooser.GhidraFileChooserModel",
+          "type_short": "GhidraFileChooserModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildWorkPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildShortCutPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JPanel",
+        "type_short": "JPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildFileNamePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JPanel",
+        "type_short": "JPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildHeaderPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JPanel",
+        "type_short": "JPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildWaitPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildNavigationButtons",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JButton[]",
+        "type_short": "javax.swing.JButton[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildNonNavigationButtons",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JButton[]",
+        "type_short": "javax.swing.JButton[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setShowDetails",
+      "comment": "When true is passed the chooser will use a detailed table view to show the files;\n false will show a simplified list of files.",
+      "javadoc": "When \u003cb\u003etrue\u003c/b\u003e is passed the chooser will use a detailed table view to show the files;\n false will show a simplified list of files.\n@param showDetails true to show details",
+      "static": false,
+      "params": [
+        {
+          "name": "showDetails",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to show details"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetShowDetails",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "showDetails",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildDirectoryList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JScrollPane",
+        "type_short": "JScrollPane",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "modelChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "accept",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFileSelectionMode",
+      "comment": "Sets the GhidraFileChooser to allow the user to just\n select files, just select\n directories, or select both files and directories.  The default is\n JFilesChooser.FILES_ONLY.",
+      "javadoc": "Sets the \u003ccode\u003eGhidraFileChooser\u003c/code\u003e to allow the user to just\n select files, just select\n directories, or select both files and directories.  The default is\n \u003ccode\u003eJFilesChooser.FILES_ONLY\u003c/code\u003e.\n@param mode the type of files to be displayed:\n \u003cul\u003e\n \u003cli\u003eGhidraFileChooser.FILES_ONLY\n \u003cli\u003eGhidraFileChooser.DIRECTORIES_ONLY\n \u003cli\u003eGhidraFileChooser.FILES_AND_DIRECTORIES\n \u003c/ul\u003e\n@exception IllegalArgumentException if \u003ccode\u003emode\u003c/code\u003e is an\n              illegal Dialog mode\n@deprecated use instead {@link #setFileSelectionMode(GhidraFileChooserMode)}",
+      "static": false,
+      "params": [
+        {
+          "name": "mode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of files to be displayed:\n \n GhidraFileChooser.FILES_ONLY\n GhidraFileChooser.DIRECTORIES_ONLY\n GhidraFileChooser.FILES_AND_DIRECTORIES\n "
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFileSelectionMode",
+      "comment": "Sets this file chooser to allow the user to just select files, just select\n directories, or select both files and directories.  The default is\n GhidraFileChooserMode#FILES_ONLY.",
+      "javadoc": "Sets this file chooser to allow the user to just select files, just select\n directories, or select both files and directories.  The default is\n {@link GhidraFileChooserMode#FILES_ONLY}.\n@param mode the type of files to be displayed",
+      "static": false,
+      "params": [
+        {
+          "name": "mode",
+          "type_long": "docking.widgets.filechooser.GhidraFileChooserMode",
+          "type_short": "GhidraFileChooserMode",
+          "comment": "the type of files to be displayed"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isMultiSelectionEnabled",
+      "comment": "Returns true if multiple files can be selected.",
+      "javadoc": "Returns true if multiple files can be selected.\n@return true if multiple files can be selected\n@see #setMultiSelectionEnabled",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if multiple files can be selected"
+      },
+      "throws": []
+    },
+    {
+      "name": "setMultiSelectionEnabled",
+      "comment": "Sets the file chooser to allow multiple file selections.",
+      "javadoc": "Sets the file chooser to allow multiple file selections.\n@param b true if multiple files may be selected\n@see #isMultiSelectionEnabled",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if multiple files may be selected"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setApproveButtonText",
+      "comment": "Sets the text used in the OK button",
+      "javadoc": "Sets the text used in the \u003ccode\u003eOK\u003c/code\u003e button\n@param buttonText the text",
+      "static": false,
+      "params": [
+        {
+          "name": "buttonText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the text"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setApproveButtonToolTipText",
+      "comment": "Sets the tooltip text used in the OK button",
+      "javadoc": "Sets the tooltip text used in the \u003ccode\u003eOK\u003c/code\u003e button\n@param tooltipText the tooltip text",
+      "static": false,
+      "params": [
+        {
+          "name": "tooltipText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the tooltip text"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateMyComputer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateMyComputer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addToHistory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateDesktop",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateHome",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeRecentFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toRemove",
+          "type_long": "java.util.List\u003cdocking.widgets.filechooser.RecentGhidraFile\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateRecent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateRecent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addToHistory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "currentDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateDirAndSelectFile",
+      "comment": "Updates the given directory and selects the given file.",
+      "javadoc": "Updates the given directory and selects the given file.\n@param directory The directory to load and update\n@param fileToSelect The file to select after updating the dir (may be null).\n@param forceUpdate True signals to force the directory to update, even if it is the current\n        directory\n@param addToHistory True signals to add the given directory to the navigation history",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "The directory to load and update"
+        },
+        {
+          "name": "fileToSelect",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "The file to select after updating the dir (may be null)."
+        },
+        {
+          "name": "forceUpdate",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True signals to force the directory to update, even if it is the current\n        directory"
+        },
+        {
+          "name": "addToHistory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True signals to add the given directory to the navigation history"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateDirOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateDirOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "addToHistory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "pendingUpdate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDisplayName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDirectoryList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "files",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedFile",
+      "comment": "Returns the selected file. This can be set either by the  programmer via \n #setSelectedFile(File) or by a user action, such as either typing the \n filename into the UI or selecting the file from a list in the UI.",
+      "javadoc": "Returns the selected file. This can be set either by the  programmer via \n {@link #setSelectedFile(File)} or by a user action, such as either typing the \n filename into the UI or selecting the file from a list in the UI.\n@return the selected file; null if cancelled or no file was selected",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": "the selected file; null if cancelled or no file was selected"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedFiles",
+      "comment": "Returns the selected files.  This will show the file chooser",
+      "javadoc": "Returns the selected files.  This will show the file chooser\n@return the selected files; an empty array if cancelled or no file was selected",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cjava.io.File\u003e",
+        "type_short": "List",
+        "comment": "the selected files; an empty array if cancelled or no file was selected"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectionRequiredMessage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "filterFilesForSelectionMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "docking.widgets.filechooser.GhidraFileChooser.FileList",
+          "type_short": "FileList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.io.File\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedFile",
+      "comment": "Returns the selected file. This can be set either by the programmer\n via #setSelectedFile(File) or by a user action, such as either typing the filename\n into the UI or selecting the file from a list in the UI.\n \n Note: this method can be called after the chooser has been shown, in which case the\n value returned has been validated by the chooser.  Also, the method may be called\n while the chooser is showing (like from a test thread).  In this case, the selected file\n will not have been validated by the chooser.",
+      "javadoc": "Returns the selected file. This can be set either by the programmer\n via {@link #setSelectedFile(File)} or by a user action, such as either typing the filename\n into the UI or selecting the file from a list in the UI.\n \u003cp\u003e\n Note: this method can be called after the chooser has been shown, in which case the\n value returned has been validated by the chooser.  Also, the method may be called\n while the chooser is showing (like from a test thread).  In this case, the selected file\n will not have been validated by the chooser.\n@param show if true then the dialog is displayed\n@return the selected file; null if cancelled or no file was selected",
+      "static": false,
+      "params": [
+        {
+          "name": "show",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true then the dialog is displayed"
+        }
+      ],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": "the selected file; null if cancelled or no file was selected"
+      },
+      "throws": []
+    },
+    {
+      "name": "getUserSelectedFileInDisplay",
+      "comment": "Gets the file currently selected in the GUI",
+      "javadoc": "Gets the file currently selected in the GUI",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.filechooser.GhidraFile",
+        "type_short": "GhidraFile",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSpecialDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedFile",
+      "comment": "Sets the selected file. If the file\u0027s parent directory is not the current directory,\n changes the current directory to be the file\u0027s parent directory.\n \n If the given file is a directory, then it\u0027s parent directory will be made the current\n directory and the directory represented by the file will be selected within the parent\n directory.\n \n If the given file does not exist, then the following will happen:\n \n  If the parent directory of the file exists, then the parent directory will be made\n      the current directory and the name of the file will be put into the filename\n      textfield; otherwise,\n  If the parent file does not exist, then the selection is cleared.\n \n \n If the given file is null, then the selected file state is cleared.",
+      "javadoc": "Sets the selected file. If the file\u0027s parent directory is not the current directory,\n changes the current directory to be the file\u0027s parent directory.\n \u003cp\u003e\n If the given file is a directory, then it\u0027s parent directory will be made the current\n directory and the directory represented by the file will be selected within the parent\n directory.\n \u003cp\u003e\n If the given file does not exist, then the following will happen:\n \u003cul\u003e\n  \u003cli\u003eIf the parent directory of the file exists, then the parent directory will be made\n      the current directory and the name of the file will be put into the filename\n      textfield; otherwise,\n  \u003cli\u003eIf the parent file does \u003cb\u003enot\u003c/b\u003e exist, then the selection is cleared.\n \u003c/ul\u003e\n \u003cp\u003e\n If the given file is null, then the selected file state is cleared.\n@see #getSelectedFile\n@param file the selected file",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the selected file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilenameFieldText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "selectText",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "show",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "savePreferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restorePreferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveViewStyle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreViewStyle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentDirectory",
+      "comment": "Returns the current directory.",
+      "javadoc": "Returns the current directory.\n@return the current directory\n@see #setCurrentDirectory",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": "the current directory"
+      },
+      "throws": []
+    },
+    {
+      "name": "setCurrentDirectory",
+      "comment": "Sets the current directory. Passing in null sets the\n file chooser to point to the user\u0027s default directory.\n This default depends on the operating system. It is\n typically the \"My Documents\" folder on Windows, and the user\u0027s\n home directory on Unix.\n \n If the file passed in as currentDirectory is not a\n directory, the parent of the file will be used as the currentDirectory.\n If the parent is not traversable, then it will walk up the parent tree\n until it finds a traversable directory, or hits the root of the\n file system.",
+      "javadoc": "Sets the current directory. Passing in \u003ccode\u003enull\u003c/code\u003e sets the\n file chooser to point to the user\u0027s default directory.\n This default depends on the operating system. It is\n typically the \"My Documents\" folder on Windows, and the user\u0027s\n home directory on Unix.\n \u003cbr\u003e\n If the file passed in as \u003ccode\u003ecurrentDirectory\u003c/code\u003e is not a\n directory, the parent of the file will be used as the currentDirectory.\n If the parent is not traversable, then it will walk up the parent tree\n until it finds a traversable directory, or hits the root of the\n file system.\n@param directory the current directory to point to\n@see #getCurrentDirectory",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the current directory to point to"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCurrentDirectoryDisplay",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "addToHistory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.filechooser.GhidraFileChooserModel",
+        "type_short": "GhidraFileChooserModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDirectoryModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.filechooser.GhidraFileChooserDirectoryModelIf",
+        "type_short": "GhidraFileChooserDirectoryModelIf",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActionManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.filechooser.FileChooserActionManager",
+        "type_short": "FileChooserActionManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedFileAndUpdateDisplay",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetSelectedFileAndUpdateDisplay",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateTextFieldForFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUserEditing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goUpOneDirectoryLevel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createNewFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "rescanCurrentDirectory",
+      "comment": "Causes the file chooser to refresh its contents\n with the content of the currently displayed directory.",
+      "javadoc": "Causes the file chooser to refresh its contents\n with the content of the currently displayed directory.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateShortCutPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkShortCutButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "button",
+          "type_long": "docking.widgets.filechooser.FileChooserToggleButton",
+          "type_short": "FileChooserToggleButton",
+          "comment": ""
+        },
+        {
+          "name": "currentDirectory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setWaitPanelVisible",
+      "comment": "Displays the WAIT panel. It handles the Swing thread issues.",
+      "javadoc": "Displays the WAIT panel. It handles the Swing thread issues.",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearBackHistory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateNavigationButtons",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateHistoryWithSelectedFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "historyEntry",
+          "type_long": "docking.widgets.filechooser.GhidraFileChooser.HistoryEntry",
+          "type_short": "HistoryEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateHistory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "addToHistory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHistorySize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "directoryExistsOrIsLogicalDirectory",
+      "comment": "Returns true if the file exists on disk OR if it is a logical dir, like \u0027My Computer\u0027",
+      "javadoc": "Returns true if the file exists on disk OR if it is a logical dir, like \u0027My Computer\u0027",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fileExists",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goBack",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goForward",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateDirectoryPresentationMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearUserSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelEdits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildDirectoryTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JScrollPane",
+        "type_short": "JScrollPane",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFileFilter",
+      "comment": "Adds the specified file filter.",
+      "javadoc": "Adds the specified file filter.\n@param f the new file filter",
+      "static": false,
+      "params": [
+        {
+          "name": "f",
+          "type_long": "ghidra.util.filechooser.GhidraFileFilter",
+          "type_short": "GhidraFileFilter",
+          "comment": "the new file filter"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedFileFilter",
+      "comment": "Set the selected filter to the given filter",
+      "javadoc": "Set the selected filter to the given filter\n@param filter the filter to initially set",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.util.filechooser.GhidraFileFilter",
+          "type_short": "GhidraFileFilter",
+          "comment": "the filter to initially set"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFileFilter",
+      "comment": "Sets the current file filter.",
+      "javadoc": "Sets the current file filter.\n@param filter the file filter to make current",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.util.filechooser.GhidraFileFilter",
+          "type_short": "GhidraFileFilter",
+          "comment": "the file filter to make current"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "wasCancelled",
+      "comment": "Returns true if the user clicked the \"cancel\" button on the file chooser.",
+      "javadoc": "Returns true if the user clicked the \"cancel\" button on the file chooser.\n@return true if the user clicked the \"cancel\" button on the file chooser",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the user clicked the \"cancel\" button on the file chooser"
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelCallback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "enterCallback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "okCallback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "okCallbackForSingleSelectionMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFilesOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDirectoriesOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFilesAndDirectories",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "okCallbackForMultipleSelectionMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doChooseFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "validFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doChooseFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "files",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "userChoseFile",
+      "comment": "A callback method for clients that *know* the user has chosen a file(s), like a\n list with a mouse listener that validates a double-click.\n \n \n If you don\u0027t know how to use this method, then don\u0027t call it!\n ",
+      "javadoc": "A callback method for clients that *know* the user has chosen a file(s), like a\n list with a mouse listener that validates a double-click.\n \u003cp\u003e\n \u003cb\u003e\n If you don\u0027t know how to use this method, then don\u0027t call it!\n \u003c/b\u003e\n@param file the file chosen by the user",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the file chosen by the user"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "userSelectedFiles",
+      "comment": "A callback method for clients that *know* the user has selected a file(s), like a\n list with a mouse listener that validates a double-click.\n \n \n If you don\u0027t know how to use this method, then don\u0027t call it!\n ",
+      "javadoc": "A callback method for clients that *know* the user has selected a file(s), like a\n list with a mouse listener that validates a double-click.\n \u003cp\u003e\n \u003cb\u003e\n If you don\u0027t know how to use this method, then don\u0027t call it!\n \u003c/b\u003e\n@param files the files to select",
+      "static": false,
+      "params": [
+        {
+          "name": "files",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": "the files to select"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnvalidatedDirectory",
+      "comment": "Gets a directory that has not been validated.  This method will only return a\n  directory if the selection mode is DIRECTORIES_ONLY",
+      "javadoc": "Gets a directory that has not been validated.  This method will only return a\n  directory if the selection mode is DIRECTORIES_ONLY",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnvalidatedUserSelectedFile",
+      "comment": "Gets the file chosen by the user, whether typed in by them or selected in the GUI",
+      "javadoc": "Gets the file chosen by the user, whether typed in by them or selected in the GUI",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateAbsoluteFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSpecialCurrentDirectorySelection",
+      "comment": "SCR 3962 - in this mode we allow the user to press Enter/OK with no text in\n the text field, which means to user the current directory as the selected dir",
+      "javadoc": "SCR 3962 - in this mode we allow the user to press Enter/OK with no text in\n the text field, which means to user the current directory as the selected dir",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateRelativeFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateParentDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isRootDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadRecentList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateRecentList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveRecentList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isTableShowing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInvalidFilenameMessage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

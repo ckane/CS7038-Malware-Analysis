@@ -1,0 +1,1270 @@
+{
+  "name": "VisualGraphPathHighlighter",
+  "comment": "A class that calculates flow between vertices and then triggers that flow to be painted\n in the UI.\n \n Threading Policy:  Some operations use algorithms that slow down, depending\n upon the graph size.  Further, some of these algorithms may not even complete.  To keep the\n graph responsive, this class will perform its work in the future.   The work we \n wish to do is further complicated by these requirements:\n \n \tSome data should be calculated only as needed, to avoid excessive work\n \tMany tasks depend on data to be calculated before they can perform their algorithm\n \tResults must be cached for speed, but may cleared as the graph is mutated\n  Algorithms must not block the UI thread\n  Related actions (i.e., hover vs. selection) should cancel any pending action, but not \n      unrelated actions (e.g., a new hover request should cancel a pending hover update)\n \n \n Based on these requirements, we need to use multi-threading.  Further complicating the need\n for multi-threading is that some operations depending on lazy-loaded data.  Finally, we \n have different types of actions, hovering vs. selecting a vertex, which should override \n previous related requests.   To accomplish this we use:\n \n \tCompletableFuture - to lazy-load and cache required algorithm data\n \tRunManagers - to queue requests so that new requests cancel old ones.  A \n      different Run Manager is used for each type of request.\n \n \t\t\n Naming Conventions:  There are many methods in this class, called from \n different threads.   For simplicity, we use the following conventions: \n \n \tfooAsync - methods ending in Async indicate that they are to be \n                              called from a background thread.\n  fooSwing - methods ending in Swing indicate that they are to be \n                              called from the Swing thread.                             \n \t*All public methods are assumed to be called on the Swing thread\n ",
+  "javadoc": "A class that calculates flow between vertices and then triggers that flow to be painted\n in the UI.\n \n \u003cP\u003e\u003cB\u003e\u003cU\u003eThreading Policy:\u003c/U\u003e\u003c/B\u003e  Some operations use algorithms that slow down, depending\n upon the graph size.  Further, some of these algorithms may not even complete.  To keep the\n graph responsive, this class will perform its work \u003cI\u003ein the future\u003c/I\u003e.   The work we \n wish to do is further complicated by these requirements:\n \u003cUL\u003e\n \t\u003cLI\u003eSome data should be calculated only as needed, to avoid excessive work\u003c/LI\u003e\n \t\u003cLI\u003eMany tasks depend on data to be calculated before they can perform their algorithm\u003c/LI\u003e\n \t\u003cLI\u003eResults must be cached for speed, but may cleared as the graph is mutated\u003c/LI\u003e\n  \u003cLI\u003eAlgorithms must not block the UI thread\u003c/LI\u003e\n  \u003cLI\u003eRelated actions (i.e., hover vs. selection) should cancel any pending action, but not \n      unrelated actions (e.g., a new hover request should cancel a pending hover update)\n \u003c/UL\u003e\n \n Based on these requirements, we need to use multi-threading.  Further complicating the need\n for multi-threading is that some operations depending on lazy-loaded data.  Finally, we \n have different types of actions, hovering vs. selecting a vertex, which should override \n previous related requests.   To accomplish this we use:\n \u003cUL\u003e\n \t\u003cLI\u003e{@link CompletableFuture} - to lazy-load and cache required algorithm data\u003c/LI\u003e\n \t\u003cLI\u003e{@link RunManager}s - to queue requests so that new requests cancel old ones.  A \n      different Run Manager is used for each type of request.\u003c/LI\u003e\n \u003c/UL\u003e\n \t\t\n \u003cP\u003e\u003cB\u003e\u003cU\u003eNaming Conventions:\u003c/U\u003e\u003c/B\u003e  There are many methods in this class, called from \n different threads.   For simplicity, we use the following conventions: \n \u003cUL\u003e\n \t\u003cLI\u003e\u003cCODE\u003efooAsync\u003c/CODE\u003e - methods ending in \u003cB\u003eAsync\u003c/B\u003e indicate that they are to be \n                              called from a background thread.\u003c/LI\u003e\n  \u003cLI\u003e\u003cCODE\u003efooSwing\u003c/CODE\u003e - methods ending in \u003cB\u003eSwing\u003c/B\u003e indicate that they are to be \n                              called from the Swing thread.\u003c/LI\u003e                             \n \t\u003cLI\u003e*All public methods are assumed to be called on the Swing thread\u003c/LI\u003e\n \u003c/UL\u003e\n@param \u003cV\u003e the vertex type\n@param \u003cE\u003e the edge type",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "ALGORITHM_TIMEOUT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "vertexFocusMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.PathHighlightMode",
+      "type_short": "PathHighlightMode",
+      "constant_value": null
+    },
+    {
+      "name": "vertexHoverMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.PathHighlightMode",
+      "type_short": "PathHighlightMode",
+      "constant_value": null
+    },
+    {
+      "name": "forwardFlowEdgeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "reverseFlowEdgeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "forwardScopedFlowEdgeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "reverseScopedFlowEdgeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "graph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+      "type_short": "VisualGraph",
+      "constant_value": null
+    },
+    {
+      "name": "hoverRunManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.RunManager",
+      "type_short": "RunManager",
+      "constant_value": null
+    },
+    {
+      "name": "focusRunManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.RunManager",
+      "type_short": "RunManager",
+      "constant_value": null
+    },
+    {
+      "name": "dominanceFuture",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.CompletableFuture\u003cghidra.graph.algo.ChkDominanceAlgorithm\u003cV,E\u003e\u003e",
+      "type_short": "CompletableFuture",
+      "constant_value": null
+    },
+    {
+      "name": "postDominanceFuture",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.CompletableFuture\u003cghidra.graph.algo.ChkDominanceAlgorithm\u003cV,E\u003e\u003e",
+      "type_short": "CompletableFuture",
+      "constant_value": null
+    },
+    {
+      "name": "circuitFuture",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.CompletableFuture\u003cghidra.graph.viewer.edge.VisualGraphPathHighlighter\u003cV,E\u003e.Circuits\u003e",
+      "type_short": "CompletableFuture",
+      "constant_value": null
+    },
+    {
+      "name": "listener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.edge.PathHighlightListener",
+      "type_short": "PathHighlightListener",
+      "constant_value": null
+    },
+    {
+      "name": "workPauser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.edge.PathHighlighterWorkPauser",
+      "type_short": "PathHighlighterWorkPauser",
+      "constant_value": null
+    },
+    {
+      "name": "focusedVertexUpdater",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.SwingUpdateManager",
+      "type_short": "SwingUpdateManager",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "graph",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": ""
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.graph.viewer.edge.PathHighlightListener",
+          "type_short": "PathHighlightListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setWorkPauser",
+      "comment": "Sets the callback that signals when this path highlighter should not be performing any\n work",
+      "javadoc": "Sets the callback that signals when this path highlighter should not be performing any\n work\n@param pauser the callback that returns a boolean of true when this class should pause\n        its work.",
+      "static": false,
+      "params": [
+        {
+          "name": "pauser",
+          "type_long": "ghidra.graph.viewer.edge.PathHighlighterWorkPauser",
+          "type_short": "PathHighlighterWorkPauser",
+          "comment": "the callback that returns a boolean of true when this class should pause\n        its work."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGraphExecutor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.concurrent.Executor",
+        "type_short": "Executor",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lazyCreateDominaceFuture",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.concurrent.CompletableFuture\u003cghidra.graph.algo.ChkDominanceAlgorithm\u003cV,E\u003e\u003e",
+        "type_short": "CompletableFuture",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDominanceGraph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "visualGraph",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.GDirectedGraph\u003cV,E\u003e",
+        "type_short": "GDirectedGraph",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lazyCreatePostDominanceFuture",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.concurrent.CompletableFuture\u003cghidra.graph.algo.ChkDominanceAlgorithm\u003cV,E\u003e\u003e",
+        "type_short": "CompletableFuture",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lazyCreateCircuitFuture",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.concurrent.CompletableFuture\u003cghidra.graph.viewer.edge.VisualGraphPathHighlighter\u003cV,E\u003e.Circuits\u003e",
+        "type_short": "CompletableFuture",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setStatusTextSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stop",
+      "comment": "Signals to this path highlighter that it should stop all background jobs",
+      "javadoc": "Signals to this path highlighter that it should stop all background jobs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVertexHoverPathHighlightMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.PathHighlightMode",
+        "type_short": "PathHighlightMode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVertexFocusPathHighlightMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.PathHighlightMode",
+        "type_short": "PathHighlightMode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexFocusMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mode",
+          "type_long": "ghidra.graph.viewer.PathHighlightMode",
+          "type_short": "PathHighlightMode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexHoverMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mode",
+          "type_long": "ghidra.graph.viewer.PathHighlightMode",
+          "type_short": "PathHighlightMode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setHoveredVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "hoveredVertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFocusedVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "focusedVertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doUpdateFocusedVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearFocusedEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearEdgeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "accumulateCircuitEdgesForCurrentStateOfGraphSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newAllCircuits",
+          "type_long": "java.util.Set\u003cE\u003e",
+          "type_short": "Set",
+          "comment": ""
+        },
+        {
+          "name": "newCircuitsByVertex",
+          "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "accumulateAllCircuitsSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "circuits",
+          "type_long": "ghidra.graph.viewer.edge.VisualGraphPathHighlighter\u003cV,E\u003e.Circuits",
+          "type_short": "Circuits",
+          "comment": ""
+        },
+        {
+          "name": "results",
+          "type_long": "java.util.Set\u003cE\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "accumulateVertexCircuitsSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "circuits",
+          "type_long": "ghidra.graph.viewer.edge.VisualGraphPathHighlighter\u003cV,E\u003e.Circuits",
+          "type_short": "Circuits",
+          "comment": ""
+        },
+        {
+          "name": "results",
+          "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ensureEdgeUpToDateSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "edge",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "E",
+        "type_short": "E",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findMatchingVertexSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "V",
+        "type_short": "V",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearCacheSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInFocusedEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setOutFocusedEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setForwardScopedFlowFocusedEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setReverseScopedFlowFocusedEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInOutFocusedEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexCycleFocusedEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setAllCycleFocusedEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setOutHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setForwardScopedFlowHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setReverseScopedFlowHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInOutHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexCycleHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexToVertexPathHoveredEdgesSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInFocusedPathOnSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "edges",
+          "type_long": "java.util.Collection\u003cE\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInHoverPathOnSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "edges",
+          "type_long": "java.util.Collection\u003cE\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setEdgeCircuitsSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "allCircuitResults",
+          "type_long": "java.util.Set\u003cE\u003e",
+          "type_short": "Set",
+          "comment": ""
+        },
+        {
+          "name": "circuitFlowResults",
+          "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposeSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "cf",
+          "type_long": "java.util.concurrent.CompletableFuture\u003cT\u003e",
+          "type_short": "CompletableFuture",
+          "comment": ""
+        },
+        {
+          "name": "clearer",
+          "type_long": "java.util.function.Consumer\u003cT\u003e",
+          "type_short": "Consumer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getForwardScopedFlowEdgesForVertexAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getForwardFlowEdgesForVertexAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReverseFlowEdgesForVertexAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowEdgesForVertexAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "isForward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "cache",
+          "type_long": "java.util.Map\u003cV,java.util.Set\u003cE\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllCircuitFlowEdgesAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReverseScopedFlowEdgesForVertexAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCircuitEdgesAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "cf",
+          "type_long": "java.util.concurrent.CompletableFuture\u003cT\u003e",
+          "type_short": "CompletableFuture",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "calculateCircuitsAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.edge.VisualGraphPathHighlighter\u003cV,E\u003e.Circuits",
+        "type_short": "Circuits",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "pathToEdgesAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.util.List\u003cV\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cE\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findForwardScopedFlowAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findReverseScopedFlowAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cE\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "calculatePathsBetweenVerticesAsync",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v1",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "v2",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

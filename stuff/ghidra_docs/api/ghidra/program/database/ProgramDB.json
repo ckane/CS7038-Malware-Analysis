@@ -1,0 +1,3806 @@
+{
+  "name": "ProgramDB",
+  "comment": "Database implementation for Program.",
+  "javadoc": "Database implementation for Program.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.listing.Program",
+    "ghidra.program.util.ChangeManager"
+  ],
+  "extends": "ghidra.framework.data.DomainObjectAdapterDB",
+  "fields": [
+    {
+      "name": "CONTENT_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Program\""
+    },
+    {
+      "name": "UNKNOWN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"unknown\""
+    },
+    {
+      "name": "DB_VERSION",
+      "comment": "DB_VERSION should be incremented any time a change is made to the overall\n database schema associated with any of the managers.\n             - version  7 - for changes to addressMapDB for deleted overlay spaces.\n             - version  8 - for removal of code manager fall-through maps\n 8-Aug-2007  - version  9 - analysis options moved\n 25-Oct-2007 - version 10 - added VariableStorageManager (upgrade required)\n 11-Jan-2008 - version 11 - added metadata (no changes, but want to force an upgrade)\n 31-Jan-2008 - version 12 - eliminated use of Variable addresses for references\n 12-Mar-2008 - version 13 - version 12 references upgrade was incomplete\n 18-Sep-2008 - version 14 - added fields for synchronizing program data types with project archives.\n 27-Aug-2009 - version 15 - added BigRefList support and modified datatype storage tables for alignment support\n 16-Jan-2010 - version 16 - force cleanup of renamed analysis properties (see ObsoleteProgramProperties)\n 13-Jul-2012 - version 17 - eliminated SymbolType.EXTERNAL (changed to external CODE)\n               PENDING: correct pointers wrapped in function (should no longer occur)\n 12-Sep-2012 - version 18 - transitioned to VariableStorage use with support for\n                            compound storage and the ability compute return/param\n                            storage dynamically\n 4-Dec-2014  - version 19 - added support for auto-parameters and forced-indirect\n                            parameters.  Function upgrade needed to remove \u0027this\u0027\n                            parameter if dynamic parameter storage enabled.\n 18-Jul-2018 - version 20 - added support for external locations storing both\n                            address and original-imported-name packed into symbol data3.\n                            Read of old symbol data3 format does not require upgrade.\n 14-May-2020 - version 21 - added support for overlay mapped blocks and byte mapping\n                            schemes other than the default 1:1\n 19-Jun-2020 - version 22 - Corrected fixed length indexing implementation causing\n                            change in index table low-level storage for newly\n                            created tables. \n 18-Feb-2021 - version 23   Added support for Big Reflist for tracking FROM references.\n                            Primarily used for large numbers of Entry Point references.\n 31-Mar-2021 - version 24   Added support for CompilerSpec extensions",
+      "javadoc": "DB_VERSION should be incremented any time a change is made to the overall\n database schema associated with any of the managers.\n             - version  7 - for changes to addressMapDB for deleted overlay spaces.\n             - version  8 - for removal of code manager fall-through maps\n 8-Aug-2007  - version  9 - analysis options moved\n 25-Oct-2007 - version 10 - added VariableStorageManager (upgrade required)\n 11-Jan-2008 - version 11 - added metadata (no changes, but want to force an upgrade)\n 31-Jan-2008 - version 12 - eliminated use of Variable addresses for references\n 12-Mar-2008 - version 13 - version 12 references upgrade was incomplete\n 18-Sep-2008 - version 14 - added fields for synchronizing program data types with project archives.\n 27-Aug-2009 - version 15 - added BigRefList support and modified datatype storage tables for alignment support\n 16-Jan-2010 - version 16 - force cleanup of renamed analysis properties (see ObsoleteProgramProperties)\n 13-Jul-2012 - version 17 - eliminated SymbolType.EXTERNAL (changed to external CODE)\n               PENDING: correct pointers wrapped in function (should no longer occur)\n 12-Sep-2012 - version 18 - transitioned to VariableStorage use with support for\n                            compound storage and the ability compute return/param\n                            storage dynamically\n 4-Dec-2014  - version 19 - added support for auto-parameters and forced-indirect\n                            parameters.  Function upgrade needed to remove \u0027this\u0027\n                            parameter if dynamic parameter storage enabled.\n 18-Jul-2018 - version 20 - added support for external locations storing both\n                            address and original-imported-name packed into symbol data3.\n                            Read of old symbol data3 format does not require upgrade.\n 14-May-2020 - version 21 - added support for overlay mapped blocks and byte mapping\n                            schemes other than the default 1:1\n 19-Jun-2020 - version 22 - Corrected fixed length indexing implementation causing\n                            change in index table low-level storage for newly\n                            created tables. \n 18-Feb-2021 - version 23   Added support for Big Reflist for tracking FROM references.\n                            Primarily used for large numbers of Entry Point references.\n 31-Mar-2021 - version 24   Added support for CompilerSpec extensions",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "24"
+    },
+    {
+      "name": "UPGRADE_REQUIRED_BEFORE_VERSION",
+      "comment": "UPGRADE_REQUIRED_BFORE_VERSION should be changed to DB_VERSION anytime the\n latest version requires a forced upgrade (i.e., Read-only mode not supported\n until upgrade is performed).  It is assumed that read-only mode is supported \n if the data\u0027s version is \u003d UPGRADE_REQUIRED_BEFORE_VERSION and \u003d DB_VERSION.",
+      "javadoc": "UPGRADE_REQUIRED_BFORE_VERSION should be changed to DB_VERSION anytime the\n latest version requires a forced upgrade (i.e., Read-only mode not supported\n until upgrade is performed).  It is assumed that read-only mode is supported \n if the data\u0027s version is \u0026gt;\u003d UPGRADE_REQUIRED_BEFORE_VERSION and \u0026lt;\u003d DB_VERSION.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "19"
+    },
+    {
+      "name": "ANALYSIS_OPTIONS_MOVED_VERSION",
+      "comment": "Key version numbers which require special upgrade handling",
+      "javadoc": "Key version numbers which require special upgrade handling",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "9"
+    },
+    {
+      "name": "ADDED_VARIABLE_STORAGE_MANAGER_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    },
+    {
+      "name": "METADATA_ADDED_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "11"
+    },
+    {
+      "name": "EXTERNAL_FUNCTIONS_ADDED_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "17"
+    },
+    {
+      "name": "COMPOUND_VARIABLE_STORAGE_ADDED_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "18"
+    },
+    {
+      "name": "AUTO_PARAMETERS_ADDED_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "19"
+    },
+    {
+      "name": "LANG_DEFAULT_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"1.0\""
+    },
+    {
+      "name": "PROGRAM_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Program Name\""
+    },
+    {
+      "name": "PROGRAM_DB_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"DB Version\""
+    },
+    {
+      "name": "LANGUAGE_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Language Version\""
+    },
+    {
+      "name": "OLD_LANGUAGE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Language Name\""
+    },
+    {
+      "name": "LANGUAGE_ID",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Language ID\""
+    },
+    {
+      "name": "COMPILER_SPEC_ID",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Compiler Spec ID\""
+    },
+    {
+      "name": "COMPILER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Compiler\""
+    },
+    {
+      "name": "EXECUTABLE_PATH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Executable Location\""
+    },
+    {
+      "name": "EXECUTABLE_FORMAT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Executable Format\""
+    },
+    {
+      "name": "EXECUTABLE_MD5",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Executable MD5\""
+    },
+    {
+      "name": "EXECUTABLE_SHA256",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Executable SHA256\""
+    },
+    {
+      "name": "TABLE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Program\""
+    },
+    {
+      "name": "EXECUTE_PATH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Execute Path\""
+    },
+    {
+      "name": "EXECUTE_FORMAT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Execute Format\""
+    },
+    {
+      "name": "IMAGE_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Image Offset\""
+    },
+    {
+      "name": "COL_FIELDS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "db.Field[]",
+      "type_short": "db.Field[]",
+      "constant_value": null
+    },
+    {
+      "name": "COL_TYPES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "SCHEMA",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "db.Schema",
+      "type_short": "Schema",
+      "constant_value": null
+    },
+    {
+      "name": "MEMORY_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "CODE_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "SYMBOL_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "NAMESPACE_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "FUNCTION_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "EXTERNAL_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "REF_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "6"
+    },
+    {
+      "name": "DATA_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "7"
+    },
+    {
+      "name": "EQUATE_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "BOOKMARK_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "9"
+    },
+    {
+      "name": "CONTEXT_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    },
+    {
+      "name": "PROPERTY_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "11"
+    },
+    {
+      "name": "TREE_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "12"
+    },
+    {
+      "name": "RELOC_MGR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "13"
+    },
+    {
+      "name": "NUM_MANAGERS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "14"
+    },
+    {
+      "name": "managers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ManagerDB[]",
+      "type_short": "ghidra.program.database.ManagerDB[]",
+      "constant_value": null
+    },
+    {
+      "name": "oldFunctionMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.oldfunction.OldFunctionManager",
+      "type_short": "OldFunctionManager",
+      "constant_value": null
+    },
+    {
+      "name": "memoryManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.mem.MemoryMapDB",
+      "type_short": "MemoryMapDB",
+      "constant_value": null
+    },
+    {
+      "name": "globalNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.GlobalNamespace",
+      "type_short": "GlobalNamespace",
+      "constant_value": null
+    },
+    {
+      "name": "changeable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "addressFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramAddressFactory",
+      "type_short": "ProgramAddressFactory",
+      "constant_value": null
+    },
+    {
+      "name": "addrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMapDB",
+      "type_short": "AddressMapDB",
+      "constant_value": null
+    },
+    {
+      "name": "listing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ListingDB",
+      "type_short": "ListingDB",
+      "constant_value": null
+    },
+    {
+      "name": "programUserData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramUserDataDB",
+      "type_short": "ProgramUserDataDB",
+      "constant_value": null
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Table",
+      "type_short": "Table",
+      "constant_value": null
+    },
+    {
+      "name": "language",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Language",
+      "type_short": "Language",
+      "constant_value": null
+    },
+    {
+      "name": "compilerSpec",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.CompilerSpec",
+      "type_short": "CompilerSpec",
+      "constant_value": null
+    },
+    {
+      "name": "languageUpgradeRequired",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "languageID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.LanguageID",
+      "type_short": "LanguageID",
+      "constant_value": null
+    },
+    {
+      "name": "compilerSpecID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.CompilerSpecID",
+      "type_short": "CompilerSpecID",
+      "constant_value": null
+    },
+    {
+      "name": "languageVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "languageMinorVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "languageUpgradeTranslator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.LanguageTranslator",
+      "type_short": "LanguageTranslator",
+      "constant_value": null
+    },
+    {
+      "name": "storedImageBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "imageBaseOverride",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "recordChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "overlaySpaceAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.OverlaySpaceAdapterDB",
+      "type_short": "OverlaySpaceAdapterDB",
+      "constant_value": null
+    },
+    {
+      "name": "addrSetPropertyMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.program.database.util.AddressSetPropertyMapDB\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "intRangePropertyMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.program.database.IntRangeMapDB\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new ProgramDB",
+      "javadoc": "Constructs a new ProgramDB\n@param name the name of the program\n@param language the Language used by this program\n@param compilerSpec compiler specification\n@param consumer the object that is using this program.\n@throws IOException if there is an error accessing the database.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the program"
+        },
+        {
+          "name": "language",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": "the Language used by this program"
+        },
+        {
+          "name": "compilerSpec",
+          "type_long": "ghidra.program.model.lang.CompilerSpec",
+          "type_short": "CompilerSpec",
+          "comment": "compiler specification"
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that is using this program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there is an error accessing the database."
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new ProgramDB",
+      "javadoc": "Constructs a new ProgramDB\n@param dbh a handle to an open program database.\n@param openMode one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened.\n@param monitor TaskMonitor that allows the open to be canceled.\n@param consumer the object that keeping the program open.\n@throws IOException if an error accessing the database occurs.\n@throws VersionException if database version does not match implementation, UPGRADE may be possible.\n@throws CancelledException if instantiation is canceled by monitor\n@throws LanguageNotFoundException if a language cannot be found for this program",
+      "static": false,
+      "params": [
+        {
+          "name": "dbh",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "a handle to an open program database."
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor that allows the open to be canceled."
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that keeping the program open."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an error accessing the database occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if database version does not match implementation, UPGRADE may be possible."
+        },
+        {
+          "type_long": "ghidra.program.model.lang.LanguageNotFoundException",
+          "type_short": "LanguageNotFoundException",
+          "comment": "if a language cannot be found for this program"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if instantiation is canceled by monitor"
+        }
+      ]
+    },
+    {
+      "name": "isLanguageUpgradePending",
+      "comment": "Determine if program initialization requires a language upgrade",
+      "javadoc": "Determine if program initialization requires a language upgrade\n@return true if language upgrade is pending",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if language upgrade is pending"
+      },
+      "throws": []
+    },
+    {
+      "name": "initCompilerSpec",
+      "comment": "Initialize program compiler specification.\n During a language upgrade this will provide a temporary spec until setLanguage is complete.",
+      "javadoc": "Initialize program compiler specification.\n During a language upgrade this will provide a temporary spec until setLanguage is complete.\n@throws CompilerSpecNotFoundException if the compiler spec cannot be found",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.CompilerSpecNotFoundException",
+          "type_short": "CompilerSpecNotFoundException",
+          "comment": "if the compiler spec cannot be found"
+        }
+      ]
+    },
+    {
+      "name": "checkLanguageVersion",
+      "comment": "Language corresponding to languageId was found.  Check language version\n for language upgrade situation.",
+      "javadoc": "Language corresponding to languageId was found.  Check language version\n for language upgrade situation.\n@param openMode one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened.\n@throws LanguageNotFoundException if a language cannot be found for this program\n@return VersionException if language upgrade required",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.exception.VersionException",
+        "type_short": "VersionException",
+        "comment": "VersionException if language upgrade required"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.LanguageNotFoundException",
+          "type_short": "LanguageNotFoundException",
+          "comment": "if a language cannot be found for this program"
+        }
+      ]
+    },
+    {
+      "name": "checkForLanguageChange",
+      "comment": "Language specified by languageName was not found.  Check for \n valid language translation/migration.  Old language version specified by\n languageVersion.",
+      "javadoc": "Language specified by languageName was not found.  Check for \n valid language translation/migration.  Old language version specified by\n languageVersion.\n@param openMode one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened.\n@return true if language upgrade required\n@throws LanguageNotFoundException if a suitable replacement language not found",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "ghidra.program.model.lang.LanguageNotFoundException",
+          "type_short": "LanguageNotFoundException",
+          "comment": ""
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of:\n \t\tREAD_ONLY: the original database will not be modified\n \t\tUPDATE: the database can be written to.\n \t\tUPGRADE: the database is upgraded to the latest schema as it is opened."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.exception.VersionException",
+        "type_short": "VersionException",
+        "comment": "true if language upgrade required"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.LanguageNotFoundException",
+          "type_short": "LanguageNotFoundException",
+          "comment": "if a suitable replacement language not found"
+        }
+      ]
+    },
+    {
+      "name": "setDomainFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "df",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertiesRestore",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "propertiesCreate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setProgramUserData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "programUserData",
+          "type_long": "ghidra.program.database.ProgramUserDataDB",
+          "type_short": "ProgramUserDataDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgramUserData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.ProgramUserData",
+        "type_short": "ProgramUserData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAssociatedUserFilesystem",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.store.FileSystem",
+        "type_short": "FileSystem",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUserData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.data.DomainObjectAdapterDB",
+        "type_short": "DomainObjectAdapterDB",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getListing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Listing",
+        "type_short": "Listing",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.SymbolTable",
+        "type_short": "SymbolTable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalManager",
+        "type_short": "ExternalManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.EquateTable",
+        "type_short": "EquateTable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMemory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.mem.Memory",
+        "type_short": "Memory",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNamespaceManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.NamespaceManager",
+        "type_short": "NamespaceManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ReferenceManager",
+        "type_short": "ReferenceManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCodeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.code.CodeManager",
+        "type_short": "CodeManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTreeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.module.TreeManager",
+        "type_short": "TreeManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataTypeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.data.ProgramDataTypeManager",
+        "type_short": "ProgramDataTypeManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.FunctionManager",
+        "type_short": "FunctionManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBookmarkManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.BookmarkManager",
+        "type_short": "BookmarkManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRelocationTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.reloc.RelocationTable",
+        "type_short": "RelocationTable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompiler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCompiler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "compiler",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExecutablePath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setExecutablePath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExecutableFormat",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setExecutableFormat",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "format",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExecutableMD5",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setExecutableMD5",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExecutableSHA256",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setExecutableSHA256",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sha256",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCreationDate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Date",
+        "type_short": "Date",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultPointerSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLanguageID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.LanguageID",
+        "type_short": "LanguageID",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Language",
+        "type_short": "Language",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompilerSpec",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.CompilerSpec",
+        "type_short": "CompilerSpec",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUsrPropertyManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.util.PropertyMapManager",
+        "type_short": "PropertyMapManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgramContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.ProgramContext",
+        "type_short": "ProgramContext",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+        "type_short": "ProgramChangeSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressFactory",
+        "type_short": "AddressFactory",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressMap",
+      "comment": "Returns this programs address map.\n NOTE: This method has been dropped from the Program interface to help\n discourage the use of the program\u0027s address map since bad assumptions \n are frequently made about address keys which may not be ordered or sequential\n across an entire address space.",
+      "javadoc": "Returns this programs address map.\n NOTE: This method has been dropped from the Program interface to help\n discourage the use of the program\u0027s address map since bad assumptions \n are frequently made about address keys which may not be ordered or sequential\n across an entire address space.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.map.AddressMap",
+        "type_short": "AddressMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address[]",
+        "type_short": "ghidra.program.model.address.Address[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "caseSensitive",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address[]",
+        "type_short": "ghidra.program.model.address.Address[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeChanged",
+      "comment": "notification the a datatype has changed",
+      "javadoc": "notification the a datatype has changed\n@param dataTypeID the id of the datatype that changed.\n@param type the type of the change (moved, renamed, etc.)\n@param isAutoChange true if change was an automatic change in response to \n another datatype\u0027s change (e.g., size, alignment), else false in which case this\n change will be added to program change-set to aid merge conflict detection.\n@param oldValue the old datatype.\n@param newValue the new datatype.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataTypeID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the datatype that changed."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of the change (moved, renamed, etc.)"
+        },
+        {
+          "name": "isAutoChange",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if change was an automatic change in response to \n another datatype\u0027s change (e.g., size, alignment), else false in which case this\n change will be added to program change-set to aid merge conflict detection."
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the old datatype."
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the new datatype."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeAdded",
+      "comment": "Notification that a datatype was added.",
+      "javadoc": "Notification that a datatype was added.\n@param dataTypeID the id if the datatype that was added.\n@param type should always be DATATYPE_ADDED\n@param oldValue always null\n@param newValue the datatype added.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataTypeID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id if the datatype that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "should always be DATATYPE_ADDED"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "always null"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the datatype added."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "categoryChanged",
+      "comment": "Notification that a category was changed.",
+      "javadoc": "Notification that a category was changed.\n@param categoryID the id of the datatype that was added.\n@param type the type of changed\n@param oldValue old value depends on the type.\n@param newValue new value depends on the type.",
+      "static": false,
+      "params": [
+        {
+          "name": "categoryID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the datatype that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of changed"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type."
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value depends on the type."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "categoryAdded",
+      "comment": "Notification that a category was added.",
+      "javadoc": "Notification that a category was added.\n@param categoryID the id of the datatype that was added.\n@param type the type of changed (should always be CATEGORY_ADDED)\n@param oldValue always null\n@param newValue new value depends on the type.",
+      "static": false,
+      "params": [
+        {
+          "name": "categoryID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the datatype that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of changed (should always be CATEGORY_ADDED)"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "always null"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value depends on the type."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sourceArchiveAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceArchiveID",
+          "type_long": "ghidra.util.UniversalID",
+          "type_short": "UniversalID",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sourceArchiveChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceArchiveID",
+          "type_long": "ghidra.util.UniversalID",
+          "type_short": "UniversalID",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programTreeAdded",
+      "comment": "Notification that a program tree was added.",
+      "javadoc": "Notification that a program tree was added.\n@param id the id of the program tree that was added.\n@param type the type of changed\n@param oldValue old value is null\n@param newValue new value depends the tree that was added.",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the program tree that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of changed"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value is null"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value depends the tree that was added."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programTreeChanged",
+      "comment": "Notification that a program tree was changed.",
+      "javadoc": "Notification that a program tree was changed.\n@param id the id of the program tree that was changed.\n@param type the type of change\n@param affectedObj the object that was changed\n@param oldValue old value depends on the type of the change\n@param newValue old value depends on the type of the change",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the id of the program tree that was changed."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of change"
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that was changed"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type of the change"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type of the change"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tagChanged",
+      "comment": "Notification that a FunctionTag was changed. This can be either an\n edit or a delete.",
+      "javadoc": "Notification that a {@link FunctionTag} was changed. This can be either an\n edit or a delete.\n@param tag the tag that was changed.\n@param type the type of change\n@param oldValue old value\n@param newValue new value",
+      "static": false,
+      "params": [
+        {
+          "name": "tag",
+          "type_long": "ghidra.program.model.listing.FunctionTag",
+          "type_short": "FunctionTag",
+          "comment": "the tag that was changed."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of change"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "new value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tagCreated",
+      "comment": "Notification that a new FunctionTag was created.",
+      "javadoc": "Notification that a new {@link FunctionTag} was created.\n@param tag the tag that was created.\n@param type the type of change",
+      "static": false,
+      "params": [
+        {
+          "name": "tag",
+          "type_long": "ghidra.program.model.listing.FunctionTag",
+          "type_short": "FunctionTag",
+          "comment": "the tag that was created."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of change"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "symbolChanged",
+      "comment": "Notification that a symbol was changed.",
+      "javadoc": "Notification that a symbol was changed.\n@param symbol the symbol that was changed.\n@param type the type of change\n@param addr the address of the symbol that changed\n@param affectedObj the object that was changed\n@param oldValue old value depends on the type of the change\n@param newValue old value depends on the type of the change",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol that was changed."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of change"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the symbol that changed"
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that was changed"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type of the change"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type of the change"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "symbolAdded",
+      "comment": "Notification that a symbol was added.",
+      "javadoc": "Notification that a symbol was added.\n@param symbol the symbol that was added.\n@param type the type of change\n@param addr the address of the symbol that added\n@param oldValue old value depends on the type of the change\n@param newValue old value depends on the type of the change",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol that was added."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of change"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the symbol that added"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type of the change"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "old value depends on the type of the change"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRegisterValuesChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setObjChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setObjChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "subType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setObjChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setObjChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "subType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setObjChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "affectedObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPropertyChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "codeUnitAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPropertyRangeRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "userDataChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "codeUnitAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "userDataChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refreshName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "refreshImageBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addOverlaySpace",
+      "comment": "Create a new OverlayAddressSpace based upon the given overlay blockName and base AddressSpace",
+      "javadoc": "Create a new OverlayAddressSpace based upon the given overlay blockName and base AddressSpace\n@param blockName the name of the overlay memory block which corresponds to the new overlay address\n space to be created.  This name may be modified to produce a valid overlay space name and avoid \n duplication.\n@param originalSpace the base AddressSpace to overlay\n@param minOffset the min offset of the space\n@param maxOffset the max offset of the space\n@return the new space\n@throws LockException if the program is shared and not checked out exclusively.\n@throws MemoryConflictException if image base override is active",
+      "static": false,
+      "params": [
+        {
+          "name": "blockName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the overlay memory block which corresponds to the new overlay address\n space to be created.  This name may be modified to produce a valid overlay space name and avoid \n duplication."
+        },
+        {
+          "name": "originalSpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": "the base AddressSpace to overlay"
+        },
+        {
+          "name": "minOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the min offset of the space"
+        },
+        {
+          "name": "maxOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the max offset of the space"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSpace",
+        "type_short": "AddressSpace",
+        "comment": "the new space"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if the program is shared and not checked out exclusively."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryConflictException",
+          "type_short": "MemoryConflictException",
+          "comment": "if image base override is active"
+        }
+      ]
+    },
+    {
+      "name": "renameOverlaySpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldOverlaySpaceName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeOverlaySpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "overlaySpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getStoredBaseImageOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getImageBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setImageBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "base",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "commit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.IllegalStateException",
+          "type_short": "IllegalStateException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "restoreImageBase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initializeDatabase",
+      "comment": "Initialize the following fields from the database and check the database version for an existing database:\n \n name\n languageName\n languageVersion\n LanguageMinorVersion\n ",
+      "javadoc": "Initialize the following fields from the database and check the database version for an existing database:\n \u003cul\u003e\n \u003cli\u003ename\u003c/li\u003e\n \u003cli\u003elanguageName\u003c/li\u003e\n \u003cli\u003elanguageVersion\u003c/li\u003e\n \u003cli\u003eLanguageMinorVersion\u003c/li\u003e\n \u003c/ul\u003e\n@param openMode program open mode\n@return version exception if the current version is out of date and can be upgraded\n@throws IOException if there is an exception at the database level\n@throws VersionException if the data is newer than this version of Ghidra and can not be\n upgraded or opened.",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "program open mode"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.exception.VersionException",
+        "type_short": "VersionException",
+        "comment": "version exception if the current version is out of date and can be upgraded"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there is an exception at the database level"
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if the data is newer than this version of Ghidra and can not be\n upgraded or opened."
+        },
+        {
+          "type_long": "ghidra.program.model.lang.LanguageNotFoundException",
+          "type_short": "LanguageNotFoundException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "upgradeDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "postUpgrade",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getStoredVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkOldProperties",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkFunctionWrappedPointers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createManagers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.exception.VersionException",
+        "type_short": "VersionException",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initManagers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "clearCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isChangeable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegisters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register[]",
+        "type_short": "ghidra.program.model.lang.Register[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "varnode",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGlobalAddress",
+      "comment": "This method is required to handle old register addresses which\n have a namespace.",
+      "javadoc": "This method is required to handle old register addresses which\n have a namespace.\n@param addr register address\n@return converted register address which does not have a namespace setting.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "register address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "converted register address which does not have a namespace setting."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "regName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setChangeSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "changeSet",
+          "type_long": "ghidra.program.database.ProgramDBChangeSet",
+          "type_short": "ProgramDBChangeSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteAddressRange",
+      "comment": "Deletes given range from the program.",
+      "javadoc": "Deletes given range from the program.\n@param startAddr the first address in the range.\n@param endAddr the last address in the range.\n@param monitor the task monitor to use while deleting information in the given range.\n@throws RollbackException if the user cancelled the operation via the task monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the first address in the range."
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the last address in the range."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor to use while deleting information in the given range."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.RollbackException",
+          "type_short": "RollbackException",
+          "comment": "if the user cancelled the operation via the task monitor."
+        }
+      ]
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "Moves all information stored in the given range to the new location",
+      "javadoc": "Moves all information stored in the given range to the new location\n@param fromAddr the first address in the range to be moved\n@param toAddr the address to move to\n@param length the number of addresses to move\n@param monitor the task monitor to use while deleting information in the given range\n@throws AddressOverflowException if there is a problem moving address ranges\n@throws RollbackException if the user cancelled the operation via the task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the first address in the range to be moved"
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to move to"
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the number of addresses to move"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor to use while deleting information in the given range"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": "if there is a problem moving address ranges"
+        },
+        {
+          "type_long": "ghidra.util.exception.RollbackException",
+          "type_short": "RollbackException",
+          "comment": "if the user cancelled the operation via the task monitor"
+        }
+      ]
+    },
+    {
+      "name": "getGlobalNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        },
+        {
+          "name": "newCompilerSpecID",
+          "type_long": "ghidra.program.model.lang.CompilerSpecID",
+          "type_short": "CompilerSpecID",
+          "comment": ""
+        },
+        {
+          "name": "forceRedisassembly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalStateException",
+          "type_short": "IllegalStateException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.IncompatibleLanguageException",
+          "type_short": "IncompatibleLanguageException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setLanguage",
+      "comment": "Translate language",
+      "javadoc": "Translate language\n@param translator language translator, if null only re-disassembly will occur.\n@param newCompilerSpecID new compiler specification which corresponds to new language, may be null.\n@param forceRedisassembly if true a redisassembly will be forced even if not required\n@param monitor task monitor\n@throws LockException if exclusive access is missing",
+      "static": false,
+      "params": [
+        {
+          "name": "translator",
+          "type_long": "ghidra.program.util.LanguageTranslator",
+          "type_short": "LanguageTranslator",
+          "comment": "language translator, if null only re-disassembly will occur."
+        },
+        {
+          "name": "newCompilerSpecID",
+          "type_long": "ghidra.program.model.lang.CompilerSpecID",
+          "type_short": "CompilerSpecID",
+          "comment": "new compiler specification which corresponds to new language, may be null."
+        },
+        {
+          "name": "forceRedisassembly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true a redisassembly will be forced even if not required"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if exclusive access is missing"
+        }
+      ]
+    },
+    {
+      "name": "repairContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldLanguageVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "oldLanguageMinorVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "translator",
+          "type_long": "ghidra.program.util.LanguageTranslator",
+          "type_short": "LanguageTranslator",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "repairARMContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldLanguageVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "oldLanguageMinorVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "translator",
+          "type_long": "ghidra.program.util.LanguageTranslator",
+          "type_short": "LanguageTranslator",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createAddressSetPropertyMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mapName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.AddressSetPropertyMap",
+        "type_short": "AddressSetPropertyMap",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getAddressSetPropertyMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mapName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.AddressSetPropertyMap",
+        "type_short": "AddressSetPropertyMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteAddressSetPropertyMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mapName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createIntRangeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mapName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.IntRangeMapDB",
+        "type_short": "IntRangeMapDB",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getIntRangeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mapName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.IntRangeMap",
+        "type_short": "IntRangeMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteIntRangeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mapName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getString",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumberOfBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reason",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "forceLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rollback",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "reason",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueProgramID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidateWriteCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flushWriteCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "installExtensions",
+      "comment": "Install updated compiler spec extension options.\n See SpecExtension.",
+      "javadoc": "Install updated compiler spec extension options.\n See {@link SpecExtension}.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerCompilerSpecOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

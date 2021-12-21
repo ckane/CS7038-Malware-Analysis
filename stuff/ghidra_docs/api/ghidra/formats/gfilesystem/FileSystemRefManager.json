@@ -1,0 +1,213 @@
+{
+  "name": "FileSystemRefManager",
+  "comment": "A threadsafe helper class that manages creating and releasing FileSystemRef instances\n and broadcasting events to FileSystemEventListener listeners.\n ",
+  "javadoc": "A threadsafe helper class that manages creating and releasing {@link FileSystemRef} instances\n and broadcasting events to {@link FileSystemEventListener} listeners.\n \u003cp\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "fs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+      "type_short": "GFileSystem",
+      "constant_value": null
+    },
+    {
+      "name": "refs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FileSystemRef\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cghidra.formats.gfilesystem.FileSystemEventListener\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "lastUsedTS",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new FileSystemRefManager pointing at the specified GFileSystem.",
+      "javadoc": "Creates a new {@link FileSystemRefManager} pointing at the specified {@link GFileSystem}.\n@param fs {@link GFileSystem} to manage.",
+      "static": false,
+      "params": [
+        {
+          "name": "fs",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": "GFileSystem to manage."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "touch",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addListener",
+      "comment": "Adds a FileSystemEventListener that will be called when\n this filesystem is FileSystemEventListener#onFilesystemClose(GFileSystem)\n or when FileSystemEventListener#onFilesystemRefChange(GFileSystem, FileSystemRefManager).",
+      "javadoc": "Adds a {@link FileSystemEventListener listener} that will be called when\n this filesystem is {@link FileSystemEventListener#onFilesystemClose(GFileSystem) closed}\n or when {@link FileSystemEventListener#onFilesystemRefChange(GFileSystem, FileSystemRefManager) refs change}.\n@param listener {@link FileSystemEventListener} to receive callbacks, weakly refd and\n automagically removed if a reference isn\u0027t held to the listener somewhere else.",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemEventListener",
+          "type_short": "FileSystemEventListener",
+          "comment": "FileSystemEventListener to receive callbacks, weakly refd and\n automagically removed if a reference isn\u0027t held to the listener somewhere else."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeListener",
+      "comment": "Removes a previously added FileSystemEventListener.",
+      "javadoc": "Removes a previously added {@link FileSystemEventListener listener}.\n@param listener {@link FileSystemEventListener} to remove.",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemEventListener",
+          "type_short": "FileSystemEventListener",
+          "comment": "FileSystemEventListener to remove."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "create",
+      "comment": "Creates a new FileSystemRef that points at the owning GFileSystem.\n ",
+      "javadoc": "Creates a new {@link FileSystemRef} that points at the owning {@link GFileSystem filesystem}.\n \u003cp\u003e\n@return new {@link FileSystemRef} pointing at the filesystem, never null.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+        "type_short": "FileSystemRef",
+        "comment": "new FileSystemRef pointing at the filesystem, never null."
+      },
+      "throws": []
+    },
+    {
+      "name": "release",
+      "comment": "Releases an existing FileSystemRef and broadcasts\n FileSystemEventListener#onFilesystemRefChange(GFileSystem, FileSystemRefManager)\n to listeners.\n ",
+      "javadoc": "Releases an existing {@link FileSystemRef} and broadcasts\n {@link FileSystemEventListener#onFilesystemRefChange(GFileSystem, FileSystemRefManager)}\n to listeners.\n \u003cp\u003e\n@param ref the {@link FileSystemRef} to release.",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+          "type_short": "FileSystemRef",
+          "comment": "the FileSystemRef to release."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canClose",
+      "comment": "Returns true if the only FileSystemRef pinning this filesystem is the\n caller\u0027s ref.",
+      "javadoc": "Returns true if the only {@link FileSystemRef} pinning this filesystem is the\n caller\u0027s ref.\n@param callersRef {@link FileSystemRef} to test\n@return boolean true if the tested {@link FileSystemRef} is the only ref pinning\n the filesystem.",
+      "static": false,
+      "params": [
+        {
+          "name": "callersRef",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+          "type_short": "FileSystemRef",
+          "comment": "FileSystemRef to test"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if the tested FileSystemRef is the only ref pinning\n the filesystem."
+      },
+      "throws": []
+    },
+    {
+      "name": "onClose",
+      "comment": "Called from the GFileSystem#close() before any destructive changes have\n been made to gracefully shutdown the ref manager.\n \n Broadcasts FileSystemEventListener#onFilesystemClose(GFileSystem).",
+      "javadoc": "Called from the {@link GFileSystem#close()} before any destructive changes have\n been made to gracefully shutdown the ref manager.\n \u003cp\u003e\n Broadcasts {@link FileSystemEventListener#onFilesystemClose(GFileSystem)}.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "finalize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastUsedTimestamp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,935 @@
+{
+  "name": "DomainObjectAdapter",
+  "comment": "An abstract class that provides default behavior for\n DomainObject(s), specifically it handles listeners and\n change status; the derived class must provide the\n getDescription() method.",
+  "javadoc": "An abstract class that provides default behavior for\n DomainObject(s), specifically it handles listeners and\n change status; the derived class must provide the\n getDescription() method.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.model.DomainObject"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DEFAULT_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"untitled\""
+    },
+    {
+      "name": "defaultDomainObjClass",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Class\u003c?\u003e",
+      "type_short": "Class",
+      "constant_value": null
+    },
+    {
+      "name": "contentHandlerTypeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.framework.data.ContentHandler\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "contentHandlerClassMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.HashMap\u003cjava.lang.Class\u003c?\u003e,ghidra.framework.data.ContentHandler\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "contentHandlerUpdateListener",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.event.ChangeListener",
+      "type_short": "ChangeListener",
+      "constant_value": null
+    },
+    {
+      "name": "name",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "domainFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.DomainFile",
+      "type_short": "DomainFile",
+      "constant_value": null
+    },
+    {
+      "name": "docs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.data.DomainObjectChangeSupport",
+      "type_short": "DomainObjectChangeSupport",
+      "constant_value": null
+    },
+    {
+      "name": "changeSupportMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.framework.model.EventQueueID,ghidra.framework.data.DomainObjectChangeSupport\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "eventsEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "closeListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.framework.model.DomainObjectClosedListener\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "consumers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cjava.lang.Object\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "metadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "changed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "temporary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.Lock",
+      "type_short": "Lock",
+      "constant_value": null
+    },
+    {
+      "name": "modificationNumber",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new DomainObjectAdapter. \n If construction of this object fails, be sure to release with consumer.",
+      "javadoc": "Construct a new DomainObjectAdapter. \n If construction of this object fails, be sure to release with consumer.\n@param name name of the object\n@param timeInterval the time (in milliseconds) to wait before the\n event queue is flushed.  If a new event comes in before the time expires,\n the timer is reset.\n@param bufsize initial size of event buffer\n@param consumer the object that created this domain object",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the object"
+        },
+        {
+          "name": "timeInterval",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the time (in milliseconds) to wait before the\n event queue is flushed.  If a new event comes in before the time expires,\n the timer is reset."
+        },
+        {
+          "name": "bufsize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "initial size of event buffer"
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object that created this domain object"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "release",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#release(java.lang.Object)",
+      "static": false,
+      "params": [
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.Lock",
+        "type_short": "Lock",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDomainFile",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#getDomainFile()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFile",
+        "type_short": "DomainFile",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAssociatedUserFilesystem",
+      "comment": "Returns the hidden user-filesystem associated with \n this objects domain file, or null if unknown.",
+      "javadoc": "Returns the hidden user-filesystem associated with \n this objects domain file, or null if unknown.\n@return user data file system",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.store.FileSystem",
+        "type_short": "FileSystem",
+        "comment": "user data file system"
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#getName()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "@see java.lang.Object#toString()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setName",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#setName(java.lang.String)",
+      "static": false,
+      "params": [
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearDomainObj",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isChanged",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#isChanged()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTemporary",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#setTemporary(boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isTemporary",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#isTemporary()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDomainFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "df",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyCloseListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flushEvents",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#flushEvents()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getChangeStatus",
+      "comment": "Return \"changed\" status",
+      "javadoc": "Return \"changed\" status\n@return true if this object has changed",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this object has changed"
+      },
+      "throws": []
+    },
+    {
+      "name": "addListener",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#addListener(ghidra.framework.model.DomainObjectListener)",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.framework.model.DomainObjectListener",
+          "type_short": "DomainObjectListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeListener",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#removeListener(ghidra.framework.model.DomainObjectListener)",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.framework.model.DomainObjectListener",
+          "type_short": "DomainObjectListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addCloseListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.DomainObjectClosedListener",
+          "type_short": "DomainObjectClosedListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeCloseListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.DomainObjectClosedListener",
+          "type_short": "DomainObjectClosedListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createPrivateEventQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.DomainObjectListener",
+          "type_short": "DomainObjectListener",
+          "comment": ""
+        },
+        {
+          "name": "maxDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.EventQueueID",
+        "type_short": "EventQueueID",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removePrivateEventQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "ghidra.framework.model.EventQueueID",
+          "type_short": "EventQueueID",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flushPrivateEventQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "ghidra.framework.model.EventQueueID",
+          "type_short": "EventQueueID",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#getDescription()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireEvent",
+      "comment": "Fires the specified event.",
+      "javadoc": "Fires the specified event.\n@param ev event to fire",
+      "static": false,
+      "params": [
+        {
+          "name": "ev",
+          "type_long": "ghidra.framework.model.DomainObjectChangeRecord",
+          "type_short": "DomainObjectChangeRecord",
+          "comment": "event to fire"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setEventsEnabled",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#setEventsEnabled(boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSendingEvents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasExclusiveAccess",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#hasExclusiveAccess()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkExclusiveAccess",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addConsumer",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.model.DomainObject#addConsumer(java.lang.Object)",
+      "static": false,
+      "params": [
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasConsumers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUsedExclusivelyBy",
+      "comment": "Returns true if the this file is used only by the given tool",
+      "javadoc": "Returns true if the this file is used only by the given tool",
+      "static": false,
+      "params": [
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUsedBy",
+      "comment": "Returns true if the given tool is using this object.",
+      "javadoc": "Returns true if the given tool is using this object.",
+      "static": false,
+      "params": [
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConsumerList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.ArrayList\u003cjava.lang.Object\u003e",
+        "type_short": "ArrayList",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDefaultContentClass",
+      "comment": "Set default content type",
+      "javadoc": "Set default content type\n@param doClass default domain object implementation",
+      "static": true,
+      "params": [
+        {
+          "name": "doClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "default domain object implementation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getContentHandler",
+      "comment": "Get the ContentHandler associated with the specified content-type.",
+      "javadoc": "Get the ContentHandler associated with the specified content-type.\n@param contentType domain object content type\n@return content handler",
+      "static": true,
+      "params": [
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "domain object content type"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.data.ContentHandler",
+        "type_short": "ContentHandler",
+        "comment": "content handler"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getContentHandler",
+      "comment": "Get the ContentHandler associated with the specified domain object",
+      "javadoc": "Get the ContentHandler associated with the specified domain object\n@param dobj domain object\n@return content handler",
+      "static": true,
+      "params": [
+        {
+          "name": "dobj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": "domain object"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.data.ContentHandler",
+        "type_short": "ContentHandler",
+        "comment": "content handler"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkContentHandlerMaps",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getContentHandlers",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModificationNumber",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fatalErrorOccurred",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

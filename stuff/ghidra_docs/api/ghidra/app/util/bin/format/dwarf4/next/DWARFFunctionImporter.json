@@ -1,0 +1,1522 @@
+{
+  "name": "DWARFFunctionImporter",
+  "comment": "Iterates through all DIEAs in a DWARFProgram and creates Ghidra functions\n and variables.",
+  "javadoc": "Iterates through all DIEAs in a {@link DWARFProgram} and creates Ghidra functions\n and variables.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "INLINE_FUNC_SHORT_LEN",
+      "comment": "Inline funcs shorter than this value receive comments at EOL instead of PRE\n (ie. inline funcs that reduce down to a single operand or operand value)",
+      "javadoc": "Inline funcs shorter than this value receive comments at EOL instead of PRE\n (ie. inline funcs that reduce down to a single operand or operand value)",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "prog",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+      "type_short": "DWARFProgram",
+      "constant_value": null
+    },
+    {
+      "name": "currentProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "dwarfDTM",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFDataTypeManager",
+      "type_short": "DWARFDataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "importOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFImportOptions",
+      "type_short": "DWARFImportOptions",
+      "constant_value": null
+    },
+    {
+      "name": "rootModule",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramModule",
+      "type_short": "ProgramModule",
+      "constant_value": null
+    },
+    {
+      "name": "processedOffsets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "functionsProcessed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.model.address.Address,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "variablesProcesesed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.program.model.address.Address\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "importSummary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFImportSummary",
+      "type_short": "DWARFImportSummary",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "hasDWARFProgModule",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "prog",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "progModuleName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "prog",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+          "type_short": "DWARFProgram",
+          "comment": ""
+        },
+        {
+          "name": "dwarfDTM",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFDataTypeManager",
+          "type_short": "DWARFDataTypeManager",
+          "comment": ""
+        },
+        {
+          "name": "importOptions",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFImportOptions",
+          "type_short": "DWARFImportOptions",
+          "comment": ""
+        },
+        {
+          "name": "importSummary",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFImportSummary",
+          "type_short": "DWARFImportSummary",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shouldProcess",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "importFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "logImportErrorSummary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBadSubprogramDef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markAllChildrenAsProcessed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "die",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+          "type_short": "DebugInfoEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processSubprogram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateFunctionSignatureWithFormalParams",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "gfunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "params",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Parameter\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "returnType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "varArgs",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateFunctionSignatureWithDetailParams",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "gfunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "dfunc",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFFunction",
+          "type_short": "DWARFFunction",
+          "comment": ""
+        },
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processFuncChildren",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        },
+        {
+          "name": "dfunc",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFFunction",
+          "type_short": "DWARFFunction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createFormalParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter",
+        "type_short": "Parameter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processVariable",
+      "comment": "Creates a new DWARFVariable from the specified DIEAggregate and\n as a child of the specified function (if not null).\n \n Used to process DW_TAG_variable as well as DW_TAG_formal_parameters.",
+      "javadoc": "Creates a new {@link DWARFVariable} from the specified {@link DIEAggregate DIEA} and\n as a child of the specified function (if not null).\n \u003cp\u003e\n Used to process DW_TAG_variable as well as DW_TAG_formal_parameters.\n@param diea - the diea that specifies the variable\n@param dfunc - function that contains this variable, or null if static variable\n@param lexicalStart - not used by any caller\n@param firstUseAddr offset dfunc or -1 if formal parameter\n@return \n@throws IOException\n@throws InvalidInputException",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": "- the diea that specifies the variable"
+        },
+        {
+          "name": "dfunc",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFFunction",
+          "type_short": "DWARFFunction",
+          "comment": "- function that contains this variable, or null if static variable"
+        },
+        {
+          "name": "lexicalStart",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "- not used by any caller"
+        },
+        {
+          "name": "firstUseAddr",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "offset dfunc or -1 if formal parameter"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+        "type_short": "DWARFVariable",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processStaticVar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "dvar",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        },
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processZeroByteStaticVar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "staticVariableAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dvar",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isZeroByteDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processLexicalBlock",
+      "comment": "Process lexical block entries.",
+      "javadoc": "Process lexical block entries.\n@param entry DIE\n@param unit current compilation unit\n@param frameBase Location list of the current frame\n@param function parent function of the lexical block\n@throws IOException\n@throws InvalidInputException\n@throws DWARFExpressionException",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        },
+        {
+          "name": "dfunc",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFFunction",
+          "type_short": "DWARFFunction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processInlinedSubroutine",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        },
+        {
+          "name": "dfunc",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFFunction",
+          "type_short": "DWARFFunction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addCommentsForInlineFunc",
+      "comment": "Constructs a function def signature for the function and adds it as a comment, either\n EOL or PRE depending on how small the inline func is.",
+      "javadoc": "Constructs a function def signature for the function and adds it as a comment, either\n EOL or PRE depending on how small the inline func is.\n@param diea\n@param blockStart\n@param blockEnd",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        },
+        {
+          "name": "blockStart",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "blockEnd",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "appendComment",
+      "comment": "Appends a comment at the specified address",
+      "javadoc": "Appends a comment at the specified address\n@param address the address to set the PRE comment\n@param commentType ie. CodeUnit.PRE_COMMENT\n@param comment the PRE comment\n@param sep the characters to use to separate existing comments\n@return true if the comment was successfully set",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to set the PRE comment"
+        },
+        {
+          "name": "commentType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "ie. CodeUnit.PRE_COMMENT"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the PRE comment"
+        },
+        {
+          "name": "sep",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the characters to use to separate existing comments"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the comment was successfully set"
+      },
+      "throws": []
+    },
+    {
+      "name": "toAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "java.lang.Number",
+          "type_short": "Number",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setExternalEntryPoint",
+      "comment": "Set external entry point.  If declared external add as entry pointer, otherwise\n clear as entry point if previously addeds.",
+      "javadoc": "Set external entry point.  If declared external add as entry pointer, otherwise\n clear as entry point if previously addeds.\n@param external true if declared external and false otherwise\n@param address address of the entry point",
+      "static": false,
+      "params": [
+        {
+          "name": "external",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if declared external and false otherwise"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address of the entry point"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isArrayDataTypeCompatibleWithExistingData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "arrayDT",
+          "type_long": "ghidra.program.model.data.Array",
+          "type_short": "Array",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isStructDataTypeCompatibleWithExistingData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "structDT",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isPointerDataTypeCompatibleWithExistingData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pdt",
+          "type_long": "ghidra.program.model.data.Pointer",
+          "type_short": "Pointer",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSimpleDataTypeCompatibleWithExistingData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEnumDataTypeCompatibleWithExistingData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "enumDT",
+          "type_long": "ghidra.program.model.data.Enum",
+          "type_short": "Enum",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDataTypeCompatibleWithExistingData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dni",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFNameInfo",
+          "type_short": "DWARFNameInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Data",
+        "type_short": "Data",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "outputGlobal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "external",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "sourceInfo",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFSourceInfo",
+          "type_short": "DWARFSourceInfo",
+          "comment": ""
+        },
+        {
+          "name": "dni",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFNameInfo",
+          "type_short": "DWARFNameInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTopLocation",
+      "comment": "Get the location that corresponds to the entry point of the function If\n there is only a single location, assume it applies to whole function",
+      "javadoc": "Get the location that corresponds to the entry point of the function If\n there is only a single location, assume it applies to whole function\n@param locList\n@param funcAddr\n@return the byte array corresponding to the location expression",
+      "static": true,
+      "params": [
+        {
+          "name": "locList",
+          "type_long": "java.util.List\u003cghidra.app.util.bin.format.dwarf4.DWARFLocation\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "funcAddr",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFLocation",
+        "type_short": "DWARFLocation",
+        "comment": "the byte array corresponding to the location expression"
+      },
+      "throws": []
+    },
+    {
+      "name": "findFirstUse",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "currentProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "funcAddr",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "firstUseAddr",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveIntoFragment",
+      "comment": "Move an address range into a fragment.",
+      "javadoc": "Move an address range into a fragment.\n@param cu current compile unit\n@param name name of the fragment\n@param start start address of the fragment\n@param end end address of the fragment\n@param fileID offset of the file name in the debug_line section",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the fragment"
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start address of the fragment"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "end address of the fragment"
+        },
+        {
+          "name": "fileName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildVariable",
+      "comment": "For some DWARF debugger strategies, the storage location provided for a formal parameter is NOT the initial storage\n of the parameter and does not match the calling convention.  If the storage location provided is in the local variable\n range for the function, this is an indication the storage does not represent the calling convention",
+      "javadoc": "For some DWARF debugger strategies, the storage location provided for a formal parameter is NOT the initial storage\n of the parameter and does not match the calling convention.  If the storage location provided is in the local variable\n range for the function, this is an indication the storage does not represent the calling convention\n@param dfunc is the DWARF function data to test\n@return true if the storage locations represent the calling convention",
+      "static": false,
+      "params": [
+        {
+          "name": "dvar",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": "true if the storage locations represent the calling convention"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "buildReturnVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dvar",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "buildParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dvar",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        },
+        {
+          "name": "funcDIEA",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter",
+        "type_short": "Parameter",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "buildVarnodes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dvar",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.Varnode[]",
+        "type_short": "ghidra.program.model.pcode.Varnode[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkThisParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        },
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dfunc",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFFunction",
+          "type_short": "DWARFFunction",
+          "comment": ""
+        },
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setUniqueParameterNames",
+      "comment": "Changes the names of the parameters in the array to unique names that won\u0027t conflict with\n any other names in the function\u0027s namespace when the parameters are used to replace\n the existing parameters in the function. Appends an integer number to\n the base name if necessary to create a unique name in the function\u0027s namespace.",
+      "javadoc": "Changes the names of the parameters in the array to unique names that won\u0027t conflict with\n any other names in the function\u0027s namespace when the parameters are used to replace\n the existing parameters in the function. Appends an integer number to\n the base name if necessary to create a unique name in the function\u0027s namespace.\n@param function the function\n@param parameters the parameters that need names that won\u0027t conflict. These should be\n Impl objects and not DB objects since their names will be changed within this method.\n@throws InvalidInputException invalid parameter name\n@throws DuplicateNameException (should not occur on non-DB parameter)",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the function"
+        },
+        {
+          "name": "parameters",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Parameter\u003e",
+          "type_short": "List",
+          "comment": "the parameters that need names that won\u0027t conflict. These should be\n Impl objects and not DB objects since their names will be changed within this method."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "(should not occur on non-DB parameter)"
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "invalid parameter name"
+        }
+      ]
+    },
+    {
+      "name": "getUniqueReplacementParameterName",
+      "comment": "Get a unique parameter name for a parameter when all parameter names are being replaced.\n If the specified name is  a default parameter name then the original default name passed\n in is returned.",
+      "javadoc": "Get a unique parameter name for a parameter when all parameter names are being replaced.\n If the specified name is  a default parameter name then the original default name passed\n in is returned.\n@param symbolTable the symbol table containing symbols for the indicated namespace\n@param namespace the namespace containing symbol names to check.\n@param baseName the base name to append with an integer number if necessary\n to create a unique name.\n@param namesNotToBeUsed set of names that should not be used when determining a unique name.\n@return a unique parameter name",
+      "static": true,
+      "params": [
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": "the symbol table containing symbols for the indicated namespace"
+        },
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "namesNotToBeUsed",
+          "type_long": "java.util.Set\u003cjava.lang.String\u003e",
+          "type_short": "Set",
+          "comment": "set of names that should not be used when determining a unique name."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "a unique parameter name"
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueNameIgnoringCurrentParameters",
+      "comment": "Gets a unique name in the indicated namespace by appending an integer number if necessary\n and ignoring any conflicts with existing parameters.",
+      "javadoc": "Gets a unique name in the indicated namespace by appending an integer number if necessary\n and ignoring any conflicts with existing parameters.\n@param symbolTable the symbol table containing symbols for the indicated namespace\n@param namespace the namespace containing symbol names to check.\n@param baseName the base name to append with an integer number if necessary to create a\n unique name.\n@param namesNotToBeUsed set of names that should not be used when determining a unique name.\n@return an unused unique name within the namespace ignoring current parameter names and\n that doesn\u0027t conflict with any in the set of names not to be used.",
+      "static": true,
+      "params": [
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": "the symbol table containing symbols for the indicated namespace"
+        },
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the namespace containing symbol names to check."
+        },
+        {
+          "name": "baseName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the base name to append with an integer number if necessary to create a\n unique name."
+        },
+        {
+          "name": "namesNotToBeUsed",
+          "type_long": "java.util.Set\u003cjava.lang.String\u003e",
+          "type_short": "Set",
+          "comment": "set of names that should not be used when determining a unique name."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "an unused unique name within the namespace ignoring current parameter names and\n that doesn\u0027t conflict with any in the set of names not to be used."
+      },
+      "throws": []
+    },
+    {
+      "name": "areAllParamaters",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "symbols",
+          "type_long": "java.util.List\u003cghidra.program.model.symbol.Symbol\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "commitPrototype",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "returnVariable",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "params",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Parameter\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "protoModel",
+          "type_long": "ghidra.program.model.lang.PrototypeModel",
+          "type_short": "PrototypeModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "commitLocal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "dvar",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFFunctionImporter.DWARFVariable",
+          "type_short": "DWARFVariable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processLabel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,699 @@
+{
+  "name": "PropertyListMergeManager",
+  "comment": "Manages options changes and conflicts between the latest versioned \n Program and the Program that is being checked into version control.",
+  "javadoc": "Manages options changes and conflicts between the latest versioned \n Program and the Program that is being checked into version control.",
+  "static": false,
+  "implements": [
+    "ghidra.app.merge.MergeResolver"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "CANCELED",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-2"
+    },
+    {
+      "name": "ASK_USER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-1"
+    },
+    {
+      "name": "LATEST_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "MY_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "ORIGINAL_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "PROPERTY_LIST_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "conflictOption",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "resultProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "myProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "originalProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "latestProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "currentMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "conflictMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,java.util.ArrayList\u003cghidra.app.merge.propertylist.ConflictInfo\u003e\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "mergePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.propertylist.PropertyListMergePanel",
+      "type_short": "PropertyListMergePanel",
+      "constant_value": null
+    },
+    {
+      "name": "currentConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "totalConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "mergeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+      "type_short": "ProgramMultiUserMergeManager",
+      "constant_value": null
+    },
+    {
+      "name": "progressIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "propertyListChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new PropertyListMergeManager.",
+      "javadoc": "Construct a new PropertyListMergeManager.\n@param mergeManager manages each stage of the merge/resolve conflict process\n@param resultProgram latest version of the Program that is the \n destination for changes that will be applied from the source program\n@param myProgram source of changes to apply to the result\n program\n@param originalProgram program that was originally checked out\n@param latestProgram program that that is the latest version; the\n resultProgram and latestProgram start out the same",
+      "static": false,
+      "params": [
+        {
+          "name": "mergeManager",
+          "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+          "type_short": "ProgramMultiUserMergeManager",
+          "comment": "manages each stage of the merge/resolve conflict process"
+        },
+        {
+          "name": "resultProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "latest version of the Program that is the \n destination for changes that will be applied from the source program"
+        },
+        {
+          "name": "myProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "source of changes to apply to the result\n program"
+        },
+        {
+          "name": "originalProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program that was originally checked out"
+        },
+        {
+          "name": "latestProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program that that is the latest version; the\n resultProgram and latestProgram start out the same"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setConflictResolution",
+      "comment": "For Junit testing purposes only.",
+      "javadoc": "For Junit testing purposes only.\n@param option option for resolving a conflict",
+      "static": false,
+      "params": [
+        {
+          "name": "option",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "option for resolving a conflict"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addPropertyList",
+      "comment": "Add the property list to the result program.",
+      "javadoc": "Add the property list to the result program.\n@param id of property list",
+      "static": false,
+      "params": [
+        {
+          "name": "listName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addProperty",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "resultList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkValues",
+      "comment": "Check the property names in the list; if values changed in both\n places, then this is a conflict.",
+      "javadoc": "Check the property names in the list; if values changed in both\n places, then this is a conflict.\n@param listName name of the property list",
+      "static": false,
+      "params": [
+        {
+          "name": "listName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the property list"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkDeletedProperties",
+      "comment": "Delete the properties",
+      "javadoc": "Delete the properties\n@param latestList\n@param myNames\n@param latestNames\n@param origNames",
+      "static": false,
+      "params": [
+        {
+          "name": "latestList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "origList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "myNames",
+          "type_long": "java.util.List\u003cjava.lang.String\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "latestNames",
+          "type_long": "java.util.List\u003cjava.lang.String\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "origNames",
+          "type_long": "java.util.List\u003cjava.lang.String\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "resultList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "origList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.ArrayList\u003cghidra.app.merge.propertylist.ConflictInfo\u003e",
+        "type_short": "ArrayList",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkForAddedProperty",
+      "comment": "The property was not in the latest program; if the value changed\n from the original, set the value in the result program.",
+      "javadoc": "The property was not in the latest program; if the value changed\n from the original, set the value in the result program.\n@param myList property list from source program\n@param resultList property list from result program\n@param origList property list from the original checked out program\n@param propertyName name of the property",
+      "static": false,
+      "params": [
+        {
+          "name": "myList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": "property list from source program"
+        },
+        {
+          "name": "resultList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": "property list from result program"
+        },
+        {
+          "name": "origList",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": "property list from the original checked out program"
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the property"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "options",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.framework.options.OptionType",
+          "type_short": "OptionType",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "options",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processConflictList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictList",
+          "type_long": "java.util.ArrayList\u003cghidra.app.merge.propertylist.ConflictInfo\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        },
+        {
+          "name": "listNameIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentListName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "showMergePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "info",
+          "type_long": "ghidra.app.merge.propertylist.ConflictInfo",
+          "type_short": "ConflictInfo",
+          "comment": ""
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "totalNumConflicts",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPhases",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[][]",
+        "type_short": "java.lang.String[][]",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

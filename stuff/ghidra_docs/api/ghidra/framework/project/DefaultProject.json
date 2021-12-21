@@ -1,0 +1,748 @@
+{
+  "name": "DefaultProject",
+  "comment": "Implementation for a Project.",
+  "javadoc": "Implementation for a Project.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.model.Project"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "OPEN_VIEW_XML_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"OPEN_VIEW\""
+    },
+    {
+      "name": "OPEN_REPOSITORY_VIEW_XML_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"OPEN_REPOSITORY_VIEW\""
+    },
+    {
+      "name": "PROJECT_TOOL_CONFIG_XML_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"PROJECT_TOOL_CONFIG\""
+    },
+    {
+      "name": "PROJECT_DATA_XML_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"PROJECT_DATA_XML_NAME\""
+    },
+    {
+      "name": "PROJECT_STATE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"projectState\""
+    },
+    {
+      "name": "projectLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.project.ProjectLock",
+      "type_short": "ProjectLock",
+      "constant_value": null
+    },
+    {
+      "name": "projectManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.project.DefaultProjectManager",
+      "type_short": "DefaultProjectManager",
+      "constant_value": null
+    },
+    {
+      "name": "projectLocator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.ProjectLocator",
+      "type_short": "ProjectLocator",
+      "constant_value": null
+    },
+    {
+      "name": "fileMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.data.ProjectFileManager",
+      "type_short": "ProjectFileManager",
+      "constant_value": null
+    },
+    {
+      "name": "toolManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.project.tool.ToolManagerImpl",
+      "type_short": "ToolManagerImpl",
+      "constant_value": null
+    },
+    {
+      "name": "changed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "isClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "dataMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.framework.options.SaveState\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "projectConfigMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.framework.model.ToolTemplate\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "otherViews",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.net.URL,ghidra.framework.data.ProjectFileManager\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for creating a New project",
+      "javadoc": "Constructor for creating a New project\n@param projectManager the manager of this project\n@param projectLocator location and name of project\n@param repository shared repository associated with the new project. Can\n            be null for non-shared projects\n@throws IOException if I/O error occurs.\n@throws LockException if unable to establish project lock",
+      "static": false,
+      "params": [
+        {
+          "name": "projectManager",
+          "type_long": "ghidra.framework.project.DefaultProjectManager",
+          "type_short": "DefaultProjectManager",
+          "comment": "the manager of this project"
+        },
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": "location and name of project"
+        },
+        {
+          "name": "repository",
+          "type_long": "ghidra.framework.client.RepositoryAdapter",
+          "type_short": "RepositoryAdapter",
+          "comment": "shared repository associated with the new project. Can\n            be null for non-shared projects"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if I/O error occurs."
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if unable to establish project lock"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for opening a project.",
+      "javadoc": "Constructor for opening a project.\n@param projectManager the manager of this project\n@param projectLocator location and name of project\n@param resetOwner if true, set the owner to the current user\n@throws FileNotFoundException project directory not found\n@throws IOException if I/O error occurs.\n@throws NotOwnerException if userName is not the owner of the project.\n@throws LockException if unable to establish project lock",
+      "static": false,
+      "params": [
+        {
+          "name": "projectManager",
+          "type_long": "ghidra.framework.project.DefaultProjectManager",
+          "type_short": "DefaultProjectManager",
+          "comment": "the manager of this project"
+        },
+        {
+          "name": "projectLocator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": "location and name of project"
+        },
+        {
+          "name": "resetOwner",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, set the owner to the current user"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if I/O error occurs."
+        },
+        {
+          "type_long": "ghidra.util.NotOwnerException",
+          "type_short": "NotOwnerException",
+          "comment": "if userName is not the owner of the project."
+        },
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if unable to establish project lock"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for opening a URL-based project",
+      "javadoc": "Constructor for opening a URL-based project\n@param connection project connection\n@throws IOException if I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "projectManager",
+          "type_long": "ghidra.framework.project.DefaultProjectManager",
+          "type_short": "DefaultProjectManager",
+          "comment": ""
+        },
+        {
+          "name": "connection",
+          "type_long": "ghidra.framework.protocol.ghidra.GhidraURLConnection",
+          "type_short": "GhidraURLConnection",
+          "comment": "project connection"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "getProjectManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectManager",
+        "type_short": "ProjectManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectLock",
+      "comment": "Creates a ProjectLock and attempts to lock it. This handles the case\n where the project was previously locked.",
+      "javadoc": "Creates a ProjectLock and attempts to lock it. This handles the case\n where the project was previously locked.\n@param locator the project locator\n@param allowInteractiveForce if true, when a lock cannot be obtained, the\n            user will be prompted\n@return A locked ProjectLock\n@throws ProjectLockException if lock failed",
+      "static": false,
+      "params": [
+        {
+          "name": "locator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": "the project locator"
+        },
+        {
+          "name": "allowInteractiveForce",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, when a lock cannot be obtained, the\n            user will be prompted"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.project.ProjectLock",
+        "type_short": "ProjectLock",
+        "comment": "A locked ProjectLock"
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeNewProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectLocator",
+      "comment": "Get the project URL for this project.",
+      "javadoc": "Get the project URL for this project.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectLocator",
+        "type_short": "ProjectLocator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addProjectView",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "url",
+          "type_long": "java.net.URL",
+          "type_short": "URL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectData",
+        "type_short": "ProjectData",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.net.MalformedURLException",
+          "type_short": "MalformedURLException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeProjectView",
+      "comment": "Remove the view from this project.",
+      "javadoc": "Remove the view from this project.",
+      "static": false,
+      "params": [
+        {
+          "name": "url",
+          "type_long": "java.net.URL",
+          "type_short": "URL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToolServices",
+      "comment": "Get the tool services for this project.",
+      "javadoc": "Get the tool services for this project.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolServices",
+        "type_short": "ToolServices",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocalToolChest",
+      "comment": "Get the local tool chest for the user logged in.",
+      "javadoc": "Get the local tool chest for the user logged in.\n@return the tool chest",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolChest",
+        "type_short": "ToolChest",
+        "comment": "the tool chest"
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToolManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolManager",
+        "type_short": "ToolManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectViews",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectLocator[]",
+        "type_short": "ghidra.framework.model.ProjectLocator[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRepository",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.client.RepositoryAdapter",
+        "type_short": "RepositoryAdapter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveSessionTools",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restore",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "save",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveToolTemplate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tag",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "template",
+          "type_long": "ghidra.framework.model.ToolTemplate",
+          "type_short": "ToolTemplate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToolTemplate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tag",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolTemplate",
+        "type_short": "ToolTemplate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOpenData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.framework.model.DomainFile\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectData",
+        "type_short": "ProjectData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSaveableData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSaveableData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.options.SaveState",
+        "type_short": "SaveState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectData",
+        "type_short": "ProjectData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "url",
+          "type_long": "java.net.URL",
+          "type_short": "URL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectData",
+        "type_short": "ProjectData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewedProjectData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.ProjectData[]",
+        "type_short": "ghidra.framework.model.ProjectData[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "releaseFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

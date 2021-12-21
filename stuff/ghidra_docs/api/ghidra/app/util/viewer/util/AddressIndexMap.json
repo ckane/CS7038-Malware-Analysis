@@ -1,0 +1,500 @@
+{
+  "name": "AddressIndexMap",
+  "comment": "This class maps a set of address ranges into a contiguous set of indexes from 0 to the\n total size of the address set. This is used primarily by the listing panel to simplify the\n display and scrolling logic.\n\n Because of the nature of the listing display, not all addresses have displayable content.  For\n example, a closed data structure can consume thousands of addresses where only the first address\n has anything to display while the structure is closed.  This can cause poor scrollbar behavior.\n To fix this, a new method #removeUnviewableAddressRanges(AddressSet) was added that\n removes those ranges from the index mapping, but the original addresses are also maintained for\n purposes of determining \"gap\" addresses (an address is a gap address if the original address set\n does not include its immediate predecessor.)  The original addresses are also used so that this\n index mapping can be reset and then given a different set of address ranges to remove as not viewable.\n (Useful for when data is open/closed or created/deleted)",
+  "javadoc": "This class maps a set of address ranges into a contiguous set of indexes from 0 to the\n total size of the address set. This is used primarily by the listing panel to simplify the\n display and scrolling logic.\n\n Because of the nature of the listing display, not all addresses have displayable content.  For\n example, a closed data structure can consume thousands of addresses where only the first address\n has anything to display while the structure is closed.  This can cause poor scrollbar behavior.\n To fix this, a new method {@link #removeUnviewableAddressRanges(AddressSet)} was added that\n removes those ranges from the index mapping, but the original addresses are also maintained for\n purposes of determining \"gap\" addresses (an address is a gap address if the original address set\n does not include its immediate predecessor.)  The original addresses are also used so that this\n index mapping can be reset and then given a different set of address ranges to remove as not viewable.\n (Useful for when data is open/closed or created/deleted)",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "PERCENT_DIVIDER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.math.BigInteger",
+      "type_short": "BigInteger",
+      "constant_value": null
+    },
+    {
+      "name": "DEFAULT_UNVIEWABLE_GAP_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.math.BigInteger",
+      "type_short": "BigInteger",
+      "constant_value": null
+    },
+    {
+      "name": "numAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.math.BigInteger",
+      "type_short": "BigInteger",
+      "constant_value": null
+    },
+    {
+      "name": "indexList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.math.BigInteger[]",
+      "type_short": "java.math.BigInteger[]",
+      "constant_value": null
+    },
+    {
+      "name": "addressList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address[]",
+      "type_short": "ghidra.program.model.address.Address[]",
+      "constant_value": null
+    },
+    {
+      "name": "minIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.math.BigInteger",
+      "type_short": "BigInteger",
+      "constant_value": null
+    },
+    {
+      "name": "maxIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.math.BigInteger",
+      "type_short": "BigInteger",
+      "constant_value": null
+    },
+    {
+      "name": "lastUsedRangeIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "originalAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "currentViewAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "minimumUnviewableGapSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.math.BigInteger",
+      "type_short": "BigInteger",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs an empty AddressIndexMap",
+      "javadoc": "Constructs an empty AddressIndexMap",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs an AddressIndexMap for the given address set.",
+      "javadoc": "Constructs an AddressIndexMap for the given address set.\n@param addrSet the address set to index.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to index."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "source",
+          "type_long": "ghidra.app.util.viewer.util.AddressIndexMap",
+          "type_short": "AddressIndexMap",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndexCount",
+      "comment": "Returns the total number of addresses",
+      "javadoc": "Returns the total number of addresses\n@return the number of addresses in the view",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the number of addresses in the view"
+      },
+      "throws": []
+    },
+    {
+      "name": "isGapIndex",
+      "comment": "Returns true if address of the given index is not the successor of the\n previous index\u0027s address.",
+      "javadoc": "Returns true if address of the given index is not the successor of the\n previous index\u0027s address.\n@param index the index to test for gap in the address set.\n@return true if the given index represents the first address after a gap in the address set.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": "the index to test for gap in the address set."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the given index represents the first address after a gap in the address set."
+      },
+      "throws": []
+    },
+    {
+      "name": "isGapAddress",
+      "comment": "Returns true if the given address is the first address after gap of missing addresses.",
+      "javadoc": "Returns true if the given address is the first address after gap of missing addresses.\n@param address the address to check for being a gap address\n@return true if the given address is the first address after gap of missing addresses.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to check for being a gap address"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the given address is the first address after gap of missing addresses."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddress",
+      "comment": "Returns the i\u0027th address in the set.",
+      "javadoc": "Returns the i\u0027th address in the set.\n@param index the index of the address to retrieve.\n@return the address associated with the given index",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": "the index of the address to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the address associated with the given index"
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndex",
+      "comment": "Returns the index for the given address.  If the address is not mapped, null will be returned",
+      "javadoc": "Returns the index for the given address.  If the address is not mapped, null will be returned\n@param addr the address for which to retrieve the index.\n@return the index associated with the given address.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address for which to retrieve the index."
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the index associated with the given address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndexAtOrAfter",
+      "comment": "Returns the index for the given address.  If the address is not mapped, the result is\n defined as follows:\n    if the address is less than the smallest address in the map, then null is returned\n    if the address is greater the the largest address in the map, then a value one bigger than\n         the index of the largest address in the map.\n    if the address is in a \"gap\", then the index of the next largest address that is in the\n    \t\tmap is returned.",
+      "javadoc": "Returns the index for the given address.  If the address is not mapped, the result is\n defined as follows:\n    if the address is less than the smallest address in the map, then null is returned\n    if the address is greater the the largest address in the map, then a value one bigger than\n         the index of the largest address in the map.\n    if the address is in a \"gap\", then the index of the next largest address that is in the\n    \t\tmap is returned.\n@param addr the address for which to retrieve the index.\n@return the associated index for the given address or if there is none, then the index\n         of then next address greater than the given address or null if there is none.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address for which to retrieve the index."
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the associated index for the given address or if there is none, then the index\n         of then next address greater than the given address or null if there is none."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressSet",
+      "comment": "Returns the Address set corresponding to the set of indexes",
+      "javadoc": "Returns the Address set corresponding to the set of indexes\n@param sel the FieldSelection containing the set of indexes to include.\n@return the AddressSet for the given field selection.",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "docking.widgets.fieldpanel.support.FieldSelection",
+          "type_short": "FieldSelection",
+          "comment": "the FieldSelection containing the set of indexes to include."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the AddressSet for the given field selection."
+      },
+      "throws": []
+    },
+    {
+      "name": "getFieldSelection",
+      "comment": "Returns a FieldSelection containing the set of indexes represented by the\n given address set",
+      "javadoc": "Returns a FieldSelection containing the set of indexes represented by the\n given address set\n@param set the set of addresses to convert into a set of indexes.\n@return a FieldSelection for the given address set.",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses to convert into a set of indexes."
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.fieldpanel.support.FieldSelection",
+        "type_short": "FieldSelection",
+        "comment": "a FieldSelection for the given address set."
+      },
+      "throws": []
+    },
+    {
+      "name": "getOriginalAddressSet",
+      "comment": "Returns the total set of addresses in this map include addresses that have been closed",
+      "javadoc": "Returns the total set of addresses in this map include addresses that have been closed\n@return the total set of addresses in the map including addresses that have been closed",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the total set of addresses in the map including addresses that have been closed"
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndexedAddressSet",
+      "comment": "Returns the total set of addresses in this index mapping (not including those that have been closed)",
+      "javadoc": "Returns the total set of addresses in this index mapping (not including those that have been closed)\n@return the total set of addresses in this index mapping (not including those that have been closed)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the total set of addresses in this index mapping (not including those that have been closed)"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxIndex",
+      "comment": "Returns the the maximum address for the range containing the given address.",
+      "javadoc": "Returns the the maximum address for the range containing the given address.\n@param addr the address to find its containing range\u0027s max address.\n@return the the maximum address for the range containing the given address.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to find its containing range\u0027s max address."
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the the maximum address for the range containing the given address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinIndex",
+      "comment": "Returns the the minimum address for the range containing the given address.",
+      "javadoc": "Returns the the minimum address for the range containing the given address.\n@param addr the address to find its containing range\u0027s min address.\n@return the the minimum address for the range containing the given address.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to find its containing range\u0027s min address."
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the the minimum address for the range containing the given address."
+      },
+      "throws": []
+    },
+    {
+      "name": "removeUnviewableAddressRanges",
+      "comment": "Removes the given addresses from the set of addresses that get mapped into indexes.  This\n is used to remove large number of addresses that are contained in closed data in order to\n make scrollbars scroll smoothly.\n \n The original address set is maintained to determine the gap addresses and also for resetting\n the index map to the entire set of addresses",
+      "javadoc": "Removes the given addresses from the set of addresses that get mapped into indexes.  This\n is used to remove large number of addresses that are contained in closed data in order to\n make scrollbars scroll smoothly.\n \u003cP\u003e\n The original address set is maintained to determine the gap addresses and also for resetting\n the index map to the entire set of addresses\n@param addressSet the set of addresses to remove from the set of addresses that get mapped.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "the set of addresses to remove from the set of addresses that get mapped."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMiniumUnviewableGapSize",
+      "comment": "Returns the suggested minimum size of address ranges that contain no viewable code units (i.e.\n collapsed data).  Ranges larger that this should be removed from the index mapping to get\n better scrollbar behavior. Currently this is 1% of the total viewed address space.",
+      "javadoc": "Returns the suggested minimum size of address ranges that contain no viewable code units (i.e.\n collapsed data).  Ranges larger that this should be removed from the index mapping to get\n better scrollbar behavior. Currently this is 1% of the total viewed address space.\n@return the suggested minimum size for a range of addresses with no viewable content.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the suggested minimum size for a range of addresses with no viewable content."
+      },
+      "throws": []
+    },
+    {
+      "name": "reset",
+      "comment": "Resets the mapping to the entire original address set.",
+      "javadoc": "Resets the mapping to the entire original address set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.viewer.util.AddressIndexMap",
+        "type_short": "AddressIndexMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addToAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "startIndex",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": ""
+        },
+        {
+          "name": "endIndex",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddress",
+      "comment": "gets the address for the given index given the rangeIndex of the range that contains that index",
+      "javadoc": "gets the address for the given index given the rangeIndex of the range that contains that index\n@param rangeIndex the index of the range of indexes that contains the index of interest.\n@param index the index to get an address for\n@return the address corresponding to the given index.",
+      "static": false,
+      "params": [
+        {
+          "name": "rangeIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the range of indexes that contains the index of interest."
+        },
+        {
+          "name": "index",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": "the index to get an address for"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the address corresponding to the given index."
+      },
+      "throws": []
+    },
+    {
+      "name": "buildMapping",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

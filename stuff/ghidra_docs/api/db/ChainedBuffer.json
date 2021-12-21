@@ -1,0 +1,1540 @@
+{
+  "name": "ChainedBuffer",
+  "comment": "DBBuffer provides storage for large data objects utilizing a common\n buffer management system.  Smaller data buffers are allocated and chained as needed.\n All instances of DBBuffer must be immediately discarded following an undo or redo on the \n associated DBHandle.\n \n The largest supported chained buffer is about 2-GBytes.  This limit may be slightly smaller \n based upon the underlying database buffer size.\n \n The buffer may consist of either a single Data Node or a series of Index Nodes \n which reference Data Nodes.\n \n Data Node (Non-indexed):\n   | 9 (1) | Obfuscation/DataLength(4) | Data ...\n \n Data Node (Indexed):\n   | 9 (1) | Data ...\n \n Index Node:\n   | 8 (1) | Obfuscation/DataLength(4) | NextIndexId(4) | DataBuffer1Id(4) | ... | DataBufferNId(4) |\n   Number of index entries computed based upon data length and buffer size.  The index for \n   the entire data space is divided among a series of Index Nodes which\n   are chained together using the NextIndexId field. Each Index Node identifies \n   Data Nodes which have been allocated by a DataBufferId.  A DataBufferId of -1 indicates an\n   non-allocated data node.  The DataLength field is only used in the first index buffer.\n   \n Obfuscation:\n   Data obfuscation is indicated by a \u00271\u0027 in the most-significant bit of the Obfuscation/DataLength \n   field.\n \n Once a DBBuffer is deleted or appended to another DBBuffer, it becomes invalid and \n may no longer be used.",
+  "javadoc": "\u003ccode\u003eDBBuffer\u003c/code\u003e provides storage for large data objects utilizing a common\n buffer management system.  Smaller data buffers are allocated and chained as needed.\n All instances of DBBuffer must be immediately discarded following an undo or redo on the \n associated DBHandle.\n \u003cp\u003e\n The largest supported chained buffer is about 2-GBytes.  This limit may be slightly smaller \n based upon the underlying database buffer size.\n \u003cp\u003e\n The buffer may consist of either a single Data Node or a series of Index Nodes \n which reference Data Nodes.\n \u003cpre\u003e\n Data Node (Non-indexed):\n   | 9 (1) | Obfuscation/DataLength(4) | Data ...\n \n Data Node (Indexed):\n   | 9 (1) | Data ...\n \n Index Node:\n   | 8 (1) | Obfuscation/DataLength(4) | NextIndexId(4) | DataBuffer1Id(4) | ... | DataBufferNId(4) |\n   Number of index entries computed based upon data length and buffer size.  The index for \n   the entire data space is divided among a series of Index Nodes which\n   are chained together using the NextIndexId field. Each Index Node identifies \n   Data Nodes which have been allocated by a DataBufferId.  A DataBufferId of -1 indicates an\n   non-allocated data node.  The DataLength field is only used in the first index buffer.\n   \n Obfuscation:\n   Data obfuscation is indicated by a \u00271\u0027 in the most-significant bit of the Obfuscation/DataLength \n   field.\n \u003c/pre\u003e\n Once a DBBuffer is deleted or appended to another DBBuffer, it becomes invalid and \n may no longer be used.",
+  "static": false,
+  "implements": [
+    "db.Buffer"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "XOR_MASK_BYTES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "byte[]",
+      "type_short": "byte[]",
+      "constant_value": null
+    },
+    {
+      "name": "NODE_TYPE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "DATA_LENGTH_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "ID_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "NODE_TYPE_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "DATA_LENGTH_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "NEXT_INDEX_ID_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "INDEX_BASE_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "9"
+    },
+    {
+      "name": "DATA_BASE_OFFSET_NONINDEXED",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "DATA_BASE_OFFSET_INDEXED",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "bufferMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.BufferMgr",
+      "type_short": "BufferMgr",
+      "constant_value": null
+    },
+    {
+      "name": "size",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "firstBufferId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "xorData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "byte[]",
+      "type_short": "byte[]",
+      "constant_value": null
+    },
+    {
+      "name": "useXORMask",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "readOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "uninitializedDataSource",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Buffer",
+      "type_short": "Buffer",
+      "constant_value": null
+    },
+    {
+      "name": "uninitializedDataSourceOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "indexBufferIdTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    },
+    {
+      "name": "dataBufferIdTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    },
+    {
+      "name": "indexesPerBuffer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "dataBaseOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "dataSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new chained buffer with optional obfuscation and uninitialized data source.\n This method may only be invoked while a database transaction \n is in progress.",
+      "javadoc": "Construct a new chained buffer with optional obfuscation and uninitialized data source.\n This method may only be invoked while a database transaction \n is in progress.\n@param size {@literal buffer size (0 \u003c size \u003c\u003d 0x7fffffff)}\n@param enableObfuscation true to enable xor-ing of stored data to facilitate data obfuscation.\n@param uninitializedDataSource optional data source for uninitialized data.  This should be a \n read-only buffer which will always be used when re-instantiating the same stored ChainedBuffer.\n This should not be specified if buffer will be completely filled/initialized.\n@param unintializedDataSourceOffset uninitialized data source offset which corresponds to\n this buffers contents.\n@param bufferMgr database buffer manager\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "enableObfuscation",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to enable xor-ing of stored data to facilitate data obfuscation."
+        },
+        {
+          "name": "uninitializedDataSource",
+          "type_long": "db.Buffer",
+          "type_short": "Buffer",
+          "comment": "optional data source for uninitialized data.  This should be a \n read-only buffer which will always be used when re-instantiating the same stored ChainedBuffer.\n This should not be specified if buffer will be completely filled/initialized."
+        },
+        {
+          "name": "unintializedDataSourceOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "uninitialized data source offset which corresponds to\n this buffers contents."
+        },
+        {
+          "name": "bufferMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "database buffer manager"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new chained buffer with optional obfuscation.\n This method may only be invoked while a database transaction \n is in progress.",
+      "javadoc": "Construct a new chained buffer with optional obfuscation.\n This method may only be invoked while a database transaction \n is in progress.\n@param size {@literal buffer size (0 \u003c size \u003c\u003d 0x7fffffff)}\n@param enableObfuscation true to enable xor-ing of stored data to facilitate data obfuscation.\n@param bufferMgr database buffer manager\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "enableObfuscation",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to enable xor-ing of stored data to facilitate data obfuscation."
+        },
+        {
+          "name": "bufferMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "database buffer manager"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new chained buffer.\n This method may only be invoked while a database transaction is in progress.",
+      "javadoc": "Construct a new chained buffer.\n This method may only be invoked while a database transaction is in progress.\n@param size {@literal buffer size (0 \u003c size \u003c\u003d 0x7fffffff)}\n@param bufferMgr database buffer manager\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "bufferMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "database buffer manager"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an existing chained buffer.",
+      "javadoc": "Construct an existing chained buffer.\n@param bufferMgr database buffer manager\n@param bufferId database buffer ID which corresponds to a stored ChainedBuffer\n@param uninitializedDataSource optional data source for uninitialized data.  This should be a \n read-only buffer which will always be used when re-instantiating the same stored ChainedBuffer.\n This should not be specified if buffer will be completely filled/initialized.\n@param unintializedDataSourceOffset uninitialized data source offset which corresponds to\n this buffers contents.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "database buffer manager"
+        },
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "database buffer ID which corresponds to a stored ChainedBuffer"
+        },
+        {
+          "name": "uninitializedDataSource",
+          "type_long": "db.Buffer",
+          "type_short": "Buffer",
+          "comment": "optional data source for uninitialized data.  This should be a \n read-only buffer which will always be used when re-instantiating the same stored ChainedBuffer.\n This should not be specified if buffer will be completely filled/initialized."
+        },
+        {
+          "name": "unintializedDataSourceOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "uninitialized data source offset which corresponds to\n this buffers contents."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an existing chained buffer.",
+      "javadoc": "Construct an existing chained buffer.\n@param bufferMgr database buffer manager\n@param bufferId database buffer ID which corresponds to a stored ChainedBuffer\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "database buffer manager"
+        },
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "database buffer ID which corresponds to a stored ChainedBuffer"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getObfuscationDataLengthFieldValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "xorMaskByte",
+      "comment": "Generate the XOR\u0027d value for the specified byteValue which is located at the\n specified bufferOffset.",
+      "javadoc": "Generate the XOR\u0027d value for the specified byteValue which is located at the\n specified bufferOffset.\n@param bufferOffset offset within a single chained buffer, valid values are in the \n range 0 to (dataSpace-1).  This value is used to determine the appropriate XOR mask.\n@param byteValue value to be XOR\u0027d against appropriate mask value\n@return XOR\u0027d value",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset within a single chained buffer, valid values are in the \n range 0 to (dataSpace-1).  This value is used to determine the appropriate XOR mask."
+        },
+        {
+          "name": "byteValue",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "value to be XOR\u0027d against appropriate mask value"
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "XOR\u0027d value"
+      },
+      "throws": []
+    },
+    {
+      "name": "getXorMask",
+      "comment": "Get an XOR obfuscation mask of the specified length in support of the \n short, int and long get/put methods.",
+      "javadoc": "Get an XOR obfuscation mask of the specified length in support of the \n short, int and long get/put methods.\n@param bufferOffset offset within a single chained buffer, valid values are in the \n range 0 to (dataSpace-1).  The value (bufferOffset+len-1) must be less than dataSpace.\n@param len mask length (2, 4, or 8)\n@return XOR mask of specified length which corresponds to specified bufferOffset.",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset within a single chained buffer, valid values are in the \n range 0 to (dataSpace-1).  The value (bufferOffset+len-1) must be less than dataSpace."
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "mask length (2, 4, or 8)"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "XOR mask of specified length which corresponds to specified bufferOffset."
+      },
+      "throws": []
+    },
+    {
+      "name": "setUnintializedDataSource",
+      "comment": "If this chained buffer was not completely filled/initialized a dataSource may be used\n obtain the initial values when needed.  When an uninitialized area is written, any unwritten\n areas within the containing block(s) will be initialized from the uninitialized dataSource.\n The same uninitialized read-only dataSource used for a chained buffer should be re-applied\n anytime this chained buffer is re-instantiated.",
+      "javadoc": "If this chained buffer was not completely filled/initialized a dataSource may be used\n obtain the initial values when needed.  When an uninitialized area is written, any unwritten\n areas within the containing block(s) will be initialized from the uninitialized dataSource.\n The same uninitialized read-only dataSource used for a chained buffer should be re-applied\n anytime this chained buffer is re-instantiated.\n@param dataSource data source for unitilized bytes\n@param dataSourceOffset offset within dataSource which corresponds to first byte of\n this chained buffer.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataSource",
+          "type_long": "db.Buffer",
+          "type_short": "Buffer",
+          "comment": "data source for unitilized bytes"
+        },
+        {
+          "name": "dataSourceOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset within dataSource which corresponds to first byte of\n this chained buffer."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasObfuscatedStorage",
+      "comment": "",
+      "javadoc": "@return true if obfuscated data storage has been enabled",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if obfuscated data storage has been enabled"
+      },
+      "throws": []
+    },
+    {
+      "name": "setReadOnly",
+      "comment": "Set the read-only state of this ChainedBuffer.  After invoking this method any\n attempt to alter this buffer will result in an UnsupportedOperation exception.",
+      "javadoc": "Set the read-only state of this ChainedBuffer.  After invoking this method any\n attempt to alter this buffer will result in an UnsupportedOperation exception.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBufferCount",
+      "comment": "Return the maximum number of buffers consumed by the storage of this DBBuffer object.\n The actual number may be less if data has not been written to the entire buffer.",
+      "javadoc": "Return the maximum number of buffers consumed by the storage of this DBBuffer object.\n The actual number may be less if data has not been written to the entire buffer.\n@return total number of buffers consumed by this ChaninedBuffer.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "total number of buffers consumed by this ChaninedBuffer."
+      },
+      "throws": []
+    },
+    {
+      "name": "setSize",
+      "comment": "Set the new size for this DBBuffer object.",
+      "javadoc": "Set the new size for this DBBuffer object.\n@param size new size\n@param preserveData if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data.\n@throws UnsupportedOperationException thrown if this ChainedBuffer utilizes an \n Uninitialized Data Source or is read-only\n@throws IOException thrown if an IO error occurs.\n@throws UnsupportedOperationException if read-only or uninitialized data source is used",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "new size"
+        },
+        {
+          "name": "preserveData",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "grow",
+      "comment": "Increase the size of this DBBuffer object.",
+      "javadoc": "Increase the size of this DBBuffer object.\n@param newSize new size.\n@param preserveData if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data.\n@throws IOException thrown if an IO error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "newSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "new size."
+        },
+        {
+          "name": "preserveData",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "shrinkToSingleBuffer",
+      "comment": "Attempt to shrink this DBBuffer object into a single data buffer.\n The current size field reflects the new small size.",
+      "javadoc": "Attempt to shrink this DBBuffer object into a single data buffer.\n The current \u003ccode\u003esize\u003c/code\u003e field reflects the new small size.\n@param preserveData if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data.\n@return true if successful, false if too big for single buffer.\n@throws IOException thrown if an IO error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "preserveData",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if successful, false if too big for single buffer."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "shrink",
+      "comment": "Decrease the size of this DBBuffer object.",
+      "javadoc": "Decrease the size of this DBBuffer object.\n@param newSize new size.\n@param preserveData if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "newSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "new size."
+        },
+        {
+          "name": "preserveData",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, existing data is preserved at the original offsets.  If false,\n no additional effort will be expended to preserve data."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "split",
+      "comment": "Split this DBBuffer object into two separate DBBuffers.  This DBBuffer remains\n valid but its new size is equal offset.  The newly created DBBuffer is \n returned.",
+      "javadoc": "Split this DBBuffer object into two separate DBBuffers.  This DBBuffer remains\n valid but its new size is equal offset.  The newly created DBBuffer is \n returned.\n@param offset the split point.  The byte at this offset becomes the first\n byte within the new buffer.\n@return the new DBBuffer object.\n@throws UnsupportedOperationException thrown if this ChainedBuffer is read-only\n@throws ArrayIndexOutOfBoundsException if offset is invalid.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the split point.  The byte at this offset becomes the first\n byte within the new buffer."
+        }
+      ],
+      "return": {
+        "type_long": "db.ChainedBuffer",
+        "type_short": "ChainedBuffer",
+        "comment": "the new DBBuffer object."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "append",
+      "comment": "Append the contents of the specified dbBuf onto the end of this buffer.\n The size of this buffer increases by the size of dbBuf.  When the operation \n is complete, dbBuf object is no longer valid and must not be used.",
+      "javadoc": "Append the contents of the specified dbBuf onto the end of this buffer.\n The size of this buffer increases by the size of dbBuf.  When the operation \n is complete, dbBuf object is no longer valid and must not be used.\n@param dbBuf the buffer to be appended to this buffer.\n@throws IOException thrown if an IO error occurs\n@throws UnsupportedOperationException if read-only, uninitialized data source is used,\n or both buffers do not have the same obfuscation enablement",
+      "static": false,
+      "params": [
+        {
+          "name": "dbBuf",
+          "type_long": "db.ChainedBuffer",
+          "type_short": "ChainedBuffer",
+          "comment": "the buffer to be appended to this buffer."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "appendIndexBuffer",
+      "comment": "Append a new initialized index buffer to the index buffer provided.\n The index buffer provided is always released.",
+      "javadoc": "Append a new initialized index buffer to the index buffer provided.\n The index buffer provided is always released.\n@param indexBuffer the last index buffer.\n@return DataBuffer\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "indexBuffer",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "the last index buffer."
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": "DataBuffer"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "allocateIndex",
+      "comment": "Allocate in-memory index and compute buffer parameters for index mode.",
+      "javadoc": "Allocate in-memory index and compute buffer parameters for index mode.\n@param buffer sample buffer for computing data and index parameters.\n@return number of index entries",
+      "static": false,
+      "params": [
+        {
+          "name": "buffer",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "sample buffer for computing data and index parameters."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of index entries"
+      },
+      "throws": []
+    },
+    {
+      "name": "createIndex",
+      "comment": "Create and initialize a new index for this DBBuffer.\n The entire index is allocated within the database (i.e., Index Nodes).  \n Data Nodes are only allocated as needed when data is written.",
+      "javadoc": "Create and initialize a new index for this DBBuffer.\n The entire index is allocated within the database (i.e., Index Nodes).  \n Data Nodes are only allocated as needed when data is written.\n@param indexBuffer first index buffer.  This buffer will be released\n prior to returning.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "indexBuffer",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "first index buffer.  This buffer will be released\n prior to returning."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "buildIndex",
+      "comment": "Build the in-memory index for a previously stored DBBuffer.",
+      "javadoc": "Build the in-memory index for a previously stored DBBuffer.\n@param indexBuffer first index buffer.  This buffer will be released\n prior to returning.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "indexBuffer",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "first index buffer.  This buffer will be released\n prior to returning."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getId",
+      "comment": "Get the first buffer ID associated with this chained buffer.  This DBBuffer\n may be reinstatiated using the returned buffer ID provided subsequent changes \n are not made.",
+      "javadoc": "Get the first buffer ID associated with this chained buffer.  This DBBuffer\n may be reinstatiated using the returned buffer ID provided subsequent changes \n are not made.\n@return buffer ID",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "buffer ID"
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "Delete and release all underlying DataBuffers.",
+      "javadoc": "Delete and release all underlying DataBuffers.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getBytes",
+      "comment": "Get byte data from the specified chained buffer.",
+      "javadoc": "Get byte data from the specified chained buffer.\n@param offset ChainedBuffer offset (needed for uninitialized buffer pass-through)\n@param index buffer index within chain\n@param bufferDataOffset data offset within specified buffer\n@param data destination byte array\n@param dataOffset destination array offset within data\n@param length number of bytes to read\n@return int actual number of byte read.\n This could be smaller than length if the end of buffer is \n encountered while reading data.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "ChainedBuffer offset (needed for uninitialized buffer pass-through)"
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer index within chain"
+        },
+        {
+          "name": "bufferDataOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data offset within specified buffer"
+        },
+        {
+          "name": "data",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "destination byte array"
+        },
+        {
+          "name": "dataOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "destination array offset within data"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of bytes to read"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int actual number of byte read.\n This could be smaller than length if the end of buffer is \n encountered while reading data."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "data",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "dataOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "data",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLong",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getShort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "short",
+        "type_short": "short",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "length",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fill",
+      "comment": "Fill the buffer over the specified range with a byte value.",
+      "javadoc": "Fill the buffer over the specified range with a byte value.\n@param startOffset starting offset, inclusive\n@param endOffset ending offset, exclusive\n@param fillByte byte value\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "startOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "starting offset, inclusive"
+        },
+        {
+          "name": "endOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "ending offset, exclusive"
+        },
+        {
+          "name": "fillByte",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "byte value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "putBytes",
+      "comment": "Put data into the specified chained buffer.  \n NOTE: The caller of this method is responsible for allocating the xorData byte array\n used for applying the obfuscation XOR mask.",
+      "javadoc": "Put data into the specified chained buffer.  \n NOTE: The caller of this method is responsible for allocating the xorData byte array\n used for applying the obfuscation XOR mask.\n@param index index of within buffer chain\n@param bufferDataOffset data buffer offset\n@param data source byte array\n@param dataOffset source array offset within data\n@param length number of bytes to write\n@return int actual number of bytes written.  \n This could be smaller than length if the end of buffer is \n encountered while writing data.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of within buffer chain"
+        },
+        {
+          "name": "bufferDataOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data buffer offset"
+        },
+        {
+          "name": "data",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "source byte array"
+        },
+        {
+          "name": "dataOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "source array offset within data"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of bytes to write"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int actual number of bytes written.  \n This could be smaller than length if the end of buffer is \n encountered while writing data."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "fill",
+      "comment": "Fill buffer with data provided by InputStream.  If \n stream is exhausted, the remainder of the buffer will be filled\n with 0\u0027s.",
+      "javadoc": "Fill buffer with data provided by InputStream.  If \n stream is exhausted, the remainder of the buffer will be filled\n with 0\u0027s.\n@param in data source\n@throws IOException thrown if IO error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "in",
+          "type_long": "java.io.InputStream",
+          "type_short": "InputStream",
+          "comment": "data source"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "put",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "data",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        },
+        {
+          "name": "dataOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "put",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "putByte",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "b",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "putInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "v",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "putLong",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "v",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "putShort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "v",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBuffer",
+      "comment": "Get a data buffer.",
+      "javadoc": "Get a data buffer.\n@param index index of within buffer chain\n@return requested data buffer.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of within buffer chain"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": "requested data buffer."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "initializeAllocatedBuffer",
+      "comment": "Initialize specified DataBuffer which corresponds to the chain index.",
+      "javadoc": "Initialize specified DataBuffer which corresponds to the chain index.\n@param chainBufferIndex chain buffer index\n@param buf newly allocated database buffer\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "chainBufferIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "chain buffer index"
+        },
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "newly allocated database buffer"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "addBuffer",
+      "comment": "Add a new data buffer as an indexed buffer.",
+      "javadoc": "Add a new data buffer as an indexed buffer.\n@param index buffer index.\n@param buf new data buffer.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer index."
+        },
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "new data buffer."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    }
+  ]
+}

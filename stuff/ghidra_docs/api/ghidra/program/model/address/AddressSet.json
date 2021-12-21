@@ -1,0 +1,1691 @@
+{
+  "name": "AddressSet",
+  "comment": "Class for storing sets of addresses.  This implementation uses a red-black tree where each\n entry node in the tree stores an address range.  The key for an entry node is the minimum address\n of the range and the value is the maximum address of the range.",
+  "javadoc": "Class for storing sets of addresses.  This implementation uses a red-black tree where each\n entry node in the tree stores an address range.  The key for an entry node is the minimum address\n of the range and the value is the maximum address of the range.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.address.AddressSetView"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "LOGBASE2",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "double",
+      "type_short": "double",
+      "constant_value": null
+    },
+    {
+      "name": "rbTree",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.RedBlackTree\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+      "type_short": "RedBlackTree",
+      "constant_value": null
+    },
+    {
+      "name": "lastNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+      "type_short": "RedBlackEntry",
+      "constant_value": null
+    },
+    {
+      "name": "addressCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new empty Address Set.",
+      "javadoc": "Create a new empty Address Set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new empty Address Set.",
+      "javadoc": "Create a new empty Address Set.\n@param factory NOT USED.\n@deprecated use {@link #AddressSet()}  (will be kept until at least Ghidra 6.2)",
+      "static": false,
+      "params": [
+        {
+          "name": "factory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "NOT USED."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new Address Set from an address range.",
+      "javadoc": "Create a new Address Set from an address range.\n@param range the range of addresses to include in this set.",
+      "static": false,
+      "params": [
+        {
+          "name": "range",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": "the range of addresses to include in this set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new Address Set from an address range.",
+      "javadoc": "Create a new Address Set from an address range.\n@param factory NOT USED.\n@param range the range of addresses to include in this set.\n@deprecated use {@link #AddressSet(AddressRange)}  (will be kept until at least Ghidra 6.2)",
+      "static": false,
+      "params": [
+        {
+          "name": "factory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "NOT USED."
+        },
+        {
+          "name": "range",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": "the range of addresses to include in this set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new Address set containing a single range",
+      "javadoc": "Creates a new Address set containing a single range\n@param start the start address of the range\n@param end the end address of the range\n@throws IllegalArgumentException if the start and end addresses are in different spaces.  To\n avoid this, use the constructor  {@link #AddressSet(Program, Address, Address)}",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address of the range"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address of the range"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new Address set containing a single range",
+      "javadoc": "Creates a new Address set containing a single range\n@param start the start address of the range\n@param end the end address of the range\n@param factory NOT USED.\n@deprecated use {@link #AddressSet(Address, Address)}  (will be kept until at least Ghidra 6.2)",
+      "static": false,
+      "params": [
+        {
+          "name": "factory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "NOT USED."
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address of the range"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address of the range"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new Address set containing a single range",
+      "javadoc": "Creates a new Address set containing a single range\n@param start the start address of the range\n@param end the end address of the range\n@param program the program whose AddressFactory is used to resolve address ranges where the\n start and end are in different address spaces. If you use the constructor with just the\n start and end address and the addresses are in different spaces, you would get an\n IllegalArgumentException.",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program whose AddressFactory is used to resolve address ranges where the\n start and end are in different address spaces. If you use the constructor with just the\n start and end address and the addresses are in different spaces, you would get an\n IllegalArgumentException."
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address of the range"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address of the range"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new Address Set from an existing Address Set.",
+      "javadoc": "Create a new Address Set from an existing Address Set.\n@param set Existing Address Set to clone.\n@param factory NOT USED.\n@deprecated use {@link #AddressSet(AddressSetView)}  (will be kept until at least Ghidra 6.2)",
+      "static": false,
+      "params": [
+        {
+          "name": "factory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "NOT USED."
+        },
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "Existing Address Set to clone."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new Address Set from an existing Address Set.",
+      "javadoc": "Create a new Address Set from an existing Address Set.\n@param set Existing Address Set to clone.",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "Existing Address Set to clone."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new Address containing a single address.",
+      "javadoc": "Create a new Address containing a single address.\n@param addr the address to be included in this address set.\n@param factory NOT USED.\n@deprecated use {@link #AddressSet(Address)}  (will be kept until at least Ghidra 6.2)",
+      "static": false,
+      "params": [
+        {
+          "name": "factory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "NOT USED."
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to be included in this address set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new Address containing a single address.",
+      "javadoc": "Create a new Address containing a single address.\n@param addr the address to be included in this address set.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to be included in this address set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Adds the given address to this set.",
+      "javadoc": "Adds the given address to this set.\n@param address the address to add",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Add an address range to this set.",
+      "javadoc": "Add an address range to this set.\n@param range the range to add.",
+      "static": false,
+      "params": [
+        {
+          "name": "range",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": "the range to add."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Adds the range to this set",
+      "javadoc": "Adds the range to this set\n@param start the start address of the range to add\n@param end the end address of the range to add",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address of the range to add"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address of the range to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addRange",
+      "comment": "Adds the range to this set",
+      "javadoc": "Adds the range to this set\n@param start the start address of the range to add\n@param end the end address of the range to add\n@throws IllegalArgumentException if the start and end addresses are in different spaces.  To\n avoid this, use the constructor  {@link #addRange(Program, Address, Address)}",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address of the range to add"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address of the range to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addRange",
+      "comment": "Adds a range of addresses to this set.",
+      "javadoc": "Adds a range of addresses to this set.\n@param program program whose AddressFactory is used to resolve address ranges that span\n multiple address spaces.\n@param start the start address of the range to add\n@param end the end address of the range to add",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program whose AddressFactory is used to resolve address ranges that span\n multiple address spaces."
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address of the range to add"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address of the range to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Add all addresses of the given AddressSet to this set.",
+      "javadoc": "Add all addresses of the given AddressSet to this set.\n@param addressSet set of addresses to add.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to add."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "Deletes an address range from this set.",
+      "javadoc": "Deletes an address range from this set.\n@param range AddressRange to remove from this set",
+      "static": false,
+      "params": [
+        {
+          "name": "range",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": "AddressRange to remove from this set"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "Deletes a range of addresses from this set",
+      "javadoc": "Deletes a range of addresses from this set\n@param start the starting address of the range to be removed\n@param end the ending address of the range to be removed (inclusive)",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the starting address of the range to be removed"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the ending address of the range to be removed (inclusive)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteRange",
+      "comment": "Deletes a range of addresses from this set",
+      "javadoc": "Deletes a range of addresses from this set\n@param start the starting address of the range to be removed\n@param end the ending address of the range to be removed",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the starting address of the range to be removed"
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the ending address of the range to be removed"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "Delete all addresses in the given AddressSet from this set.",
+      "javadoc": "Delete all addresses in the given AddressSet from this set.\n@param addressSet set of addresses to remove from this set.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to remove from this set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Removes all addresses from the set.",
+      "javadoc": "Removes all addresses from the set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printRanges",
+      "comment": "Returns a string displaying the ranges in this set.",
+      "javadoc": "Returns a string displaying the ranges in this set.\n@return a string displaying the ranges in this set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "a string displaying the ranges in this set."
+      },
+      "throws": []
+    },
+    {
+      "name": "toList",
+      "comment": "Returns a list of the AddressRanges in this set.",
+      "javadoc": "Returns a list of the AddressRanges in this set.\n@return a list of the AddressRanges in this set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "List",
+        "comment": "a list of the AddressRanges in this set."
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasSameAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersects",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersectRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersect",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "union",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "subtract",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmpty",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "iterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "iterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "iterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.address.AddressRange\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersects",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "xor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRangeContaining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFirstRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersectsBinary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersectsLinear",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "containsLinear",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "useLinearAlgorithm",
+      "comment": "Determines if the optimal algorithm for an operation.  Generally set operations can be done\n either by applying each range of the given address set to this set OR by linearly visiting\n each range in both this set and the other set.  The first approach involves doing a\n binary search in this set for each range in the given set costing Nlog(M) operations where\n N is the size of this set and M is the size of the other set.  The second approach involves\n visiting every range in both sets in order so the cost is N + M.  Therefor, if N+M is less\n than Nlog(M), we should use a linear algorithm.",
+      "javadoc": "Determines if the optimal algorithm for an operation.  Generally set operations can be done\n either by applying each range of the given address set to this set OR by linearly visiting\n each range in both this set and the other set.  The first approach involves doing a\n binary search in this set for each range in the given set costing Nlog(M) operations where\n N is the size of this set and M is the size of the other set.  The second approach involves\n visiting every range in both sets in order so the cost is N + M.  Therefor, if N+M is less\n than Nlog(M), we should use a linear algorithm.\n@param set the other address set to operate against.\n@return true if a linear algorithm will likely be faster that a series of binary searches.",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the other address set to operate against."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a linear algorithm will likely be faster that a series of binary searches."
+      },
+      "throws": []
+    },
+    {
+      "name": "containsBinary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersectRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersectLinear",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "intersectBinary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "min",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr1",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "addr2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "compareRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "range1",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": ""
+        },
+        {
+          "name": "range2",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet.RangeCompare",
+        "type_short": "RangeCompare",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "compareRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "minAddr1",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "maxAddr1",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "minAddr2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "maxAddr2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet.RangeCompare",
+        "type_short": "RangeCompare",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "xorSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+          "type_short": "RedBlackEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+          "type_short": "RedBlackEntry",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "consumeFollowOnNodes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+          "type_short": "RedBlackEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkValidRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createRangeNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+        "type_short": "RedBlackEntry",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateRangeEndAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+          "type_short": "RedBlackEntry",
+          "comment": ""
+        },
+        {
+          "name": "newEnd",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteRangeNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+          "type_short": "RedBlackEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.datastruct.RedBlackEntry\u003cghidra.program.model.address.Address,ghidra.program.model.address.Address\u003e",
+        "type_short": "RedBlackEntry",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findFirstAddressInCommon",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteFromMin",
+      "comment": "Delete all addresses from the minimum address in the set up to and including toAddr.\n Addresses less-than-or-equal to specified \n address based upon Address comparison.",
+      "javadoc": "Delete all addresses from the minimum address in the set up to and including toAddr.\n Addresses less-than-or-equal to specified \n address based upon {@link Address} comparison.\n@param toAddr only addresses greater than toAddr will be left in the set.",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "only addresses greater than toAddr will be left in the set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteToMax",
+      "comment": "Delete all addresses starting at the fromAddr to the maximum address in the set.\n Addresses greater-than-or-equal to specified \n address based upon Address comparison.",
+      "javadoc": "Delete all addresses starting at the fromAddr to the maximum address in the set.\n Addresses greater-than-or-equal to specified \n address based upon {@link Address} comparison.\n@param fromAddr only addresses less than fromAddr will be left in the set.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "only addresses less than fromAddr will be left in the set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

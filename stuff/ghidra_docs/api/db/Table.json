@@ -1,0 +1,2290 @@
+{
+  "name": "Table",
+  "comment": "Table implementation class.\n NOTE: Most public methods are synchronized on the associated DBHandle instance\n to prevent concurrent modification by multiple threads.",
+  "javadoc": "Table implementation class.\n NOTE: Most public methods are synchronized on the associated DBHandle instance\n to prevent concurrent modification by multiple threads.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "db",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.DBHandle",
+      "type_short": "DBHandle",
+      "constant_value": null
+    },
+    {
+      "name": "tableRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.TableRecord",
+      "type_short": "TableRecord",
+      "constant_value": null
+    },
+    {
+      "name": "schema",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Schema",
+      "type_short": "Schema",
+      "constant_value": null
+    },
+    {
+      "name": "nodeMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.NodeMgr",
+      "type_short": "NodeMgr",
+      "constant_value": null
+    },
+    {
+      "name": "rootBufferId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "recordCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "maximumKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "secondaryIndexes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.IntObjectHashtable\u003cdb.IndexTable\u003e",
+      "type_short": "IntObjectHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "indexedColumns",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    },
+    {
+      "name": "isIndexed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "modCount",
+      "comment": "Modification counter",
+      "javadoc": "Modification counter",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new or existing Table.",
+      "javadoc": "Construct a new or existing Table.\n@param db database handle\n@param tableRecord master table record for this table.\n@throws UnsupportedFieldException if unsupported schema field encountered",
+      "static": false,
+      "params": [
+        {
+          "name": "db",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "database handle"
+        },
+        {
+          "name": "tableRecord",
+          "type_long": "db.TableRecord",
+          "type_short": "TableRecord",
+          "comment": "master table record for this table."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "db.Field.UnsupportedFieldException",
+          "type_short": "UnsupportedFieldException",
+          "comment": "if unsupported schema field encountered"
+        }
+      ]
+    },
+    {
+      "name": "getDBHandle",
+      "comment": "",
+      "javadoc": "@return the database handle used by this table.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.DBHandle",
+        "type_short": "DBHandle",
+        "comment": "the database handle used by this table."
+      },
+      "throws": []
+    },
+    {
+      "name": "useLongKeys",
+      "comment": "Determine if this table uses long keys.",
+      "javadoc": "Determine if this table uses long keys.\n@return true if this table utilizes long keys.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this table utilizes long keys."
+      },
+      "throws": []
+    },
+    {
+      "name": "useFixedKeys",
+      "comment": "Determine if this table uses FixedField keys.",
+      "javadoc": "Determine if this table uses FixedField keys.\n@return true if this table utilizes FixedField keys.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this table utilizes FixedField keys."
+      },
+      "throws": []
+    },
+    {
+      "name": "tableRecordChanged",
+      "comment": "Callback notification indicating that the tableRecord has been\n changed by the masterTable.  This method is called via the MasterTable\n following an undo or redo.",
+      "javadoc": "Callback notification indicating that the tableRecord has been\n changed by the masterTable.  This method is called via the MasterTable\n following an undo or redo.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidate",
+      "comment": "Mark table as invalid.\n Subsequent table use may generate an exception.",
+      "javadoc": "Mark table as invalid.\n Subsequent table use may generate an exception.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableNum",
+      "comment": "Get this tables master table number.",
+      "javadoc": "Get this tables master table number.\n@return table number for this table.  Each table has a unique table \n number within the master table.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "table number for this table.  Each table has a unique table \n number within the master table."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllStatistics",
+      "comment": "Get table statistics.",
+      "javadoc": "Get table statistics.\n@return list of diagnostic statistics data for this table and related index tables.\n@throws IOException database IO error",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.TableStatistics[]",
+        "type_short": "db.TableStatistics[]",
+        "comment": "list of diagnostic statistics data for this table and related index tables."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "database IO error"
+        }
+      ]
+    },
+    {
+      "name": "getBTreeNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.BTreeNode",
+        "type_short": "BTreeNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFieldKeyNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.FieldKeyNode",
+        "type_short": "FieldKeyNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "accumulateNodeStatistics",
+      "comment": "Accumulate node statistics",
+      "javadoc": "Accumulate node statistics\n@param stats statistics collection object\n@param bufferId node buffer ID to examine\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "stats",
+          "type_long": "db.TableStatistics",
+          "type_short": "TableStatistics",
+          "comment": "statistics collection object"
+        },
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "node buffer ID to examine"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getStatistics",
+      "comment": "Compile table statitics.",
+      "javadoc": "Compile table statitics.\n@return table statistics data\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.TableStatistics",
+        "type_short": "TableStatistics",
+        "comment": "table statistics data"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "addIndex",
+      "comment": "Add an existing secondary index.\n NOTE: Records for this table instance must not be modified until\n after all existing secondary indexes are added.  Failure to comply may\n result in an inconsistent index.",
+      "javadoc": "Add an existing secondary index.\n NOTE: Records for this table instance must not be modified until\n after all existing secondary indexes are added.  Failure to comply may\n result in an inconsistent index.\n@param indexTable secondary index table",
+      "static": false,
+      "params": [
+        {
+          "name": "indexTable",
+          "type_long": "db.IndexTable",
+          "type_short": "IndexTable",
+          "comment": "secondary index table"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "insertedRecord",
+      "comment": "Callback method for when a new record is added.\n Used for maintaining indexes only.  May be called before \n the old record is actually inserted.",
+      "javadoc": "Callback method for when a new record is added.\n Used for maintaining indexes only.  May be called before \n the old record is actually inserted.\n@param record new record which has been added\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "new record which has been added"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "updatedRecord",
+      "comment": "Callback method for when an existing record is modified.\n Used for maintaining indexes only.  May be called before \n the old record is actually updated.",
+      "javadoc": "Callback method for when an existing record is modified.\n Used for maintaining indexes only.  May be called before \n the old record is actually updated.\n@param oldRecord old record\n@param newRecord new record\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "oldRecord",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "old record"
+        },
+        {
+          "name": "newRecord",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "new record"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "deletedRecord",
+      "comment": "Callback method for when existing records are deleted.\n Used for maintaining indexes only.  May be called before \n the old record is actually deleted.",
+      "javadoc": "Callback method for when existing records are deleted.\n Used for maintaining indexes only.  May be called before \n the old record is actually deleted.\n@param oldRecord record which has been deleted\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "oldRecord",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "record which has been deleted"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "rebuild",
+      "comment": "Rebuild table and associated indexes to ensure consistent state.",
+      "javadoc": "Rebuild table and associated indexes to ensure consistent state.\n@param monitor task monitor\n@throws IOException if unable to rebuild\n@throws CancelledException if task was cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if unable to rebuild"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if task was cancelled"
+        }
+      ]
+    },
+    {
+      "name": "isConsistent",
+      "comment": "Check the consistency of this table and its associated index tables.",
+      "javadoc": "Check the consistency of this table and its associated index tables.\n@param monitor task monitor\n@return true if consistency check passed, else false\n@throws IOException thrown if IO error occurs\n@throws CancelledException is task was cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if consistency check passed, else false"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "is task was cancelled"
+        }
+      ]
+    },
+    {
+      "name": "isConsistent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "indexName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "logIndexConsistencyError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "indexName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteAll",
+      "comment": "Delete all records within this table.",
+      "javadoc": "Delete all records within this table.\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getIndexedColumns",
+      "comment": "Get the list of columns which are indexed",
+      "javadoc": "Get the list of columns which are indexed\n@return list of indexed columns",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int[]",
+        "type_short": "int[]",
+        "comment": "list of indexed columns"
+      },
+      "throws": []
+    },
+    {
+      "name": "removeIndex",
+      "comment": "Remove the index associated with the specified column.",
+      "javadoc": "Remove the index associated with the specified column.\n@param columnIndex column corresponding to the column index which \n should be deleted.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "column corresponding to the column index which \n should be deleted."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getSchema",
+      "comment": "Get this tables schema.",
+      "javadoc": "Get this tables schema.\n@return table schema",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.Schema",
+        "type_short": "Schema",
+        "comment": "table schema"
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Get table name",
+      "javadoc": "Get table name\n@return table name",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "table name"
+      },
+      "throws": []
+    },
+    {
+      "name": "setName",
+      "comment": "Change the name of this table",
+      "javadoc": "Change the name of this table\n@param name new table name\n@return true if rename successful\n@throws DuplicateNameException if new table name already exists",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new table name"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if rename successful"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if new table name already exists"
+        }
+      ]
+    },
+    {
+      "name": "getRecordCount",
+      "comment": "Get record count",
+      "javadoc": "Get record count\n@return record count",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "record count"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxKey",
+      "comment": "Get the maximum record key which has ever been assigned within this table.\n This method is only valid for those tables which employ a long key and may\n not reflect records which have been removed (i.e., returned key may not \n correspond to an existing record).",
+      "javadoc": "Get the maximum record key which has ever been assigned within this table.\n This method is only valid for those tables which employ a long key and may\n not reflect records which have been removed (i.e., returned key may not \n correspond to an existing record).\n@return maximum record key.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "maximum record key."
+      },
+      "throws": []
+    },
+    {
+      "name": "getKey",
+      "comment": "Get the next available key.\n This method is only valid for those tables which employ a long key.",
+      "javadoc": "Get the next available key.\n This method is only valid for those tables which employ a long key.\n@return next available key.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "next available key."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasRecord",
+      "comment": "Determine if this table contains a record with the specified key.",
+      "javadoc": "Determine if this table contains a record with the specified key.\n@param key record key.\n@return true if record exists with key, else false.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "record key."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if record exists with key, else false."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "hasRecord",
+      "comment": "Determine if this table contains a record with the specified key.",
+      "javadoc": "Determine if this table contains a record with the specified key.\n@param key record key.\n@return true if record exists with key, else false.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "record key."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if record exists with key, else false."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecord",
+      "comment": "Get the record identified by the specified key value.",
+      "javadoc": "Get the record identified by the specified key value.\n@param key unique record key.\n@return Record the record identified by key, or null if record was not\n found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "unique record key."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "Record the record identified by key, or null if record was not\n found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecord",
+      "comment": "Get the record identified by the specified key value.",
+      "javadoc": "Get the record identified by the specified key value.\n@param key unique record key.\n@return Record the record identified by key, or null if record was not\n found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "unique record key."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "Record the record identified by key, or null if record was not\n found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordBefore",
+      "comment": "Get the record with the maximum key value which is less than  \n the specified key.",
+      "javadoc": "Get the record with the maximum key value which is less than  \n the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value less than the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value less than the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordBefore",
+      "comment": "Get the record with the maximum key value which is less than  \n the specified key.",
+      "javadoc": "Get the record with the maximum key value which is less than  \n the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value less than the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value less than the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordAfter",
+      "comment": "Get the record with the minimum key value which is greater than \n the specified key.",
+      "javadoc": "Get the record with the minimum key value which is greater than \n the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value greater than the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value greater than the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordAfter",
+      "comment": "Get the record with the minimum key value which is greater than \n the specified key.",
+      "javadoc": "Get the record with the minimum key value which is greater than \n the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value greater than the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value greater than the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordAtOrBefore",
+      "comment": "Get the record with the maximum key value which is less than or equal \n to the specified key.",
+      "javadoc": "Get the record with the maximum key value which is less than or equal \n to the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value less than or equal to the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value less than or equal to the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordAtOrBefore",
+      "comment": "Get the record with the maximum key value which is less than or equal \n to the specified key.",
+      "javadoc": "Get the record with the maximum key value which is less than or equal \n to the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value less than or equal to the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value less than or equal to the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordAtOrAfter",
+      "comment": "Get the record with the minimum key value which is greater than or equal \n to the specified key.",
+      "javadoc": "Get the record with the minimum key value which is greater than or equal \n to the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value greater than or equal to the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value greater than or equal to the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordAtOrAfter",
+      "comment": "Get the record with the minimum key value which is greater than or equal \n to the specified key.",
+      "javadoc": "Get the record with the minimum key value which is greater than or equal \n to the specified key.\n@param key unique key which may or may not exist within the table.\n@return the first record which has a key value greater than or equal to the \n specified key, or null if no record was found.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "unique key which may or may not exist within the table."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": "the first record which has a key value greater than or equal to the \n specified key, or null if no record was found."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "putRecord",
+      "comment": "Put the specified record into the stored BTree.",
+      "javadoc": "Put the specified record into the stored BTree.\n@param record the record to be stored.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "the record to be stored."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "putLongKeyRecord",
+      "comment": "Store a record which uses a long key",
+      "javadoc": "Store a record which uses a long key\n@param record recore to be inserted or updated\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "recore to be inserted or updated"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "putFieldKeyRecord",
+      "comment": "Store a record which uses a Field key",
+      "javadoc": "Store a record which uses a Field key\n@param record record to be inserted or updated\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "record to be inserted or updated"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "deleteRecord",
+      "comment": "Delete a record identified by the specified key value.",
+      "javadoc": "Delete a record identified by the specified key value.\n@param key unique record key.\n@return true if record was deleted successfully.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "unique record key."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if record was deleted successfully."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "deleteRecord",
+      "comment": "Delete a record identified by the specified key value.",
+      "javadoc": "Delete a record identified by the specified key value.\n@param key unique record key.\n@return true if record was deleted successfully.\n@throws IOException throw if an IO Error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "unique record key."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if record was deleted successfully."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "throw if an IO Error occurs"
+        }
+      ]
+    },
+    {
+      "name": "deleteRecords",
+      "comment": "Delete all records whose keys fall within the specified range, inclusive.",
+      "javadoc": "Delete all records whose keys fall within the specified range, inclusive.\n@param startKey minimum key value\n@param endKey maximum key value\n@return true if one or more records were deleted.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "startKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "minimum key value"
+        },
+        {
+          "name": "endKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "maximum key value"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if one or more records were deleted."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "deleteRecords",
+      "comment": "Delete all records whose keys fall within the specified range, inclusive.",
+      "javadoc": "Delete all records whose keys fall within the specified range, inclusive.\n@param startKey minimum key value\n@param endKey maximum key value\n@return true if one or more records were deleted.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "startKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "minimum key value"
+        },
+        {
+          "name": "endKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "maximum key value"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if one or more records were deleted."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "findRecords",
+      "comment": "Find the primary keys corresponding to those records which contain the\n specified field value in the specified record column.  The table must\n have been created with long keys and a secondary index on the specified \n column index.",
+      "javadoc": "Find the primary keys corresponding to those records which contain the\n specified field value in the specified record column.  The table must\n have been created with long keys and a secondary index on the specified \n column index.\n@param field the field value\n@param columnIndex the record schema column which should be searched.\n@return list of primary keys\n@throws IOException if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the field value"
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the record schema column which should be searched."
+        }
+      ],
+      "return": {
+        "type_long": "db.Field[]",
+        "type_short": "db.Field[]",
+        "comment": "list of primary keys"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "getMatchingRecordCount",
+      "comment": "Get the number of records which contain the\n specified field value in the specified record column.  The table must\n have been created with a secondary index on the specified column index.",
+      "javadoc": "Get the number of records which contain the\n specified field value in the specified record column.  The table must\n have been created with a secondary index on the specified column index.\n@param field the field value\n@param columnIndex the record schema column which should be searched.\n@return number of records which match the specified field value.\n@throws IOException if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the field value"
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the record schema column which should be searched."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of records which match the specified field value."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "hasRecord",
+      "comment": "Determine if a record exists with the specified value within the specified\n column.  The table must have been created with a secondary index on the \n specified column index.",
+      "javadoc": "Determine if a record exists with the specified value within the specified\n column.  The table must have been created with a secondary index on the \n specified column index.\n@param field the field value\n@param columnIndex the record schema column which should be searched.\n@return true if one or more records exis with the specified value.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the field value"
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the record schema column which should be searched."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if one or more records exis with the specified value."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexFieldIterator",
+      "comment": "Iterate over all the unique index field values.  Index values are\n returned in an ascending sorted order with the initial iterator position\n set to the minimum index value.",
+      "javadoc": "Iterate over all the unique index field values.  Index values are\n returned in an ascending sorted order with the initial iterator position\n set to the minimum index value.\n@param columnIndex identifies an indexed column.\n@return index field iterator.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "identifies an indexed column."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "index field iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexFieldIterator",
+      "comment": "Iterate over all the unique index field values within the specified range identified\n by minField and maxField.  Index values are returned in an ascending sorted order.",
+      "javadoc": "Iterate over all the unique index field values within the specified range identified\n by minField and maxField.  Index values are returned in an ascending sorted order.\n@param minField minimum index column value, if null absolute minimum is used\n@param maxField maximum index column value, if null absolute maximum is used\n@param before if true initial position is before minField, else position\n is after maxField\n@param columnIndex identifies an indexed column.\n@return index field iterator.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "minField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "minimum index column value, if null absolute minimum is used"
+        },
+        {
+          "name": "maxField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "maximum index column value, if null absolute maximum is used"
+        },
+        {
+          "name": "before",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true initial position is before minField, else position\n is after maxField"
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "identifies an indexed column."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "index field iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexFieldIterator",
+      "comment": "Iterate over all the unique index field values within the specified range identified\n by minField and maxField.  Index values are returned in an ascending sorted order with the \n initial iterator position corresponding to the startField.",
+      "javadoc": "Iterate over all the unique index field values within the specified range identified\n by minField and maxField.  Index values are returned in an ascending sorted order with the \n initial iterator position corresponding to the startField.\n@param minField minimum index column value, if null absolute minimum is used\n@param maxField maximum index column value, if null absolute maximum is used\n@param startField index column value corresponding to initial position of iterator\n@param before if true initial position is before startField value, else position\n is after startField value\n@param columnIndex identifies an indexed column.\n@return index field iterator.\n@throws IOException if a secondary index does not exist for the specified\n column or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "minField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "minimum index column value, if null absolute minimum is used"
+        },
+        {
+          "name": "maxField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "maximum index column value, if null absolute maximum is used"
+        },
+        {
+          "name": "startField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "index column value corresponding to initial position of iterator"
+        },
+        {
+          "name": "before",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true initial position is before startField value, else position\n is after startField value"
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "identifies an indexed column."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "index field iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "indexIterator",
+      "comment": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  This table must have been constructed with a secondary\n index on the specified column.",
+      "javadoc": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  This table must have been constructed with a secondary\n index on the specified column.\n@param columnIndex schema column to sort on.\n@return RecordIterator record iterator.\n@throws IOException if a secondary index does not exist for the specified\n column or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "RecordIterator record iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "indexIterator",
+      "comment": "Iterate over a range of records using a secondary index.  Sorting occurs on the\n specified schema column. The iterator is initially positioned before the startValue.\n This table must have been constructed with a secondary index on the specified column.",
+      "javadoc": "Iterate over a range of records using a secondary index.  Sorting occurs on the\n specified schema column. The iterator is initially positioned before the startValue.\n This table must have been constructed with a secondary index on the specified column.\n@param columnIndex schema column to sort on.\n@param startValue the starting and minimum value of the secondary index field.\n@param endValue the ending and maximum value of the secondary index field.\n@param atStart if true, position the iterator before the start value. \n Otherwise, position the iterator after the end value.\n@return record iterator.\n@throws IOException if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on."
+        },
+        {
+          "name": "startValue",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the starting and minimum value of the secondary index field."
+        },
+        {
+          "name": "endValue",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the ending and maximum value of the secondary index field."
+        },
+        {
+          "name": "atStart",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, position the iterator before the start value. \n Otherwise, position the iterator after the end value."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "record iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "indexIteratorAfter",
+      "comment": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately follows \n the specified startValue. If this value does not exist, the initial position corresponds\n to where it would exist.\n This table must have been constructed with a secondary index on the specified column.",
+      "javadoc": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately follows \n the specified startValue. If this value does not exist, the initial position corresponds\n to where it would exist.\n This table must have been constructed with a secondary index on the specified column.\n@param columnIndex schema column to sort on.\n@param startValue the starting value of the secondary index field.\n@return RecordIterator record iterator.\n@throws IOException if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on."
+        },
+        {
+          "name": "startValue",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the starting value of the secondary index field."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "RecordIterator record iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "indexIteratorBefore",
+      "comment": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately precedes \n the specified startValue. If this value does not exist, the initial position corresponds\n to where it would exist.\n This table must have been constructed with a secondary index on the specified column.",
+      "javadoc": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately precedes \n the specified startValue. If this value does not exist, the initial position corresponds\n to where it would exist.\n This table must have been constructed with a secondary index on the specified column.\n@param columnIndex schema column to sort on.\n@param startValue the starting value of the secondary index field.\n@return RecordIterator record iterator.\n@throws IOException if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on."
+        },
+        {
+          "name": "startValue",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the starting value of the secondary index field."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "RecordIterator record iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "indexIteratorAfter",
+      "comment": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately follows \n the specified startValue and primaryKey. If no such entry exists, the initial position \n corresponds to where it would exist.\n \n This table must have been constructed with a secondary index on the specified column.",
+      "javadoc": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately follows \n the specified startValue and primaryKey. If no such entry exists, the initial position \n corresponds to where it would exist.\n \u003cp\u003e\n This table must have been constructed with a secondary index on the specified column.\n@param columnIndex schema column to sort on.\n@param startValue the starting value of the secondary index field.\n@param primaryKey the primary key associated with the startField.\n@return RecordIterator record iterator.\n@throws IOException if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on."
+        },
+        {
+          "name": "startValue",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the starting value of the secondary index field."
+        },
+        {
+          "name": "primaryKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the primary key associated with the startField."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "RecordIterator record iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "indexIteratorBefore",
+      "comment": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately precedes \n the specified startValue and primaryKey. If no such entry exists, the initial position \n corresponds to where it would exist.\n \n This table must have been constructed with a secondary index on the specified column.",
+      "javadoc": "Iterate over the records using a secondary index.  Sorting occurs on the\n specified schema column.  The iterator\u0027s initial position immediately precedes \n the specified startValue and primaryKey. If no such entry exists, the initial position \n corresponds to where it would exist.\n \u003cp\u003e\n This table must have been constructed with a secondary index on the specified column.\n@param columnIndex schema column to sort on.\n@param startValue the starting value of the secondary index field.\n@param primaryKey the primary key associated with the startField.\n@return RecordIterator record iterator.\n@throws IOException if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on."
+        },
+        {
+          "name": "startValue",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the starting value of the secondary index field."
+        },
+        {
+          "name": "primaryKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the primary key associated with the startField."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "RecordIterator record iterator."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a secondary index does not exist for the specified\n column, or the wrong field type was specified, or an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "indexKeyIterator",
+      "comment": "Iterate over all primary keys sorted based upon the associated index key.",
+      "javadoc": "Iterate over all primary keys sorted based upon the associated index key.\n@param columnIndex schema column to sort on.\n@return primary key iterator\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "primary key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexKeyIteratorBefore",
+      "comment": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned before the first index buffer whose index key \n is greater than or equal to the specified startField value.",
+      "javadoc": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned before the first index buffer whose index key \n is greater than or equal to the specified startField value.\n@param columnIndex schema column to sort on\n@param startField index column value which determines initial position of iterator\n@return primary key iterator\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on"
+        },
+        {
+          "name": "startField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "index column value which determines initial position of iterator"
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "primary key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexKeyIteratorAfter",
+      "comment": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned after the index buffer whose index key \n is equal to the specified startField value or immediately before the first \n index buffer whose index key is greater than the specified startField value.",
+      "javadoc": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned after the index buffer whose index key \n is equal to the specified startField value or immediately before the first \n index buffer whose index key is greater than the specified startField value.\n@param columnIndex schema column to sort on\n@param startField index column value which determines initial position of iterator\n@return primary key iterator\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on"
+        },
+        {
+          "name": "startField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "index column value which determines initial position of iterator"
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "primary key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexKeyIteratorBefore",
+      "comment": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned before the primaryKey within the index buffer \n whose index key is equal to the specified startField value or immediately before the first \n index buffer whose index key is greater than the specified startField value.",
+      "javadoc": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned before the primaryKey within the index buffer \n whose index key is equal to the specified startField value or immediately before the first \n index buffer whose index key is greater than the specified startField value.\n@param columnIndex schema column to sort on\n@param startField index column value which determines initial position of iterator\n@param primaryKey initial position within index buffer if index key matches startField value.\n@return primary key iterator\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on"
+        },
+        {
+          "name": "startField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "index column value which determines initial position of iterator"
+        },
+        {
+          "name": "primaryKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "initial position within index buffer if index key matches startField value."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "primary key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexKeyIteratorAfter",
+      "comment": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned after the primaryKey within the index buffer \n whose index key is equal to the specified startField value or immediately before the first \n index buffer whose index key is greater than the specified startField value.",
+      "javadoc": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is initially positioned after the primaryKey within the index buffer \n whose index key is equal to the specified startField value or immediately before the first \n index buffer whose index key is greater than the specified startField value.\n@param columnIndex schema column to sort on\n@param startField index column value which determines initial position of iterator\n@param primaryKey initial position within index buffer if index key matches startField value.\n@return primary key iterator\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on"
+        },
+        {
+          "name": "startField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "index column value which determines initial position of iterator"
+        },
+        {
+          "name": "primaryKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "initial position within index buffer if index key matches startField value."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "primary key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexKeyIterator",
+      "comment": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is limited to range of index keys of minField through maxField, inclusive.\n If atMin is true, the iterator is initially positioned before the first index \n buffer whose index key is greater than or equal to the specified minField value. \n If atMin is false, the iterator is initially positioned after the first index \n buffer whose index key is less than or equal to the specified maxField value.",
+      "javadoc": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is limited to range of index keys of minField through maxField, inclusive.\n If atMin is true, the iterator is initially positioned before the first index \n buffer whose index key is greater than or equal to the specified minField value. \n If atMin is false, the iterator is initially positioned after the first index \n buffer whose index key is less than or equal to the specified maxField value.\n@param columnIndex schema column to sort on\n@param minField minimum index column value\n@param maxField maximum index column value\n@param atMin if true, position iterator before minField value, \n Otherwise, position iterator after maxField value.\n@return primary key iterator\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on"
+        },
+        {
+          "name": "minField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "minimum index column value"
+        },
+        {
+          "name": "maxField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "maximum index column value"
+        },
+        {
+          "name": "atMin",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, position iterator before minField value, \n Otherwise, position iterator after maxField value."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "primary key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "indexKeyIterator",
+      "comment": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is limited to range of index keys of minField through maxField, inclusive.\n The iterator is initially positioned before or after the specified startField index value.",
+      "javadoc": "Iterate over all primary keys sorted based upon the associated index key.\n The iterator is limited to range of index keys of minField through maxField, inclusive.\n The iterator is initially positioned before or after the specified startField index value.\n@param columnIndex schema column to sort on\n@param minField minimum index column value\n@param maxField maximum index column value\n@param startField starting indexed value position\n@param before if true positioned before startField value, else positioned after maxField\n@return primary key iterator\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "schema column to sort on"
+        },
+        {
+          "name": "minField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "minimum index column value"
+        },
+        {
+          "name": "maxField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "maximum index column value"
+        },
+        {
+          "name": "startField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "starting indexed value position"
+        },
+        {
+          "name": "before",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true positioned before startField value, else positioned after maxField"
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "primary key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "iterator",
+      "comment": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value.",
+      "javadoc": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value.\n@return record iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "record iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "iterator",
+      "comment": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.",
+      "javadoc": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.\n@param startKey the first primary key.\n@return record iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "startKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the first primary key."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "record iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "iterator",
+      "comment": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.",
+      "javadoc": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.\n@param minKey the minimum primary key.\n@param maxKey the maximum primary key.\n@param startKey the initial iterator position.\n@return record iterator\n@throws IOException if an I/O error occurs.\n@throws IllegalArgumentException if long keys are not in use or startKey \n is less than minKey or greater than maxKey.",
+      "static": false,
+      "params": [
+        {
+          "name": "minKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the minimum primary key."
+        },
+        {
+          "name": "maxKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the maximum primary key."
+        },
+        {
+          "name": "startKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the initial iterator position."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "record iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "iterator",
+      "comment": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.",
+      "javadoc": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.\n@param startKey the first primary key.\n@return record iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "startKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the first primary key."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "record iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "iterator",
+      "comment": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.",
+      "javadoc": "Iterate over the records in ascending sorted order.  Sorting occurs on the primary key value\n starting at the specified startKey.\n@param minKey the minimum primary key, may be null.\n@param maxKey the maximum primary key, may be null.\n@param startKey the initial iterator position, if null minKey is also start.\n@return record iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "minKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the minimum primary key, may be null."
+        },
+        {
+          "name": "maxKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the maximum primary key, may be null."
+        },
+        {
+          "name": "startKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the initial iterator position, if null minKey is also start."
+        }
+      ],
+      "return": {
+        "type_long": "db.RecordIterator",
+        "type_short": "RecordIterator",
+        "comment": "record iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "longKeyIterator",
+      "comment": "Iterate over all long primary keys in ascending sorted order.",
+      "javadoc": "Iterate over all long primary keys in ascending sorted order.\n@return long key iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.DBLongIterator",
+        "type_short": "DBLongIterator",
+        "comment": "long key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "longKeyIterator",
+      "comment": "Iterate over the long primary keys in ascending sorted order\n starting at the specified startKey.",
+      "javadoc": "Iterate over the long primary keys in ascending sorted order\n starting at the specified startKey.\n@param startKey the first primary key.\n@return long key iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "startKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the first primary key."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBLongIterator",
+        "type_short": "DBLongIterator",
+        "comment": "long key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "longKeyIterator",
+      "comment": "Iterate over the long primary keys in ascending sorted order\n starting at the specified startKey.",
+      "javadoc": "Iterate over the long primary keys in ascending sorted order\n starting at the specified startKey.\n@param minKey the minimum primary key.\n@param maxKey the maximum primary key.\n@param startKey the initial iterator position.\n@return long key iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "minKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the minimum primary key."
+        },
+        {
+          "name": "maxKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the maximum primary key."
+        },
+        {
+          "name": "startKey",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the initial iterator position."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBLongIterator",
+        "type_short": "DBLongIterator",
+        "comment": "long key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "fieldKeyIterator",
+      "comment": "Iterate over all primary keys in ascending sorted order.",
+      "javadoc": "Iterate over all primary keys in ascending sorted order.\n@return Field type key iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "Field type key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "fieldKeyIterator",
+      "comment": "Iterate over the primary keys in ascending sorted order\n starting at the specified startKey.",
+      "javadoc": "Iterate over the primary keys in ascending sorted order\n starting at the specified startKey.\n@param startKey the first primary key.  If null the minimum key value will be assumed.\n@return Field type key iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "startKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the first primary key.  If null the minimum key value will be assumed."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "Field type key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "fieldKeyIterator",
+      "comment": "Iterate over the records in ascending sorted order\n starting at the specified startKey.",
+      "javadoc": "Iterate over the records in ascending sorted order\n starting at the specified startKey.\n@param minKey minimum key value.  Null corresponds to minimum key value.\n@param maxKey maximum key value.  Null corresponds to maximum key value.\n@param startKey the initial iterator position.  If null minKey will be assumed,\n if still null the minimum key value will be assumed.\n@return Field type key iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "minKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "minimum key value.  Null corresponds to minimum key value."
+        },
+        {
+          "name": "maxKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "maximum key value.  Null corresponds to maximum key value."
+        },
+        {
+          "name": "startKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "the initial iterator position.  If null minKey will be assumed,\n if still null the minimum key value will be assumed."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "Field type key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "fieldKeyIterator",
+      "comment": "Iterate over the records in ascending sorted order\n starting at the specified startKey.",
+      "javadoc": "Iterate over the records in ascending sorted order\n starting at the specified startKey.\n@param minKey minimum key value.  Null corresponds to minimum key value.\n@param maxKey maximum key value.  Null corresponds to maximum key value.\n@param before if true initial position is before minKey, else position\n is after maxKey.\n@return Field type key iterator\n@throws IOException if an I/O error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "minKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "minimum key value.  Null corresponds to minimum key value."
+        },
+        {
+          "name": "maxKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "maximum key value.  Null corresponds to maximum key value."
+        },
+        {
+          "name": "before",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true initial position is before minKey, else position\n is after maxKey."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBFieldIterator",
+        "type_short": "DBFieldIterator",
+        "comment": "Field type key iterator"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs."
+        }
+      ]
+    },
+    {
+      "name": "isInvalid",
+      "comment": "",
+      "javadoc": "@return true if table is valid and has not been invalidated",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if table is valid and has not been invalidated"
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

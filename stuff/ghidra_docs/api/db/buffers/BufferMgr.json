@@ -1,0 +1,1995 @@
+{
+  "name": "BufferMgr",
+  "comment": "BufferMgr provides low-level buffer management and caching.\n Checkpointing and buffer versioning is supported along with an undo/redo\n capability.",
+  "javadoc": "\u003ccode\u003eBufferMgr\u003c/code\u003e provides low-level buffer management and caching.\n Checkpointing and buffer versioning is supported along with an undo/redo\n capability.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "ALWAYS_PRECACHE_PROPERTY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"db.always.precache\""
+    },
+    {
+      "name": "alwaysPreCache",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "DEFAULT_BUFFER_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16384"
+    },
+    {
+      "name": "DEFAULT_CHECKPOINT_COUNT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    },
+    {
+      "name": "DEFAULT_CACHE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4194304"
+    },
+    {
+      "name": "MINIMUM_CACHE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "65536"
+    },
+    {
+      "name": "CACHE_FILE_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"ghidra\""
+    },
+    {
+      "name": "CACHE_FILE_EXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".cache\""
+    },
+    {
+      "name": "HEAD",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-1"
+    },
+    {
+      "name": "TAIL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-2"
+    },
+    {
+      "name": "openInstances",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.HashSet\u003cdb.buffers.BufferMgr\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "maxCheckpoints",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "maxCacheSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "currentCheckpoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "corruptedState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "sourceFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.BufferFile",
+      "type_short": "BufferFile",
+      "constant_value": null
+    },
+    {
+      "name": "cacheFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.LocalBufferFile",
+      "type_short": "LocalBufferFile",
+      "constant_value": null
+    },
+    {
+      "name": "recoveryMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.RecoveryMgr",
+      "type_short": "RecoveryMgr",
+      "constant_value": null
+    },
+    {
+      "name": "snapshotLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Object",
+      "type_short": "Object",
+      "constant_value": null
+    },
+    {
+      "name": "modifiedSinceSnapshot",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "hasNonUndoableChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "bufferSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "cacheHead",
+      "comment": "The cached buffer list provides a linked list of all\n buffer nodes which have an in-memory buffer.  Oldest\n cached nodes are at the bottom (cacheTail.prevCached).",
+      "javadoc": "The cached buffer list provides a linked list of all\n buffer nodes which have an in-memory buffer.  Oldest\n cached nodes are at the bottom (cacheTail.prevCached).",
+      "static": false,
+      "type_long": "db.buffers.BufferNode",
+      "type_short": "BufferNode",
+      "constant_value": null
+    },
+    {
+      "name": "cacheTail",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.BufferNode",
+      "type_short": "BufferNode",
+      "constant_value": null
+    },
+    {
+      "name": "cacheSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "buffersOnHand",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "lockCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "freeBuffers",
+      "comment": "Available memory cache buffers",
+      "javadoc": "Available memory cache buffers",
+      "static": false,
+      "type_long": "java.util.Stack\u003cdb.buffers.DataBuffer\u003e",
+      "type_short": "Stack",
+      "constant_value": null
+    },
+    {
+      "name": "cacheHits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "cacheMisses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "lowWaterMark",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "checkpointHeads",
+      "comment": "Collection of checkpoint heads for undo",
+      "javadoc": "Collection of checkpoint heads for undo",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cdb.buffers.BufferNode\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "redoCheckpointHeads",
+      "comment": "Collection of checkpoint heads for redo",
+      "javadoc": "Collection of checkpoint heads for redo",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cdb.buffers.BufferNode\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "currentCheckpointHead",
+      "comment": "Current checkpoint head.  If null a new checkpoint must be\n established on the first buffer modification.",
+      "javadoc": "Current checkpoint head.  If null a new checkpoint must be\n established on the first buffer modification.",
+      "static": false,
+      "type_long": "db.buffers.BufferNode",
+      "type_short": "BufferNode",
+      "constant_value": null
+    },
+    {
+      "name": "baselineCheckpointHead",
+      "comment": "Baseline checkpoint head.  This is holds the oldest version of\n each buffer supported by undo.",
+      "javadoc": "Baseline checkpoint head.  This is holds the oldest version of\n each buffer supported by undo.",
+      "static": false,
+      "type_long": "db.buffers.BufferNode",
+      "type_short": "BufferNode",
+      "constant_value": null
+    },
+    {
+      "name": "indexProvider",
+      "comment": "Index provider for database buffer file.",
+      "javadoc": "Index provider for database buffer file.",
+      "static": false,
+      "type_long": "db.buffers.IndexProvider",
+      "type_short": "IndexProvider",
+      "constant_value": null
+    },
+    {
+      "name": "cacheIndexProvider",
+      "comment": "Index provider for cache file.",
+      "javadoc": "Index provider for cache file.",
+      "static": false,
+      "type_long": "db.buffers.IndexProvider",
+      "type_short": "IndexProvider",
+      "constant_value": null
+    },
+    {
+      "name": "bufferTable",
+      "comment": "The buffer table contains stacks for each buffer id.\n The table contains the head buffer node.  When new buffer\n versions are created, they are pushed onto the stack - e.g.,\n inserted between the head and the next node.",
+      "javadoc": "The buffer table contains stacks for each buffer id.\n The table contains the head buffer node.  When new buffer\n versions are created, they are pushed onto the stack - e.g.,\n inserted between the head and the next node.",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.ObjectArray",
+      "type_short": "ObjectArray",
+      "constant_value": null
+    },
+    {
+      "name": "INITIAL_BUFFER_TABLE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1024"
+    },
+    {
+      "name": "preCacheStatus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.BufferMgr.PreCacheStatus",
+      "type_short": "PreCacheStatus",
+      "constant_value": null
+    },
+    {
+      "name": "preCacheThread",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Thread",
+      "type_short": "Thread",
+      "constant_value": null
+    },
+    {
+      "name": "preCacheLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Object",
+      "type_short": "Object",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new buffer manager with no underlying source file using the\n default buffer size, cache size and maximum undo count.",
+      "javadoc": "Construct a new buffer manager with no underlying source file using the\n default buffer size, cache size and maximum undo count.\n@throws IOException if a cache file access error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new buffer manager with no underlying source file.",
+      "javadoc": "Construct a new buffer manager with no underlying source file.\n@param requestedBufferSize requested buffer size.  Actual buffer size may\n vary.\n@param approxCacheSize approximate size of cache in Bytes.\n@param maxUndos maximum number of checkpoints retained for undo (Minimum\u003d1).\n@throws IOException if a cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "requestedBufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "requested buffer size.  Actual buffer size may\n vary."
+        },
+        {
+          "name": "approxCacheSize",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "approximate size of cache in Bytes."
+        },
+        {
+          "name": "maxUndos",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of checkpoints retained for undo (Minimum\u003d1)."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a buffer manager for a given source file using default\n cache size and maximum undo count.",
+      "javadoc": "Construct a buffer manager for a given source file using default\n cache size and maximum undo count.\n@param sourceFile buffer file\n@throws IOException if source or cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "buffer file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source or cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a buffer manager for a given source file using default\n cache size and maximum undo count.",
+      "javadoc": "Construct a buffer manager for a given source file using default\n cache size and maximum undo count.\n@param sourceFile buffer file\n@param approxCacheSize approximate size of cache in Bytes.\n@param maxUndos maximum number of checkpoints retained for undo (Minimum\u003d1).\n@throws IOException if source or cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "buffer file"
+        },
+        {
+          "name": "approxCacheSize",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "approximate size of cache in Bytes."
+        },
+        {
+          "name": "maxUndos",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of checkpoints retained for undo (Minimum\u003d1)."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source or cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a buffer manager for a given source file.",
+      "javadoc": "Construct a buffer manager for a given source file.\n@param sourceFile buffer source file\n@param requestedBufferSize requested buffer size.  Actual buffer size may\n vary (ignored if source is not null).\n@param approxCacheSize approximate size of cache in Bytes.\n@param maxUndos maximum number of checkpoints retained for undo (Minimum\u003d1).\n@throws IOException if source or cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "buffer source file"
+        },
+        {
+          "name": "requestedBufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "requested buffer size.  Actual buffer size may\n vary (ignored if source is not null)."
+        },
+        {
+          "name": "approxCacheSize",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "approximate size of cache in Bytes."
+        },
+        {
+          "name": "maxUndos",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of checkpoints retained for undo (Minimum\u003d1)."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.FileNotFoundException",
+          "type_short": "FileNotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source or cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "enablePreCache",
+      "comment": "Enable and start source buffer file pre-cache if appropriate.\n This may be forced for all use cases by setting the System property \n db.always.precache\u003dtrue\n WARNING! EXPERIMENTAL !!!",
+      "javadoc": "Enable and start source buffer file pre-cache if appropriate.\n This may be forced for all use cases by setting the System property \n db.always.precache\u003dtrue\n WARNING! EXPERIMENTAL !!!",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addInstance",
+      "comment": "Add new BufferMgr instance and ensure that all non-disposed\n BufferMgr instances are properly disposed when the VM shuts-down.",
+      "javadoc": "Add new BufferMgr instance and ensure that all non-disposed\n BufferMgr instances are properly disposed when the VM shuts-down.\n@param bufMgr new instance",
+      "static": true,
+      "params": [
+        {
+          "name": "bufMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "new instance"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCorruptedState",
+      "comment": "Set the corrupt state flag for this buffer manager.  This will cause any snapshot\n attempt to fail and cause most public access methods to throw an IOException.\n The caller should log this action and the reason for it.",
+      "javadoc": "Set the corrupt state flag for this buffer manager.  This will cause any snapshot\n attempt to fail and cause most public access methods to throw an IOException.\n The caller should log this action and the reason for it.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCorrupted",
+      "comment": "Determine if BufferMgr has become corrupted (IOException has occurred).",
+      "javadoc": "Determine if BufferMgr has become corrupted (IOException has occurred).\n@return true if this BufferMgr is corrupt.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this BufferMgr is corrupt."
+      },
+      "throws": []
+    },
+    {
+      "name": "removeInstance",
+      "comment": "Remove a BufferMgr instance after it has been disposed.",
+      "javadoc": "Remove a BufferMgr instance after it has been disposed.\n@param bufMgr disposed instance",
+      "static": true,
+      "params": [
+        {
+          "name": "bufMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "disposed instance"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLockCount",
+      "comment": "Get the current number of locked buffers.",
+      "javadoc": "Get the current number of locked buffers.\n@return int",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBufferSize",
+      "comment": "",
+      "javadoc": "@return the size of each buffer in bytes.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the size of each buffer in bytes."
+      },
+      "throws": []
+    },
+    {
+      "name": "getSourceFile",
+      "comment": "",
+      "javadoc": "@return returns the source file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.BufferFile",
+        "type_short": "BufferFile",
+        "comment": "returns the source file"
+      },
+      "throws": []
+    },
+    {
+      "name": "finalize",
+      "comment": "Dispose of buffer manager when finalized.",
+      "javadoc": "Dispose of buffer manager when finalized.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getParameter",
+      "comment": "Get file parameter",
+      "javadoc": "Get file parameter\n@param name parameter name/key\n@return parameter value\n@throws NoSuchElementException if parameter not found",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "parameter name/key"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "parameter value"
+      },
+      "throws": [
+        {
+          "type_long": "java.util.NoSuchElementException",
+          "type_short": "NoSuchElementException",
+          "comment": "if parameter not found"
+        }
+      ]
+    },
+    {
+      "name": "setParameter",
+      "comment": "Set file parameter",
+      "javadoc": "Set file parameter\n@param name parameter name/key\n@param value parameter value",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "parameter name/key"
+        },
+        {
+          "name": "value",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "parameter value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Dispose of all buffer manager resources including any source\n buffer file.  Any existing recovery data will be discarded.\n This method should be called when this buffer manager instance\n is no longer needed.",
+      "javadoc": "Dispose of all buffer manager resources including any source\n buffer file.  Any existing recovery data will be discarded.\n This method should be called when this buffer manager instance\n is no longer needed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Dispose of all buffer manager resources including any source\n buffer file.\n This method should be called when this buffer manager instance\n is no longer needed.",
+      "javadoc": "Dispose of all buffer manager resources including any source\n buffer file.\n This method should be called when this buffer manager instance\n is no longer needed.\n@param keepRecoveryData true if existing snapshot recovery files \n should not be deleted.",
+      "static": false,
+      "params": [
+        {
+          "name": "keepRecoveryData",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if existing snapshot recovery files \n should not be deleted."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "packCheckpoints",
+      "comment": "If maximum number of checkpoints is exceeded, pack oldest\n checkpoint into baseline.",
+      "javadoc": "If maximum number of checkpoints is exceeded, pack oldest\n checkpoint into baseline.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposeNode",
+      "comment": "Dispose a checkpoint buffer node.\n Node is removed from all applicable lists and the disk\n cache index added to free index list.",
+      "javadoc": "Dispose a checkpoint buffer node.\n Node is removed from all applicable lists and the disk\n cache index added to free index list.\n@param node buffer node to dispose",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "buffer node to dispose"
+        },
+        {
+          "name": "isVersioned",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposeNodeList",
+      "comment": "Dispose all nodes in list.",
+      "javadoc": "Dispose all nodes in list.\n@param head list head",
+      "static": false,
+      "params": [
+        {
+          "name": "head",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "list head"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposeRedoCheckpoints",
+      "comment": "Dispose all redo checkpoint lists.",
+      "javadoc": "Dispose all redo checkpoint lists.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMaxUndos",
+      "comment": "Set the maximum number of undoable checkpoints maintained by buffer manager.\n Existing redo checkpoints are cleared and the stack of undo checkpoints\n will be reduced if maxUndos is less than the current setting.",
+      "javadoc": "Set the maximum number of undoable checkpoints maintained by buffer manager.\n Existing redo checkpoints are cleared and the stack of undo checkpoints\n will be reduced if maxUndos is less than the current setting.\n@param maxUndos maximum number of undo checkpoints.  A negative\n value restores the default value.",
+      "static": false,
+      "params": [
+        {
+          "name": "maxUndos",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of undo checkpoints.  A negative\n value restores the default value."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearCheckpoints",
+      "comment": "Clear all checkpoints and re-baseline buffers",
+      "javadoc": "Clear all checkpoints and re-baseline buffers",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxUndos",
+      "comment": "Get the maximum number of checkpoints retained.",
+      "javadoc": "Get the maximum number of checkpoints retained.\n@return int",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCacheBuffer",
+      "comment": "Get a reusable buffer object from cache.\n The oldest buffer node is removed from memory cache.",
+      "javadoc": "Get a reusable buffer object from cache.\n The oldest buffer node is removed from memory cache.\n@return buffer object.\n@throws IOException if a cache file access error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": "buffer object."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "removeFromCache",
+      "comment": "Remove a buffer node from memory cache.",
+      "javadoc": "Remove a buffer node from memory cache.\n@param node buffer node",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "buffer node"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "returnToCache",
+      "comment": "Return the specified node to cache with the associated buffer object.",
+      "javadoc": "Return the specified node to cache with the associated buffer object.\n@param node node to be cached\n@param buf buffer object",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "node to be cached"
+        },
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "buffer object"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "returnFreeBuffer",
+      "comment": "Return a reusable buffer to the cache.",
+      "javadoc": "Return a reusable buffer to the cache.\n@param buf buffer to be returned.",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "buffer to be returned."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopPreCache",
+      "comment": "Stop the pre-cache thread if currently active",
+      "javadoc": "Stop the pre-cache thread if currently active",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "startPreCacheIfNeeded",
+      "comment": "Start pre-cache of source file if appropriate.\n This targets remote buffer file adapters only.",
+      "javadoc": "Start pre-cache of source file if appropriate.\n This targets remote buffer file adapters only.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "preCacheSourceFile",
+      "comment": "Pre-cache source file into cache file.  This is intended to be run in a \n dedicated thread when the source file is remote.",
+      "javadoc": "Pre-cache source file into cache file.  This is intended to be run in a \n dedicated thread when the source file is remote.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "preCacheBuffer",
+      "comment": "Pre-cache an non-requested buffer from the sourceFile",
+      "javadoc": "Pre-cache an non-requested buffer from the sourceFile\n@param buf source file data buffer\n@throws IOException if cache file access error occurs\n@return true if block added to cache, false if already cached",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "source file data buffer"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if block added to cache, false if already cached"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getBufferNode",
+      "comment": "Get the buffer node at the current checkpoint level.\n Creates node from source if necessary.",
+      "javadoc": "Get the buffer node at the current checkpoint level.\n Creates node from source if necessary.\n@param id buffer id.\n@param load if true, buffer will be loaded into memory cache.\n@return buffer node or null if node not found\n@throws IOException if source or cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer id."
+        },
+        {
+          "name": "load",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, buffer will be loaded into memory cache."
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.BufferNode",
+        "type_short": "BufferNode",
+        "comment": "buffer node or null if node not found"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source or cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "createNewBufferNode",
+      "comment": "Create a new buffer node associated with the specified checkpoint list.\n If versionHead is null, a new buffer table entry and version list will be created.",
+      "javadoc": "Create a new buffer node associated with the specified checkpoint list.\n If versionHead is null, a new buffer table entry and version list will be created.\n@param id buffer id\n@param checkpointHead head of checkpoint list\n@param versionHead head of buffer version list, may be null\n@return new buffer node",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer id"
+        },
+        {
+          "name": "checkpointHead",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "head of checkpoint list"
+        },
+        {
+          "name": "versionHead",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "head of buffer version list, may be null"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.BufferNode",
+        "type_short": "BufferNode",
+        "comment": "new buffer node"
+      },
+      "throws": []
+    },
+    {
+      "name": "createNewBufferList",
+      "comment": "Create a new buffer version list and add the specified node.",
+      "javadoc": "Create a new buffer version list and add the specified node.\n@param id buffer id\n@param node the first buffer version to add into list\n@return buffer version head.",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer id"
+        },
+        {
+          "name": "node",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "the first buffer version to add into list"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.BufferNode",
+        "type_short": "BufferNode",
+        "comment": "buffer version head."
+      },
+      "throws": []
+    },
+    {
+      "name": "getCachedBufferNode",
+      "comment": "Get the buffer node at the current checkpoint level.",
+      "javadoc": "Get the buffer node at the current checkpoint level.\n@param id buffer id.\n@return buffer node or null if node not found",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer id."
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.BufferNode",
+        "type_short": "BufferNode",
+        "comment": "buffer node or null if node not found"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "loadCachedNode",
+      "comment": "Load buffer from disk cache into memory cache.",
+      "javadoc": "Load buffer from disk cache into memory cache.\n@param node buffer node to be unloaded from memory cache.\n@throws IOException if a cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "buffer node to be unloaded from memory cache."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "unloadCachedNode",
+      "comment": "Unload buffer from memory cache to disk cache if needed.",
+      "javadoc": "Unload buffer from memory cache to disk cache if needed.\n@param node buffer node to be unloaded from memory cache.\n@throws IOException if a cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.buffers.BufferNode",
+          "type_short": "BufferNode",
+          "comment": "buffer node to be unloaded from memory cache."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getBuffer",
+      "comment": "Get the specified buffer.\n When done working with the buffer, the method releaseBuffer\n must be used to return it to the buffer manager.  Buffers\n should not be held for long periods.",
+      "javadoc": "Get the specified buffer.\n When done working with the buffer, the method releaseBuffer\n must be used to return it to the buffer manager.  Buffers\n should not be held for long periods.\n@param id buffer id\n@return buffer object, or null if buffer not found\n@throws IOException if source or cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer id"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": "buffer object, or null if buffer not found"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source or cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "createBuffer",
+      "comment": "Get a new or recycled buffer.\n New buffer is always returned with update enabled.\n When done working with the buffer, the method releaseBuffer\n must be used to return it to the buffer manager.  Buffers\n should not be held for long periods.",
+      "javadoc": "Get a new or recycled buffer.\n New buffer is always returned with update enabled.\n When done working with the buffer, the method releaseBuffer\n must be used to return it to the buffer manager.  Buffers\n should not be held for long periods.\n@return buffer object, or null if buffer not found\n@throws IOException if a cache file access error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": "buffer object, or null if buffer not found"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "releaseBuffer",
+      "comment": "Release buffer back to buffer manager.\n After invoking this method, the buffer object should not\n be used and all references should be dropped.",
+      "javadoc": "Release buffer back to buffer manager.\n After invoking this method, the buffer object should not\n be used and all references should be dropped.\n@param buf data buffer\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "data buffer"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "handleCorruptionException",
+      "comment": "Handle exception which indicates a potential corruption of the BufferMgr state",
+      "javadoc": "Handle exception which indicates a potential corruption of the BufferMgr state\n@param exception exception\n@param errorText associated error text\n@throws IOException exception thrown if instance of IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "exception",
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "exception"
+        },
+        {
+          "name": "errorText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "associated error text"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "exception thrown if instance of IOException"
+        }
+      ]
+    },
+    {
+      "name": "releaseCleanBuffer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "releaseDirtyBuffer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.AssertionError",
+          "type_short": "AssertionError",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteBuffer",
+      "comment": "Delete buffer.\n DataBuffer is added to the free list for reuse.",
+      "javadoc": "Delete buffer.\n DataBuffer is added to the free list for reuse.\n@param id buffer id\n@throws IOException if source or cache file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer id"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source or cache file access error occurs"
+        }
+      ]
+    },
+    {
+      "name": "atCheckpoint",
+      "comment": "",
+      "javadoc": "@return true if no buffers have been updated since last checkpoint.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if no buffers have been updated since last checkpoint."
+      },
+      "throws": []
+    },
+    {
+      "name": "checkpoint",
+      "comment": "Completes a transaction by closing the current checkpoint.  All\n modified buffers since the previous invocation of this method\n will be contained within \"transaction\".\n The redo stack will be cleared.",
+      "javadoc": "Completes a transaction by closing the current checkpoint.  All\n modified buffers since the previous invocation of this method\n will be contained within \"transaction\".\n The redo stack will be cleared.\n@return true if checkpoint successful, or false if buffers are read-only",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if checkpoint successful, or false if buffers are read-only"
+      },
+      "throws": []
+    },
+    {
+      "name": "isChanged",
+      "comment": "",
+      "javadoc": "@return true if unsaved \"buffer\" changes exist.\n If no changes have been made, or all changes have been\n \"undone\", false will be returned.  Parameter changes\n are no considered.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if unsaved \"buffer\" changes exist.\n If no changes have been made, or all changes have been\n \"undone\", false will be returned.  Parameter changes\n are no considered."
+      },
+      "throws": []
+    },
+    {
+      "name": "startCheckpoint",
+      "comment": "Create a new checkpoint node list.\n The redo stack will be cleared.",
+      "javadoc": "Create a new checkpoint node list.\n The redo stack will be cleared.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasUndoCheckpoints",
+      "comment": "Indicates whether checkpoint versions are available for undo.",
+      "javadoc": "Indicates whether checkpoint versions are available for undo.\n@return true if undo is available",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if undo is available"
+      },
+      "throws": []
+    },
+    {
+      "name": "hasRedoCheckpoints",
+      "comment": "Indicates whether checkpoint versions are available for redo.",
+      "javadoc": "Indicates whether checkpoint versions are available for redo.\n@return true if redo is available",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if redo is available"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAvailableUndoCount",
+      "comment": "",
+      "javadoc": "@return number of undo-able transactions",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of undo-able transactions"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAvailableRedoCount",
+      "comment": "",
+      "javadoc": "@return the number of redo-able transactions",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of redo-able transactions"
+      },
+      "throws": []
+    },
+    {
+      "name": "undo",
+      "comment": "Backup to previous checkpoint.  Method should not be invoked\n when one or more buffers are locked.",
+      "javadoc": "Backup to previous checkpoint.  Method should not be invoked\n when one or more buffers are locked.\n@param redoable true if currrent checkpoint should be moved to redo stack\n@return true if successful else false\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "redoable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if currrent checkpoint should be moved to redo stack"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if successful else false"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "redo",
+      "comment": "Redo next checkpoint. Method should not be invoked\n when one or more buffers are locked.",
+      "javadoc": "Redo next checkpoint. Method should not be invoked\n when one or more buffers are locked.\n@return true if successful else false",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if successful else false"
+      },
+      "throws": []
+    },
+    {
+      "name": "canSave",
+      "comment": "",
+      "javadoc": "@return true if save operation can be performed.\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if save operation can be performed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "modifiedSinceSnapshot",
+      "comment": "",
+      "javadoc": "@return true if buffers have been modified since opening or since\n last snapshot.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if buffers have been modified since opening or since\n last snapshot."
+      },
+      "throws": []
+    },
+    {
+      "name": "takeRecoverySnapshot",
+      "comment": "Generate recovery snapshot of unsaved data.",
+      "javadoc": "Generate recovery snapshot of unsaved data.\n@param changeSet an optional database-backed change set which reflects changes\n made since the last version.\n@param monitor task monitor\n@return true if snapshot successful, false if\n@throws IOException if IO error occurs\n@throws CancelledException if task monitor is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "changeSet",
+          "type_long": "db.DBChangeSet",
+          "type_short": "DBChangeSet",
+          "comment": "an optional database-backed change set which reflects changes\n made since the last version."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if snapshot successful, false if"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if task monitor is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "getRecoveryChangeSetFile",
+      "comment": "Returns the recovery changeSet data file for reading or null if one is not available.\n The caller must dispose of the returned file before peforming generating any new\n recovery snapshots.",
+      "javadoc": "Returns the recovery changeSet data file for reading or null if one is not available.\n The caller must dispose of the returned file before peforming generating any new\n recovery snapshots.\n@return recovery change set buffer file\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.LocalBufferFile",
+        "type_short": "LocalBufferFile",
+        "comment": "recovery change set buffer file"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "clearRecoveryFiles",
+      "comment": "Immediately following instantiation of this BufferMgr, discard any pre-existing\n recovery snapshots.",
+      "javadoc": "Immediately following instantiation of this BufferMgr, discard any pre-existing\n recovery snapshots.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "recover",
+      "comment": "Immediately following instatiation of this BufferMgr, attempt a unsaved data recovery.\n If successful, the method getRecoveryChangeSetFile should be invoked to obtain/open the\n changeSet data file which must be used by the application to recover the changeSet.\n If recovery is cancelled, this buffer manager must be disposed.\n since the underlying state will be corrupt.",
+      "javadoc": "Immediately following instatiation of this BufferMgr, attempt a unsaved data recovery.\n If successful, the method getRecoveryChangeSetFile should be invoked to obtain/open the\n changeSet data file which must be used by the application to recover the changeSet.\n If recovery is cancelled, this buffer manager must be disposed.\n since the underlying state will be corrupt.\n@param monitor task monitor\n@return true if recovery successful else false\n@throws IOException if IO error occurs\n@throws CancelledException if task monitor is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if recovery successful else false"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if task monitor is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "recover",
+      "comment": "Recover data from recovery file",
+      "javadoc": "Recover data from recovery file\n@param recoveryFile recovery file\n@param recoveryIndex recovery index (0 or 1) which corresponds to\n recoveryFile.\n@param monitor task monitor\n@throws IOException if IO error occurs\n@throws CancelledException if task monitor is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "recoveryFile",
+          "type_long": "db.buffers.RecoveryFile",
+          "type_short": "RecoveryFile",
+          "comment": "recovery file"
+        },
+        {
+          "name": "recoveryIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "recovery index (0 or 1) which corresponds to\n recoveryFile."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if task monitor is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "canRecover",
+      "comment": "Determine if unsaved changes can be recovered for the current BufferFile\n associated with the specified bfMgr.",
+      "javadoc": "Determine if unsaved changes can be recovered for the current BufferFile\n associated with the specified bfMgr.\n@param bfMgr buffer file manager\n@return true if a recover is possible",
+      "static": true,
+      "params": [
+        {
+          "name": "bfMgr",
+          "type_long": "db.buffers.BufferFileManager",
+          "type_short": "BufferFileManager",
+          "comment": "buffer file manager"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a recover is possible"
+      },
+      "throws": []
+    },
+    {
+      "name": "save",
+      "comment": "Save the current set of buffers to a new version of the source buffer file.\n If the buffer manager was not instantiated with a source file an\n IllegalStateException will be thrown.",
+      "javadoc": "Save the current set of buffers to a new version of the source buffer file.\n If the buffer manager was not instantiated with a source file an\n IllegalStateException will be thrown.\n@param comment if version history is maintained, this comment will be\n associated with the new version.\n@param changeSet an optional database-backed change set which reflects changes\n made since the last version.\n@param monitor a cancellable task monitor.  This method will establish the\n maximum progress count.\n@throws CancelledException if the task monitor cancelled the operation.\n@throws IOException if source, cache or destination file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "if version history is maintained, this comment will be\n associated with the new version."
+        },
+        {
+          "name": "changeSet",
+          "type_long": "db.DBChangeSet",
+          "type_short": "DBChangeSet",
+          "comment": "an optional database-backed change set which reflects changes\n made since the last version."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "a cancellable task monitor.  This method will establish the\n maximum progress count."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source, cache or destination file access error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task monitor cancelled the operation."
+        }
+      ]
+    },
+    {
+      "name": "saveAs",
+      "comment": "Save the current set of buffers to a new buffer file.",
+      "javadoc": "Save the current set of buffers to a new buffer file.\n@param outFile an empty buffer file open for writing\n@param associateWithNewFile if true the outFile will be associated with this BufferMgr as the\n current source file, if false no change will be made to this BufferMgr\u0027s state and the outFile\n will be written and set as read-only.  The caller is responsible for disposing the outFile if\n this parameter is false.\n@param monitor a cancelable task monitor.  This method will establish the\n maximum progress count.\n@throws CancelledException if the task monitor canceled the operation.\n@throws IOException if source, cache or destination file access error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "outFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "an empty buffer file open for writing"
+        },
+        {
+          "name": "associateWithNewFile",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the outFile will be associated with this BufferMgr as the\n current source file, if false no change will be made to this BufferMgr\u0027s state and the outFile\n will be written and set as read-only.  The caller is responsible for disposing the outFile if\n this parameter is false."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "a cancelable task monitor.  This method will establish the\n maximum progress count."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if source, cache or destination file access error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task monitor canceled the operation."
+        }
+      ]
+    },
+    {
+      "name": "doSave",
+      "comment": "Write all changes to the specified outFile",
+      "javadoc": "Write all changes to the specified outFile\n@param outFile output buffer file\n@param monitor task monitor\n@throws IOException if IO error occurs\n@throws CancelledException thrown if task cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "outFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "output buffer file"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "thrown if task cancelled"
+        }
+      ]
+    },
+    {
+      "name": "setSourceFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCacheHits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCacheMisses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLowBufferCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resetCacheStatistics",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStatusInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllocatedBufferCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFreeBufferCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanupOldCacheFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

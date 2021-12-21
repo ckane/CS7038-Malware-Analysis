@@ -1,0 +1,386 @@
+{
+  "name": "AbstractDependencyGraph",
+  "comment": "Class for managing the visiting (processing)  of a set of values where some values depend\n on other values being process before them.  In other words, an acyclic directed graph will\n be formed where the vertexes are the values and the edges represent dependencies.  Values can\n only be removed if they have no dependencies.  Since the graph is acyclic, as values are removed\n that have no dependencies, other nodes that depend on those nodes will become eligible for \n processing and removal.  If cycles are introduced, they will eventually cause an IllegalState\n exception to occur when removing and processing values.  There is also a hasCycles() method\n that can be called before processing to find cycle problems up front without wasting time \n processing values.",
+  "javadoc": "Class for managing the visiting (processing)  of a set of values where some values depend\n on other values being process before them.  In other words, an acyclic directed graph will\n be formed where the vertexes are the values and the edges represent dependencies.  Values can\n only be removed if they have no dependencies.  Since the graph is acyclic, as values are removed\n that have no dependencies, other nodes that depend on those nodes will become eligible for \n processing and removal.  If cycles are introduced, they will eventually cause an IllegalState\n exception to occur when removing and processing values.  There is also a hasCycles() method\n that can be called before processing to find cycle problems up front without wasting time \n processing values.\n@param \u003cT\u003e the type of value.  Some concrete classes might have restrictions on T.\n@see DependencyGraph\n@see DeterministicDependencyGraph",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "nodeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cT,ghidra.util.graph.AbstractDependencyGraph\u003cT\u003e.DependencyNode\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "unvisitedIndependentSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cT\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "visitedButNotDeletedCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNodeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cT,ghidra.util.graph.AbstractDependencyGraph\u003cT\u003e.DependencyNode\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createNodeMap",
+      "comment": "Creates the Map of Nodes to DependencyNodes appropriate for the implementer.",
+      "javadoc": "Creates the Map of Nodes to {@link DependencyNode}s appropriate for the implementer.\n@return a new Map of Nodes to {@link DependencyNode}s.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cT,ghidra.util.graph.AbstractDependencyGraph\u003cT\u003e.DependencyNode\u003e",
+        "type_short": "Map",
+        "comment": "a new Map of Nodes to DependencyNodes."
+      },
+      "throws": []
+    },
+    {
+      "name": "createNodeSet",
+      "comment": "Creates the Set of Nodes appropriate for the implementer.",
+      "javadoc": "Creates the Set of Nodes appropriate for the implementer.\n@return a new Set of Nodes.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cT\u003e",
+        "type_short": "Set",
+        "comment": "a new Set of Nodes."
+      },
+      "throws": []
+    },
+    {
+      "name": "createDependencyNodeSet",
+      "comment": "Creates the Set of DependencyNodes appropriate for the implementer.",
+      "javadoc": "Creates the Set of {@link DependencyNode}s appropriate for the implementer.\n@return a new Set of {@link DependencyNode}s.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.util.graph.AbstractDependencyGraph\u003cT\u003e.DependencyNode\u003e",
+        "type_short": "Set",
+        "comment": "a new Set of DependencyNodes."
+      },
+      "throws": []
+    },
+    {
+      "name": "copy",
+      "comment": "Returns a copy of this graph.",
+      "javadoc": "Returns a copy of this graph.\n@return a copy of this graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.graph.AbstractDependencyGraph\u003cT\u003e",
+        "type_short": "AbstractDependencyGraph",
+        "comment": "a copy of this graph."
+      },
+      "throws": []
+    },
+    {
+      "name": "addValue",
+      "comment": "Adds the value to this graph.",
+      "javadoc": "Adds the value to this graph.\n@param value the value to add",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the value to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "size",
+      "comment": "Returns the number of values in this graph.",
+      "javadoc": "Returns the number of values in this graph.\n@return the number of values in this graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of values in this graph."
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmpty",
+      "comment": "Returns true if the graph has no values;",
+      "javadoc": "Returns true if the graph has no values;\n@return true if the graph has no values;",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the graph has no values;"
+      },
+      "throws": []
+    },
+    {
+      "name": "contains",
+      "comment": "Returns true if this graph has the given key.",
+      "javadoc": "Returns true if this graph has the given key.\n@param value the value to check if its in this graph\n@return true if this graph has the given key.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the value to check if its in this graph"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this graph has the given key."
+      },
+      "throws": []
+    },
+    {
+      "name": "getValues",
+      "comment": "Returns the set of values in this graph.",
+      "javadoc": "Returns the set of values in this graph.\n@return the set of values in this graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cT\u003e",
+        "type_short": "Set",
+        "comment": "the set of values in this graph."
+      },
+      "throws": []
+    },
+    {
+      "name": "getNodeMapValues",
+      "comment": "Returns the set of values in this graph.",
+      "javadoc": "Returns the set of values in this graph.\n@return the set of values in this graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cT\u003e",
+        "type_short": "Set",
+        "comment": "the set of values in this graph."
+      },
+      "throws": []
+    },
+    {
+      "name": "getOrCreateDependencyNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.graph.AbstractDependencyGraph\u003cT\u003e.DependencyNode",
+        "type_short": "DependencyNode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addDependency",
+      "comment": "Add a dependency such that value1 depends on value2.  Both value1 and value2 will be\n added to the graph if they are not already in the graph.",
+      "javadoc": "Add a dependency such that value1 depends on value2.  Both value1 and value2 will be\n added to the graph if they are not already in the graph.\n@param value1 the value that depends on value2\n@param value2 the value that value1 is depending on",
+      "static": false,
+      "params": [
+        {
+          "name": "value1",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the value that depends on value2"
+        },
+        {
+          "name": "value2",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the value that value1 is depending on"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasUnVisitedIndependentValues",
+      "comment": "Returns true if there are unvisited values ready (no dependencies) for processing.",
+      "javadoc": "Returns true if there are unvisited values ready (no dependencies) for processing.\n@return true if there are unvisited values ready for processing.\n@exception IllegalStateException is thrown if the graph is not empty and there are no nodes\n without dependency which indicates there is a cycle in the graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there are unvisited values ready for processing."
+      },
+      "throws": []
+    },
+    {
+      "name": "pop",
+      "comment": "Removes and returns a value that has no dependencies from the graph.  If the graph is empty\n or all the nodes without dependencies are currently visited, then null will be returned.\n NOTE: If the getUnvisitedIndependentValues() method has been called(), this method may\n return null until all those \"visited\" nodes are removed from the graph.",
+      "javadoc": "Removes and returns a value that has no dependencies from the graph.  If the graph is empty\n or all the nodes without dependencies are currently visited, then null will be returned.\n NOTE: If the getUnvisitedIndependentValues() method has been called(), this method may\n return null until all those \"visited\" nodes are removed from the graph.\n@return return an arbitrary value that has no dependencies and hasn\u0027t been visited or null.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": "return an arbitrary value that has no dependencies and hasn\u0027t been visited or null."
+      },
+      "throws": []
+    },
+    {
+      "name": "checkCycleState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasCycles",
+      "comment": "Checks if this graph has cycles.  Normal processing of this graph will eventually reveal\n a cycle and throw an exception at the time it is detected.  This method allows for a \n \"fail fast\" way to detect cycles.",
+      "javadoc": "Checks if this graph has cycles.  Normal processing of this graph will eventually reveal\n a cycle and throw an exception at the time it is detected.  This method allows for a \n \"fail fast\" way to detect cycles.\n@return true if cycles exist in the graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if cycles exist in the graph."
+      },
+      "throws": []
+    },
+    {
+      "name": "reset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnvisitedIndependentValues",
+      "comment": "Returns a set of all values that have no dependencies.  As values are removed from the\n graph, dependencies will be removed and additional values will be eligible to be returned\n by this method.  Once a value has been retrieved using this method, it will be considered\n \"visited\" and future calls to this method will not include those values.  To continue\n processing the values in the graph, all values return from this method should eventually\n be deleted from the graph to \"free up\" other values.  NOTE: values retrieved by this method\n will no longer be eligible for return by the pop() method.",
+      "javadoc": "Returns a set of all values that have no dependencies.  As values are removed from the\n graph, dependencies will be removed and additional values will be eligible to be returned\n by this method.  Once a value has been retrieved using this method, it will be considered\n \"visited\" and future calls to this method will not include those values.  To continue\n processing the values in the graph, all values return from this method should eventually\n be deleted from the graph to \"free up\" other values.  NOTE: values retrieved by this method\n will no longer be eligible for return by the pop() method.\n@return the set of values without dependencies that have never been returned by this method \n before.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cT\u003e",
+        "type_short": "Set",
+        "comment": "the set of values without dependencies that have never been returned by this method \n before."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllIndependentValues",
+      "comment": "Returns the set of all values that have no dependencies regardless of whether or not\n they have been \"visited\" (by the getUnvisitedIndependentValues() method.",
+      "javadoc": "Returns the set of all values that have no dependencies regardless of whether or not\n they have been \"visited\" (by the getUnvisitedIndependentValues() method.\n@return return the set of all values that have no dependencies.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cT\u003e",
+        "type_short": "Set",
+        "comment": "return the set of all values that have no dependencies."
+      },
+      "throws": []
+    },
+    {
+      "name": "remove",
+      "comment": "Removes the value from the graph.  Any dependency from this node to another will be removed,\n possible allowing nodes that depend on this node to be eligible for processing.",
+      "javadoc": "Removes the value from the graph.  Any dependency from this node to another will be removed,\n possible allowing nodes that depend on this node to be eligible for processing.\n@param value the value to remove from the graph.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the value to remove from the graph."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDependentValues",
+      "comment": "Returns a set of values that depend on the given value.",
+      "javadoc": "Returns a set of values that depend on the given value.\n@param value the value that other values may depend on.\n@return a set of values that depend on the given value.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the value that other values may depend on."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cT\u003e",
+        "type_short": "Set",
+        "comment": "a set of values that depend on the given value."
+      },
+      "throws": []
+    }
+  ]
+}

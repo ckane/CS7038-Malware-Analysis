@@ -1,0 +1,622 @@
+{
+  "name": "LocalFileSystem",
+  "comment": "A GFileSystem implementation giving access to the user\u0027s operating system\u0027s\n local file system.\n \n This implementation does not have a GFileSystemFactory as\n this class will be used as the single root filesystem.\n \n Closing() this filesystem does nothing.",
+  "javadoc": "A {@link GFileSystem} implementation giving access to the user\u0027s operating system\u0027s\n local file system.\n \u003cp\u003e\n This implementation does not have a {@link GFileSystemFactory} as\n this class will be used as the single root filesystem.\n \u003cp\u003e\n Closing() this filesystem does nothing.",
+  "static": false,
+  "implements": [
+    "ghidra.formats.gfilesystem.GFileSystem",
+    "ghidra.formats.gfilesystem.GFileHashProvider"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "FSTYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"file\""
+    },
+    {
+      "name": "emptyDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.formats.gfilesystem.GFile\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "fsFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+      "type_short": "FSRLRoot",
+      "constant_value": null
+    },
+    {
+      "name": "refManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FileSystemRefManager",
+      "type_short": "FileSystemRefManager",
+      "constant_value": null
+    },
+    {
+      "name": "fileFingerprintToMD5Map",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "org.apache.commons.collections4.map.ReferenceMap\u003cghidra.formats.gfilesystem.LocalFileSystem.FileFingerprintRec,java.lang.String\u003e",
+      "type_short": "ReferenceMap",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "makeGlobalRootFS",
+      "comment": "Create a new instance",
+      "javadoc": "Create a new instance\n@return new {@link LocalFileSystem} instance using {@link #FSTYPE} as its FSRL type.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.LocalFileSystem",
+        "type_short": "LocalFileSystem",
+        "comment": "new LocalFileSystem instance using #FSTYPE as its FSRL type."
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+          "type_short": "FSRLRoot",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSameFS",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSubFileSystem",
+      "comment": "Creates a new file system instance that is a sub-view limited to the specified directory.",
+      "javadoc": "Creates a new file system instance that is a sub-view limited to the specified directory.\n@param fsrl {@link FSRL} that must be a directory in this local filesystem\n@return new {@link LocalFileSystemSub} instance\n@throws IOException if bad FSRL",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL that must be a directory in this local filesystem"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.LocalFileSystemSub",
+        "type_short": "LocalFileSystemSub",
+        "comment": "new LocalFileSystemSub instance"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if bad FSRL"
+        }
+      ]
+    },
+    {
+      "name": "isLocalSubdir",
+      "comment": "Returns true if the FSRL is a local filesystem subdirectory.",
+      "javadoc": "Returns true if the {@link FSRL} is a local filesystem subdirectory.\n@param fsrl {@link FSRL} to test.\n@return boolean true if local filesystem directory.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL to test."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if local filesystem directory."
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocalFile",
+      "comment": "Convert a FSRL that points to this file system into a java File.",
+      "javadoc": "Convert a FSRL that points to this file system into a java {@link File}.\n@param fsrl {@link FSRL}\n@return {@link File}\n@throws IOException if FSRL does not point to this file system",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL"
+        }
+      ],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": "File"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if FSRL does not point to this file system"
+        }
+      ]
+    },
+    {
+      "name": "getLocalFSRL",
+      "comment": "Converts a File into a FSRL.",
+      "javadoc": "Converts a {@link File} into a {@link FSRL}.\n@param f {@link File}\n@return {@link FSRL}",
+      "static": false,
+      "params": [
+        {
+          "name": "f",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "File"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "FSRL"
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isStatic",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getListing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "directory",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.GFile\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFileAttributes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.fileinfo.FileAttributes",
+        "type_short": "FileAttributes",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFileAttributes",
+      "comment": "Create a FileAttributes container with info about the specified local file.",
+      "javadoc": "Create a {@link FileAttributes} container with info about the specified local file.\n@param f {@link File} to query\n@return {@link FileAttributes} instance",
+      "static": false,
+      "params": [
+        {
+          "name": "f",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "File to query"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.fileinfo.FileAttributes",
+        "type_short": "FileAttributes",
+        "comment": "FileAttributes instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "fileToFileType",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "p",
+          "type_long": "java.nio.file.Path",
+          "type_short": "Path",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.fileinfo.FileType",
+        "type_short": "FileType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+        "type_short": "FSRLRoot",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lookup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFileImpl",
+        "type_short": "GFileImpl",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRefManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRefManager",
+        "type_short": "FileSystemRefManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInputStream",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.io.InputStream",
+        "type_short": "InputStream",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInputStream",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.io.InputStream",
+        "type_short": "InputStream",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getByteProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.ByteProvider",
+        "type_short": "ByteProvider",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getByteProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.ByteProvider",
+        "type_short": "ByteProvider",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMD5Hash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": ""
+        },
+        {
+          "name": "required",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getMD5Hash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        },
+        {
+          "name": "required",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

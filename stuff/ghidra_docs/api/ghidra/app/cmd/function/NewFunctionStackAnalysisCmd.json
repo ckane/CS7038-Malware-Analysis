@@ -1,0 +1,702 @@
+{
+  "name": "NewFunctionStackAnalysisCmd",
+  "comment": "Command for analyzing the Stack; the command is run in the background.\n NOTE: referenced thunk-functions should be created prior to this command",
+  "javadoc": "Command for analyzing the Stack; the command is run in the background.\n NOTE: referenced thunk-functions should be created prior to this command",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.framework.cmd.BackgroundCommand",
+  "fields": [
+    {
+      "name": "MAX_PARAM_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2048"
+    },
+    {
+      "name": "MAX_LOCAL_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-65536"
+    },
+    {
+      "name": "entryPoints",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "forceProcessing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "dontCreateNewVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "doParams",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "doLocals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "stackReg",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register",
+      "type_short": "Register",
+      "constant_value": null
+    },
+    {
+      "name": "purge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "DEFAULT_FUNCTION_COMMENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "MAX_PARAM_FILLIN_COUNT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for analyzing the Stack.",
+      "javadoc": "Constructs a new command for analyzing the Stack.\n@param entries and address set indicating the entry points of functions that have \n stacks to be analyzed.\n@param forceProcessing flag to force processing of stack references even if the stack\n           has already been defined.",
+      "static": false,
+      "params": [
+        {
+          "name": "entries",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "and address set indicating the entry points of functions that have \n stacks to be analyzed."
+        },
+        {
+          "name": "forceProcessing",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "flag to force processing of stack references even if the stack\n           has already been defined."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for analyzing the Stack.",
+      "javadoc": "Constructs a new command for analyzing the Stack.\n@param entry the entry point of the function that contains the stack to\n           be analyzed.\n@param forceProcessing flag to force processing of stack references even if the stack\n           has already been defined.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point of the function that contains the stack to\n           be analyzed."
+        },
+        {
+          "name": "forceProcessing",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "flag to force processing of stack references even if the stack\n           has already been defined."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entries",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "doParameterAnalysis",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "doLocalAnalysis",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "forceProcessing",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyTo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.cmd.BackgroundCommand#applyTo(ghidra.framework.model.DomainObject, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "analyzeFunction",
+      "comment": "Analyze a function to build a stack frame based on stack references.",
+      "javadoc": "Analyze a function to build a stack frame based on stack references.\n@param entry The address of the entry point for the new function\n@param monitor the task monitor that is checked to see if the command has\n been cancelled.\n@throws CancelledException if the user canceled this command",
+      "static": false,
+      "params": [
+        {
+          "name": "f",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor that is checked to see if the command has\n been cancelled."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user canceled this command"
+        }
+      ]
+    },
+    {
+      "name": "isProtectedVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFunctionStackVariablesToSortedList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createStackPointerVariables",
+      "comment": "Create locals and parameters based on references involving purely the stack pointer.\n Pushes, Pops, and arithmetic manipulation of the stack pointer must be tracked.",
+      "javadoc": "Create locals and parameters based on references involving purely the stack pointer.\n Pushes, Pops, and arithmetic manipulation of the stack pointer must be tracked.\n@param func - function to analyze stack pointer references",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "- function to analyze stack pointer references"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addStackLocalVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "conflicts",
+          "type_long": "ghidra.program.util.VariableStorageConflicts",
+          "type_short": "VariableStorageConflicts",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addStackParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "conflicts",
+          "type_long": "ghidra.program.util.VariableStorageConflicts",
+          "type_short": "VariableStorageConflicts",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addMissingParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "stackVar",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "nextCopyParamIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "oldParamList",
+          "type_long": "ghidra.program.model.listing.Parameter[]",
+          "type_short": "ghidra.program.model.listing.Parameter[]",
+          "comment": ""
+        },
+        {
+          "name": "newParamList",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "callingConvention",
+          "type_long": "ghidra.program.model.lang.PrototypeModel",
+          "type_short": "PrototypeModel",
+          "comment": ""
+        },
+        {
+          "name": "hasStackParams",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStackOpIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "context",
+          "type_long": "ghidra.program.util.VarnodeContext",
+          "type_short": "VarnodeContext",
+          "comment": ""
+        },
+        {
+          "name": "cu",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "defineFuncVariable",
+      "comment": "Checks the indicated function in the program to determine if it is a jump thunk\n through a function pointer.",
+      "javadoc": "Checks the indicated function in the program to determine if it is a jump thunk\n through a function pointer.\n@param func the function to check\n@param monitor status monitor for indicating progress and allowing cancel.\n@returntrue if check if this is a jump thunk through a function pointer",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the function to check"
+        },
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "stackOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRefSize",
+      "comment": "Look at the result register to try and figure out stack access size.",
+      "javadoc": "Look at the result register to try and figure out stack access size.\n@param instr instruction being analyzed\n@param opIndex operand that has a stack reference.\n@return size of value referenced on the stack",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "instruction being analyzed"
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "operand that has a stack reference."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "size of value referenced on the stack"
+      },
+      "throws": []
+    },
+    {
+      "name": "getVariablesIntersecting",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVariableContaining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addVariableToSortedList",
+      "comment": "Add non-overlapping stack variable to sorted variable list.  \n The caller is responsible for ensuring that no overlap/conflict\n with other variables in the list exist.",
+      "javadoc": "Add non-overlapping stack variable to sorted variable list.  \n The caller is responsible for ensuring that no overlap/conflict\n with other variables in the list exist.\n@param var\n@param sortedVariables",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "accumulateVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "refSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "sortedVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

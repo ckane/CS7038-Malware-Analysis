@@ -1,0 +1,510 @@
+{
+  "name": "ElfRelocationHandler",
+  "comment": "ElfRelocationHandler provides the base class for processor specific\n ELF relocation handlers.",
+  "javadoc": "\u003ccode\u003eElfRelocationHandler\u003c/code\u003e provides the base class for processor specific\n ELF relocation handlers.",
+  "static": false,
+  "implements": [
+    "ghidra.util.classfinder.ExtensionPoint"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canRelocate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "elf",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRelrRelocationType",
+      "comment": "Get the architecture-specific relative relocation type \n which should be applied to RELR relocations.  The\n default implementation returns 0 which indicates \n RELR is unsupported.",
+      "javadoc": "Get the architecture-specific relative relocation type \n which should be applied to RELR relocations.  The\n default implementation returns 0 which indicates \n RELR is unsupported.\n@return RELR relocation type",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "RELR relocation type"
+      },
+      "throws": []
+    },
+    {
+      "name": "createRelocationContext",
+      "comment": "Relocation context for a specific Elf image and relocation table.  The relocation context\n is used to process relocations and manage any data required to process relocations.",
+      "javadoc": "Relocation context for a specific Elf image and relocation table.  The relocation context\n is used to process relocations and manage any data required to process relocations.\n@param loadHelper Elf load helper\n@param relocationTable Elf relocation table\n@param symbolMap Elf symbol placement map\n@return relocation context or null if unsupported",
+      "static": false,
+      "params": [
+        {
+          "name": "loadHelper",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfLoadHelper",
+          "type_short": "ElfLoadHelper",
+          "comment": "Elf load helper"
+        },
+        {
+          "name": "relocationTable",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfRelocationTable",
+          "type_short": "ElfRelocationTable",
+          "comment": "Elf relocation table"
+        },
+        {
+          "name": "symbolMap",
+          "type_long": "java.util.Map\u003cghidra.app.util.bin.format.elf.ElfSymbol,ghidra.program.model.address.Address\u003e",
+          "type_short": "Map",
+          "comment": "Elf symbol placement map"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.elf.relocation.ElfRelocationContext",
+        "type_short": "ElfRelocationContext",
+        "comment": "relocation context or null if unsupported"
+      },
+      "throws": []
+    },
+    {
+      "name": "relocate",
+      "comment": "Perform relocation fixup",
+      "javadoc": "Perform relocation fixup\n@param elfRelocationContext relocation context\n@param relocation ELF relocation\n@param relocationAddress relocation target address (fixup location)\n@throws MemoryAccessException memory access failure\n@throws NotFoundException required relocation data not found",
+      "static": false,
+      "params": [
+        {
+          "name": "elfRelocationContext",
+          "type_long": "ghidra.app.util.bin.format.elf.relocation.ElfRelocationContext",
+          "type_short": "ElfRelocationContext",
+          "comment": "relocation context"
+        },
+        {
+          "name": "relocation",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfRelocation",
+          "type_short": "ElfRelocation",
+          "comment": "ELF relocation"
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation target address (fixup location)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "memory access failure"
+        },
+        {
+          "type_long": "ghidra.util.exception.NotFoundException",
+          "type_short": "NotFoundException",
+          "comment": "required relocation data not found"
+        }
+      ]
+    },
+    {
+      "name": "isUnsupportedExternalRelocation",
+      "comment": "Determine if symbolAddr is contained within the EXTERNAL block.  If so, relocationAddress will be marked\n with a codeUnsupported EXTERNAL Data Elf Relocation error bookmark.\n NOTE: This method should only be invoked when the symbol offset will be adjust with a non-zero \n value (i.e., addend).",
+      "javadoc": "Determine if symbolAddr is contained within the EXTERNAL block.  If so, relocationAddress will be marked\n with a \u003ccode\u003cUnsupported EXTERNAL Data Elf Relocation\u003c/code\u003e error bookmark.\n NOTE: This method should only be invoked when the symbol offset will be adjust with a non-zero \n value (i.e., addend).\n@param program\n@param relocationAddress relocation address to be bookmarked if EXTERNAL block relocation\n@param symbolAddr symbol address correspondng to relocation (may be null)\n@param symbolName symbol name (may not be null if symbolAddr is not null)\n@param adjustment relocation symbol offset adjustment/addend\n@param log import log\n@return true if symbolAddress contained within EXTERNAL block.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked if EXTERNAL block relocation"
+        },
+        {
+          "name": "symbolAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "symbol address correspondng to relocation (may be null)"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "symbol name (may not be null if symbolAddr is not null)"
+        },
+        {
+          "name": "adjustment",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "relocation symbol offset adjustment/addend"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "import log"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if symbolAddress contained within EXTERNAL block."
+      },
+      "throws": []
+    },
+    {
+      "name": "markAsUnhandled",
+      "comment": "Generate error log entry and bookmark at relocationAddress indicating \n an unhandled relocation.",
+      "javadoc": "Generate error log entry and bookmark at relocationAddress indicating \n an unhandled relocation.\n@param program\n@param relocationAddress relocation address to be bookmarked\n@param type relocation type\n@param symbolIndex associated symbol index within symbol table\n@param symbolName associated symbol name\n@param log import log",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked"
+        },
+        {
+          "name": "type",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "relocation type"
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "associated symbol index within symbol table"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "associated symbol name"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "import log"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markAsUnsupportedRelr",
+      "comment": "Generate error log entry and bookmark at relocationAddress indicating \n an unsupported RELR relocation.",
+      "javadoc": "Generate error log entry and bookmark at relocationAddress indicating \n an unsupported RELR relocation.\n@param program\n@param relocationAddress relocation address to be bookmarked",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markAsUninitializedMemory",
+      "comment": "Generate error log entry and bookmark at relocationAddress where\n import failed to transition block to initialized while processing relocation.",
+      "javadoc": "Generate error log entry and bookmark at relocationAddress where\n import failed to transition block to initialized while processing relocation.\n@param program\n@param relocationAddress relocation address to be bookmarked\n@param type relocation type\n@param symbolIndex associated symbol index within symbol table\n@param symbolName associated symbol name\n@param log import log",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked"
+        },
+        {
+          "name": "type",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "relocation type"
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "associated symbol index within symbol table"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "associated symbol name"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "import log"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markAsError",
+      "comment": "Generate error log entry and bookmark at relocationAddress where\n import failed to be applied.",
+      "javadoc": "Generate error log entry and bookmark at relocationAddress where\n import failed to be applied.\n@param program\n@param relocationAddress relocation address to be bookmarked\n@param type relocation type\n@param symbolName associated symbol name\n@param log import log",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked"
+        },
+        {
+          "name": "type",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "relocation type"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "associated symbol name"
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "import log"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markAsError",
+      "comment": "Generate error log entry and bookmark at relocationAddress where\n import failed to be applied.",
+      "javadoc": "Generate error log entry and bookmark at relocationAddress where\n import failed to be applied.\n@param program\n@param relocationAddress relocation address to be bookmarked\n@param type relocation type\n@param symbolName associated symbol name\n@param msg additional error message\n@param log import log",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked"
+        },
+        {
+          "name": "type",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "relocation type"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "associated symbol name"
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "additional error message"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "import log"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markAsWarning",
+      "comment": "Generate warning log entry and bookmark at relocationAddress where\n import issue occurred.",
+      "javadoc": "Generate warning log entry and bookmark at relocationAddress where\n import issue occurred.\n@param program\n@param relocationAddress relocation address to be bookmarked\n@param type relocation type\n@param msg message associated with warning\n@param log import log",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked"
+        },
+        {
+          "name": "type",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "relocation type"
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "message associated with warning"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "import log"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markAsWarning",
+      "comment": "Generate warning log entry and bookmark at relocationAddress where\n import issue occurred.",
+      "javadoc": "Generate warning log entry and bookmark at relocationAddress where\n import issue occurred.\n@param program\n@param relocationAddress relocation address to be bookmarked\n@param type relocation type\n@param symbolName symbol name\n@param symbolIndex symbol index\n@param msg message associated with warning\n@param log import log",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "relocationAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "relocation address to be bookmarked"
+        },
+        {
+          "name": "type",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "relocation type"
+        },
+        {
+          "name": "symbolName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "symbol name"
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "symbol index"
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "message associated with warning"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "import log"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

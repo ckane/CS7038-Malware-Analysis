@@ -1,0 +1,1070 @@
+{
+  "name": "ListingMergeManager",
+  "comment": "Manages program listing changes and conflicts between the latest versioned\n program (LATEST) and the modified program (MY) being checked into version control.\n Listing changes include:\n \n bytes\n code units [instructions and data]\n equates\n functions\n symbols\n references [memory, stack, and external]\n comments [plate, pre, end-of-line, repeatable, and post]\n properties\n bookmarks\n ",
+  "javadoc": "Manages program listing changes and conflicts between the latest versioned\n program (LATEST) and the modified program (MY) being checked into version control.\n \u003cbr\u003eListing changes include:\n \u003cul\u003e\n \u003cli\u003ebytes\u003c/li\u003e\n \u003cli\u003ecode units [instructions and data]\u003c/li\u003e\n \u003cli\u003eequates\u003c/li\u003e\n \u003cli\u003efunctions\u003c/li\u003e\n \u003cli\u003esymbols\u003c/li\u003e\n \u003cli\u003ereferences [memory, stack, and external]\u003c/li\u003e\n \u003cli\u003ecomments [plate, pre, end-of-line, repeatable, and post]\u003c/li\u003e\n \u003cli\u003eproperties\u003c/li\u003e\n \u003cli\u003ebookmarks\u003c/li\u003e\n \u003c/ul\u003e",
+  "static": false,
+  "implements": [
+    "ghidra.app.merge.MergeResolver",
+    "ghidra.app.merge.listing.ListingMergeConstants"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "LISTING_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "CODE_UNITS_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "EXTERNALS_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "FUNCTIONS_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "SYMBOLS_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "ADDRESS_BASED_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "RESULT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "LATEST",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "MY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "ORIGINAL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3"
+    },
+    {
+      "name": "conflictOption",
+      "comment": "conflictOption CANCELED, ASK_USER, PICK_ORIGINAL, PICK_LATEST, PICK_MY",
+      "javadoc": "conflictOption CANCELED, ASK_USER, PICK_ORIGINAL, PICK_LATEST, PICK_MY",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "mergeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+      "type_short": "ProgramMultiUserMergeManager",
+      "constant_value": null
+    },
+    {
+      "name": "currentMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ListingMerger",
+      "type_short": "ListingMerger",
+      "constant_value": null
+    },
+    {
+      "name": "externalFunctionMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalFunctionMerger",
+      "type_short": "ExternalFunctionMerger",
+      "constant_value": null
+    },
+    {
+      "name": "cuMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.CodeUnitMerger",
+      "type_short": "CodeUnitMerger",
+      "constant_value": null
+    },
+    {
+      "name": "equateMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.EquateMerger",
+      "type_short": "EquateMerger",
+      "constant_value": null
+    },
+    {
+      "name": "userPropertyMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.UserDefinedPropertyMerger",
+      "type_short": "UserDefinedPropertyMerger",
+      "constant_value": null
+    },
+    {
+      "name": "functionMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.FunctionMerger",
+      "type_short": "FunctionMerger",
+      "constant_value": null
+    },
+    {
+      "name": "referenceMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ReferenceMerger",
+      "type_short": "ReferenceMerger",
+      "constant_value": null
+    },
+    {
+      "name": "commentMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.CommentMerger",
+      "type_short": "CommentMerger",
+      "constant_value": null
+    },
+    {
+      "name": "bookmarkMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.BookmarkMerger",
+      "type_short": "BookmarkMerger",
+      "constant_value": null
+    },
+    {
+      "name": "symbolMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.SymbolMerger",
+      "type_short": "SymbolMerger",
+      "constant_value": null
+    },
+    {
+      "name": "functionTagMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.FunctionTagListingMerger",
+      "type_short": "FunctionTagListingMerger",
+      "constant_value": null
+    },
+    {
+      "name": "conflictInfoPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ConflictInfoPanel",
+      "type_short": "ConflictInfoPanel",
+      "constant_value": null
+    },
+    {
+      "name": "mergePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+      "type_short": "ListingMergePanel",
+      "constant_value": null
+    },
+    {
+      "name": "currentStatusMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "programs",
+      "comment": "The four programs used in a versioned program merge.\n RESULT: the program to be updated with the result of the merge.\n This is the program that will actually get checked in.\n ORIGINAL: the program that was checked out.\n LATEST: the latest checked-in version of the program.\n MY: the program requesting to be checked in.",
+      "javadoc": "The four programs used in a versioned program merge.\n \u003cbr\u003eRESULT: the program to be updated with the result of the merge.\n This is the program that will actually get checked in.\n \u003cbr\u003eORIGINAL: the program that was checked out.\n \u003cbr\u003eLATEST: the latest checked-in version of the program.\n \u003cbr\u003eMY: the program requesting to be checked in.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program[]",
+      "type_short": "ghidra.program.model.listing.Program[]",
+      "constant_value": null
+    },
+    {
+      "name": "diffOriginalLatest",
+      "comment": "Used to determine differences between the original program and latest program.\n  Note: This diff is restricted to only where there are possible conflicts with the \"My\" program.\n  If an individual merger needs to find all diffs between the original and latest programs\n  then it must use its own diff.",
+      "javadoc": "Used to determine differences between the original program and latest program.\n  \u003cbr\u003eNote: This diff is restricted to only where there are possible conflicts with the \"My\" program.\n  If an individual merger needs to find all diffs between the original and latest programs\n  then it must use its own diff.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiff",
+      "type_short": "ProgramDiff",
+      "constant_value": null
+    },
+    {
+      "name": "diffOriginalMy",
+      "comment": "Used to determine differences between the original program and my program.",
+      "javadoc": "Used to determine differences between the original program and my program.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiff",
+      "type_short": "ProgramDiff",
+      "constant_value": null
+    },
+    {
+      "name": "diffResultLatest",
+      "comment": "Used to determine differences between the result program and latest program.",
+      "javadoc": "Used to determine differences between the result program and latest program.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiff",
+      "type_short": "ProgramDiff",
+      "constant_value": null
+    },
+    {
+      "name": "diffResultMy",
+      "comment": "Used to determine differences between the result program and my program.",
+      "javadoc": "Used to determine differences between the result program and my program.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiff",
+      "type_short": "ProgramDiff",
+      "constant_value": null
+    },
+    {
+      "name": "diffLatestMy",
+      "comment": "Used to determine differences between the latest program and my program.",
+      "javadoc": "Used to determine differences between the latest program and my program.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiff",
+      "type_short": "ProgramDiff",
+      "constant_value": null
+    },
+    {
+      "name": "latestChanges",
+      "comment": "program changes between the original and latest versioned program.",
+      "javadoc": "program changes between the original and latest versioned program.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "myChanges",
+      "comment": "program changes between the original and my modified program.",
+      "javadoc": "program changes between the original and my modified program.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+      "type_short": "ProgramChangeSet",
+      "constant_value": null
+    },
+    {
+      "name": "latestSet",
+      "comment": "addresses of listing changes between the original and latest versioned program.",
+      "javadoc": "addresses of listing changes between the original and latest versioned program.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "mySet",
+      "comment": "addresses of listing changes between the original and my modified program.",
+      "javadoc": "addresses of listing changes between the original and my modified program.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "mergeMy",
+      "comment": "Used to merge from Checked Out version to Result version.",
+      "javadoc": "Used to merge from Checked Out version to Result version.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "mergeLatest",
+      "comment": "Used to merge from Latest version to Result version.",
+      "javadoc": "Used to merge from Latest version to Result version.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "mergeOriginal",
+      "comment": "Used to merge from Original version to Result version.",
+      "javadoc": "Used to merge from Original version to Result version.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    },
+    {
+      "name": "totalConflictsInPhase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "conflictNum",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "showListingPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Manages listing changes and conflicts between the latest versioned\n program and the modified program being checked into version control.",
+      "javadoc": "Manages listing changes and conflicts between the latest versioned\n program and the modified program being checked into version control.\n@param mergeManager the top level merge manager for merging a program version.\n@param resultPgm the program to be updated with the result of the merge.\n This is the program that will actually get checked in.\n@param originalPgm the program that was checked out.\n@param latestPgm the latest checked-in version of the program.\n@param myPgm the program requesting to be checked in.\n@param latestChanges the address set of changes between original and latest versioned program.\n@param myChanges the address set of changes between original and my modified program.",
+      "static": false,
+      "params": [
+        {
+          "name": "mergeManager",
+          "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+          "type_short": "ProgramMultiUserMergeManager",
+          "comment": "the top level merge manager for merging a program version."
+        },
+        {
+          "name": "resultPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be updated with the result of the merge.\n This is the program that will actually get checked in."
+        },
+        {
+          "name": "originalPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program that was checked out."
+        },
+        {
+          "name": "latestPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the latest checked-in version of the program."
+        },
+        {
+          "name": "myPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program requesting to be checked in."
+        },
+        {
+          "name": "latestChanges",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "the address set of changes between original and latest versioned program."
+        },
+        {
+          "name": "myChanges",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "the address set of changes between original and my modified program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionTagListingMerger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.FunctionTagListingMerger",
+        "type_short": "FunctionTagListingMerger",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setShowListingPanel",
+      "comment": "True signals to show the listing panel (default); false signals to show an empty listing (faster)",
+      "javadoc": "True signals to show the listing panel (default); false signals to show an empty listing (faster)\n@param showListingPanel",
+      "static": false,
+      "params": [
+        {
+          "name": "showListingPanel",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeExternalFunctions",
+      "comment": "Performs autoMerge of bytes and code units followed by merge of byte and code unit conflicts.",
+      "javadoc": "Performs autoMerge of bytes and code units followed by merge of byte and code unit conflicts.\n@param monitor the task monitor for canceling the merge\n@throws ProgramConflictException if programs can\u0027t be compared using Diff.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for canceling the merge"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if programs can\u0027t be compared using Diff."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "setListingViewsToEntireProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "emptyListingViewForPrograms",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeCodeUnits",
+      "comment": "Performs autoMerge of bytes and code units followed by merge of byte and code unit conflicts.",
+      "javadoc": "Performs autoMerge of bytes and code units followed by merge of byte and code unit conflicts.\n@param monitor the task monitor for canceling the merge\n@throws ProgramConflictException if programs can\u0027t be compared using Diff.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for canceling the merge"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if programs can\u0027t be compared using Diff."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "mergeFunctions",
+      "comment": "Performs autoMerge of functions followed by merge of function conflicts.",
+      "javadoc": "Performs autoMerge of functions followed by merge of function conflicts.\n@param monitor the task monitor for canceling the merge\n@throws ProgramConflictException if programs can\u0027t be compared using Diff.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for canceling the merge"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if programs can\u0027t be compared using Diff."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "mergeSymbols",
+      "comment": "Performs autoMerge of symbols followed by merge of symbol conflicts.",
+      "javadoc": "Performs autoMerge of symbols followed by merge of symbol conflicts.\n@param monitor the task monitor for canceling the merge\n@throws ProgramConflictException if programs can\u0027t be compared using Diff.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for canceling the merge"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if programs can\u0027t be compared using Diff."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "mergeAddressBasedProgramItems",
+      "comment": "Performs autoMerge of each remaining address based program item followed by merge of\n their conflicts in address order.",
+      "javadoc": "Performs autoMerge of each remaining address based program item followed by merge of\n their conflicts in address order.\n@param monitor the task monitor for canceling the merge\n@throws ProgramConflictException if programs can\u0027t be compared using Diff.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for canceling the merge"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if programs can\u0027t be compared using Diff."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "displayInitialPhaseMessage",
+      "comment": "Updates the phase status and message information in the mergeManager.",
+      "javadoc": "Updates the phase status and message information in the mergeManager.\n@param phaseIndicator indicates the phase for the merge manager to change to \"In Progress\".\n@param phaseMessage text indicating what this phase will be merging.",
+      "static": false,
+      "params": [
+        {
+          "name": "phaseIndicator",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": "indicates the phase for the merge manager to change to \"In Progress\"."
+        },
+        {
+          "name": "phaseMessage",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "text indicating what this phase will be merging."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeBottomComponent",
+      "comment": "Removes the bottom component (the conflict component) from the listing merge panel.\n This should be called when the conflict Apply button is activated.",
+      "javadoc": "Removes the bottom component (the conflict component) from the listing merge panel.\n This should be called when the conflict Apply button is activated.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initMergeInfo",
+      "comment": "Sets up the change address sets, Diffs between the various program versions,\n and Merges from various versions to the resulting program.",
+      "javadoc": "Sets up the change address sets, Diffs between the various program versions,\n and Merges from various versions to the resulting program.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeMergers",
+      "comment": "Creates all of the individual mergers that are used by the ListingMergeManager.\n Each of these listing mergers will autoMerge() non-conflicting changes and will\n determine conflicts. The conflicts are handled later by calling manualMerge().",
+      "javadoc": "Creates all of the individual mergers that are used by the ListingMergeManager.\n Each of these listing mergers will autoMerge() non-conflicting changes and will\n determine conflicts. The conflicts are handled later by calling manualMerge().",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "Performs an automatic merge of My changes that are not conflicts for all the mergers\n specified. Each of the merger\u0027s autoMerge is performed in the order they\n are found in the array. Each autoMerge will cause that merger to determine conflicts.\n Note: This method should be called a single time for any set of listing mergers\n and then be followed by the mergeConflicts() call to resolve conflicts.",
+      "javadoc": "Performs an automatic merge of My changes that are not conflicts for all the mergers\n specified. Each of the merger\u0027s autoMerge is performed in the order they\n are found in the array. Each autoMerge will cause that merger to determine conflicts.\n \u003cbr\u003eNote: This method should be called a single time for any set of listing mergers\n and then be followed by the mergeConflicts() call to resolve conflicts.\n@param mergers the listing mergers to be auto-merged.\n@param monitor indicates progress to user and allows cancel.\n@throws ProgramConflictException if programs can\u0027t be compared using Diff.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "mergers",
+          "type_long": "ghidra.app.merge.listing.ListingMerger[]",
+          "type_short": "ghidra.app.merge.listing.ListingMerger[]",
+          "comment": "the listing mergers to be auto-merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "indicates progress to user and allows cancel."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if programs can\u0027t be compared using Diff."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "setConflictDecision",
+      "comment": "For JUnit testing only, set the option for resolving a conflict.",
+      "javadoc": "For JUnit testing only, set the option for resolving a conflict.\n@param decision CANCELED, ASK_USER, PICK_LATEST, PICK_MY, PICK_ORIGINAL",
+      "static": false,
+      "params": [
+        {
+          "name": "decision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "CANCELED, ASK_USER, PICK_LATEST, PICK_MY, PICK_ORIGINAL"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "Performs a manual merge of the Listing conflicts for all the mergers\n specified. The addresses with conflicts will be resolved in order\n from minimum address to maximum address.\n At each address all conflicts are resolved before moving to the next address.\n Note: Call the autoMerge() method before this method in order to\n determine the conflicts.",
+      "javadoc": "Performs a manual merge of the Listing conflicts for all the mergers\n specified. The addresses with conflicts will be resolved in order\n from minimum address to maximum address.\n At each address all conflicts are resolved before moving to the next address.\n \u003cbr\u003eNote: Call the autoMerge() method before this method in order to\n determine the conflicts.\n@param mergers the listing mergers whose conflicts are to be merged.\n@param monitor indicates progress to user and allows cancel.\n@throws ProgramConflictException if programs can\u0027t be compared using Diff.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "mergers",
+          "type_long": "ghidra.app.merge.listing.ListingMerger[]",
+          "type_short": "ghidra.app.merge.listing.ListingMerger[]",
+          "comment": "the listing mergers whose conflicts are to be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "indicates progress to user and allows cancel."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "getTotalNumConflicts",
+      "comment": "Gets the number of Listing conflicts to resolve at the indicated address.",
+      "javadoc": "Gets the number of Listing conflicts to resolve at the indicated address.\n@param mergers the mergers whose address based conflicts are of interest.\n@param addr the address\n@return the number of Listing conflicts at the address",
+      "static": false,
+      "params": [
+        {
+          "name": "mergers",
+          "type_long": "ghidra.app.merge.listing.ListingMerger[]",
+          "type_short": "ghidra.app.merge.listing.ListingMerger[]",
+          "comment": "the mergers whose address based conflicts are of interest."
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of Listing conflicts at the address"
+      },
+      "throws": []
+    },
+    {
+      "name": "getListingConflicts",
+      "comment": "Gets the set of addresses where conflicts need to be resolved in the listing\n by each of the merger\u0027s specified.",
+      "javadoc": "Gets the set of addresses where conflicts need to be resolved in the listing\n by each of the merger\u0027s specified.\n@param mergers the mergers whose address based conflicts are of interest.\n@return the set of addresses with conflicts.",
+      "static": false,
+      "params": [
+        {
+          "name": "mergers",
+          "type_long": "ghidra.app.merge.listing.ListingMerger[]",
+          "type_short": "ghidra.app.merge.listing.ListingMerger[]",
+          "comment": "the mergers whose address based conflicts are of interest."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the set of addresses with conflicts."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergedCodeUnits",
+      "comment": "Gets the address set for the code units that were changed in the result\n by the merge.",
+      "javadoc": "Gets the address set for the code units that were changed in the result\n by the merge.\n@return the address set indicating the code units that changed in the\n result program due to the merge",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the address set indicating the code units that changed in the\n result program due to the merge"
+      },
+      "throws": []
+    },
+    {
+      "name": "getListingMergePanel",
+      "comment": "Returns the listing merge panel.\n This panel displays all four programs for a versioned merge.\n Above the listings in conflict information.\n Below the listings is a conflict panel for the user to resolve conflicts.",
+      "javadoc": "Returns the listing merge panel.\n This panel displays all four programs for a versioned merge.\n Above the listings in conflict information.\n Below the listings is a conflict panel for the user to resolve conflicts.\n@return the listing merge conflict panel",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+        "type_short": "ListingMergePanel",
+        "comment": "the listing merge conflict panel"
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictInfoPanel",
+      "comment": "Returns the conflict information panel. This panel appears above\n the listings on a listing merge conflict dialog. It indicates the type\n of conflict, address (if applicable), how many conflicts, etc.",
+      "javadoc": "Returns the conflict information panel. This panel appears above\n the listings on a listing merge conflict dialog. It indicates the type\n of conflict, address (if applicable), how many conflicts, etc.\n@return the conflict information panel.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.ConflictInfoPanel",
+        "type_short": "ConflictInfoPanel",
+        "comment": "the conflict information panel."
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveNamespace",
+      "comment": "This method allows other listing merge managers to resolve a namespace\n via the symbol merge manager. This is because the symbol merge manager\n actually merges namespaces and best knows how to resolve them.\n It also keeps track of how they have been resolved.",
+      "javadoc": "This method allows other listing merge managers to resolve a namespace\n via the symbol merge manager. This is because the symbol merge manager\n actually merges namespaces and best knows how to resolve them.\n It also keeps track of how they have been resolved.\n@param srcProgram the program version that the namespace to be resolved is coming from.\n@param srcNamespace the namespace to be resolved\n@return the namespace from the result program version\n@throws DuplicateNameException if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with.\n@throws InvalidInputException if the name space is not validly named\n for the result program.",
+      "static": false,
+      "params": [
+        {
+          "name": "srcProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program version that the namespace to be resolved is coming from."
+        },
+        {
+          "name": "srcNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the namespace to be resolved"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": "the namespace from the result program version"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the name space is not validly named\n for the result program."
+        }
+      ]
+    },
+    {
+      "name": "getPhases",
+      "comment": "This method returns all of the phases of the Listing Merge Manager that will be\n displayed in the Program Merge Manager.\n The first item is a phase indicator for the Listing Phase as a whole and\n the others are for each sub-phase of the Listing.",
+      "javadoc": "This method returns all of the phases of the Listing Merge Manager that will be\n displayed in the Program Merge Manager.\n The first item is a phase indicator for the Listing Phase as a whole and\n the others are for each sub-phase of the Listing.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[][]",
+        "type_short": "java.lang.String[][]",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

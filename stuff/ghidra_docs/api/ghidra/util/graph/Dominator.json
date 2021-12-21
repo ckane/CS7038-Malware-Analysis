@@ -1,0 +1,577 @@
+{
+  "name": "Dominator",
+  "comment": "Title: Dominator\n Description: This class contains the functions necessary to build the\n dominance graph of a FlowGraph, ShrinkWrap or Modularized Graph.\n A more complete explanation of my algorithm can be found in my paper\n titled \"Building a Dominance Graph\"",
+  "javadoc": "Title: Dominator\n Description: This class contains the functions necessary to build the\n dominance graph of a FlowGraph, ShrinkWrap or Modularized Graph.\n A more complete explanation of my algorithm can be found in my paper\n titled \"Building a Dominance Graph\"",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.util.graph.DirectedGraph",
+  "fields": [
+    {
+      "name": "vertexColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.graph.attributes.IntegerAttribute\u003cghidra.util.graph.Vertex\u003e",
+      "type_short": "IntegerAttribute",
+      "constant_value": null
+    },
+    {
+      "name": "callingParent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.graph.attributes.ObjectAttribute\u003cghidra.util.graph.Vertex\u003e",
+      "type_short": "ObjectAttribute",
+      "constant_value": null
+    },
+    {
+      "name": "vertexWeight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.graph.attributes.DoubleAttribute\u003cghidra.util.graph.Vertex\u003e",
+      "type_short": "DoubleAttribute",
+      "constant_value": null
+    },
+    {
+      "name": "edgeWeight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.graph.attributes.DoubleAttribute\u003cghidra.util.graph.Edge\u003e",
+      "type_short": "DoubleAttribute",
+      "constant_value": null
+    },
+    {
+      "name": "vertexType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.graph.attributes.StringAttribute\u003cghidra.util.graph.Vertex\u003e",
+      "type_short": "StringAttribute",
+      "constant_value": null
+    },
+    {
+      "name": "paths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.graph.Path",
+      "type_short": "Path",
+      "constant_value": null
+    },
+    {
+      "name": "white",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "gray",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertexCapacity",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "edgeCapacity",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "cg",
+          "type_long": "ghidra.util.graph.DirectedGraph",
+          "type_short": "DirectedGraph",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "backTrack",
+      "comment": "this aids in going back to the parent from which a vertex was accessed in\n the depth first search",
+      "javadoc": "this aids in going back to the parent from which a vertex was accessed in\n the depth first search",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.graph.Vertex",
+        "type_short": "Vertex",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDominator",
+      "comment": "this returns the vertex that is the dominator",
+      "javadoc": "this returns the vertex that is the dominator",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.graph.Vertex",
+        "type_short": "Vertex",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "allPathsContaining",
+      "comment": "this returns all paths that contain v which we need to consider when\n looking for the dominator of v.  It places the longest path as the\n first element in the vector pathSet.",
+      "javadoc": "this returns all paths that contain v which we need to consider when\n looking for the dominator of v.  It places the longest path as the\n first element in the vector pathSet.",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Vector",
+        "type_short": "Vector",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "allPathsContain",
+      "comment": "This takes the longest path that contains vertex v and looks to see\n if any of v\u0027s ancestors from that path are contained in all other\n paths that contain v.",
+      "javadoc": "This takes the longest path that contains vertex v and looks to see\n if any of v\u0027s ancestors from that path are contained in all other\n paths that contain v.",
+      "static": false,
+      "params": [
+        {
+          "name": "pathSet",
+          "type_long": "java.util.Vector",
+          "type_short": "Vector",
+          "comment": ""
+        },
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        },
+        {
+          "name": "path",
+          "type_long": "java.util.Vector",
+          "type_short": "Vector",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.graph.Vertex",
+        "type_short": "Vertex",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goToNextWhiteChild",
+      "comment": "Goes to the next child of v that has not been visited and sets the\n calling parent to be v so that we can backtrack.",
+      "javadoc": "Goes to the next child of v that has not been visited and sets the\n calling parent to be v so that we can backtrack.",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.graph.Vertex",
+        "type_short": "Vertex",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDominance",
+      "comment": "This makes a list of all the paths that are in a graph that terminate\n either because of a repeated vertex or hitting a sink. It then calls\n getDominanceGraph which gets the dominator for every vertex and builds a\n dominance graph.",
+      "javadoc": "This makes a list of all the paths that are in a graph that terminate\n either because of a repeated vertex or hitting a sink. It then calls\n getDominanceGraph which gets the dominator for every vertex and builds a\n dominance graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.graph.DirectedGraph",
+        "type_short": "DirectedGraph",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDominanceGraph",
+      "comment": "This iterates through the vertices of our graph and gets the dominator\n for each.  In a new graph - dom - it adds each vertex and an edge between the\n vertex and its dominator.  It returns dom, the dominance graph.",
+      "javadoc": "This iterates through the vertices of our graph and gets the dominator\n for each.  In a new graph - dom - it adds each vertex and an edge between the\n vertex and its dominator.  It returns dom, the dominance graph.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.graph.DirectedGraph",
+        "type_short": "DirectedGraph",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addToPaths",
+      "comment": "This function originally did not return anything.  It returns a vertex\n for the purpose of keeping track of which vertex we left off on.  So if we\n backtrack, we can copy the portion of the previous path that is contained\n in the path we are currently construction.  I tried to do this without\n passing v as a parameter and it did not work.  Something funny happened I\n suppose with JAVA and pointers.\n This  function simply adds to singlePath until there are no more white\n children which means we\u0027ve either reached a sink, or the only vertices\n left are repeated meaning we have a loop.",
+      "javadoc": "This function originally did not return anything.  It returns a vertex\n for the purpose of keeping track of which vertex we left off on.  So if we\n backtrack, we can copy the portion of the previous path that is contained\n in the path we are currently construction.  I tried to do this without\n passing v as a parameter and it did not work.  Something funny happened I\n suppose with JAVA and pointers.\n This  function simply adds to singlePath until there are no more white\n children which means we\u0027ve either reached a sink, or the only vertices\n left are repeated meaning we have a loop.",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        },
+        {
+          "name": "singlePath",
+          "type_long": "java.util.Vector",
+          "type_short": "Vector",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.graph.Vertex",
+        "type_short": "Vertex",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasWhiteChild",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "whitenChildren",
+      "comment": "Whitens the children of v.  It is only called after v has no more\n  children left and we have backtracked to the calling parent of\n  v.  This is to ensure that we don\u0027t miss out on any paths that\n  contain a child of v which has other parents.",
+      "javadoc": "Whitens the children of v.  It is only called after v has no more\n  children left and we have backtracked to the calling parent of\n  v.  This is to ensure that we don\u0027t miss out on any paths that\n  contain a child of v which has other parents.",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        },
+        {
+          "name": "color",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCallingParent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        },
+        {
+          "name": "parent",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCallingParent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.graph.Vertex",
+        "type_short": "Vertex",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "o",
+          "type_long": "ghidra.util.graph.KeyedObject",
+          "type_short": "KeyedObject",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setWeight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        },
+        {
+          "name": "weight",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getWeight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.util.graph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "double",
+        "type_short": "double",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setWeight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "ghidra.util.graph.Edge",
+          "type_short": "Edge",
+          "comment": ""
+        },
+        {
+          "name": "weight",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getWeight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "ghidra.util.graph.Edge",
+          "type_short": "Edge",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "double",
+        "type_short": "double",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

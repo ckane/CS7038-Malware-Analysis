@@ -1,0 +1,1176 @@
+{
+  "name": "ExternalProgramMerger",
+  "comment": "Manages external program name changes and conflicts between the latest versioned\n program and the modified program being checked into version control.",
+  "javadoc": "Manages external program name changes and conflicts between the latest versioned\n program and the modified program being checked into version control.",
+  "static": false,
+  "implements": [
+    "ghidra.app.merge.MergeResolver",
+    "ghidra.app.merge.listing.ListingMergeConstants"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "EXTERNAL_PROGRAM_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "conflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+      "type_short": "VerticalChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "conflictOption",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "currentIDGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup",
+      "type_short": "IDGroup",
+      "constant_value": null
+    },
+    {
+      "name": "currentMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "extPgms",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.app.merge.listing.ExternalProgramMerger.IDGroup\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "mergeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+      "type_short": "ProgramMultiUserMergeManager",
+      "constant_value": null
+    },
+    {
+      "name": "resultPgm",
+      "comment": "the program to be updated with the result of the merge.\n This is the program that will actually get checked in.",
+      "javadoc": "the program to be updated with the result of the merge.\n This is the program that will actually get checked in.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "originalPgm",
+      "comment": "the program that was checked out.",
+      "javadoc": "the program that was checked out.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "latestPgm",
+      "comment": "the latest checked-in version of the program.",
+      "javadoc": "the latest checked-in version of the program.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "myPgm",
+      "comment": "the program requesting to be checked in.",
+      "javadoc": "the program requesting to be checked in.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "originalExtMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.ExternalManager",
+      "type_short": "ExternalManager",
+      "constant_value": null
+    },
+    {
+      "name": "latestExtMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.ExternalManager",
+      "type_short": "ExternalManager",
+      "constant_value": null
+    },
+    {
+      "name": "myExtMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.ExternalManager",
+      "type_short": "ExternalManager",
+      "constant_value": null
+    },
+    {
+      "name": "resultExtMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.ExternalManager",
+      "type_short": "ExternalManager",
+      "constant_value": null
+    },
+    {
+      "name": "infoBuf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.StringBuffer",
+      "type_short": "StringBuffer",
+      "constant_value": null
+    },
+    {
+      "name": "externalProgramChoice",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "originalResolvedSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "latestResolvedSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "myResolvedSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "resultToOriginalMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "resultToLatestMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "resultToMyMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "resultIDsInAGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Manages code unit changes and conflicts between the latest versioned\n program and the modified program being checked into version control.",
+      "javadoc": "Manages code unit changes and conflicts between the latest versioned\n program and the modified program being checked into version control.\n@param mergeManager the top level merge manager for merging a program version.\n@param resultPgm the program to be updated with the result of the merge.\n This is the program that will actually get checked in.\n@param originalPgm the program that was checked out.\n@param latestPgm the latest checked-in version of the program.\n@param myPgm the program requesting to be checked in.\n@param latestChanges the address set of changes between original and latest versioned program.\n@param myChanges the address set of changes between original and my modified program.",
+      "static": false,
+      "params": [
+        {
+          "name": "mergeManager",
+          "type_long": "ghidra.app.merge.ProgramMultiUserMergeManager",
+          "type_short": "ProgramMultiUserMergeManager",
+          "comment": "the top level merge manager for merging a program version."
+        },
+        {
+          "name": "resultPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be updated with the result of the merge.\n This is the program that will actually get checked in."
+        },
+        {
+          "name": "originalPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program that was checked out."
+        },
+        {
+          "name": "latestPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the latest checked-in version of the program."
+        },
+        {
+          "name": "myPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program requesting to be checked in."
+        },
+        {
+          "name": "latestChanges",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "the address set of changes between original and latest versioned program."
+        },
+        {
+          "name": "myChanges",
+          "type_long": "ghidra.program.model.listing.ProgramChangeSet",
+          "type_short": "ProgramChangeSet",
+          "comment": "the address set of changes between original and my modified program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setConflictDecision",
+      "comment": "For JUnit testing only, set the option for resolving a conflict.",
+      "javadoc": "For JUnit testing only, set the option for resolving a conflict.\n@param decision CANCELED, ASK_USER, LATEST, MY, ORIGINAL",
+      "static": false,
+      "params": [
+        {
+          "name": "decision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "CANCELED, ASK_USER, LATEST, MY, ORIGINAL"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearResolveInfo",
+      "comment": "Clears all text from the information buffer.",
+      "javadoc": "Clears all text from the information buffer.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showResolveInfo",
+      "comment": "This is a generic method for displaying the contents of the information\n buffer to the user.",
+      "javadoc": "This is a generic method for displaying the contents of the information\n buffer to the user.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mapResultsToOriginalLibs",
+      "comment": "Populate the reverse map for the Library symbols in the Original program.",
+      "javadoc": "Populate the reverse map for the Library symbols in the Original program.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mapResultsToLatestLibs",
+      "comment": "Populate the reverse map for the Library symbols in the Latest program.",
+      "javadoc": "Populate the reverse map for the Library symbols in the Latest program.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mapResultsToMyLibs",
+      "comment": "Populate the reverse map for the Library symbols in the My program.",
+      "javadoc": "Populate the reverse map for the Library symbols in the My program.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGroupsForOriginalLibs",
+      "comment": "Gets symbol ID groups for each Library symbol that was in the Original program.\n  Note: This method excludes any new Library symbols in Original whose matching Result ID\n has already been placed in the resultIDsInAGroup set. Otherwise, each ID group that has a\n Result ID will add it to the resultIDsInAGroup set.",
+      "javadoc": "Gets symbol ID groups for each Library symbol that was in the Original program.\n \u003cbr\u003e Note: This method excludes any new Library symbols in Original whose matching Result ID\n has already been placed in the resultIDsInAGroup set. Otherwise, each ID group that has a\n Result ID will add it to the resultIDsInAGroup set.\n@return the ID groups for Library symbols in the Original program.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.merge.listing.ExternalProgramMerger.IDGroup\u003e",
+        "type_short": "List",
+        "comment": "the ID groups for Library symbols in the Original program."
+      },
+      "throws": []
+    },
+    {
+      "name": "getGroupsForLatestNewLibs",
+      "comment": "Gets symbol ID groups for each Library symbol that is new in the Latest program\n (symbol wasn\u0027t in the Original program).\n  Note: This method excludes any new Library symbols in Original whose matching Result ID\n has already been placed in the resultIDsInAGroup set. Otherwise, each ID group that has a\n Result ID will add it to the resultIDsInAGroup set.",
+      "javadoc": "Gets symbol ID groups for each Library symbol that is new in the Latest program\n (symbol wasn\u0027t in the Original program).\n \u003cbr\u003e Note: This method excludes any new Library symbols in Original whose matching Result ID\n has already been placed in the resultIDsInAGroup set. Otherwise, each ID group that has a\n Result ID will add it to the resultIDsInAGroup set.\n@return the ID groups for new Library symbols in the Latest program.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.merge.listing.ExternalProgramMerger.IDGroup\u003e",
+        "type_short": "List",
+        "comment": "the ID groups for new Library symbols in the Latest program."
+      },
+      "throws": []
+    },
+    {
+      "name": "getGroupsForMyNewLibs",
+      "comment": "Gets symbol ID groups for each Library symbol that is new in the My program\n (symbol wasn\u0027t in the Original program).\n  Note: This method excludes any new Library symbols in Original whose matching Result ID\n has already been placed in the resultIDsInAGroup set. Otherwise, each ID group that has a\n Result ID will add it to the resultIDsInAGroup set.",
+      "javadoc": "Gets symbol ID groups for each Library symbol that is new in the My program\n (symbol wasn\u0027t in the Original program).\n \u003cbr\u003e Note: This method excludes any new Library symbols in Original whose matching Result ID\n has already been placed in the resultIDsInAGroup set. Otherwise, each ID group that has a\n Result ID will add it to the resultIDsInAGroup set.\n@return the ID groups for new Library symbols in the My program.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.merge.listing.ExternalProgramMerger.IDGroup\u003e",
+        "type_short": "List",
+        "comment": "the ID groups for new Library symbols in the My program."
+      },
+      "throws": []
+    },
+    {
+      "name": "getOriginalIDForResultID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLatestIDForResultID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMyIDForResultID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMergeNamedExternalProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "idGroup",
+          "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup",
+          "type_short": "IDGroup",
+          "comment": ""
+        },
+        {
+          "name": "progress",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMergeWhenOnlyLatestChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "latestName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "latestPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMergeWhenOnlyMyChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "resultName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "myName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "myPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isExternalUserDefined",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "externalName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExternalLibrary",
+      "comment": "Removes the indicated external library from the indicated program version\n if it is empty.",
+      "javadoc": "Removes the indicated external library from the indicated program version\n if it is empty.\n@param program the program\n@param libName the external library name\n@throws InvalidInputException if there is no such enterrnal library in the program",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program"
+        },
+        {
+          "name": "libName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the external library name"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if there is no such enterrnal library in the program"
+        }
+      ]
+    },
+    {
+      "name": "same",
+      "comment": "Determines whether the latest external program name and my external program name are equals.",
+      "javadoc": "Determines whether the latest external program name and my external program name are equals.\n@param latestName the latest external program name or null.\n@param myName my external program name or null.\n@return true if the names are equal.",
+      "static": false,
+      "params": [
+        {
+          "name": "latestName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the latest external program name or null."
+        },
+        {
+          "name": "myName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "my external program name or null."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the names are equal."
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "Performs a manual merge of external program conflicts.",
+      "javadoc": "Performs a manual merge of external program conflicts.\n@param chosenConflictOption ASK_USER means interactively resolve conflicts.\n JUnit testing also allows setting this to LATEST, MY, or ORIGINAL to force\n selection of a particular version change.\n@param monitor task monitor for informing the user of progress.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "ASK_USER means interactively resolve conflicts.\n JUnit testing also allows setting this to LATEST, MY, or ORIGINAL to force\n selection of a particular version change."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for informing the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the merge."
+        }
+      ]
+    },
+    {
+      "name": "showMergePanel",
+      "comment": "Displays the external program name conflict panel to the user.",
+      "javadoc": "Displays the external program name conflict panel to the user.\n@param idGroup the symbol ID group for the external program (Library) being merged.\n@param monitor task monitor to provide merge status to the user and allow canceling.",
+      "static": false,
+      "params": [
+        {
+          "name": "idGroup",
+          "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup",
+          "type_short": "IDGroup",
+          "comment": "the symbol ID group for the external program (Library) being merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor to provide merge status to the user and allow canceling."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictPanel",
+      "comment": "Gets the conflict resolution panel to display",
+      "javadoc": "Gets the conflict resolution panel to display\n@param idGroup the symbol ID group for the external program (Library) in conflict.\n@param listener the listener for the user\u0027s choice when resolving the conflict.\n@return the panel.",
+      "static": false,
+      "params": [
+        {
+          "name": "idGroup",
+          "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup",
+          "type_short": "IDGroup",
+          "comment": "the symbol ID group for the external program (Library) in conflict."
+        },
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "the listener for the user\u0027s choice when resolving the conflict."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+        "type_short": "VerticalChoicesPanel",
+        "comment": "the panel."
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalNameInfo",
+      "comment": "Returns an array of strings to display for a row of external program name information.",
+      "javadoc": "Returns an array of strings to display for a row of external program name information.\n@param pgm the program version\n@param extPgmName the external program name\n@param prefix prefix for the first column\u0027s info.\n@param suffix suffix for the first column\u0027s info.\n@return an array of strings (one for each column of the conflict choice table.",
+      "static": false,
+      "params": [
+        {
+          "name": "pgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program version"
+        },
+        {
+          "name": "extPgmName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the external program name"
+        },
+        {
+          "name": "prefix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "prefix for the first column\u0027s info."
+        },
+        {
+          "name": "suffix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "suffix for the first column\u0027s info."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "an array of strings (one for each column of the conflict choice table."
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictInfo",
+      "comment": "Gets the information to display at the top of the conflict window indicating\n which conflict this is of the total external program name conflicts.",
+      "javadoc": "Gets the information to display at the top of the conflict window indicating\n which conflict this is of the total external program name conflicts.\n@param idGroup the symbol ID group for the external program (Library) in conflict.\n@param conflictIndex the index of the current conflict.\n@param totalConflicts the total number of conflicts.",
+      "static": false,
+      "params": [
+        {
+          "name": "idGroup",
+          "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup",
+          "type_short": "IDGroup",
+          "comment": "the symbol ID group for the external program (Library) in conflict."
+        },
+        {
+          "name": "conflictIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the current conflict."
+        },
+        {
+          "name": "totalConflicts",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the total number of conflicts."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflictNum",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "totalConflicts",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createNameInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "Actually merges the indicated program name from the program version indicated\n by conflictOption into the result program.",
+      "javadoc": "Actually merges the indicated program name from the program version indicated\n by conflictOption into the result program.\n@param idGroup the symbol ID group for the external program (Library) to merge.\n@param chosenConflictOption conflict option indicating the program version the user chose.\n@param monitor the task monitor for feedback and canceling.\n@throws CancelledException if the user cancels the merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "idGroup",
+          "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup",
+          "type_short": "IDGroup",
+          "comment": "the symbol ID group for the external program (Library) to merge."
+        },
+        {
+          "name": "chosenConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "conflict option indicating the program version the user chose."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for feedback and canceling."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflicts",
+      "comment": "Returns an array of symbol ID groups for all the external programs that are in conflict.",
+      "javadoc": "Returns an array of symbol ID groups for all the external programs that are in conflict.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup[]",
+        "type_short": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearConflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeExternalProgramName",
+      "comment": "Actually merges (sets or removes) the indicated external program name in\n program1 based on the same external program name in program2",
+      "javadoc": "Actually merges (sets or removes) the indicated external program name in\n program1 based on the same external program name in program2\n@param program1 the program to merge into.\n@param program2 the program to get the merge information from.\n@param idGroup the symbol ID group for the external program (Library) to merge.\n@param monitor task monitor for feedback or canceling the merge.s",
+      "static": false,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to merge into."
+        },
+        {
+          "name": "program2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to get the merge information from."
+        },
+        {
+          "name": "idGroup",
+          "type_long": "ghidra.app.merge.listing.ExternalProgramMerger.IDGroup",
+          "type_short": "IDGroup",
+          "comment": "the symbol ID group for the external program (Library) to merge."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for feedback or canceling the merge.s"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPhases",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[][]",
+        "type_short": "java.lang.String[][]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultIDFromOriginalID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originalSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultIDFromLatestID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "latestSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NoValueException",
+          "type_short": "NoValueException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getResultIDFromMyID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mySymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.NoValueException",
+          "type_short": "NoValueException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "name": "UndoableDomainObject",
+  "comment": "UndoableDomainObject extends a domain object to provide transaction\n support and the ability to undo and redo changes made within a stack of \n recent transactions.  Each transactions may contain many sub-transactions which\n reflect concurrent changes to the domain object.  If any sub-transaction fails to commit,\n all concurrent sub-transaction changes will be rolled-back. \n \n NOTE: A transaction must be started in order\n to make any change to this domain object - failure to do so will result in a \n IOException.",
+  "javadoc": "\u003ccode\u003eUndoableDomainObject\u003c/code\u003e extends a domain object to provide transaction\n support and the ability to undo and redo changes made within a stack of \n recent transactions.  Each transactions may contain many sub-transactions which\n reflect concurrent changes to the domain object.  If any sub-transaction fails to commit,\n all concurrent sub-transaction changes will be rolled-back. \n \u003cP\u003e\n NOTE: A \u003ci\u003etransaction\u003c/i\u003e must be started in order\n to make any change to this domain object - failure to do so will result in a \n IOException.\n@see #startTransaction(String)\n@see #endTransaction(int, boolean)",
+  "static": false,
+  "implements": [
+    "ghidra.framework.model.DomainObject",
+    "ghidra.framework.model.Undoable"
+  ],
+  "fields": [],
+  "methods": [
+    {
+      "name": "startTransaction",
+      "comment": "Start a new transaction in order to make changes to this domain object.\n All changes must be made in the context of a transaction. \n If a transaction is already in progress, a sub-transaction \n of the current transaction will be returned.",
+      "javadoc": "Start a new transaction in order to make changes to this domain object.\n All changes must be made in the context of a transaction. \n If a transaction is already in progress, a sub-transaction \n of the current transaction will be returned.\n@param description brief description of transaction\n@return transaction ID\n@throws DomainObjectLockedException the domain object is currently locked\n@throws TerminatedTransactionException an existing transaction which has not yet ended was terminated early.\n Sub-transactions are not permitted until the terminated transaction ends.",
+      "static": false,
+      "params": [
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "brief description of transaction"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "transaction ID"
+      },
+      "throws": []
+    },
+    {
+      "name": "startTransaction",
+      "comment": "Start a new transaction in order to make changes to this domain object.\n All changes must be made in the context of a transaction. \n If a transaction is already in progress, a sub-transaction \n of the current transaction will be returned.",
+      "javadoc": "Start a new transaction in order to make changes to this domain object.\n All changes must be made in the context of a transaction. \n If a transaction is already in progress, a sub-transaction \n of the current transaction will be returned.\n@param description brief description of transaction\n@param listener listener to be notified if the transaction is aborted.\n@return transaction ID\n@throws DomainObjectLockedException the domain object is currently locked\n@throws TerminatedTransactionException an existing transaction which has not yet ended was terminated early.\n Sub-transactions are not permitted until the terminated transaction ends.",
+      "static": false,
+      "params": [
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "brief description of transaction"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.model.AbortedTransactionListener",
+          "type_short": "AbortedTransactionListener",
+          "comment": "listener to be notified if the transaction is aborted."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "transaction ID"
+      },
+      "throws": []
+    },
+    {
+      "name": "endTransaction",
+      "comment": "Terminate the specified transaction for this domain object.",
+      "javadoc": "Terminate the specified transaction for this domain object.\n@param transactionID transaction ID obtained from startTransaction method\n@param commit if true the changes made in this transaction will be marked for commit,\n if false this and any concurrent transaction will be rolled-back.",
+      "static": false,
+      "params": [
+        {
+          "name": "transactionID",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "transaction ID obtained from startTransaction method"
+        },
+        {
+          "name": "commit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the changes made in this transaction will be marked for commit,\n if false this and any concurrent transaction will be rolled-back."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentTransaction",
+      "comment": "Returns the current transaction",
+      "javadoc": "Returns the current transaction\n@return the current transaction",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.Transaction",
+        "type_short": "Transaction",
+        "comment": "the current transaction"
+      },
+      "throws": []
+    },
+    {
+      "name": "hasTerminatedTransaction",
+      "comment": "Returns true if the last transaction was terminated externally from the action that\n started it.",
+      "javadoc": "Returns true if the last transaction was terminated externally from the action that\n started it.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSynchronizedDomainObjects",
+      "comment": "Return array of all domain objects synchronized with a \n shared transaction manager.",
+      "javadoc": "Return array of all domain objects synchronized with a \n shared transaction manager.\n@return returns array of synchronized domain objects or\n null if this domain object is not synchronized with others.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainObject[]",
+        "type_short": "ghidra.framework.model.DomainObject[]",
+        "comment": "returns array of synchronized domain objects or\n null if this domain object is not synchronized with others."
+      },
+      "throws": []
+    },
+    {
+      "name": "addSynchronizedDomainObject",
+      "comment": "Synchronize the specified domain object with this domain object\n using a shared transaction manager.  If either or both is already shared, \n a transition to a single shared transaction manager will be \n performed.",
+      "javadoc": "Synchronize the specified domain object with this domain object\n using a shared transaction manager.  If either or both is already shared, \n a transition to a single shared transaction manager will be \n performed.\n@param domainObj\n@throws LockException if lock or open transaction is active on either\n this or the specified domain object",
+      "static": false,
+      "params": [
+        {
+          "name": "domainObj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if lock or open transaction is active on either\n this or the specified domain object"
+        }
+      ]
+    },
+    {
+      "name": "releaseSynchronizedDomainObject",
+      "comment": "Remove this domain object from a shared transaction manager.  If\n this object has not been synchronized with others via a shared\n transaction manager, this method will have no affect.",
+      "javadoc": "Remove this domain object from a shared transaction manager.  If\n this object has not been synchronized with others via a shared\n transaction manager, this method will have no affect.\n@throws LockException if lock or open transaction is active",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if lock or open transaction is active"
+        }
+      ]
+    }
+  ]
+}

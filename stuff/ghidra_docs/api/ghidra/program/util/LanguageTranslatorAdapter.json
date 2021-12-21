@@ -1,0 +1,726 @@
+{
+  "name": "LanguageTranslatorAdapter",
+  "comment": "LanguageTranslatorAdapter provides a default language translator \n behavior which may be extended to provide customized language translations.",
+  "javadoc": "\u003ccode\u003eLanguageTranslatorAdapter\u003c/code\u003e provides a default language translator \n behavior which may be extended to provide customized language translations.",
+  "static": false,
+  "implements": [
+    "ghidra.program.util.LanguageTranslator"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DEFAULT_COMPILER_SPEC_ID",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"default\""
+    },
+    {
+      "name": "oldLanguageID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.LanguageID",
+      "type_short": "LanguageID",
+      "constant_value": null
+    },
+    {
+      "name": "newLanguageID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.LanguageID",
+      "type_short": "LanguageID",
+      "constant_value": null
+    },
+    {
+      "name": "oldLanguageVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "newLanguageVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "oldLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Language",
+      "type_short": "Language",
+      "constant_value": null
+    },
+    {
+      "name": "newLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Language",
+      "type_short": "Language",
+      "constant_value": null
+    },
+    {
+      "name": "newRegisterNameMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.program.model.lang.Register\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "spaceMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.program.model.address.AddressSpace\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "oldRegisterRangeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.RangeMap",
+      "type_short": "RangeMap",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for default translator.",
+      "javadoc": "Constructor for default translator.\n@param oldLanguage\n@param newLanguage",
+      "static": false,
+      "params": [
+        {
+          "name": "oldLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        },
+        {
+          "name": "newLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for customized language translators which want to leverage \n some of the default language mappings.  Successful construction does not\n guarantee the two languages can utilize the default address space mapping.\n This constructor",
+      "javadoc": "Constructor for customized language translators which want to leverage \n some of the default language mappings.  Successful construction does not\n guarantee the two languages can utilize the default address space mapping.\n This constructor\n@param oldLanguageID\n@param oldLanguageVersion\n@param newLanguageID\n@param newLanguageVersion\n@see #validateDefaultSpaceMap()",
+      "static": false,
+      "params": [
+        {
+          "name": "oldLanguageID",
+          "type_long": "ghidra.program.model.lang.LanguageID",
+          "type_short": "LanguageID",
+          "comment": ""
+        },
+        {
+          "name": "oldLanguageVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "newLanguageID",
+          "type_long": "ghidra.program.model.lang.LanguageID",
+          "type_short": "LanguageID",
+          "comment": ""
+        },
+        {
+          "name": "newLanguageVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildRegisterNameMap",
+      "comment": "Build register name map - assumes register names have not changed\n and that newLanguage has been established",
+      "javadoc": "Build register name map - assumes register names have not changed\n and that newLanguage has been established",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildRegisterRangeMap",
+      "comment": "Build old register range map - assumes oldLanguage has been established\n NOTE: use of RangeMap assumes max register space size of 32-bits",
+      "javadoc": "Build old register range map - assumes oldLanguage has been established\n NOTE: use of RangeMap assumes max register space size of 32-bits",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValid",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "languageID",
+          "type_long": "ghidra.program.model.lang.LanguageID",
+          "type_short": "LanguageID",
+          "comment": ""
+        },
+        {
+          "name": "languageVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Language",
+        "type_short": "Language",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateDefaultSpaceMap",
+      "comment": "Build and validate the default address space map.  This method must be invoked following instantiation\n if the default address space mapping will be used.",
+      "javadoc": "Build and validate the default address space map.  This method must be invoked following instantiation\n if the default address space mapping will be used.\n@throws IncompatibleLanguageException if a default mapping of the address spaces could not be identified.\n@see #getNewAddressSpace(String)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.listing.IncompatibleLanguageException",
+          "type_short": "IncompatibleLanguageException",
+          "comment": "if a default mapping of the address spaces could not be identified."
+        }
+      ]
+    },
+    {
+      "name": "findSpaceSameName",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "oldSpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": ""
+        },
+        {
+          "name": "newSpaces",
+          "type_long": "java.util.ArrayList\u003cghidra.program.model.address.AddressSpace\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSpace",
+        "type_short": "AddressSpace",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.listing.IncompatibleLanguageException",
+          "type_short": "IncompatibleLanguageException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getOldLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Language",
+        "type_short": "Language",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOldLanguageID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.LanguageID",
+        "type_short": "LanguageID",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOldVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Language",
+        "type_short": "Language",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewLanguageID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.LanguageID",
+        "type_short": "LanguageID",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOldRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOldRegisterContaining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOldContextRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewContextRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewAddressSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldSpaceName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSpace",
+        "type_short": "AddressSpace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValueTranslationRequired",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSameRegisterConstruction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "newReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "translateContextValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewRegisterValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewCompilerSpecID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldCompilerSpecID",
+          "type_long": "ghidra.program.model.lang.CompilerSpecID",
+          "type_short": "CompilerSpecID",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.CompilerSpecID",
+        "type_short": "CompilerSpecID",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOldCompilerSpec",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldCompilerSpecID",
+          "type_long": "ghidra.program.model.lang.CompilerSpecID",
+          "type_short": "CompilerSpecID",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.CompilerSpec",
+        "type_short": "CompilerSpec",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.CompilerSpecNotFoundException",
+          "type_short": "CompilerSpecNotFoundException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "fixupInstructions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "oldLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getDefaultLanguageTranslator",
+      "comment": "Return a validated default translator if one can be determined.",
+      "javadoc": "Return a validated default translator if one can be determined.\n@param oldLanguage\n@param newLanguage\n@return default translator or null if reasonable mappings can not be determined.",
+      "static": true,
+      "params": [
+        {
+          "name": "oldLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        },
+        {
+          "name": "newLanguage",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.util.LanguageTranslator",
+        "type_short": "LanguageTranslator",
+        "comment": "default translator or null if reasonable mappings can not be determined."
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultLanguageTranslator",
+      "comment": "Return a validated default translator between two versions of the same language or null\n if one can not be determined.",
+      "javadoc": "Return a validated default translator between two versions of the same language or null\n if one can not be determined.\n@param languageID\n@param fromVersion\n@param toVersion\n@return ",
+      "static": true,
+      "params": [
+        {
+          "name": "languageID",
+          "type_long": "ghidra.program.model.lang.LanguageID",
+          "type_short": "LanguageID",
+          "comment": ""
+        },
+        {
+          "name": "fromVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "toVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.util.LanguageTranslator",
+        "type_short": "LanguageTranslator",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

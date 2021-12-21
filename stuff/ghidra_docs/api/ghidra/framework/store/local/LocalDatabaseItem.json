@@ -1,0 +1,787 @@
+{
+  "name": "LocalDatabaseItem",
+  "comment": "LocalDatabaseItem provides a FolderItem implementation\n for a local database.  This item wraps an underlying VersionedDatabase\n if the file-system is versioned, otherwise a PrivateDatabase is wrapped.\n \n This item utilizes a data directory for storing all files relating to the\n database as well as history and checkout data files if this item is versioned.",
+  "javadoc": "\u003ccode\u003eLocalDatabaseItem\u003c/code\u003e provides a FolderItem implementation\n for a local database.  This item wraps an underlying VersionedDatabase\n if the file-system is versioned, otherwise a PrivateDatabase is wrapped.\n \u003cp\u003e\n This item utilizes a data directory for storing all files relating to the\n database as well as history and checkout data files if this item is versioned.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.store.DatabaseItem"
+  ],
+  "extends": "ghidra.framework.store.local.LocalFolderItem",
+  "fields": [
+    {
+      "name": "privateDb",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.db.PrivateDatabase",
+      "type_short": "PrivateDatabase",
+      "constant_value": null
+    },
+    {
+      "name": "versionedDb",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.db.VersionedDatabase",
+      "type_short": "VersionedDatabase",
+      "constant_value": null
+    },
+    {
+      "name": "versionedDbListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.local.LocalDatabaseItem.LocalVersionedDbListener",
+      "type_short": "LocalVersionedDbListener",
+      "constant_value": null
+    },
+    {
+      "name": "deleteUser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for a new or existing local database item which corresponds to the specified \n property file.",
+      "javadoc": "Constructor for a new or existing local database item which corresponds to the specified \n property file.\n@param fileSystem file system\n@param propertyFile database property file\n@param create if true the data directory will be created\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "file system"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "database property file"
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the data directory will be created"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for an existing local database item which corresponds to the specified \n property file.",
+      "javadoc": "Constructor for an existing local database item which corresponds to the specified \n property file.\n@param fileSystem file system\n@param propertyFile database property file",
+      "static": false,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "file system"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "database property file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new local Database item which corresponds to the specified \n property file.  The initial contents of the database are copied from the\n specified srcFile.",
+      "javadoc": "Create a new local Database item which corresponds to the specified \n property file.  The initial contents of the database are copied from the\n specified srcFile.\n@param fileSystem file system\n@param propertyFile database property file\n@param srcFile open source Database buffer file\n@param contentType user content type\n@param fileID unique file ID\n@param comment if versioned, comment used for version 1 history data\n@param resetDatabaseId if true database ID will be reset for new Database\n@param monitor copy progress monitor\n@param user if versioned, user used for permission check and history data\n@throws IOException if error occurs\n@throws CancelledException if database creation cancelled by user",
+      "static": false,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "file system"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "database property file"
+        },
+        {
+          "name": "srcFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "open source Database buffer file"
+        },
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "user content type"
+        },
+        {
+          "name": "fileID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "unique file ID"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "if versioned, comment used for version 1 history data"
+        },
+        {
+          "name": "resetDatabaseId",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true database ID will be reset for new Database"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "copy progress monitor"
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "if versioned, user used for permission check and history data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if database creation cancelled by user"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new local Database item which corresponds to the specified \n property file.  The initial contents of the database are copied from the\n specified packedFile.",
+      "javadoc": "Create a new local Database item which corresponds to the specified \n property file.  The initial contents of the database are copied from the\n specified packedFile.\n@param fileSystem file system\n@param propertyFile database property file\n@param packedFile packed database file\n@param contentType user content type\n@param monitor copy progress monitor\n@param user if versioned, user used for permission check and history data\n@throws IOException if error occurs\n@throws CancelledException if database creation cancelled by user",
+      "static": false,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "file system"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "database property file"
+        },
+        {
+          "name": "packedFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "packed database file"
+        },
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "user content type"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "copy progress monitor"
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "if versioned, user used for permission check and history data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if database creation cancelled by user"
+        }
+      ]
+    },
+    {
+      "name": "create",
+      "comment": "Create a new LocalDatabaseItem and an empty updateable BufferFile which may be used\n to create the initial database content.",
+      "javadoc": "Create a new LocalDatabaseItem and an empty updateable BufferFile which may be used\n to create the initial database content.\n@param fileSystem file system\n@param propertyFile database property file\n@param bufferSize buffer size to be used for new database\n@param contentType user content type\n@param fileID unique file ID or null\n@param user if versioned, user used for permission check and history data\n@param projectPath path of project in versioned database checkout is done (may be null for non-versioned database)\n@return open updateable empty BufferFile for initial content writing\n@throws IOException if error occurs",
+      "static": true,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "file system"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "database property file"
+        },
+        {
+          "name": "bufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer size to be used for new database"
+        },
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "user content type"
+        },
+        {
+          "name": "fileID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "unique file ID or null"
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "if versioned, user used for permission check and history data"
+        },
+        {
+          "name": "projectPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "path of project in versioned database checkout is done (may be null for non-versioned database)"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.LocalManagedBufferFile",
+        "type_short": "LocalManagedBufferFile",
+        "comment": "open updateable empty BufferFile for initial content writing"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error occurs"
+        }
+      ]
+    },
+    {
+      "name": "length",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "moveTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newFolder",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "newStorageName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newFolderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "fireItemChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinimumVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteMinimumVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "clearCheckout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteCurrentVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "open",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "minChangeDataVer",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.LocalManagedBufferFile",
+        "type_short": "LocalManagedBufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "open",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.LocalManagedBufferFile",
+        "type_short": "LocalManagedBufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "open",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.LocalManagedBufferFile",
+        "type_short": "LocalManagedBufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "openForUpdate",
+      "comment": "Open the latest database version for update.",
+      "javadoc": "Open the latest database version for update.\n@param checkoutId reqiured for update to a versioned item, otherwise set to -1 for\n a non-versioned private database.\n@return open database handle\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "checkoutId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "reqiured for update to a versioned item, otherwise set to -1 for\n a non-versioned private database."
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.LocalManagedBufferFile",
+        "type_short": "LocalManagedBufferFile",
+        "comment": "open database handle"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "canRecover",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#canRecover()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "output",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "outputFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateCheckout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "versionedFolderItem",
+          "type_long": "ghidra.framework.store.FolderItem",
+          "type_short": "FolderItem",
+          "comment": ""
+        },
+        {
+          "name": "updateItem",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateCheckout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "item",
+          "type_long": "ghidra.framework.store.FolderItem",
+          "type_short": "FolderItem",
+          "comment": ""
+        },
+        {
+          "name": "checkoutVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "lastModified",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refresh",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalFolderItem",
+        "type_short": "LocalFolderItem",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "cleanupOldPresaveFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,789 @@
+{
+  "name": "ConcurrentQ",
+  "comment": "A queue for easily scheduling tasks to be run in parallel (or sequentially)\n via a thread pool.  This class provides a clean separation of items that need to\n be processed from the algorithm that does the processing, making it easy to parallelize\n the processing of multiple items.   Further, you can control the maximum number of items that\n can be processed concurrently.  This is useful to throttle operations that may starve the\n other threads in the system.  You may also control how many items get placed into the queue\n at one time, blocking if some threshold is exceeded.\n \n Examples:\n \n \n Put and Forget:\n \n \n \n Put Items and Handle Results in Any Order as They Available:\n \n  {\n     public RESULT process(ITEM item, TaskMonitor monitor) {\n         // do work here...\n     }\n };\n \n  {\n      {\n         RESULT result \u003d result.getResult();\n             // work on my result...\n         }\n };\n \n ;\n builder.setThreadPoolName(\"Thread Pool Name\");\n builder.setListener(itemListener);\n concurrentQ \u003d builder.build(callback);\n ...\n ...\n concurrentQ.add(item); // where item is one of the instances of ITEM\n concurrentQ.add(item);\n concurrentQ.add(item);\n \n \n \n \n \n Put Items and Handle Results When All Items Have Been Processed:\n \n\n \n builder.setThreadPoolName(\"Thread Pool Name\");\n builder.setCollectResults(true);\n concurrentQ \u003d builder.getQueue(callback);\n ...\n ...\n concurrentQ.add(item); // where item is one of the instances of ITEM\n concurrentQ.add(item);\n concurrentQ.add(item);\n ...\n \n \n \n \n Put Items, Blocking While Full, and Handle Results in Any Order as They Available:\n \n  {\n     public RESULT process(ITEM item, TaskMonitor monitor) {\n         // do work here...\n     }\n };\n\n  {\n      {\n         RESULT result \u003d result.getResult();\n             // work on my result...\n         }\n };\n \n ;\n builder.setThreadPoolName(\"Thread Pool Name\");\n builder.setQueue(new LinkedBlockingQueue(100));\n concurrentQ \u003d builder.getQueue(callback);\n ...\n ...\n \n \n \n \n ",
+  "javadoc": "A queue for easily scheduling tasks to be run in parallel (or sequentially)\n via a thread pool.  This class provides a clean separation of items that need to\n be processed from the algorithm that does the processing, making it easy to parallelize\n the processing of multiple items.   Further, you can control the maximum number of items that\n can be processed concurrently.  This is useful to throttle operations that may starve the\n other threads in the system.  You may also control how many items get placed into the queue\n at one time, blocking if some threshold is exceeded.\n \u003cp\u003e\n Examples:\n \u003chr\u003e\n \u003cp\u003e\n \u003cu\u003ePut and Forget:\u003c/u\u003e\n \u003cpre\u003e{@literal\n QCallback\u003cITEM, RESULT\u003e callback \u003d new AbstractQCallback\u003cITEM, RESULT\u003e() {\n     public RESULT process(ITEM item, TaskMonitor monitor) {\n         // do work here...\n     }\n };\n \n ConcurrentQBuilder\u003cITEM, RESULT\u003e builder \u003d new ConcurrentQBuilder\u003cITEM, RESULT\u003e();\n builder.setThreadPoolName(\"Thread Pool Name\");\n concurrentQ \u003d builder.getQueue(callback);\n ...\n ...\n concurrentQ.add(item); // where item is one of the instances of ITEM\n \n }\u003c/pre\u003e\n \u003chr\u003e\n \u003cp\u003e\n \u003cu\u003ePut Items and Handle Results in Any Order as They Available:\u003c/u\u003e\n \u003cpre\u003e\n {@literal QCallback\u003cITEM, RESULT\u003e callback \u003d new AbstractQCallback\u003cITEM, RESULT\u003e()} {\n     public RESULT process(ITEM item, TaskMonitor monitor) {\n         // do work here...\n     }\n };\n \n {@literal QItemListener\u003cITEM, RESULT\u003e itemListener \u003d new QItemListener\u003cITEM, RESULT\u003e()} {\n     {@literal public void itemProcessed(QResult\u003cITEM, RESULT\u003e result)} {\n         RESULT result \u003d result.getResult();\n             \u003cspan style\u003d\"color:blue\"\u003e\u003cb\u003e// work on my result...\u003c/b\u003e\u003c/span\u003e\n         }\n };\n \n {@literal ConcurrentQBuilder\u003cITEM, RESULT\u003e builder \u003d new ConcurrentQBuilder\u003cITEM, RESULT\u003e()};\n builder.setThreadPoolName(\"Thread Pool Name\");\n \u003cspan style\u003d\"color:blue\"\u003e\u003cb\u003ebuilder.setListener(itemListener);\u003c/b\u003e\u003c/span\u003e\n concurrentQ \u003d builder.build(callback);\n ...\n ...\n concurrentQ.add(item); // where item is one of the instances of ITEM\n concurrentQ.add(item);\n concurrentQ.add(item);\n \n \u003c/pre\u003e\n \n \u003chr\u003e\n \u003cp\u003e\n \u003cu\u003ePut Items and Handle Results When All Items Have Been Processed:\u003c/u\u003e\n \u003cpre\u003e{@literal\n QCallback\u003cITEM, RESULT\u003e callback \u003d new AbstractQCallback\u003cITEM, RESULT\u003e() {\n     public RESULT process(ITEM item, TaskMonitor monitor) {\n         // do work here...\n     }\n };}\n\n {@literal ConcurrentQBuilder\u003cITEM, RESULT\u003e builder \u003d new ConcurrentQBuilder\u003cITEM, RESULT\u003e();}\n builder.setThreadPoolName(\"Thread Pool Name\");\n \u003cspan style\u003d\"color:blue\"\u003e\u003cb\u003ebuilder.setCollectResults(true);\u003c/b\u003e\u003c/span\u003e\n concurrentQ \u003d builder.getQueue(callback);\n ...\n ...\n concurrentQ.add(item); // where item is one of the instances of ITEM\n concurrentQ.add(item);\n concurrentQ.add(item);\n ...\n \n \u003cspan style\u003d\"color:blue\"\u003e\u003cb\u003e{@literal List\u003cQResult\u003cI, R\u003e\u003e results \u003d concurrentQ.waitForResults();}\u003c/b\u003e\u003c/span\u003e{@literal\n // process the results...\n \n }\u003c/pre\u003e\n \u003chr\u003e\n \u003cp\u003e\n \u003cu\u003ePut Items, \u003cb\u003eBlocking While Full\u003c/b\u003e, and Handle Results in Any Order as They Available:\u003c/u\u003e\n \u003cpre\u003e\n {@literal QCallback\u003cITEM, RESULT\u003e callback \u003d new AbstractQCallback\u003cITEM, RESULT\u003e()} {\n     public RESULT process(ITEM item, TaskMonitor monitor) {\n         // do work here...\n     }\n };\n\n {@literal QItemListener\u003cITEM, RESULT\u003e itemListener \u003d new QItemListener\u003cITEM, RESULT\u003e()} {\n     {@literal public void itemProcessed(QResult\u003cITEM, RESULT\u003e result)} {\n         RESULT result \u003d result.getResult();\n             // work on my result...\n         }\n };\n \n {@literal ConcurrentQBuilder\u003cITEM, RESULT\u003e builder \u003d new ConcurrentQBuilder\u003cITEM, RESULT\u003e()};\n builder.setThreadPoolName(\"Thread Pool Name\");\n \u003cspan style\u003d\"color:blue\"\u003e\u003cb\u003ebuilder.setQueue(new LinkedBlockingQueue(100));\u003c/b\u003e\u003c/span\u003e\n concurrentQ \u003d builder.getQueue(callback);\n ...\n ...\n {@literal Iterator\u003cITEM\u003e iterator \u003d \u003cget an iterator for 1000s of items somewhere\u003e}\n \u003cspan style\u003d\"color:blue\"\u003e\u003cb\u003e{@code concurrentQ.offer(iterator); // this call will block when the queue fills up (100 items or more)}\u003c/b\u003e\u003c/span\u003e\n \n \u003c/pre\u003e\n \u003chr\u003e\n@param \u003cI\u003e The type of the items to be processed.\n@param \u003cR\u003e The type of objects resulting from processing an item; if you don\u0027t care about the\n            return value, then make this value whatever you want, like \u003ccode\u003eObject\u003c/code\u003e or the\n            same value as {@code I} and return null from {@link QCallback#process(Object, TaskMonitor)}.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "queue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Queue\u003cI\u003e",
+      "type_short": "Queue",
+      "constant_value": null
+    },
+    {
+      "name": "threadPool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.GThreadPool",
+      "type_short": "GThreadPool",
+      "constant_value": null
+    },
+    {
+      "name": "callback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.QCallback\u003cI,R\u003e",
+      "type_short": "QCallback",
+      "constant_value": null
+    },
+    {
+      "name": "itemListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.QItemListener\u003cI,R\u003e",
+      "type_short": "QItemListener",
+      "constant_value": null
+    },
+    {
+      "name": "progressListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.QProgressListener\u003cI\u003e",
+      "type_short": "QProgressListener",
+      "constant_value": null
+    },
+    {
+      "name": "resultList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Deque\u003cgeneric.concurrent.QResult\u003cI,R\u003e\u003e",
+      "type_short": "Deque",
+      "constant_value": null
+    },
+    {
+      "name": "taskSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cgeneric.concurrent.FutureTaskMonitor\u003cI,R\u003e\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "maxInProgress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "collectResults",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "jobsReportProgress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "monitorAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.ConcurrentQ\u003cI,R\u003e.QMonitorAdapter",
+      "type_short": "QMonitorAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "unhandledException",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Exception",
+      "type_short": "Exception",
+      "constant_value": null
+    },
+    {
+      "name": "tracker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.ProgressTracker",
+      "type_short": "ProgressTracker",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.locks.ReentrantLock",
+      "type_short": "ReentrantLock",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a ConcurrentQ that will process as many items as the given threadPool can handle\n at one time.",
+      "javadoc": "Creates a ConcurrentQ that will process as many items as the given threadPool can handle\n at one time.\n@param name The name of the thread pool that will be created by this constructor.\n@param callback the QWorker object that will be used to process items concurrently.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The name of the thread pool that will be created by this constructor."
+        },
+        {
+          "name": "callback",
+          "type_long": "generic.concurrent.QCallback\u003cI,R\u003e",
+          "type_short": "QCallback",
+          "comment": "the QWorker object that will be used to process items concurrently."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a ConcurrentQ that will process at most maxInProgress items at a time, regardless of\n how many threads are available in the GThreadPool.",
+      "javadoc": "Creates a ConcurrentQ that will process at most maxInProgress items at a time, regardless of\n how many threads are available in the GThreadPool.\n@param callback the QWorker object that will be used to process items concurrently.\n@param queue the internal storage queue to use in this concurrent queue.\n@param threadPool the GThreadPool to used for providing the threads for concurrent processing.\n@param listener An optional QItemListener that will be called back with results when the\n                item has been processed.\n@param collectResults specifies if this queue should collect the results as items are processed\n                 so they can be returned in a waitForResults() call.\n@param maxInProgress specifies the maximum number of items that can be process at a time.\n                 If this is set to 0, then this queue will attempt to execute as many\n                 items at a time as there are threads in the given threadPool.  Setting\n                 this parameter to 1 will have the effect of guaranteeing that\n                 all times are processed one at a time in the order they were submitted.\n                 Any other positive value will run that many items concurrently,\n                 up to the number of available threads.\n@param jobsReportProgress true signals that jobs wish to report progress via their task\n                 monitor.  The default is false, which triggers this queue to report an\n                 overall progress for each job that is processed.  False is a good default\n                 for clients that have a finite number of jobs to be done.",
+      "static": false,
+      "params": [
+        {
+          "name": "callback",
+          "type_long": "generic.concurrent.QCallback\u003cI,R\u003e",
+          "type_short": "QCallback",
+          "comment": "the QWorker object that will be used to process items concurrently."
+        },
+        {
+          "name": "queue",
+          "type_long": "java.util.Queue\u003cI\u003e",
+          "type_short": "Queue",
+          "comment": "the internal storage queue to use in this concurrent queue."
+        },
+        {
+          "name": "threadPool",
+          "type_long": "generic.concurrent.GThreadPool",
+          "type_short": "GThreadPool",
+          "comment": "the GThreadPool to used for providing the threads for concurrent processing."
+        },
+        {
+          "name": "listener",
+          "type_long": "generic.concurrent.QItemListener\u003cI,R\u003e",
+          "type_short": "QItemListener",
+          "comment": "An optional QItemListener that will be called back with results when the\n                item has been processed."
+        },
+        {
+          "name": "collectResults",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "specifies if this queue should collect the results as items are processed\n                 so they can be returned in a waitForResults() call."
+        },
+        {
+          "name": "maxInProgress",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "specifies the maximum number of items that can be process at a time.\n                 If this is set to 0, then this queue will attempt to execute as many\n                 items at a time as there are threads in the given threadPool.  Setting\n                 this parameter to 1 will have the effect of guaranteeing that\n                 all times are processed one at a time in the order they were submitted.\n                 Any other positive value will run that many items concurrently,\n                 up to the number of available threads."
+        },
+        {
+          "name": "jobsReportProgress",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true signals that jobs wish to report progress via their task\n                 monitor.  The default is false, which triggers this queue to report an\n                 overall progress for each job that is processed.  False is a good default\n                 for clients that have a finite number of jobs to be done."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addProgressListener",
+      "comment": "Adds a progress listener for this queue.  All the progress and messages reported by a\n QWorker will be routed to these listener.",
+      "javadoc": "Adds a progress listener for this queue.  All the progress and messages reported by a\n QWorker will be routed to these listener.\n@param listener the listener for receiving progress and message notifications.",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "generic.concurrent.QProgressListener\u003cI\u003e",
+          "type_short": "QProgressListener",
+          "comment": "the listener for receiving progress and message notifications."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeProgressListener",
+      "comment": "Removes a progress listener from this queue.  All the progress and messages reported by a\n QWorker will be routed to this listener.",
+      "javadoc": "Removes a progress listener from this queue.  All the progress and messages reported by a\n QWorker will be routed to this listener.\n@param listener the listener for receiving progress and message notifications.",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "generic.concurrent.QProgressListener\u003cI\u003e",
+          "type_short": "QProgressListener",
+          "comment": "the listener for receiving progress and message notifications."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMonitor",
+      "comment": "Sets the monitor to use with this queue.",
+      "javadoc": "Sets the monitor to use with this queue.\n@param monitor the monitor to attache to this queue\n@param cancelClearsAllItems if true, cancelling the monitor will cancel all items currently\n \t\t\t\t\t\t\t\tbeing processed by a thread and clear the scheduled\n \t\t\t\t\t\t\t\titems that haven\u0027t yet run.\n \t\t\t\t\t\t\t\tIf false, only the items currently being processed will be cancelled.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the monitor to attache to this queue"
+        },
+        {
+          "name": "cancelClearsAllItems",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, cancelling the monitor will cancel all items currently\n \t\t\t\t\t\t\t\tbeing processed by a thread and clear the scheduled\n \t\t\t\t\t\t\t\titems that haven\u0027t yet run.\n \t\t\t\t\t\t\t\tIf false, only the items currently being processed will be cancelled."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Adds the list of items to this queue for concurrent processing.",
+      "javadoc": "Adds the list of items to this queue for concurrent processing.\n@param items the items to be scheduled for concurrent processing",
+      "static": false,
+      "params": [
+        {
+          "name": "items",
+          "type_long": "java.util.Collection\u003cI\u003e",
+          "type_short": "Collection",
+          "comment": "the items to be scheduled for concurrent processing"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Adds the items of the given iterator to this queue for concurrent processing.",
+      "javadoc": "Adds the items of the given iterator to this queue for concurrent processing.\n@param iterator an iterator from which the items to be scheduled for concurrent processing\n \t      will be taken.",
+      "static": false,
+      "params": [
+        {
+          "name": "iterator",
+          "type_long": "java.util.Iterator\u003cI\u003e",
+          "type_short": "Iterator",
+          "comment": "an iterator from which the items to be scheduled for concurrent processing\n \t      will be taken."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "offer",
+      "comment": "Allows clients to use a bounded queue (such as a LinkedBlockingQueue to control\n how many items get placed into this queue at one time.  Calling the add methods\n will place all items into the queue, which for a large number of items, can consume a\n large amount of memory.  This method will block once the queue at maximum capacity,\n continuing to add new items as existing items on the queue are processed.\n \n To enable blocking on the queue when it is full, construct this ConcurrentQ\n with an instance of BlockingQueue.",
+      "javadoc": "Allows clients to use a bounded queue (such as a {@link LinkedBlockingQueue} to control\n how many items get placed into this queue at one time.  Calling the \u003ccode\u003eadd\u003c/code\u003e methods\n will place all items into the queue, which for a large number of items, can consume a\n large amount of memory.  This method will block once the queue at maximum capacity,\n continuing to add new items as existing items on the queue are processed.\n \u003cp\u003e\n To enable blocking on the queue when it is full, construct this \u003ccode\u003eConcurrentQ\u003c/code\u003e\n with an instance of {@link BlockingQueue}.\n@param iterator An iterator from which items will be taken.\n@throws InterruptedException if this queue is interrupted while waiting to add more items",
+      "static": false,
+      "params": [
+        {
+          "name": "iterator",
+          "type_long": "java.util.Iterator\u003cI\u003e",
+          "type_short": "Iterator",
+          "comment": "An iterator from which items will be taken."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.InterruptedException",
+          "type_short": "InterruptedException",
+          "comment": "if this queue is interrupted while waiting to add more items"
+        }
+      ]
+    },
+    {
+      "name": "add",
+      "comment": "Adds the item to this queue for concurrent processing.",
+      "javadoc": "Adds the item to this queue for concurrent processing.\n@param item the item to be scheduled for concurrent processing.",
+      "static": false,
+      "params": [
+        {
+          "name": "item",
+          "type_long": "I",
+          "type_short": "I",
+          "comment": "the item to be scheduled for concurrent processing."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmpty",
+      "comment": "Returns true if this queue has no items waiting to be processed or currently being processed.",
+      "javadoc": "Returns true if this queue has no items waiting to be processed or currently being processed.\n@return true if this queue has no items waiting to be processed or currently being processed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this queue has no items waiting to be processed or currently being processed."
+      },
+      "throws": []
+    },
+    {
+      "name": "waitForResults",
+      "comment": "Waits until all scheduled items have been completed or cancelled and returns a list of\n QResults if this queue has been told to collect results.\n \n You can still call this method to wait for items to be processed, even if you did not\n specify to collect results.  In that case, the list returned will be empty.",
+      "javadoc": "Waits until all scheduled items have been completed or cancelled and returns a list of\n QResults if this queue has been told to collect results.\n \u003cP\u003e\n You can still call this method to wait for items to be processed, even if you did not\n specify to collect results.  In that case, the list returned will be empty.\n@return the list of QResult objects that have all the results of the completed jobs.\n@throws InterruptedException if this call was interrupted--Note:  this interruption only\n             happens if the calling thread cannot acquire the lock.  If the thread is\n             interrupted while waiting for results, then it will try again.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Collection\u003cgeneric.concurrent.QResult\u003cI,R\u003e\u003e",
+        "type_short": "Collection",
+        "comment": "the list of QResult objects that have all the results of the completed jobs."
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.InterruptedException",
+          "type_short": "InterruptedException",
+          "comment": "if this call was interrupted--Note:  this interruption only\n             happens if the calling thread cannot acquire the lock.  If the thread is\n             interrupted while waiting for results, then it will try again."
+        }
+      ]
+    },
+    {
+      "name": "waitForNextResult",
+      "comment": "Wait until at least one result is available and then return the first result.",
+      "javadoc": "Wait until at least one result is available and then return the first result.\n@return the first available result\n@throws InterruptedException if interrupted while waiting for a result\n@throws IllegalStateException if this queue has been set to not collect results\n         (see the constructor).",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "generic.concurrent.QResult\u003cI,R\u003e",
+        "type_short": "QResult",
+        "comment": "the first available result"
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.InterruptedException",
+          "type_short": "InterruptedException",
+          "comment": "if interrupted while waiting for a result"
+        }
+      ]
+    },
+    {
+      "name": "waitUntilDone",
+      "comment": "Waits until all items have been processed OR an Exception happens during the\n processing of ANY item.\n \n Note:\n If an exception does occur then the remaining items in the\n queue will be cleared and all current items will be cancelled.\n \n If you wish for processing to continue for remaining items when any item encounters an\n exception, then you should instead use #waitForResults().  That method will return\n all results, both with and without exceptions, which you can then process, including\n checking for exceptions.  Note that to use #waitForResults() to examine exceptions,\n you must have created this queue with collectResults as true.",
+      "javadoc": "Waits until all items have been processed \u003cb\u003eOR\u003c/b\u003e an Exception happens during the\n processing of \u003cb\u003eANY item\u003c/b\u003e.\n \u003cp\u003e\n \u003cb\u003e\u003cu\u003eNote:\u003c/u\u003e\u003c/b\u003e\n If an exception does occur then the remaining items in the\n queue will be cleared and all current items will be cancelled.\n \u003cp\u003e\n If you wish for processing to continue for remaining items when any item encounters an\n exception, then you should instead use {@link #waitForResults()}.  That method will return\n all results, both with and without exceptions, which you can then process, including\n checking for exceptions.  Note that to use {@link #waitForResults()} to examine exceptions,\n you must have created this queue with \u003ccode\u003ecollectResults\u003c/code\u003e as true.\n@throws InterruptedException if interrupted while waiting for a result\n@throws Exception any exception encountered while processing an item (this will cancel all\n         items in the queue).",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.InterruptedException",
+          "type_short": "InterruptedException",
+          "comment": "if interrupted while waiting for a result"
+        },
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "any exception encountered while processing an item (this will cancel all\n         items in the queue)."
+        }
+      ]
+    },
+    {
+      "name": "checkException",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "waitForResults",
+      "comment": "Waits up to the specified time for scheduled jobs to complete.  The results of all completed\n jobs will be returned if this queue has been told to collect results.  At the time that this\n returns, there may still be work to process.  The returned list will contain as much work\n as has been processed when the wait has finished.  Repeated calls to this method will not\n return results from previous waits.\n \n You can still call this method to wait for items to be processed, even if you did not\n specify to collect results.  In that case, the list returned will be empty.",
+      "javadoc": "Waits up to the specified time for scheduled jobs to complete.  The results of all completed\n jobs will be returned if this queue has been told to collect results.  At the time that this\n returns, there may still be work to process.  The returned list will contain as much work\n as has been processed when the wait has finished.  Repeated calls to this method will not\n return results from previous waits.\n \u003cP\u003e\n You can still call this method to wait for items to be processed, even if you did not\n specify to collect results.  In that case, the list returned will be empty.\n@param timeout the timeout\n@param unit the timeout unit\n@return the list of QResult objects that have all the results of the completed jobs.\n@throws InterruptedException if this call was interrupted.",
+      "static": false,
+      "params": [
+        {
+          "name": "timeout",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the timeout"
+        },
+        {
+          "name": "unit",
+          "type_long": "java.util.concurrent.TimeUnit",
+          "type_short": "TimeUnit",
+          "comment": "the timeout unit"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cgeneric.concurrent.QResult\u003cI,R\u003e\u003e",
+        "type_short": "Collection",
+        "comment": "the list of QResult objects that have all the results of the completed jobs."
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.InterruptedException",
+          "type_short": "InterruptedException",
+          "comment": "if this call was interrupted."
+        }
+      ]
+    },
+    {
+      "name": "cancelAllTasks",
+      "comment": "Cancels the processing of currently scheduled items in this queue.  Any items that haven\u0027t\n yet been scheduled on the threadPool are returned immediately from this call.  Items that\n are currently being processed will be cancelled and those results will be available on the\n next waitForResults() call and also if there is a QItemListener, it will be called with\n the QResult.  There is no guarantee that scheduled tasks will terminate any time soon.  If\n they check the isCancelled() state of their QMonitor, it will be true.  Setting the\n interruptRunningTasks to true, will result in a thread interrupt to any currently running\n task which might be useful if the task perform waiting operations like I/O.",
+      "javadoc": "Cancels the processing of currently scheduled items in this queue.  Any items that haven\u0027t\n yet been scheduled on the threadPool are returned immediately from this call.  Items that\n are currently being processed will be cancelled and those results will be available on the\n next waitForResults() call and also if there is a QItemListener, it will be called with\n the QResult.  There is no guarantee that scheduled tasks will terminate any time soon.  If\n they check the isCancelled() state of their QMonitor, it will be true.  Setting the\n interruptRunningTasks to true, will result in a thread interrupt to any currently running\n task which might be useful if the task perform waiting operations like I/O.\n@param interruptRunningTasks if true, an attempt will be made to interrupt any currently\n processing thread.\n@return a list of all items that have not yet been queued to the threadPool.",
+      "static": false,
+      "params": [
+        {
+          "name": "interruptRunningTasks",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, an attempt will be made to interrupt any currently\n processing thread."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cI\u003e",
+        "type_short": "List",
+        "comment": "a list of all items that have not yet been queued to the threadPool."
+      },
+      "throws": []
+    },
+    {
+      "name": "removeUnscheduledJobs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cI\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelScheduledJobs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Cancels all running tasks and disposes of the internal thread pool if it is a private\n pool.",
+      "javadoc": "Cancels all running tasks and disposes of the internal thread pool if it is a private\n pool.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "waitUntilDone",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "timeout",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "unit",
+          "type_long": "java.util.concurrent.TimeUnit",
+          "type_short": "TimeUnit",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.InterruptedException",
+          "type_short": "InterruptedException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "fillOpenProcessingSlots",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyTaskStarted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "generic.concurrent.FutureTaskMonitor\u003cI,R\u003e",
+          "type_short": "FutureTaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInProgressCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "itemProcessed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "generic.concurrent.FutureTaskMonitor\u003cI,R\u003e",
+          "type_short": "FutureTaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "result",
+          "type_long": "generic.concurrent.QResult\u003cI,R\u003e",
+          "type_short": "QResult",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "progressChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "item",
+          "type_long": "I",
+          "type_short": "I",
+          "comment": ""
+        },
+        {
+          "name": "currentProgress",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maxProgressChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "item",
+          "type_long": "I",
+          "type_short": "I",
+          "comment": ""
+        },
+        {
+          "name": "maxProgress",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "progressModeChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "item",
+          "type_long": "I",
+          "type_short": "I",
+          "comment": ""
+        },
+        {
+          "name": "indeterminate",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "progressMessageChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "item",
+          "type_long": "I",
+          "type_short": "I",
+          "comment": ""
+        },
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

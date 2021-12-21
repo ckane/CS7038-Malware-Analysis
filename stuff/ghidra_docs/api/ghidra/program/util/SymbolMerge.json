@@ -1,0 +1,772 @@
+{
+  "name": "SymbolMerge",
+  "comment": "SymbolMerge provides functionality for replacing or merging\n symbols from one program to another.",
+  "javadoc": "\u003ccode\u003eSymbolMerge\u003c/code\u003e provides functionality for replacing or merging\n symbols from one program to another.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "PROGRESS_COUNTER_GRANULARITY",
+      "comment": "Indicates how often to show progress counter changes.",
+      "javadoc": "Indicates how often to show progress counter changes.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "129"
+    },
+    {
+      "name": "originToResultTranslator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.AddressTranslator",
+      "type_short": "AddressTranslator",
+      "constant_value": null
+    },
+    {
+      "name": "fromProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "toProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "fromSymbolTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SymbolTable",
+      "type_short": "SymbolTable",
+      "constant_value": null
+    },
+    {
+      "name": "toSymbolTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SymbolTable",
+      "type_short": "SymbolTable",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a SymbolMerge for replacing or merging symbols from one program\n to another program.",
+      "javadoc": "Creates a \u003ccode\u003eSymbolMerge\u003c/code\u003e for replacing or merging symbols from one program\n to another program.\n@param fromProgram the program to get symbols \"from\".\n@param toProgram the program to merge symbols \"to\".",
+      "static": false,
+      "params": [
+        {
+          "name": "fromProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to get symbols \"from\"."
+        },
+        {
+          "name": "toProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to merge symbols \"to\"."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originToResultTranslator",
+          "type_long": "ghidra.program.util.AddressTranslator",
+          "type_short": "AddressTranslator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveNamespace",
+      "comment": "This method creates a namespace in one program (the \"to\" program) that is effectively the\n same as the namespace from another program (the \"from\" program.) It will resolve each\n parent namespace in this namespace\u0027s parent hierarchy until reaching the global namespace\n for the program or until there is no parent namespace.\n When resolving any namespace the type of namespace will be the same as it was in the \"from\"\n program. However, the name of the namespace will match the original name in the \"from\"\n program or will be the original name with a conflict suffix attached.\n If a namespace that is effectively the same can\u0027t be found then this method will create\n one and the name may match the original or have a conflict name.\n If the namespace can\u0027t be resolved, an exception is thrown.\n Any namespaces that are created with a conflict name will have their symbol IDs mapped\n into the conflictSymbolIDMap.",
+      "javadoc": "This method creates a namespace in one program (the \"to\" program) that is effectively the\n same as the namespace from another program (the \"from\" program.) It will resolve each\n parent namespace in this namespace\u0027s parent hierarchy until reaching the global namespace\n for the program or until there is no parent namespace.\n When resolving any namespace the type of namespace will be the same as it was in the \"from\"\n program. However, the name of the namespace will match the original name in the \"from\"\n program or will be the original name with a conflict suffix attached.\n \u003cbr\u003eIf a namespace that is effectively the same can\u0027t be found then this method will create\n one and the name may match the original or have a conflict name.\n \u003cbr\u003eIf the namespace can\u0027t be resolved, an exception is thrown.\n \u003cbr\u003eAny namespaces that are created with a conflict name will have their symbol IDs mapped\n into the \u003ccode\u003econflictSymbolIDMap\u003c/code\u003e.\n@param fromNamespace the namespace in the \"from\" program.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)\n@return the resolved namespace in the \"to\" program. Also the \u003ccode\u003econflictSymbolIDMap\u003c/code\u003e\n will have been modified, if this namespace had to be created with a conflict name.\n@throws DuplicateNameException if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with.\n@throws InvalidInputException if the name space is not validly named\n for the \"to\" program.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the namespace in the \"from\" program."
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": "the resolved namespace in the \"to\" program. Also the conflictSymbolIDMap\n will have been modified, if this namespace had to be created with a conflict name."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the name space is not validly named\n for the \"to\" program."
+        }
+      ]
+    },
+    {
+      "name": "createNamespace",
+      "comment": "Get/create a uniquely named namespace. If the namespace\u0027s name can\u0027t\n be created because of a name conflict, it will be given a new conflict name.",
+      "javadoc": "Get/create a uniquely named namespace. If the namespace\u0027s name can\u0027t\n be created because of a name conflict, it will be given a new conflict name.\n@param name the desired name for the namespace\n@param symbolType the symbol type for this namespace\n@param address the address for this namespace\n This address should be derived from the \"to\" program.\n@param toParentNamespace the parent of this namespace that is in the \"to\" program.\n@param source the source of this symbol\n@return an equivalent namespace that exists or was created in the \"to\" program.\n@throws DuplicateNameException if the namespace couldn\u0027t be created\n because of an unresolvable name conflict.\n@throws InvalidInputException if the namespace couldn\u0027t be created\n because the specified name is invalid in the \"to\" program.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the desired name for the namespace"
+        },
+        {
+          "name": "symbolType",
+          "type_long": "ghidra.program.model.symbol.SymbolType",
+          "type_short": "SymbolType",
+          "comment": "the symbol type for this namespace"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address for this namespace\n This address should be derived from the \"to\" program."
+        },
+        {
+          "name": "toParentNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the parent of this namespace that is in the \"to\" program."
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "the source of this symbol"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": "an equivalent namespace that exists or was created in the \"to\" program."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the namespace couldn\u0027t be created\n because of an unresolvable name conflict."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the namespace couldn\u0027t be created\n because the specified name is invalid in the \"to\" program."
+        }
+      ]
+    },
+    {
+      "name": "createSymbol",
+      "comment": "Creates a new symbol of the indicated type along with its associated Object in the \"to\" program.\n This method will throw an exception if the symbol can\u0027t be created.\n Note: It will not create a symbol with a conflict name.",
+      "javadoc": "Creates a new symbol of the indicated type along with its associated Object in the \"to\" program.\n \u003cbr\u003eThis method will throw an exception if the symbol can\u0027t be created.\n \u003cbr\u003eNote: It will not create a symbol with a conflict name.\n@param name the name for the symbol\n@param type the symbol type for this symbol\n@param address the address for this symbol\n This address should be derived from the \"to\" program.\n@param parentNamespace the parent namespace of this symbol that is in the \"to\" program\n@param source the source of this symbol.\n@return a new symbol. Returns null if it can\u0027t create a symbol of the indicated type..\n@throws DuplicateNameException if the symbol and Object couldn\u0027t be created\n because of an unresolvable name conflict.\n@throws InvalidInputException if the symbol and Object couldn\u0027t be created\n because of an invalid name.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name for the symbol"
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.SymbolType",
+          "type_short": "SymbolType",
+          "comment": "the symbol type for this symbol"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address for this symbol\n This address should be derived from the \"to\" program."
+        },
+        {
+          "name": "parentNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the parent namespace of this symbol that is in the \"to\" program"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "the source of this symbol."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": "a new symbol. Returns null if it can\u0027t create a symbol of the indicated type.."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the symbol and Object couldn\u0027t be created\n because of an unresolvable name conflict."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the symbol and Object couldn\u0027t be created\n because of an invalid name."
+        }
+      ]
+    },
+    {
+      "name": "replaceSymbols",
+      "comment": "replaceSymbols will replace the symbols at the indicated address\n in the destination program with those from the source program. If the same symbol exists\n in the source and destination programs, this method will simply allow it to remain in the\n destination program. For a symbol to be the same, it must have the same name and the same\n parent namespace path. The primary symbol will be get set to the symbol that was primary in\n the source program.",
+      "javadoc": "\u003ccode\u003ereplaceSymbols\u003c/code\u003e will replace the symbols at the indicated address\n in the destination program with those from the source program. If the same symbol exists\n in the source and destination programs, this method will simply allow it to remain in the\n destination program. For a symbol to be the same, it must have the same name and the same\n parent namespace path. The primary symbol will be get set to the symbol that was primary in\n the source program.\n@param address the program address where the symbols are being replaced.\n This address should be derived from the \"to\" program.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)\n@param monitor the task monitor for updating user progress and allowing cancelling.\n@return a map of symbols that were created as conflicts during the replace. These map symbols\n in the source program to a symbol with another name due to a duplicate symbol problem.\n (key \u003d \"from\" program\u0027s symbol; value \u003d \"to\" program\u0027s symbol)\n@throws CancelledException if the task monitor is cancelled.\n@throws DuplicateNameException if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with.\n@throws InvalidInputException the indicated address.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the program address where the symbols are being replaced.\n This address should be derived from the \"to\" program."
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for updating user progress and allowing cancelling."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": "a map of symbols that were created as conflicts during the replace. These map symbols\n in the source program to a symbol with another name due to a duplicate symbol problem.\n (key \u003d \"from\" program\u0027s symbol; value \u003d \"to\" program\u0027s symbol)"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task monitor is cancelled."
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if the name space can\u0027t be resolved due\n to a name conflict that can\u0027t be dealt with."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "the indicated address."
+        }
+      ]
+    },
+    {
+      "name": "removeUniqueToSymbols",
+      "comment": "removeUniqueToSymbols removes all the symbols in the\n destination program at the specified address that don\u0027t have the same\n symbol in the source program at that address. The FUNCTION symbol will\n not be removed at the address even if it is different. Otherwise, the\n function would inadvertently get removed.",
+      "javadoc": "\u003ccode\u003eremoveUniqueToSymbols\u003c/code\u003e removes all the symbols in the\n destination program at the specified address that don\u0027t have the same\n symbol in the source program at that address. The FUNCTION symbol will\n not be removed at the address even if it is different. Otherwise, the\n function would inadvertently get removed.\n@param address the program address where the symbols are being replaced.\n This address should be derived from the \"to\" program.\n@param monitor the task monitor for updating user progress and allowing cancelling.\n@throws CancelledException if the task monitor is cancelled.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for updating user progress and allowing cancelling."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task monitor is cancelled."
+        }
+      ]
+    },
+    {
+      "name": "addFromSymbols",
+      "comment": "Adds symbols to the \"to\" program that are not in the \"to\" program, but are in the\n \"from\" program.",
+      "javadoc": "Adds symbols to the \"to\" program that are not in the \"to\" program, but are in the\n \"from\" program.\n@param fromAddress the program address where the symbols are being added from.\n This address should be derived from the \"from\" program.\n@param replace true indicates this method is being called as part of a replace.\n false indicates this method is being done as part of a merge.\n \u003cbr\u003eNote: merge and replace require different behaviors here.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)\n@param monitor the task monitor for updating user progress and allowing cancelling.\n@return an array of \u003ccode\u003eSymbolTranslators\u003c/code\u003e for symbols that ended up with different\n pathnames in the destination program than they had in the source program. These map symbols\n in the source program to a symbol with another name due to a duplicate symbol problem.\n@throws CancelledException if the task monitor is canceled.\n@throws DuplicateNameException if a symbol couldn\u0027t be added due\n to a name conflict that can\u0027t be dealt with.\n@throws InvalidInputException if the symbol name being used to create a symbol in the\n destination program is not valid.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the program address where the symbols are being added from.\n This address should be derived from the \"from\" program."
+        },
+        {
+          "name": "replace",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates this method is being called as part of a replace.\n false indicates this method is being done as part of a merge.\n Note: merge and replace require different behaviors here."
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for updating user progress and allowing cancelling."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": "an array of SymbolTranslators for symbols that ended up with different\n pathnames in the destination program than they had in the source program. These map symbols\n in the source program to a symbol with another name due to a duplicate symbol problem."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task monitor is canceled."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the symbol name being used to create a symbol in the\n destination program is not valid."
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if a symbol couldn\u0027t be added due\n to a name conflict that can\u0027t be dealt with."
+        }
+      ]
+    },
+    {
+      "name": "determineToNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "fromNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionSymbol",
+      "comment": "Replaces the function symbol at the indicated entry point in the \"to\" program with the\n function symbol in the \"from\" program. If there is no function in the \"to\" program the\n symbol becomes a regular \"label\" symbol.",
+      "javadoc": "Replaces the function symbol at the indicated entry point in the \"to\" program with the\n function symbol in the \"from\" program. If there is no function in the \"to\" program the\n symbol becomes a regular \"label\" symbol.\n@param fromEntryPoint the entry point address\n This address should be derived from the \"from\" program.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws InvalidInputException if the function symbol name from the second program isn\u0027t valid\n@throws DuplicateNameException if a duplicate name is encountered that couldn\u0027t be handled\n while replacing the function symbol.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address\n This address should be derived from the \"from\" program."
+        },
+        {
+          "name": "toEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if a duplicate name is encountered that couldn\u0027t be handled\n while replacing the function symbol."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the function symbol name from the second program isn\u0027t valid"
+        }
+      ]
+    },
+    {
+      "name": "mergeFunctionSymbol",
+      "comment": "Merges the function symbol at the indicated entry point from the \"from\" program into the\n \"to\" program. The function is merged  as a regular \"label\" symbol.",
+      "javadoc": "Merges the function symbol at the indicated entry point from the \"from\" program into the\n \"to\" program. The function is merged  as a regular \"label\" symbol.\n@param fromEntryPoint the entry point address\n This address should be derived from the \"from\" program.\n@param replacePrimary true indicates that the primary symbol in the \"to\" program should be\n set to the function symbol if there was one in the \"from\" program.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws InvalidInputException if the function symbol name from the second program isn\u0027t valid\n@throws DuplicateNameException if a duplicate name is encountered that couldn\u0027t be handled\n while copying the function symbol.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address\n This address should be derived from the \"from\" program."
+        },
+        {
+          "name": "replacePrimary",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates that the primary symbol in the \"to\" program should be\n set to the function symbol if there was one in the \"from\" program."
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if a duplicate name is encountered that couldn\u0027t be handled\n while copying the function symbol."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the function symbol name from the second program isn\u0027t valid"
+        }
+      ]
+    },
+    {
+      "name": "addFunctionAsLabel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": ""
+        },
+        {
+          "name": "toSymTab",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "fromName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "toNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "oldID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeLabels",
+      "comment": "mergeLabels either replaces the symbols in the \"to\" program with those in the\n \"from\" program or merges the symbols from the \"from\" program into the \"to\" program at\n the indicated addresses.",
+      "javadoc": "\u003cCODE\u003emergeLabels\u003c/CODE\u003e either replaces the symbols in the \"to\" program with those in the\n \"from\" program or merges the symbols from the \"from\" program into the \"to\" program at\n the indicated addresses.\n@param fromAddressSet the addresses where symbols should be replaced or merged.\n The addresses in this set should be derived from the \"from\" program.\n@param setting indicates whether to replace or merge the symbols.\n@param replacePrimary true indicates that the primary symbol in the \"to\" program should be\n set to the same symbol as was primary in the \"from\" program.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translator is not a\n \"one for one translator\".",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses where symbols should be replaced or merged.\n The addresses in this set should be derived from the \"from\" program."
+        },
+        {
+          "name": "setting",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "indicates whether to replace or merge the symbols."
+        },
+        {
+          "name": "replacePrimary",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates that the primary symbol in the \"to\" program should be\n set to the same symbol as was primary in the \"from\" program."
+        },
+        {
+          "name": "replaceFunction",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translator is not a\n \"one for one translator\"."
+        }
+      ]
+    },
+    {
+      "name": "copySymbols",
+      "comment": "replaceSymbol adds the symbol and its aliases from the fromProgram\u0027s SymbolTable to\n  the toProgram\u0027s SymbolTable. If the toSymbolTable already has a symbol (and\n  possibly aliases) they are removed and the symbol and aliases from the\n  fromProgram\u0027s SymbolTable are added.",
+      "javadoc": "replaceSymbol adds the symbol and its aliases from the fromProgram\u0027s SymbolTable to\n  the toProgram\u0027s SymbolTable. If the toSymbolTable already has a symbol (and\n  possibly aliases) they are removed and the symbol and aliases from the\n  fromProgram\u0027s SymbolTable are added.\n@param fromAddress the address where the symbols will be copy from/to.\n This address should be derived from the \"from\" program.\n@param replacePrimary true indicates that the primary symbol in the \"to\" program should be\n set to the same symbol as was primary in the \"from\" program.\n@param replaceFunction true indicates that the function symbol in the \"to\" program should be\n set to the same function symbol as in the \"from\" program.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@return the symbol now at the address in the toSymbolTable.\n@throws CancelledException if user cancels via the monitor.\n@throws InvalidInputException if a symbol name from the second program isn\u0027t valid\n@throws DuplicateNameException if a duplicate name is encountered that couldn\u0027t be handled\n while copying a symbol.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address where the symbols will be copy from/to.\n This address should be derived from the \"from\" program."
+        },
+        {
+          "name": "replacePrimary",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates that the primary symbol in the \"to\" program should be\n set to the same symbol as was primary in the \"from\" program."
+        },
+        {
+          "name": "replaceFunction",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates that the function symbol in the \"to\" program should be\n set to the same function symbol as in the \"from\" program."
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": "the symbol now at the address in the toSymbolTable."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if a duplicate name is encountered that couldn\u0027t be handled\n while copying a symbol."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if a symbol name from the second program isn\u0027t valid"
+        }
+      ]
+    },
+    {
+      "name": "replacePrimary",
+      "comment": "",
+      "javadoc": "@param address This address should be derived from the \"to\" program.\n@param conflictSymbolIDMap maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "This address should be derived from the \"to\" program."
+        },
+        {
+          "name": "conflictSymbolIDMap",
+          "type_long": "ghidra.util.datastruct.LongLongHashtable",
+          "type_short": "LongLongHashtable",
+          "comment": "maps the symbol IDs in the \"from\" program to the symbol IDs\n in the \"to\" program for any symbols (and their associated objects) that were created\n with conflict names.\n (key \u003d \"from\" program\u0027s symbol ID; value \u003d \"to\" program\u0027s symbol ID)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reApplyDuplicateSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "dupSyms",
+          "type_long": "java.util.Hashtable\u003cghidra.program.model.symbol.Symbol,ghidra.program.model.symbol.Symbol\u003e",
+          "type_short": "Hashtable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDuplicateSymbolsInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "dupSyms",
+          "type_long": "java.util.Hashtable\u003cghidra.program.model.symbol.Symbol,ghidra.program.model.symbol.Symbol\u003e",
+          "type_short": "Hashtable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

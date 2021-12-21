@@ -1,0 +1,842 @@
+{
+  "name": "FunctionsXmlMgr",
+  "comment": "",
+  "javadoc": "",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "LIB_BOOKMARK_CATEGORY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Library Identification\""
+    },
+    {
+      "name": "FID_BOOKMARK_CATEGORY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Function ID Analyzer\""
+    },
+    {
+      "name": "LIBRARY_BOOKMARK_CATEGORY_STRINGS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Set\u003cjava.lang.String\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "listing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "dtParser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.xml.DtParser",
+      "type_short": "DtParser",
+      "constant_value": null
+    },
+    {
+      "name": "factory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressFactory",
+      "type_short": "AddressFactory",
+      "constant_value": null
+    },
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.importer.MessageLog",
+      "type_short": "MessageLog",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "read",
+      "comment": "Parses a list of Function definitions from xml and creates then, adding them to the current\n Program.\n \n Information from a TYPEINFO_COMMENT is used in preference to information from RETURN_TYPE and STACK_FRAME/STACK_VARs that\n are tagged as parameters.\n \n DTD for the FUNCTION element:\n \n !ELEMENT FUNCTION (RETURN_TYPE?, ADDRESS_RANGE*, REGULAR_CMT?, REPEATABLE_CMT?, TYPEINFO_CMT?, STACK_FRAME?, REGISTER_VAR*)\n \n ",
+      "javadoc": "Parses a list of {@link Function function} definitions from xml and creates then, adding them to the current\n {@link Program program}.\n \u003cp\u003e\n Information from a TYPEINFO_COMMENT is used in preference to information from RETURN_TYPE and STACK_FRAME/STACK_VARs that\n are tagged as parameters.\n \u003cp\u003e\n DTD for the FUNCTION element:\n \u003cpre\u003e\u003ccode\u003e\n \u0026lt;!ELEMENT FUNCTION (RETURN_TYPE?, ADDRESS_RANGE*, REGULAR_CMT?, REPEATABLE_CMT?, TYPEINFO_CMT?, STACK_FRAME?, REGISTER_VAR*)\u0026gt;\n \u003c/code\u003e\u003c/pre\u003e\n \u003cp\u003e\n@param parser the parser\n@param overwriteConflicts true to overwrite any conflicts\n@param ignoreStackFrames true to ignore stack frames\n@param monitor the task monitor\n@throws AddressFormatException if any address is not parsable\n@throws CancelledException if the operation is cancelled through the monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": "the parser"
+        },
+        {
+          "name": "overwriteConflicts",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to overwrite any conflicts"
+        },
+        {
+          "name": "ignoreStackFrames",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to ignore stack frames"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressFormatException",
+          "type_short": "AddressFormatException",
+          "comment": "if any address is not parsable"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the operation is cancelled through the monitor"
+        }
+      ]
+    },
+    {
+      "name": "tryToParseTypeInfoComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "typeInfoComment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addLocalVars",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "variables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "overwriteConflicts",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "funcDesc",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "element",
+          "type_long": "ghidra.xml.XmlElement",
+          "type_short": "XmlElement",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getElementText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": ""
+        },
+        {
+          "name": "expectedElementName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readReturnType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": ""
+        },
+        {
+          "name": "funcName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": ""
+        },
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressFormatException",
+          "type_short": "AddressFormatException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOutOfBoundsException",
+          "type_short": "AddressOutOfBoundsException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readStackFrame",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "overwriteConflicts",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "stackVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "stackParams",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readStackVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": ""
+        },
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "overwriteConflicts",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "stackVariables",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "stackParams",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueVarName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readRegisterVars",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "registerParams",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "write",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "writeFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeTypeInfoComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLibrary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Returns the name of function qualified with\n any namespace information.\n For example, \"User32.dll::SomeClass::printf\".",
+      "javadoc": "Returns the name of function qualified with\n any namespace information.\n For example, \"User32.dll::SomeClass::printf\".",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeReturnType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeRegularComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeRepeatableComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeStackFrame",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeStackVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeRegisterVars",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "writer",
+          "type_long": "ghidra.util.xml.XmlWriter",
+          "type_short": "XmlWriter",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegisterParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter[]",
+        "type_short": "ghidra.program.model.listing.Parameter[]",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

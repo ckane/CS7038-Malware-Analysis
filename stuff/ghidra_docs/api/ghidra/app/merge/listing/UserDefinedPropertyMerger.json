@@ -1,0 +1,528 @@
+{
+  "name": "UserDefinedPropertyMerger",
+  "comment": "Class for merging user defined property changes. This class can merge non-conflicting\n user defined property changes that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then manually merge the conflicting user defined properties.\n Wherever a user defined property conflict is detected, the user will be allowed to choose\n the property at the address in conflict from the latest, my or original program.\n Important: This class is intended to be used only for a single program \n version merge. It should be constructed, followed by an autoMerge(), and lastly\n each address with a conflict should have mergeConflicts() called on it.",
+  "javadoc": "Class for merging user defined property changes. This class can merge non-conflicting\n user defined property changes that were made to the checked out version. It can determine\n where there are conflicts between the latest checked in version and my\n checked out version. It can then manually merge the conflicting user defined properties.\n Wherever a user defined property conflict is detected, the user will be allowed to choose\n the property at the address in conflict from the latest, my or original program.\n \u003cbr\u003eImportant: This class is intended to be used only for a single program \n version merge. It should be constructed, followed by an autoMerge(), and lastly\n each address with a conflict should have mergeConflicts() called on it.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.merge.listing.AbstractListingMerger",
+  "fields": [
+    {
+      "name": "USER_DEFINED_PHASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"User Defined Properties\""
+    },
+    {
+      "name": "latestPMM",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.util.PropertyMapManager",
+      "type_short": "PropertyMapManager",
+      "constant_value": null
+    },
+    {
+      "name": "myPMM",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.util.PropertyMapManager",
+      "type_short": "PropertyMapManager",
+      "constant_value": null
+    },
+    {
+      "name": "originalPMM",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.util.PropertyMapManager",
+      "type_short": "PropertyMapManager",
+      "constant_value": null
+    },
+    {
+      "name": "propertyName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "myDetailSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "propNames",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "conflictSets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet[]",
+      "type_short": "ghidra.program.model.address.AddressSet[]",
+      "constant_value": null
+    },
+    {
+      "name": "conflictSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "conflictPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.merge.listing.VerticalChoicesPanel",
+      "type_short": "VerticalChoicesPanel",
+      "constant_value": null
+    },
+    {
+      "name": "sameOption",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    },
+    {
+      "name": "propertyIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a user defined properties merger.",
+      "javadoc": "Constructs a user defined properties merger.\n@param listingMergeMgr the listing merge manager that owns this merger.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingMergeMgr",
+          "type_long": "ghidra.app.merge.listing.ListingMergeManager",
+          "type_short": "ListingMergeManager",
+          "comment": "the listing merge manager that owns this merger."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "progressMin",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "progressMax",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getProperty",
+      "comment": "Gets the property, if there is one, from the specified property map for \n the indicated address.",
+      "javadoc": "Gets the property, if there is one, from the specified property map for \n the indicated address.\n@param map the property map\n@param address the address\n@return the property at the address or null if there isn\u0027t one.",
+      "static": false,
+      "params": [
+        {
+          "name": "map",
+          "type_long": "ghidra.program.model.util.PropertyMap",
+          "type_short": "PropertyMap",
+          "comment": "the property map"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": "the property at the address or null if there isn\u0027t one."
+      },
+      "throws": []
+    },
+    {
+      "name": "samePropertyTypes",
+      "comment": "Determines if the indicated property maps are for the same type of property.",
+      "javadoc": "Determines if the indicated property maps are for the same type of property.\n@param latestMap the first map\n@param myMap the second map\n@return true if the property type held by the two maps is the same.\n Otherwise, return false.",
+      "static": false,
+      "params": [
+        {
+          "name": "latestMap",
+          "type_long": "ghidra.program.model.util.PropertyMap",
+          "type_short": "PropertyMap",
+          "comment": "the first map"
+        },
+        {
+          "name": "myMap",
+          "type_long": "ghidra.program.model.util.PropertyMap",
+          "type_short": "PropertyMap",
+          "comment": "the second map"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the property type held by the two maps is the same.\n Otherwise, return false."
+      },
+      "throws": []
+    },
+    {
+      "name": "getPropertyNames",
+      "comment": "Determines all of the property names that are available in the latest and my program.",
+      "javadoc": "Determines all of the property names that are available in the latest and my program.\n@return the property names.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": "the property names."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflictCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupConflictsPanel",
+      "comment": "Creates a conflict panel and adds it to the indicated listing panel.",
+      "javadoc": "Creates a conflict panel and adds it to the indicated listing panel.\n@param listingPanel the merge listing panel\n@param propertyName the name of the property in conflict.\n@param addr the address where the property is in conflict.\n@param changeListener the changeListener that will process the user\u0027s selection\n when it is made on the conflict panel.",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": "the merge listing panel"
+        },
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property in conflict."
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address where the property is in conflict."
+        },
+        {
+          "name": "changeListener",
+          "type_long": "javax.swing.event.ChangeListener",
+          "type_short": "ChangeListener",
+          "comment": "the changeListener that will process the user\u0027s selection\n when it is made on the conflict panel."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "mergeConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merges from the property at the indicated address into the result program \n from the program (latest, my, or original) based on the conflict option.",
+      "javadoc": "Merges from the property at the indicated address into the result program \n from the program (latest, my, or original) based on the conflict option.\n@param propName the name of the property to merge.\n@param addr the address wheree the property is to be merged.\n@param mergeConflictOption the conflict option indicating which program \n to merge from. (KEEP_ORIGINAL, KEEP_LATEST, or KEEP_MY)",
+      "static": false,
+      "params": [
+        {
+          "name": "propName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to merge."
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address wheree the property is to be merged."
+        },
+        {
+          "name": "mergeConflictOption",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the conflict option indicating which program \n to merge from. (KEEP_ORIGINAL, KEEP_LATEST, or KEEP_MY)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showMergePanel",
+      "comment": "Creates and displays a user defined property conflict to the user.",
+      "javadoc": "Creates and displays a user defined property conflict to the user.\n@param listingPanel the listing merge panel\n@param userDefinedPropertyName the name of the property\n@param addr the address of the conflict",
+      "static": false,
+      "params": [
+        {
+          "name": "listingPanel",
+          "type_long": "ghidra.app.merge.tool.ListingMergePanel",
+          "type_short": "ListingMergePanel",
+          "comment": "the listing merge panel"
+        },
+        {
+          "name": "userDefinedPropertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the conflict"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createButtonText",
+      "comment": "Creates the text associated with the button for the user\u0027s choice.",
+      "javadoc": "Creates the text associated with the button for the user\u0027s choice.\n@param version the program version (\"Latest\", \"Checked Out\", \"Original\")\n@param userDefinedPropertyName the name of the property\n@param propertyObj the property object.\n@return the button\u0027s text.",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the program version (\"Latest\", \"Checked Out\", \"Original\")"
+        },
+        {
+          "name": "userDefinedPropertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property"
+        },
+        {
+          "name": "propertyObj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the property object."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the button\u0027s text."
+      },
+      "throws": []
+    },
+    {
+      "name": "getConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "apply",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

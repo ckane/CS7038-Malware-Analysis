@@ -1,0 +1,222 @@
+{
+  "name": "NoisyStructureBuilder",
+  "comment": "Build a structure from a \"noisy\" source of field information.\n Feed it field records, either via addDataType(), when we\n have more definitive info about the size of the field, or via addReference()\n when we have a pointer reference to the field with possibly less info about the field size.\n \n As records come in, overlaps and conflicts in specific field data-types are resolved.\n In a conflict, less specific data-types are replaced.\n After all information is collected a final Structure can be built by iterating over\n the final field entries.",
+  "javadoc": "Build a structure from a \"noisy\" source of field information.\n Feed it field records, either via addDataType(), when we\n have more definitive info about the size of the field, or via addReference()\n when we have a pointer reference to the field with possibly less info about the field size.\n \n As records come in, overlaps and conflicts in specific field data-types are resolved.\n In a conflict, less specific data-types are replaced.\n After all information is collected a final Structure can be built by iterating over\n the final field entries.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "offsetToDataTypeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeMap\u003cjava.lang.Long,ghidra.program.model.data.DataType\u003e",
+      "type_short": "TreeMap",
+      "constant_value": null
+    },
+    {
+      "name": "structDT",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.Structure",
+      "type_short": "Structure",
+      "constant_value": null
+    },
+    {
+      "name": "sizeOfStruct",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "computeMax",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newOff",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkForOverlap",
+      "comment": "Check if the given range overlaps any existing field entries.  If it does\n return the first entry, otherwise return null.",
+      "javadoc": "Check if the given range overlaps any existing field entries.  If it does\n return the first entry, otherwise return null.\n@param offset is the starting of the range (in bytes)\n@param size is the number of bytes in the range\n@return the first overlapping entry or null",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the starting of the range (in bytes)"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the number of bytes in the range"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map.Entry\u003cjava.lang.Long,ghidra.program.model.data.DataType\u003e",
+        "type_short": "Entry",
+        "comment": "the first overlapping entry or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSize",
+      "comment": "",
+      "javadoc": "@return the size of the structure in bytes (given current information)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the size of the structure in bytes (given current information)"
+      },
+      "throws": []
+    },
+    {
+      "name": "addDataType",
+      "comment": "Add data-type information about a specific field",
+      "javadoc": "Add data-type information about a specific field\n@param offset of the field within the structure\n@param dt is the data-type of field if known (null otherwise)",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "of the field within the structure"
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "is the data-type of field if known (null otherwise)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addReference",
+      "comment": "Adds information for a field given a pointer reference.\n The data-type information is not used unless it is a pointer.",
+      "javadoc": "Adds information for a field given a pointer reference.\n The data-type information is not used unless it is a pointer.\n@param offset is the offset of the field within the structure\n@param dt is the data-type of the pointer to the field (or null)",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the offset of the field within the structure"
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "is the data-type of the pointer to the field (or null)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMinimumSize",
+      "comment": "We may have partial information about the size of the structure.  This method feeds it to the\n builder as a minimum size for the structure.",
+      "javadoc": "We may have partial information about the size of the structure.  This method feeds it to the\n builder as a minimum size for the structure.\n@param size is the minimum size in bytes",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the minimum size in bytes"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "iterator",
+      "comment": "",
+      "javadoc": "@return an iterator to the current field entries",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cjava.util.Map.Entry\u003cjava.lang.Long,ghidra.program.model.data.DataType\u003e\u003e",
+        "type_short": "Iterator",
+        "comment": "an iterator to the current field entries"
+      },
+      "throws": []
+    },
+    {
+      "name": "populateOriginalStructure",
+      "comment": "Populate this builder with fields from a preexisting Structure.\n The builder presumes it is rebuilding this Structure so it can check for\n pathological containment issues.",
+      "javadoc": "Populate this builder with fields from a preexisting Structure.\n The builder presumes it is rebuilding this Structure so it can check for\n pathological containment issues.\n@param dt is the preexisting Structure",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": "is the preexisting Structure"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

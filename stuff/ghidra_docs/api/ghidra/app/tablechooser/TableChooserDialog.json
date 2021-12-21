@@ -1,0 +1,645 @@
+{
+  "name": "TableChooserDialog",
+  "comment": "Dialog to show a table of items.  If the dialog is constructed with a non-null\n TableChooserExecutor, then a button will be placed in the dialog, allowing the user\n to perform the action defined by the executor.\n\n Each button press will use the selected items as the items to be processed.  While the\n items are scheduled to be processed, they will still be in the table, painted light gray.\n Attempting to reschedule any of these pending items will have no effect.   Each time the\n button is pressed, a new SwingWorker is created, which will put the processing into\n a background thread.   Further, by using multiple workers, the work will be performed in\n parallel.",
+  "javadoc": "Dialog to show a table of items.  If the dialog is constructed with a non-null\n {@link TableChooserExecutor}, then a button will be placed in the dialog, allowing the user\n to perform the action defined by the executor.\n\n \u003cp\u003eEach button press will use the selected items as the items to be processed.  While the\n items are scheduled to be processed, they will still be in the table, painted light gray.\n Attempting to reschedule any of these pending items will have no effect.   Each time the\n button is pressed, a new {@link SwingWorker} is created, which will put the processing into\n a background thread.   Further, by using multiple workers, the work will be performed in\n parallel.",
+  "static": false,
+  "implements": [
+    "ghidra.app.nav.NavigatableRemovalListener"
+  ],
+  "extends": "docking.DialogComponentProvider",
+  "fields": [
+    {
+      "name": "workers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cghidra.app.tablechooser.TableChooserDialog.ExecutorSwingWorker\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "sharedPending",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.app.tablechooser.AddressableRowObject\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "executor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.tablechooser.TableChooserExecutor",
+      "type_short": "TableChooserExecutor",
+      "constant_value": null
+    },
+    {
+      "name": "wrappingRenderer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.tablechooser.TableChooserDialog.WrappingCellRenderer",
+      "type_short": "WrappingCellRenderer",
+      "constant_value": null
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.table.GhidraTable",
+      "type_short": "GhidraTable",
+      "constant_value": null
+    },
+    {
+      "name": "model",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.tablechooser.TableChooserTableModel",
+      "type_short": "TableChooserTableModel",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "tool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.PluginTool",
+      "type_short": "PluginTool",
+      "constant_value": null
+    },
+    {
+      "name": "navigatable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.nav.Navigatable",
+      "type_short": "Navigatable",
+      "constant_value": null
+    },
+    {
+      "name": "closedCallback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "utility.function.Callback",
+      "type_short": "Callback",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        },
+        {
+          "name": "executor",
+          "type_long": "ghidra.app.tablechooser.TableChooserExecutor",
+          "type_short": "TableChooserExecutor",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "title",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "navigatable",
+          "type_long": "ghidra.app.nav.Navigatable",
+          "type_short": "Navigatable",
+          "comment": ""
+        },
+        {
+          "name": "isModal",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        },
+        {
+          "name": "executor",
+          "type_long": "ghidra.app.tablechooser.TableChooserExecutor",
+          "type_short": "TableChooserExecutor",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "title",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "navigatable",
+          "type_long": "ghidra.app.nav.Navigatable",
+          "type_short": "Navigatable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildMainPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JPanel",
+        "type_short": "JPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setClosedListener",
+      "comment": "Sets the given listener that will get notified when this dialog is closed",
+      "javadoc": "Sets the given listener that will get notified when this dialog is closed\n@param callback the callback to notify",
+      "static": false,
+      "params": [
+        {
+          "name": "callback",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": "the callback to notify"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Adds the given object to this dialog.  This method can be called from any thread.",
+      "javadoc": "Adds the given object to this dialog.  This method can be called from any thread.\n@param rowObject the object to add",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObject",
+          "type_long": "ghidra.app.tablechooser.AddressableRowObject",
+          "type_short": "AddressableRowObject",
+          "comment": "the object to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "remove",
+      "comment": "Removes the given object from this dialog.  Nothing will happen if the given item is not\n in this dialog.  This method can be called from any thread.",
+      "javadoc": "Removes the given object from this dialog.  Nothing will happen if the given item is not\n in this dialog.  This method can be called from any thread.\n@param rowObject the object to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObject",
+          "type_long": "ghidra.app.tablechooser.AddressableRowObject",
+          "type_short": "AddressableRowObject",
+          "comment": "the object to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createTableModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createActions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "show",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dialogClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "okCallback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "workerDone",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "worker",
+          "type_long": "ghidra.app.tablechooser.TableChooserDialog.ExecutorSwingWorker",
+          "type_short": "ExecutorSwingWorker",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doExecute",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObjects",
+          "type_long": "java.util.List\u003cghidra.app.tablechooser.AddressableRowObject\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doProcessRows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObjects",
+          "type_long": "java.util.List\u003cghidra.app.tablechooser.AddressableRowObject\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.tablechooser.AddressableRowObject\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doProcessRowsInTransaction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObjects",
+          "type_long": "java.util.List\u003cghidra.app.tablechooser.AddressableRowObject\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.tablechooser.AddressableRowObject\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addCustomColumn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "columnDisplay",
+          "type_long": "ghidra.app.tablechooser.ColumnDisplay\u003c?\u003e",
+          "type_short": "ColumnDisplay",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSortColumn",
+      "comment": "Sets the default sorted column for this dialog.\n\n This method should be called after all custom columns have been added via\n #addCustomColumn(ColumnDisplay).",
+      "javadoc": "Sets the default sorted column for this dialog.\n\n \u003cP\u003eThis method should be called after all custom columns have been added via\n {@link #addCustomColumn(ColumnDisplay)}.\n@param index the view\u0027s 0-based column index\n@see #setSortState(TableSortState)\n@throws IllegalArgumentException if an invalid column is requested for sorting",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the view\u0027s 0-based column index"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSortState",
+      "comment": "Sets the column sort state for this dialog.   The TableSortState allows for\n combinations of sorted columns in ascending or descending order.\n\n This method should be called after all custom columns have been added via\n #addCustomColumn(ColumnDisplay).",
+      "javadoc": "Sets the column sort state for this dialog.   The {@link TableSortState} allows for\n combinations of sorted columns in ascending or descending order.\n\n \u003cP\u003eThis method should be called after all custom columns have been added via\n {@link #addCustomColumn(ColumnDisplay)}.\n@param state the sort state\n@see #setSortColumn(int)\n@throws IllegalArgumentException if an invalid column is requested for sorting",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "docking.widgets.table.TableSortState",
+          "type_short": "TableSortState",
+          "comment": "the sort state"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "navigatableRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "nav",
+          "type_long": "ghidra.app.nav.Navigatable",
+          "type_short": "Navigatable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMessage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectRows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedRows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int[]",
+        "type_short": "int[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedRowObjects",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.tablechooser.AddressableRowObject\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

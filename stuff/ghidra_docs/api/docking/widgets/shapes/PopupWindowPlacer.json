@@ -1,0 +1,580 @@
+{
+  "name": "PopupWindowPlacer",
+  "comment": "This class places a rectangle on the boundary of an inner bounds area, such that it is not\n placed outside of an outer boundary.  It takes the concept of trying to make the placement at\n the closest distance, but preferring certain sides or angles of approach in iterating a\n solution. However, we reduce this concept down to a very simple form where iteration is not\n needed because we are basing the algorithm on a geometric model that has explicit solutions\n (for example, instead of picking a starting point around the perimeter and rotating\n counter-clockwise to find a fit, or, for example, creating a grid of placements and choosing\n the one that is closest but yet has preferences on one side or another).  From the geometric\n model, we can, instead, calculate the first location that will fit with a preferred boundary\n location, such as fit on the right side of the context area, near the bottom.  We could have\n chosen to iterate through the areas in a counter-clockwise fashion, but by using a builder\n model, we give the user more control of the order of choice.\n For example, the user might first prefer the right side near the bottom, then the left side near\n the bottom, followed by the top near the right, and then the bottom near the right.\n \n This first drawing shows the overall context of the inner bounds within an outer bounds along\n with a good placement and a bad placement that violates the outer bounds.\n \n\n        +-----------------------------------------------+\n        |                                        outer  |\n        |                                               |\n        |                                               |\n        |      +------------------+                     |\n        |      |       good       |                     |\n        |      |     placement    |                     |\n        |      |                  |                     |\n        |      +------------------+---------+           |\n        |                         |         |           |\n        |                         |  inner  |           |\n        |                         |         |           |\n        |                         +---------+------------------+\n        |                                   |       bad |      |\n        |                                   |     placement    |\n        +-----------------------------------+-----------+      |\n                                            +------------------+\n\n \n\n The next two drawings show the LEFT and RIGHT edges with nominal locations of TOP, CENTER, and\n BOTTOM placements and the TOP and BOTTOM edges with nominal location of LEFT, CENTER, and\n RIGHT placements.  There are a total of eight of these locations (\"cells\") around the inner\n bounds.\n \n\n              LEFT                            RIGHT\n        +---------------+               +---------------+\n        |               |               |               |\n        |      TOP      |               |      TOP      |\n        |               |               |               |\n        +---------------X---------------X---------------+\n        |               |               |               |\n        |    CENTER     X     inner     X    CENTER     |\n        |               |               |               |\n        +---------------X---------------X---------------+\n        |               |               |               |\n        |    BOTTOM     |               |    BOTTOM     |\n        |               |               |               |\n        +---------------+               +---------------+\n\n\n        +---------------+---------------+---------------+\n        |               |               |               |\n        |     LEFT      |    CENTER     |     RIGHT     | TOP\n        |               |               |               |\n        +---------------X-------X-------X---------------+\n                        |               |\n                        |     inner     |\n                        |               |\n        +---------------X-------X-------X---------------+\n        |               |               |               |\n        |     LEFT      |    CENTER     |     RIGHT     | BOTTOM\n        |               |               |               |\n        +---------------+---------------+---------------+\n\n \n \n\n These cells are shown in their nominal placement locations (where they touch the inner bounds,\n marked with an X).  However we will shift these locations by particular amounts so that these\n locations still fit within the outer bounds.  For instance, if we allow the BOTTOM cell\n on the LEFT edge to be shifted up far enough such that it fits the lower edge of the outer\n bounds, we limit this shift if it reaches the nominal placement of another specified cell\n (CENTER or TOP) on that edge.  If a solution is not found before the limit is reached, the\n placement fails.\n \n If the chosen cell is a CENTER cell, then it could shift up or down, depending on the\n circumstances and the parameters applied.\n \n These placements and shifts are controlled by specifying the major and minorBegin\n and minorEnd Location.  The major Location specifies the edge\n for an EdgePopupPlacer and the minorBegin Location specifies the placement cell\n on this edge and the minorEnds specifies the last cell (amount of shift allowed), starting\n from the minorBegin Location.  For a CENTER minorBeing Location, the minorEnd cell may be\n any of the three allowed Locations on that major edge as well as null, representing that a\n shift is allowed in either direction.  When the minorEnd Location is set to the minorBegin\n Location, then no shift is permitted.\n \n Combinations of these placement attempts can be put together to create more complex strategies.\n See PopupWindowPlacerBuilder for examples of these.\n \n There are also LeastOverlapCornerPopupWindowPlacer and\n ThrowsAssertExceptionPlacer, for instance, that do not follow the same cell scheme.\n The first of these tries to make the placement at each of the corners of the inner\n bounds, but shifts these placements to fit the outer bounds in such a way that the inner\n bounds area may be occluded.  The placement on the corner which overlaps the least amount of\n the inner bounds area is chosen.  The second of these placers automatically throws an\n AssertException.  It is intended to be used in a builder model in which a sequence of\n placement attempts are made until good solution is found or until a null value is returned.\n This last placer, when chosen, serves as an assert condition, which is helpful\n in circumstances where the developer believes such an assertion is not possible,\n such as when allowing an overlapping placement solution.",
+  "javadoc": "This class places a rectangle on the boundary of an inner bounds area, such that it is not\n placed outside of an outer boundary.  It takes the concept of trying to make the placement at\n the closest distance, but preferring certain sides or angles of approach in iterating a\n solution. However, we reduce this concept down to a very simple form where iteration is not\n needed because we are basing the algorithm on a geometric model that has explicit solutions\n (for example, instead of picking a starting point around the perimeter and rotating\n counter-clockwise to find a fit, or, for example, creating a grid of placements and choosing\n the one that is closest but yet has preferences on one side or another).  From the geometric\n model, we can, instead, calculate the first location that will fit with a preferred boundary\n location, such as fit on the right side of the context area, near the bottom.  We could have\n chosen to iterate through the areas in a counter-clockwise fashion, but by using a builder\n model, we give the user more control of the order of choice.\n For example, the user might first prefer the right side near the bottom, then the left side near\n the bottom, followed by the top near the right, and then the bottom near the right.\n \u003cp\u003e\n This first drawing shows the overall context of the inner bounds within an outer bounds along\n with a good placement and a bad placement that violates the outer bounds.\n \u003cpre\u003e\n\n        +-----------------------------------------------+\n        |                                        outer  |\n        |                                               |\n        |                                               |\n        |      +------------------+                     |\n        |      |       good       |                     |\n        |      |     placement    |                     |\n        |      |                  |                     |\n        |      +------------------+---------+           |\n        |                         |         |           |\n        |                         |  inner  |           |\n        |                         |         |           |\n        |                         +---------+------------------+\n        |                                   |       bad |      |\n        |                                   |     placement    |\n        +-----------------------------------+-----------+      |\n                                            +------------------+\n\n \u003c/pre\u003e\n\n The next two drawings show the LEFT and RIGHT edges with nominal locations of TOP, CENTER, and\n BOTTOM placements and the TOP and BOTTOM edges with nominal location of LEFT, CENTER, and\n RIGHT placements.  There are a total of eight of these locations (\"cells\") around the inner\n bounds.\n \u003cpre\u003e\n\n              LEFT                            RIGHT\n        +---------------+               +---------------+\n        |               |               |               |\n        |      TOP      |               |      TOP      |\n        |               |               |               |\n        +---------------X---------------X---------------+\n        |               |               |               |\n        |    CENTER     X     inner     X    CENTER     |\n        |               |               |               |\n        +---------------X---------------X---------------+\n        |               |               |               |\n        |    BOTTOM     |               |    BOTTOM     |\n        |               |               |               |\n        +---------------+               +---------------+\n\n\n        +---------------+---------------+---------------+\n        |               |               |               |\n        |     LEFT      |    CENTER     |     RIGHT     | TOP\n        |               |               |               |\n        +---------------X-------X-------X---------------+\n                        |               |\n                        |     inner     |\n                        |               |\n        +---------------X-------X-------X---------------+\n        |               |               |               |\n        |     LEFT      |    CENTER     |     RIGHT     | BOTTOM\n        |               |               |               |\n        +---------------+---------------+---------------+\n\n \u003c/pre\u003e\n \u003cp\u003e\n\n These cells are shown in their nominal placement locations (where they touch the inner bounds,\n marked with an X).  However we will shift these locations by particular amounts so that these\n locations still fit within the outer bounds.  For instance, if we allow the BOTTOM cell\n on the LEFT edge to be shifted up far enough such that it fits the lower edge of the outer\n bounds, we limit this shift if it reaches the nominal placement of another specified cell\n (CENTER or TOP) on that edge.  If a solution is not found before the limit is reached, the\n placement fails.\n \u003cp\u003e\n If the chosen cell is a CENTER cell, then it could shift up or down, depending on the\n circumstances and the parameters applied.\n \u003cp\u003e\n These placements and shifts are controlled by specifying the \u003cB\u003emajor\u003c/B\u003e and \u003cB\u003eminorBegin\u003c/B\u003e\n and \u003cB\u003eminorEnd\u003c/B\u003e {@link Location Locations}.  The major Location specifies the \u003cB\u003eedge\u003c/B\u003e\n for an {@link EdgePopupPlacer} and the minorBegin Location specifies the placement \u003cB\u003ecell\u003c/B\u003e\n on this edge and the minorEnds specifies the last cell (amount of shift allowed), starting\n from the minorBegin Location.  For a CENTER minorBeing Location, the minorEnd cell may be\n any of the three allowed Locations on that major edge as well as null, representing that a\n shift is allowed in either direction.  When the minorEnd Location is set to the minorBegin\n Location, then no shift is permitted.\n \u003cp\u003e\n Combinations of these placement attempts can be put together to create more complex strategies.\n See {@link PopupWindowPlacerBuilder} for examples of these.\n \u003cp\u003e\n There are also {@link LeastOverlapCornerPopupWindowPlacer} and\n {@link ThrowsAssertExceptionPlacer}, for instance, that do not follow the same cell scheme.\n The first of these tries to make the placement at each of the corners of the inner\n bounds, but shifts these placements to fit the outer bounds in such a way that the inner\n bounds area may be occluded.  The placement on the corner which overlaps the least amount of\n the inner bounds area is chosen.  The second of these placers automatically throws an\n {@link AssertException}.  It is intended to be used in a builder model in which a sequence of\n placement attempts are made until good solution is found or until a null value is returned.\n This last placer, when chosen, serves as an assert condition, which is helpful\n in circumstances where the developer believes such an assertion is not possible,\n such as when allowing an overlapping placement solution.\n@see PopupWindowPlacerBuilder",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "major",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.shapes.Location",
+      "type_short": "Location",
+      "constant_value": null
+    },
+    {
+      "name": "minorBegin",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.shapes.Location",
+      "type_short": "Location",
+      "constant_value": null
+    },
+    {
+      "name": "minorEnd",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.shapes.Location",
+      "type_short": "Location",
+      "constant_value": null
+    },
+    {
+      "name": "next",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.shapes.PopupWindowPlacer",
+      "type_short": "PopupWindowPlacer",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor only for classes that do not use placement preferences",
+      "javadoc": "Constructor only for classes that do not use placement preferences",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor only for classes that specify major edge and minor begin and end location\n on that edge.",
+      "javadoc": "Constructor only for classes that specify major edge and minor begin and end location\n on that edge.\n@param major edge\n@param minorBegin start location on edge\n@param minorEnd end location on edge\n@see PopupWindowPlacerBuilder",
+      "static": false,
+      "params": [
+        {
+          "name": "major",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "edge"
+        },
+        {
+          "name": "minorBegin",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "start location on edge"
+        },
+        {
+          "name": "minorEnd",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "end location on edge"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setNext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "next",
+          "type_long": "docking.widgets.shapes.PopupWindowPlacer",
+          "type_short": "PopupWindowPlacer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPlacement",
+      "comment": "Returns the placement Rectangle of toBePlaced Dimension for this PopupWindowPlacer. If it\n cannot find a solution, it tries the  #next PopupWindowPlacer and so forth until\n there are no others available, upon which null is returned if there is no solution.",
+      "javadoc": "Returns the placement Rectangle of toBePlaced Dimension for this PopupWindowPlacer. If it\n cannot find a solution, it tries the  {@link #next} PopupWindowPlacer and so forth until\n there are no others available, upon which null is returned if there is no solution.\n@param toBePlaced the Dimension\n@param innerBounds the inner bounds Rectangle\n@param outerBounds the out bounds in which the final result must fit\n@return the placement Rectangle or null if extends outside the outerBounds",
+      "static": false,
+      "params": [
+        {
+          "name": "toBePlaced",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": "the Dimension"
+        },
+        {
+          "name": "innerBounds",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": "the inner bounds Rectangle"
+        },
+        {
+          "name": "outerBounds",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": "the out bounds in which the final result must fit"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Rectangle",
+        "type_short": "Rectangle",
+        "comment": "the placement Rectangle or null if extends outside the outerBounds"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMyPlacement",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toBePlaced",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        },
+        {
+          "name": "innerBounds",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": ""
+        },
+        {
+          "name": "outerBounds",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Rectangle",
+        "type_short": "Rectangle",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPlacement",
+      "comment": "Returns a Rectangle solution for the placement of a toBePlaced Dimension.\n \n When dealing with solutions for the top or bottom edge, we are considering vertical\n to be the major axis with y/height values representing that axis, and horizontal\n to be the minor axis with x/width values representing that axis.  When dealing with\n solutions for the left and right edge, these major and minor axes are switched.",
+      "javadoc": "Returns a Rectangle solution for the placement of a toBePlaced Dimension.\n \u003cp\u003e\n When dealing with solutions for the top or bottom edge, we are considering \u003cB\u003evertical\u003c/B\u003e\n to be the major axis with y/height values representing that axis, and \u003cB\u003ehorizontal\u003c/B\u003e\n to be the minor axis with x/width values representing that axis.  When dealing with\n solutions for the left and right edge, these major and minor axes are switched.\n@param result the new instance of the resulting class type to be returned\n@param toBePlaced the wrapped toBePlaced Dimension\n@param context the wrapped context Rectangle\n@param outer the wrapped outer boundsRectangle\n@return the resultant wrapped Rectangle",
+      "static": false,
+      "params": [
+        {
+          "name": "result",
+          "type_long": "docking.widgets.shapes.PopupWindowPlacer.PositionableRectangle",
+          "type_short": "PositionableRectangle",
+          "comment": "the new instance of the resulting class type to be returned"
+        },
+        {
+          "name": "toBePlaced",
+          "type_long": "docking.widgets.shapes.PopupWindowPlacer.PositionableDimension",
+          "type_short": "PositionableDimension",
+          "comment": "the wrapped toBePlaced Dimension"
+        },
+        {
+          "name": "context",
+          "type_long": "docking.widgets.shapes.PopupWindowPlacer.PositionableRectangle",
+          "type_short": "PositionableRectangle",
+          "comment": "the wrapped context Rectangle"
+        },
+        {
+          "name": "outer",
+          "type_long": "docking.widgets.shapes.PopupWindowPlacer.PositionableRectangle",
+          "type_short": "PositionableRectangle",
+          "comment": "the wrapped outer boundsRectangle"
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacer.PositionableRectangle",
+        "type_short": "PositionableRectangle",
+        "comment": "the resultant wrapped Rectangle"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPlacement",
+      "comment": "With all inputs on a line (one-dimensional), returns the placement for the minor axis.\n In other words, this algorithm is used for both conditions: the major axis being horizontal\n and the minor axis being vertical; the major axis being vertical, and the minor axis being\n horizontal.  These two situations are independent, but the same algorithm is used.\n \n Algorithm Design\n Note: smaller values are up and bigger values are down, in the presentation below.\n \n In trying to allay some confusion (yes it can be confusing), note that for any given major\n axis (say horizontal), this axis can portray values that are further right or further left.\n This is why the left edge and right edge are noted by horizontal axes values... one\n intersects the horizontal axis further to the left and the other intersects the axis\n further to the right.\n \n The location of placements on the left or right edges, however are noted by vertical axis\n values, with TOP having a lesser value and bottom having a greater value.  These locations\n specified by the minor dimension, and are the \"one dimension\" that is the subject of this\n placement algorithm.\n \n The scenario with top and bottom edge reverses the major dimension to be vertical and the\n minor dimension to be horizontal.\n \n Keeping with the original right edge scenario begun above, we are trying to find a minor\n axis placement on the right (major) edge.  For this placement, one can refer to\n documentation elsewhere in this class, but essentially, we are trying to place a popup\n area against a context rectangle without exceeding the outer bounds (screen) rectangle.  But,\n again, we are only considering the placement against the right edge already chosen and only\n trying to fit in the vertical dimension against this edge.  Thus, this algorithm only needs\n values for this one dimension.  These are the length of the placement area in this one\n dimension, and both the location and lengths of the context and outer bounds rectangles\n for this one dimension.\n \n The algorithm considers three main locations (cells) on this minor axis.  When the minor\n axis is vertical (which is our current scenario), they are TOP, CENTER, and BOTTOM.  When\n the minor axis is horizontal, they are LEFT, CENTER, and RIGHT.  These locations are\n nominal, but are also allowed to be shifted so that the placement fits within the outer\n bounds.  Thus, we have five key values, in which three have fixed relative placements\n (when using positive lengths):\n \n         lesserLocation (nominal placement on TOP or LEFT)\n               \n         centerLocation (nominal placement such that the center of the context rectangle\n                          and the center of the popup area align with each other)\n               \n         greaterLocation (nominal placement on BOTTOM or RIGHT)\n \n and these two can be found at various placements amongst the other three:\n \n         lesserBoundedLocation  lesserLocation (lesserLocation shifted so TOP or\n             LEFT fits outer bounds)\n         greaterBoundedLocation  greaterLocation (lesserLocation shifted BOTTOM or\n             RIGHT fits outer bounds)\n \n Note that with an ill-constructed scenario, as shown here, we return no solution:\n \n         greaterBoundedLocation\n                   \n         lesserBoundedLocation\n \n Given a better-constructed scenario, the lesserBoundedLocation and\n greaterBoundedLocation values can fall between the other three values at the following\n possible locations:\n \n         lesserLocation\n              lesserBoundedLocation ( lesserLocation)\n              greaterBoundedLocation ( greaterLocation)\n         centerLocation\n              lesserBoundedLocation ( lesserLocation)\n              greaterBoundedLocation ( greaterLocation)\n         greaterLocation\n \n These layout possibilities can be broken down into three possibilities...\n \n         lesserLocation\n              lesserBoundedLocation ( lesserLocation)\n              greaterBoundedLocation\n         centerLocation\n         greaterLocation\n         ----------\n         if start is LESSER\n             if end is LESSER and lesserBoundedLocation !\u003d lesserLocation\n                 no solution\n             else\n                 solution is lesserBoundedLocation\n         else\n             if end is LESSER\n                 solution is greaterBoundedLocation\n             else\n                 no solution\n \n  or\n \n         lesserLocation\n              lesserBoundedLocation ( lesserLocation)\n         centerLocation\n              greaterBoundedLocation ( greaterLocation)\n         greaterLocation\n         ----------\n         if start is GREATER\n             if end is GREATER and greaterBoundedLocation !\u003d greaterLocation\n                 no solution\n             else\n                 solution is greaterBoundedLocation\n         else if start is LESSER\n             if end is LESSER and lesserBoundedLocation !\u003d lesserLocation\n                 no solution\n             else\n                 solution is lesserBoundedLocation\n         else\n             solution is centerLocation\n \n  or\n \n         lesserLocation\n         centerLocation\n              lesserBoundedLocation\n              greaterBoundedLocation ( greaterLocation)\n         greaterLocation\n         ----------\n         if start is GREATER\n             if end is GREATER and greaterBoundedLocation !\u003d greaterLocation\n                 no solution\n             else\n                 solution is greaterBoundedLocation\n         else\n             if end is GREATER\n                 solution is lesserBoundedLocation\n             else\n                 no solution\n \n The algorithm breaks down into these scenarios and presents the solution as required.",
+      "javadoc": "With all inputs on a line (one-dimensional), returns the placement for the minor axis.\n In other words, this algorithm is used for both conditions: the major axis being horizontal\n and the minor axis being vertical; the major axis being vertical, and the minor axis being\n horizontal.  These two situations are independent, but the same algorithm is used.\n \u003cp\u003e\n \u003cB\u003eAlgorithm Design\u003c/B\u003e\u003cp\u003e\n Note: smaller values are up and bigger values are down, in the presentation below.\n \u003cp\u003e\n In trying to allay some confusion (yes it can be confusing), note that for any given major\n axis (say horizontal), this axis can portray values that are further right or further left.\n This is why the left edge and right edge are noted by horizontal axes values... one\n intersects the horizontal axis further to the left and the other intersects the axis\n further to the right.\n \u003cp\u003e\n The location of placements on the left or right edges, however are noted by vertical axis\n values, with TOP having a lesser value and bottom having a greater value.  These locations\n specified by the minor dimension, and are the \"one dimension\" that is the subject of this\n placement algorithm.\n \u003cp\u003e\n The scenario with top and bottom edge reverses the major dimension to be vertical and the\n minor dimension to be horizontal.\n \u003cp\u003e\n Keeping with the original right edge scenario begun above, we are trying to find a minor\n axis placement on the right (major) edge.  For this placement, one can refer to\n documentation elsewhere in this class, but essentially, we are trying to place a popup\n area against a context rectangle without exceeding the outer bounds (screen) rectangle.  But,\n again, we are only considering the placement against the right edge already chosen and only\n trying to fit in the vertical dimension against this edge.  Thus, this algorithm only needs\n values for this one dimension.  These are the length of the placement area in this one\n dimension, and both the location and lengths of the context and outer bounds rectangles\n for this one dimension.\n \u003cp\u003e\n The algorithm considers three main locations (cells) on this minor axis.  When the minor\n axis is vertical (which is our current scenario), they are TOP, CENTER, and BOTTOM.  When\n the minor axis is horizontal, they are LEFT, CENTER, and RIGHT.  These locations are\n nominal, but are also allowed to be shifted so that the placement fits within the outer\n bounds.  Thus, we have five key values, in which three have fixed relative placements\n (when using \u003cB\u003epositive\u003c/B\u003e lengths):\n \u003cpre\u003e\n         \u003cB\u003elesserLocation\u003c/B\u003e (nominal placement on TOP or LEFT)\n               \u0026le;\n         \u003cB\u003ecenterLocation\u003c/B\u003e (nominal placement such that the center of the context rectangle\n                          and the center of the popup area align with each other)\n               \u0026le;\n         \u003cB\u003egreaterLocation\u003c/B\u003e (nominal placement on BOTTOM or RIGHT)\n \u003c/pre\u003e\n and these two can be found at various placements amongst the other three:\n \u003cpre\u003e\n         \u003cB\u003elesserBoundedLocation \u0026ge; lesserLocation\u003c/B\u003e (lesserLocation shifted so TOP or\n             LEFT fits outer bounds)\n         \u003cB\u003egreaterBoundedLocation \u0026le; greaterLocation\u003c/B\u003e (lesserLocation shifted BOTTOM or\n             RIGHT fits outer bounds)\n \u003c/pre\u003e\n Note that with an ill-constructed scenario, as shown here, we return \u003cB\u003eno solution\u003c/B\u003e:\n \u003cpre\u003e\n         \u003cB\u003egreaterBoundedLocation\u003c/B\u003e\n                   \u0026lt;\n         \u003cB\u003elesserBoundedLocation\u003c/B\u003e\n \u003c/pre\u003e\n Given a better-constructed scenario, the \u003cB\u003elesserBoundedLocation\u003c/B\u003e and\n \u003cB\u003egreaterBoundedLocation\u003c/B\u003e values can fall between the other three values at the following\n possible locations:\n \u003cpre\u003e\n         \u003cB\u003elesserLocation\u003c/B\u003e\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003elesserBoundedLocation\u003c/B\u003e (\u0026ge; \u003cB\u003elesserLocation\u003c/B\u003e)\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003egreaterBoundedLocation\u003c/B\u003e (\u0026le; \u003cB\u003egreaterLocation\u003c/B\u003e)\n         \u003cB\u003ecenterLocation\u003c/B\u003e\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003elesserBoundedLocation\u003c/B\u003e (\u0026ge; \u003cB\u003elesserLocation\u003c/B\u003e)\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003egreaterBoundedLocation\u003c/B\u003e (\u0026le; \u003cB\u003egreaterLocation\u003c/B\u003e)\n         \u003cB\u003egreaterLocation\u003c/B\u003e\n \u003c/pre\u003e\n These layout possibilities can be broken down into three possibilities...\n \u003cpre\u003e\n         \u003cB\u003elesserLocation\u003c/B\u003e\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003elesserBoundedLocation\u003c/B\u003e (\u0026ge; \u003cB\u003elesserLocation\u003c/B\u003e)\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003egreaterBoundedLocation\u003c/B\u003e\n         \u003cB\u003ecenterLocation\u003c/B\u003e\n         \u003cB\u003egreaterLocation\u003c/B\u003e\n         ----------\n         if start is LESSER\n             if end is LESSER and lesserBoundedLocation !\u003d lesserLocation\n                 no solution\n             else\n                 solution is lesserBoundedLocation\n         else\n             if end is LESSER\n                 solution is greaterBoundedLocation\n             else\n                 no solution\n \u003c/pre\u003e\n  or\n \u003cpre\u003e\n         \u003cB\u003elesserLocation\u003c/B\u003e\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003elesserBoundedLocation\u003c/B\u003e (\u0026ge; \u003cB\u003elesserLocation\u003c/B\u003e)\n         \u003cB\u003ecenterLocation\u003c/B\u003e\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003egreaterBoundedLocation\u003c/B\u003e (\u0026le; \u003cB\u003egreaterLocation\u003c/B\u003e)\n         \u003cB\u003egreaterLocation\u003c/B\u003e\n         ----------\n         if start is GREATER\n             if end is GREATER and greaterBoundedLocation !\u003d greaterLocation\n                 no solution\n             else\n                 solution is greaterBoundedLocation\n         else if start is LESSER\n             if end is LESSER and lesserBoundedLocation !\u003d lesserLocation\n                 no solution\n             else\n                 solution is lesserBoundedLocation\n         else\n             solution is centerLocation\n \u003c/pre\u003e\n  or\n \u003cpre\u003e\n         \u003cB\u003elesserLocation\u003c/B\u003e\n         \u003cB\u003ecenterLocation\u003c/B\u003e\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003elesserBoundedLocation\u003c/B\u003e\n             \u003cB\u003e\u0026rarr;\u003c/B\u003e \u003cB\u003egreaterBoundedLocation\u003c/B\u003e (\u0026le; \u003cB\u003egreaterLocation\u003c/B\u003e)\n         \u003cB\u003egreaterLocation\u003c/B\u003e\n         ----------\n         if start is GREATER\n             if end is GREATER and greaterBoundedLocation !\u003d greaterLocation\n                 no solution\n             else\n                 solution is greaterBoundedLocation\n         else\n             if end is GREATER\n                 solution is lesserBoundedLocation\n             else\n                 no solution\n \u003c/pre\u003e\n The algorithm breaks down into these scenarios and presents the solution as required.\n@param placementLength the length of the placement Dimension on the line\n@param contextLocation location of the context Rectangle on the line\n@param contextLength the length of the context Rectangle Dimension on the line\n@param boundLocation location of the outer bounds Rectangle on the line\n@param boundLength the length of the outer bounds Rectangle Dimension on the line\n@return the resultant location on the line",
+      "static": false,
+      "params": [
+        {
+          "name": "placementLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the placement Dimension on the line"
+        },
+        {
+          "name": "contextLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "location of the context Rectangle on the line"
+        },
+        {
+          "name": "contextLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the context Rectangle Dimension on the line"
+        },
+        {
+          "name": "boundLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "location of the outer bounds Rectangle on the line"
+        },
+        {
+          "name": "boundLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the outer bounds Rectangle Dimension on the line"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Integer",
+        "type_short": "Integer",
+        "comment": "the resultant location on the line"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSolutionWhenGreaterBoundedLessThanCenter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "lesserLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "lesserBoundedLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "greaterBoundedLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Integer",
+        "type_short": "Integer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSolutionWhenLesserBoundedGreaterThanCenter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "lesserBoundedLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "greaterBoundedLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "greaterLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Integer",
+        "type_short": "Integer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSolutionWhenCenterBounded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "lesserLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "lesserBoundedLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "centerLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "greaterBoundedLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "greaterLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Integer",
+        "type_short": "Integer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGreaterBoundedLocation",
+      "comment": "With all inputs on a line (one-dimensional), returns a location that is shifted enough from\n the placementLocation such that the greater end of bounds specified by boundLocation\n is not exceeded (i.e., the new location is not bigger than ).",
+      "javadoc": "With all inputs on a line (one-dimensional), returns a location that is shifted enough from\n the placementLocation such that the greater end of bounds specified by boundLocation\n is not exceeded (i.e., the new location is not bigger than {@code #boundLocation}).\n@param placementLocation starting location that gets shifted\n@param placementLength the length of the to-be-placed dimension on the (one-dimensional)\n        line\n@param boundLocation the bounds on the line that must not be exceeded to the greater side\n@param boundLength the length of the outer bounds dimension on the (one-dimensional) line\n@return the shifted result",
+      "static": false,
+      "params": [
+        {
+          "name": "placementLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "starting location that gets shifted"
+        },
+        {
+          "name": "placementLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the to-be-placed dimension on the (one-dimensional)\n        line"
+        },
+        {
+          "name": "boundLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the bounds on the line that must not be exceeded to the greater side"
+        },
+        {
+          "name": "boundLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the outer bounds dimension on the (one-dimensional) line"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the shifted result"
+      },
+      "throws": []
+    },
+    {
+      "name": "getLesserBoundedLocation",
+      "comment": "With all inputs on a line (one-dimensional), returns a location that is shifted enough from\n the placementLocation such that the lesser end of bounds specified by boundLocation\n is not exceeded (i.e., the new location is not smaller than boundLocation).",
+      "javadoc": "With all inputs on a line (one-dimensional), returns a location that is shifted enough from\n the placementLocation such that the lesser end of bounds specified by boundLocation\n is not exceeded (i.e., the new location is not smaller than boundLocation).\n@param placementLocation starting location that gets shifted\n@param boundLocation the bounds on the line that must not be exceeded to the lesser side\n@return the shifted result",
+      "static": false,
+      "params": [
+        {
+          "name": "placementLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "starting location that gets shifted"
+        },
+        {
+          "name": "boundLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the bounds on the line that must not be exceeded to the lesser side"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the shifted result"
+      },
+      "throws": []
+    },
+    {
+      "name": "getGreaterLocation",
+      "comment": "Returns the placement on a line (one-dimensional) on the greater end of the context area.",
+      "javadoc": "Returns the placement on a line (one-dimensional) on the greater end of the context area.\n@param contextLocation the context location on the line\n@param contextLength the context length on the line\n@param placementLength the length of the to-be-place dimension on that line\n@return the resultant placement on the line",
+      "static": false,
+      "params": [
+        {
+          "name": "contextLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the context location on the line"
+        },
+        {
+          "name": "contextLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the context length on the line"
+        },
+        {
+          "name": "placementLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the to-be-place dimension on that line"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the resultant placement on the line"
+      },
+      "throws": []
+    },
+    {
+      "name": "getLesserLocation",
+      "comment": "Returns the placement on a line (one-dimensional) on the lesser end of the context area.",
+      "javadoc": "Returns the placement on a line (one-dimensional) on the lesser end of the context area.\n@param contextLocation the context location on the line\n@param contextLength the context length on the line\n@param placementLength the length of the to-be-place dimension on that line\n@return the resultant placement on the line",
+      "static": false,
+      "params": [
+        {
+          "name": "contextLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the context location on the line"
+        },
+        {
+          "name": "contextLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the context length on the line"
+        },
+        {
+          "name": "placementLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the to-be-place dimension on that line"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the resultant placement on the line"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCenterLocation",
+      "comment": "Determines the placementLocation such that the midpoint of the context and the midpoint\n of the placement are at the same point.  Location and Length can either be an x value and\n width or a y value and height.",
+      "javadoc": "Determines the placementLocation such that the midpoint of the context and the midpoint\n of the placement are at the same point.  Location and Length can either be an x value and\n width or a y value and height.\n@param contextLocation the x or y value of the context, depending on if we are doing the\n        horizontal or vertical midpoint\n@param contextLength the corresponding width (if dealing with x/horizontal midpoint) or\n        height (if dealing with y/vertical midpoint)\n@param placementLength the corresponding height or width of the placement\n@return the placement location (again x or y value)",
+      "static": false,
+      "params": [
+        {
+          "name": "contextLocation",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the x or y value of the context, depending on if we are doing the\n        horizontal or vertical midpoint"
+        },
+        {
+          "name": "contextLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the corresponding width (if dealing with x/horizontal midpoint) or\n        height (if dealing with y/vertical midpoint)"
+        },
+        {
+          "name": "placementLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the corresponding height or width of the placement"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the placement location (again x or y value)"
+      },
+      "throws": []
+    },
+    {
+      "name": "debugDump",
+      "comment": "Dumps some debug output about the current class and its placement result",
+      "javadoc": "Dumps some debug output about the current class and its placement result",
+      "static": false,
+      "params": [
+        {
+          "name": "placement",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dumpRectangle",
+      "comment": "Dumps a simple Rectangle output",
+      "javadoc": "Dumps a simple Rectangle output",
+      "static": false,
+      "params": [
+        {
+          "name": "r",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

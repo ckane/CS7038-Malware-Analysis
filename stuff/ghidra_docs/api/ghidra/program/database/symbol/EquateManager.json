@@ -1,0 +1,1277 @@
+{
+  "name": "EquateManager",
+  "comment": "Implementation of the Equate Table",
+  "javadoc": "Implementation of the Equate Table",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.symbol.EquateTable",
+    "db.util.ErrorHandler",
+    "ghidra.program.database.ManagerDB"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "addrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMap",
+      "type_short": "AddressMap",
+      "constant_value": null
+    },
+    {
+      "name": "refCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.DBObjectCache\u003cghidra.program.database.symbol.EquateRefDB\u003e",
+      "type_short": "DBObjectCache",
+      "constant_value": null
+    },
+    {
+      "name": "equateCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.DBObjectCache\u003cghidra.program.database.symbol.EquateDB\u003e",
+      "type_short": "DBObjectCache",
+      "constant_value": null
+    },
+    {
+      "name": "equateAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.symbol.EquateDBAdapter",
+      "type_short": "EquateDBAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "refAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.symbol.EquateRefDBAdapter",
+      "type_short": "EquateRefDBAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramDB",
+      "type_short": "ProgramDB",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.Lock",
+      "type_short": "Lock",
+      "constant_value": null
+    },
+    {
+      "name": "DATATYPE_TAG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"dtID\""
+    },
+    {
+      "name": "ERROR_TAG",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"\u003cBAD EQUATE\u003e\""
+    },
+    {
+      "name": "FORMAT_DELIMITER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\":\""
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor",
+      "javadoc": "Constructor\n@param handle database handle\n@param addrMap map that converts addresses to longs and longs to addresses\n@param openMode one of ProgramDB.CREATE, UPDATE, UPGRADE, or READ_ONLY\n@param lock the program synchronization lock\n@param monitor the progress monitor used when upgrading.\n@throws VersionException if the database version doesn\u0027t match the current version.\n@throws IOException if a database error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "database handle"
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMap",
+          "type_short": "AddressMap",
+          "comment": "map that converts addresses to longs and longs to addresses"
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of ProgramDB.CREATE, UPDATE, UPGRADE, or READ_ONLY"
+        },
+        {
+          "name": "lock",
+          "type_long": "ghidra.util.Lock",
+          "type_short": "Lock",
+          "comment": "the program synchronization lock"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the progress monitor used when upgrading."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if the database version doesn\u0027t match the current version."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a database error occurs."
+        }
+      ]
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.ProgramDB",
+        "type_short": "ProgramDB",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeAdapters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.database.ProgramDB",
+          "type_short": "ProgramDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programReady",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentRevision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "dbError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Equate",
+        "type_short": "Equate",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reference",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "scalarValue",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Equate",
+        "type_short": "Equate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reference",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.Equate\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reference",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.Equate\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Equate",
+        "type_short": "Equate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.symbol.Equate\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.Equate\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateDB",
+          "type_long": "ghidra.program.database.symbol.EquateDB",
+          "type_short": "EquateDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getAddressMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.map.AddressMap",
+        "type_short": "AddressMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateDatabaseAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.EquateDBAdapter",
+        "type_short": "EquateDBAdapter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRefDatabaseAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.EquateRefDBAdapter",
+        "type_short": "EquateRefDBAdapter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dynamicHash",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.EquateRefDB[]",
+        "type_short": "ghidra.program.database.symbol.EquateRefDB[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getReferenceCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "reference",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.EquateReference\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateDB",
+          "type_long": "ghidra.program.database.symbol.EquateDB",
+          "type_short": "EquateDB",
+          "comment": ""
+        },
+        {
+          "name": "refAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateDB",
+          "type_long": "ghidra.program.database.symbol.EquateDB",
+          "type_short": "EquateDB",
+          "comment": ""
+        },
+        {
+          "name": "dynamicHash",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "refAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "validateName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "equateNameChanged",
+      "comment": "Send notification that the equate name changed",
+      "javadoc": "Send notification that the equate name changed\n@param oldName old name\n@param newName new name",
+      "static": false,
+      "params": [
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "old name"
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new name"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateRefRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "refID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeRef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateDB",
+          "type_long": "ghidra.program.database.symbol.EquateDB",
+          "type_short": "EquateDB",
+          "comment": ""
+        },
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.database.symbol.EquateRefDB",
+          "type_short": "EquateRefDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getEquateDB",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.EquateDB",
+        "type_short": "EquateDB",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getEquateRefDB",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.symbol.EquateRefDB",
+        "type_short": "EquateRefDB",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "referenceRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "equateDB",
+          "type_long": "ghidra.program.database.symbol.EquateDB",
+          "type_short": "EquateDB",
+          "comment": ""
+        },
+        {
+          "name": "refAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": ""
+        },
+        {
+          "name": "dynamichash",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.Lock",
+        "type_short": "Lock",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidateCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "formatNameForEquate",
+      "comment": "Formats a string to the equate format given the enum UUID and the value for the equate. The\n formatted strings are used when setting equates from datatypes so that information can be\n stored with an equate to point back to that datatype.",
+      "javadoc": "Formats a string to the equate format given the enum UUID and the value for the equate. The\n formatted strings are used when setting equates from datatypes so that information can be\n stored with an equate to point back to that datatype.\n@param dtID The enum\u0027s data type UUID\n@param equateValue The value intended for the equate\n@return The formatted equate name",
+      "static": true,
+      "params": [
+        {
+          "name": "dtID",
+          "type_long": "ghidra.util.UniversalID",
+          "type_short": "UniversalID",
+          "comment": "The enum\u0027s data type UUID"
+        },
+        {
+          "name": "equateValue",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The value intended for the equate"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "The formatted equate name"
+      },
+      "throws": []
+    },
+    {
+      "name": "formatNameForEquateError",
+      "comment": "Formats a string to the equate error format given the value. Used for rendering formatted\n  equates that do not point back to a datatype.",
+      "javadoc": "Formats a string to the equate error format given the value. Used for rendering formatted\n  equates that do not point back to a datatype.\n@param equateValue The value of the equate\n@return The error formatted equate name",
+      "static": true,
+      "params": [
+        {
+          "name": "equateValue",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The value of the equate"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "The error formatted equate name"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataTypeUUID",
+      "comment": "Pulls out the enum data type UUID given a formatted equate name. This UUID should point back\n to a datatype.",
+      "javadoc": "Pulls out the enum data type UUID given a formatted equate name. This UUID should point back\n to a datatype.\n@param formattedEquateName The formatted equate name to pull the UUID from\n@return The enum data type UUID or null if the given name is not formatted.",
+      "static": true,
+      "params": [
+        {
+          "name": "formattedEquateName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The formatted equate name to pull the UUID from"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.UniversalID",
+        "type_short": "UniversalID",
+        "comment": "The enum data type UUID or null if the given name is not formatted."
+      },
+      "throws": []
+    },
+    {
+      "name": "getEquateValueFromFormattedName",
+      "comment": "Pulls out the value of the equate given the formatted equate name. The value stored in the\n equate info is a decimal.",
+      "javadoc": "Pulls out the value of the equate given the formatted equate name. The value stored in the\n equate info is a decimal.\n@param formattedEquateName The formatted equate name to pull the value from\n@return The value of the equate, or -1 if the given name is not formatted.",
+      "static": true,
+      "params": [
+        {
+          "name": "formattedEquateName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The formatted equate name to pull the value from"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "The value of the equate, or -1 if the given name is not formatted."
+      },
+      "throws": []
+    }
+  ]
+}

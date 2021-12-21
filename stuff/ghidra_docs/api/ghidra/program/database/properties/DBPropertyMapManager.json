@@ -1,0 +1,815 @@
+{
+  "name": "DBPropertyMapManager",
+  "comment": "Manages generic address keyed properties.",
+  "javadoc": "Manages generic address keyed properties.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.util.PropertyMapManager",
+    "ghidra.program.database.ManagerDB"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "dbHandle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.DBHandle",
+      "type_short": "DBHandle",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramDB",
+      "type_short": "ProgramDB",
+      "constant_value": null
+    },
+    {
+      "name": "addrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMap",
+      "type_short": "AddressMap",
+      "constant_value": null
+    },
+    {
+      "name": "changeMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ChangeManager",
+      "type_short": "ChangeManager",
+      "constant_value": null
+    },
+    {
+      "name": "propertiesDBAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.properties.PropertiesDBAdapter",
+      "type_short": "PropertiesDBAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "propertyMapCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeMap\u003cjava.lang.String,ghidra.program.model.util.PropertyMap\u003e",
+      "type_short": "TreeMap",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.Lock",
+      "type_short": "Lock",
+      "constant_value": null
+    },
+    {
+      "name": "CURRENT_PROPERTIES_TABLE_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "PROPERTIES_TABLE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Properties\""
+    },
+    {
+      "name": "PROPERTY_TYPE_COL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "OBJECT_CLASS_COL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "INT_PROPERTY_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "0"
+    },
+    {
+      "name": "LONG_PROPERTY_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "1"
+    },
+    {
+      "name": "STRING_PROPERTY_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "2"
+    },
+    {
+      "name": "VOID_PROPERTY_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "3"
+    },
+    {
+      "name": "OBJECT_PROPERTY_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "4"
+    },
+    {
+      "name": "PROPERTIES_SCHEMA",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "db.Schema",
+      "type_short": "Schema",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new DBPropertyMapManager",
+      "javadoc": "Constructs a new DBPropertyMapManager\n@param handle the database handle\n@param changeMgr the change manager\n@param addrMap the address map\n@param openMode the program open mode.\n@param lock the program synchronization lock\n@param monitor the task monitor\n@throws IOException\n@throws VersionException\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "the database handle"
+        },
+        {
+          "name": "changeMgr",
+          "type_long": "ghidra.program.util.ChangeManager",
+          "type_short": "ChangeManager",
+          "comment": "the change manager"
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMap",
+          "type_short": "AddressMap",
+          "comment": "the address map"
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the program open mode."
+        },
+        {
+          "name": "lock",
+          "type_long": "ghidra.util.Lock",
+          "type_short": "Lock",
+          "comment": "the program synchronization lock"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setProgram",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.ManagerDB#setProgram(ghidra.program.database.ProgramDB)",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.database.ProgramDB",
+          "type_short": "ProgramDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programReady",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.ManagerDB#programReady(int, int, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentRevision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "invalidateCache",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.ManagerDB#invalidateCache(boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "loadPropertyMaps",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "findAdapters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createIntPropertyMap",
+      "comment": "Creates a new IntPropertyMap with the given name.",
+      "javadoc": "Creates a new IntPropertyMap with the given name.\n@param propertyName the name of the property to create.\n@exception DuplicateNameException thrown if a PropertyMap already\n exists with that name.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to create."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.IntPropertyMap",
+        "type_short": "IntPropertyMap",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createLongPropertyMap",
+      "comment": "Creates a new LongPropertyMap with the given name.",
+      "javadoc": "Creates a new LongPropertyMap with the given name.\n@param propertyName the name of the property to create.\n@exception DuplicateNameException thrown if a PropertyMap already\n exists with that name.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to create."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.LongPropertyMap",
+        "type_short": "LongPropertyMap",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createStringPropertyMap",
+      "comment": "Creates a new StringPropertyMap with the given name.",
+      "javadoc": "Creates a new StringPropertyMap with the given name.\n@param propertyName the name of the property to create.\n@exception DuplicateNameException thrown if a PropertyMap already\n exists with that name.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to create."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.StringPropertyMap",
+        "type_short": "StringPropertyMap",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createObjectPropertyMap",
+      "comment": "Creates a new ObjectPropertyMap with the given name.",
+      "javadoc": "Creates a new ObjectPropertyMap with the given name.\n@param propertyName the name of the property to create.\n@param objectClass the class of the objects that will be stored in the property.\n@exception DuplicateNameException thrown if a PropertyMap already\n exists with that name.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to create."
+        },
+        {
+          "name": "objectClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.util.Saveable\u003e",
+          "type_short": "Class",
+          "comment": "the class of the objects that will be stored in the property."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.ObjectPropertyMap",
+        "type_short": "ObjectPropertyMap",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createVoidPropertyMap",
+      "comment": "Creates a new VoidPropertyMap with the given name.",
+      "javadoc": "Creates a new VoidPropertyMap with the given name.\n@param propertyName the name of the property to create.\n@exception DuplicateNameException thrown if a PropertyMap already\n exists with that name.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to create."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.VoidPropertyMap",
+        "type_short": "VoidPropertyMap",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getPropertyMap",
+      "comment": "Returns the PropertyMap with the given name or null if no PropertyMap\n exists with that name.",
+      "javadoc": "Returns the PropertyMap with the given name or null if no PropertyMap\n exists with that name.\n@param propertyName the name of the property to retrieve.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.PropertyMap",
+        "type_short": "PropertyMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIntPropertyMap",
+      "comment": "Returns the IntPropertyMap associated with the given name.",
+      "javadoc": "Returns the IntPropertyMap associated with the given name.\n@param propertyName the name of the property to retrieve.\n@throws TypeMismatchException if a propertyMap named propertyName\n exists but is not an IntPropertyMap.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.IntPropertyMap",
+        "type_short": "IntPropertyMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLongPropertyMap",
+      "comment": "Returns the LongPropertyMap associated with the given name.",
+      "javadoc": "Returns the LongPropertyMap associated with the given name.\n@param propertyName the name of the property to retrieve.\n@throws TypeMismatchException if a propertyMap named propertyName\n exists but is not an LongPropertyMap.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.LongPropertyMap",
+        "type_short": "LongPropertyMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStringPropertyMap",
+      "comment": "Returns the StringPropertyMap associated with the given name.",
+      "javadoc": "Returns the StringPropertyMap associated with the given name.\n@param propertyName the name of the property to retrieve.\n@throws TypeMismatchException if a propertyMap named propertyName\n exists but is not a StringPropertyMap.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.StringPropertyMap",
+        "type_short": "StringPropertyMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getObjectPropertyMap",
+      "comment": "Returns the ObjectPropertyMap associated with the given name.",
+      "javadoc": "Returns the ObjectPropertyMap associated with the given name.\n@param propertyName the name of the property to retrieve.\n@throws TypeMismatchException if a propertyMap named propertyName\n exists but is not an ObjectPropertyMap.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.ObjectPropertyMap",
+        "type_short": "ObjectPropertyMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVoidPropertyMap",
+      "comment": "Returns the VoidPropertyMap associated with the given name.",
+      "javadoc": "Returns the VoidPropertyMap associated with the given name.\n@param propertyName the name of the property to retrieve.\n@throws TypeMismatchException if a propertyMap named propertyName\n exists but is not a VoidPropertyMap.",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to retrieve."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.util.VoidPropertyMap",
+        "type_short": "VoidPropertyMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removePropertyMap",
+      "comment": "Removes the PropertyMap with the given name.",
+      "javadoc": "Removes the PropertyMap with the given name.\n@param propertyName the name of the property to remove.\n@return true if a PropertyMap with that name was found (and removed)",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the property to remove."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a PropertyMap with that name was found (and removed)"
+      },
+      "throws": []
+    },
+    {
+      "name": "propertyManagers",
+      "comment": "Returns an iterator over the names of all existing PropertyMangers.",
+      "javadoc": "Returns an iterator over the names of all existing PropertyMangers.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cjava.lang.String\u003e",
+        "type_short": "Iterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAll",
+      "comment": "Removes any property at the given address from all defined\n PropertyManagers.",
+      "javadoc": "Removes any property at the given address from all defined\n PropertyManagers.\n@param addr the address at which to remove all properties.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to remove all properties."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAll",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.util.PropertyMapManager#removeAll(ghidra.program.model.address.Address, ghidra.program.model.address.Address, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.ManagerDB#moveAddressRange(ghidra.program.model.address.Address, ghidra.program.model.address.Address, long, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteAddressRange",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.ManagerDB#deleteAddressRange(ghidra.program.model.address.Address, ghidra.program.model.address.Address, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

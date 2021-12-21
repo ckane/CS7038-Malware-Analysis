@@ -1,0 +1,1082 @@
+{
+  "name": "VarKeyInteriorNode",
+  "comment": "LongKeyInteriorNode stores a BTree node for use as an interior\n node when searching for Table records within the database.  This type of node\n has the following layout within a single DataBuffer (field size in bytes):\n \n   | NodeType(1) | KeyType(1) | KeyCount(4) | KeyOffset0(4) | ID0(4) | ... | KeyOffsetN(4) | IDN(4) | \n     ...FreeSpace... | KeyN | ... | Key0 |",
+  "javadoc": "\u003ccode\u003eLongKeyInteriorNode\u003c/code\u003e stores a BTree node for use as an interior\n node when searching for Table records within the database.  This type of node\n has the following layout within a single DataBuffer (field size in bytes):\n \n   | NodeType(1) | KeyType(1) | KeyCount(4) | KeyOffset0(4) | ID0(4) | ... | KeyOffsetN(4) | IDN(4) | \n     ...\u0026lt;FreeSpace\u0026gt;... | KeyN | ... | Key0 |",
+  "static": false,
+  "implements": [
+    "db.FieldKeyInteriorNode"
+  ],
+  "extends": "db.VarKeyNode",
+  "fields": [
+    {
+      "name": "BASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "6"
+    },
+    {
+      "name": "KEY_OFFSET_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "ID_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "ENTRY_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "MIN_KEY_CAPACITY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "HALF_KEY_CAPACITY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an existing variable-length-key interior node.",
+      "javadoc": "Construct an existing variable-length-key interior node.\n@param nodeMgr table node manager instance\n@param buf node buffer\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager instance"
+        },
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "node buffer"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new variable-length-key interior node with two child nodes.",
+      "javadoc": "Construct a new variable-length-key interior node with two child nodes.\n@param nodeMgr table node manager.\n@param key1 left child node left-most key\n@param id1 left child node buffer ID\n@param key2 right child node left-most key\n@param id2 right child node buffer ID\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager."
+        },
+        {
+          "name": "key1",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "left child node left-most key"
+        },
+        {
+          "name": "id1",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "left child node buffer ID"
+        },
+        {
+          "name": "key2",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "right child node left-most key"
+        },
+        {
+          "name": "id2",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "right child node buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new empty variable-length-key interior node.\n Node must be initialized with a minimum of two keys.",
+      "javadoc": "Construct a new empty variable-length-key interior node.\n Node must be initialized with a minimum of two keys.\n@param nodeMgr table node manager.\n@param keyType sample key Field",
+      "static": false,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager."
+        },
+        {
+          "name": "keyType",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "sample key Field"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "logConsistencyError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tableName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isConsistent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tableName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getMaxKeyLength",
+      "comment": "Get the maximum number of bytes which may be consumed by a key.",
+      "javadoc": "Get the maximum number of bytes which may be consumed by a key.\n@param bufferLength buffer length\n@return maximum length of stored key (this includes the 4-byte length\n prefix which is stored with variable length key fields).",
+      "static": true,
+      "params": [
+        {
+          "name": "bufferLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer length"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "maximum length of stored key (this includes the 4-byte length\n prefix which is stored with variable length key fields)."
+      },
+      "throws": []
+    },
+    {
+      "name": "getIdIndex",
+      "comment": "Perform a binary search to locate the specified key and derive an index\n into the Buffer ID storage.  This method is intended to locate the child\n node which contains the specified key.  The returned index corresponds \n to a child\u0027s stored buffer/node ID and may correspond to another interior\n node or a leaf record node.  Each stored key within this interior node\n effectively identifies the maximum key contained within the corresponding\n child node.",
+      "javadoc": "Perform a binary search to locate the specified key and derive an index\n into the Buffer ID storage.  This method is intended to locate the child\n node which contains the specified key.  The returned index corresponds \n to a child\u0027s stored buffer/node ID and may correspond to another interior\n node or a leaf record node.  Each stored key within this interior node\n effectively identifies the maximum key contained within the corresponding\n child node.\n@param key key to search for\n@return int buffer ID index of child node.  An existing positive index\n value will always be returned.\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "key to search for"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int buffer ID index of child node.  An existing positive index\n value will always be returned."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getKeyIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getOffsetIndex",
+      "comment": "Perform a binary search across the stored key offsets to find the\n key index which corresponds to the specified key offset.  This facilitates\n finding the key which utilizes the buffer storage at the specified \n offset.",
+      "javadoc": "Perform a binary search across the stored key offsets to find the\n key index which corresponds to the specified key offset.  This facilitates\n finding the key which utilizes the buffer storage at the specified \n offset.\n@return key index.",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "key index."
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyOffset",
+      "comment": "Get the key offset within the buffer",
+      "javadoc": "Get the key offset within the buffer\n@param index key index\n@return record key offset",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key index"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "record key offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "putKeyOffset",
+      "comment": "Store the key offset within the buffer for the specified key index.",
+      "javadoc": "Store the key offset within the buffer for the specified key index.\n@param index key index\n@param offset key offset",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key index"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key offset"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getKeyLength",
+      "comment": "Get the length of a specified child key.",
+      "javadoc": "Get the length of a specified child key.\n@param index child key index\n@return key storage length\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "child key index"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "key storage length"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getBufferId",
+      "comment": "Get the child node buffer ID associated with the specified key index",
+      "javadoc": "Get the child node buffer ID associated with the specified key index\n@param index child key index\n@return child node buffer ID",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "child key index"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "child node buffer ID"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFreeSpace",
+      "comment": "",
+      "javadoc": "@return unused free space within node",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "unused free space within node"
+      },
+      "throws": []
+    },
+    {
+      "name": "insertEntry",
+      "comment": "Insert the child node entry (key and buffer ID) associated with the specified key index.\n All entries at and after index are shifted to make space for new entry.\n The node key count is adjusted to reflect the addition of a child.",
+      "javadoc": "Insert the child node entry (key and buffer ID) associated with the specified key index.\n All entries at and after index are shifted to make space for new entry.\n The node key count is adjusted to reflect the addition of a child.\n@param index child key index\n@param key child node key\n@param bufferId child node buffer ID",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "child key index"
+        },
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "child node key"
+        },
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "child node buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateKey",
+      "comment": "Update the child key associated with the specified key index.\n Other entries are shifted as necessary to accommodate the new key length for \n the updated entry.",
+      "javadoc": "Update the child key associated with the specified key index.\n Other entries are shifted as necessary to accommodate the new key length for \n the updated entry.\n@param index child key index\n@param updateKey updated child node key",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "child key index"
+        },
+        {
+          "name": "updateKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "updated child node key"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteEntry",
+      "comment": "Delete the child node entry (key and buffer ID) associated with the specified key index.\n Other entries after shifted as necessary.\n The node key count is adjusted to reflect the removal of a child.",
+      "javadoc": "Delete the child node entry (key and buffer ID) associated with the specified key index.\n Other entries after shifted as necessary.\n The node key count is adjusted to reflect the removal of a child.\n@param index child key index",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "child key index"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "moveKeys",
+      "comment": "Move all keys from index to the end by the specified offset.",
+      "javadoc": "Move all keys from index to the end by the specified offset.\n@param index the smaller key index (0 \u0026lt;\u003d index1)\n@param offset movement offset in bytes\n@return insertion offset immediately following moved block.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the smaller key index (0 \u003d index1)"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "movement offset in bytes"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "insertion offset immediately following moved block."
+      },
+      "throws": []
+    },
+    {
+      "name": "keyChanged",
+      "comment": "Callback method for when a child node\u0027s leftmost key changes.",
+      "javadoc": "Callback method for when a child node\u0027s leftmost key changes.\n@param oldKey previous leftmost key.\n@param newKey new leftmost key.\n@param node child node containing oldKey\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "oldKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "previous leftmost key."
+        },
+        {
+          "name": "newKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "new leftmost key."
+        },
+        {
+          "name": "node",
+          "type_long": "db.FieldKeyNode",
+          "type_short": "FieldKeyNode",
+          "comment": "child node containing oldKey"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "split",
+      "comment": "Split this interior node and update the old key entry.",
+      "javadoc": "Split this interior node and update the old key entry.\n@param oldIndex index of key to be updated\n@param oldKey old key value stored at oldIndex\n@param newKey new key value\n@param node child node containing oldKey\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "oldIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of key to be updated"
+        },
+        {
+          "name": "oldKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "old key value stored at oldIndex"
+        },
+        {
+          "name": "newKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "new key value"
+        },
+        {
+          "name": "node",
+          "type_long": "db.VarKeyNode",
+          "type_short": "VarKeyNode",
+          "comment": "child node containing oldKey"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "insert",
+      "comment": "Insert new child node.",
+      "javadoc": "Insert new child node.\n@param node new child node.\n@return root node\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.VarKeyNode",
+          "type_short": "VarKeyNode",
+          "comment": "new child node."
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyNode",
+        "type_short": "VarKeyNode",
+        "comment": "root node"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "insert",
+      "comment": "Insert a new entry into this node.\n It is assumed that there is sufficient space for the new entry.",
+      "javadoc": "Insert a new entry into this node.\n It is assumed that there is sufficient space for the new entry.\n@param id id of new node\n@param key leftmost key associated with new node.\n@param node child node which corresponds to the id and key.\n@return root node.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "id of new node"
+        },
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "leftmost key associated with new node."
+        },
+        {
+          "name": "node",
+          "type_long": "db.VarKeyNode",
+          "type_short": "VarKeyNode",
+          "comment": "child node which corresponds to the id and key."
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyNode",
+        "type_short": "VarKeyNode",
+        "comment": "root node."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "split",
+      "comment": "Split this interior node and insert new child entry (key and buffer ID).  \n Assumes 3 or more child keys exist in this node.",
+      "javadoc": "Split this interior node and insert new child entry (key and buffer ID).  \n Assumes 3 or more child keys exist in this node.\n@param newKey new child key\n@param newId new child node\u0027s buffer ID\n@param node child node instance (corresponds to newKey and newId)\n@return root node.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "newKey",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "new child key"
+        },
+        {
+          "name": "newId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "new child node\u0027s buffer ID"
+        },
+        {
+          "name": "node",
+          "type_long": "db.VarKeyNode",
+          "type_short": "VarKeyNode",
+          "comment": "child node instance (corresponds to newKey and newId)"
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyNode",
+        "type_short": "VarKeyNode",
+        "comment": "root node."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getLeafNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyRecordNode",
+        "type_short": "VarKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLeftmostLeafNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.VarKeyRecordNode",
+        "type_short": "VarKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRightmostLeafNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.VarKeyRecordNode",
+        "type_short": "VarKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteChild",
+      "comment": "Callback method allowing child node to remove itself from parent.\n Rebalancing of the tree is performed if the interior node falls \n below the half-full point.",
+      "javadoc": "Callback method allowing child node to remove itself from parent.\n Rebalancing of the tree is performed if the interior node falls \n below the half-full point.\n@param key child node key\n@return root node\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "child node key"
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyNode",
+        "type_short": "VarKeyNode",
+        "comment": "root node"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "balanceChild",
+      "comment": "Callback method allowing a child interior node to request balancing of its \n content with its sibling nodes.  Balancing is only done if the specified node \n is half-full or less.",
+      "javadoc": "Callback method allowing a child interior node to request balancing of its \n content with its sibling nodes.  Balancing is only done if the specified node \n is half-full or less.\n@param node child interior node\n@return root node",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.VarKeyInteriorNode",
+          "type_short": "VarKeyInteriorNode",
+          "comment": "child interior node"
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyNode",
+        "type_short": "VarKeyNode",
+        "comment": "root node"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "balanceChild",
+      "comment": "Balance the entries contained within two adjacent child interior nodes.\n One of the two nodes must be half-full or less.\n This could result in the removal of a child node if entries will fit within\n one node.",
+      "javadoc": "Balance the entries contained within two adjacent child interior nodes.\n One of the two nodes must be half-full or less.\n This could result in the removal of a child node if entries will fit within\n one node.\n@param leftNode left child interior node\n@param rightNode right child interior node\n@return new root\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "leftNode",
+          "type_long": "db.VarKeyInteriorNode",
+          "type_short": "VarKeyInteriorNode",
+          "comment": "left child interior node"
+        },
+        {
+          "name": "rightNode",
+          "type_long": "db.VarKeyInteriorNode",
+          "type_short": "VarKeyInteriorNode",
+          "comment": "right child interior node"
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyNode",
+        "type_short": "VarKeyNode",
+        "comment": "new root"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "moveKeysRight",
+      "comment": "Move some (not all) of the keys from the left node into the right node.",
+      "javadoc": "Move some (not all) of the keys from the left node into the right node.\n@param leftNode\n@param rightNode\n@param count\n@return true if movement occurred, else false",
+      "static": true,
+      "params": [
+        {
+          "name": "leftNode",
+          "type_long": "db.VarKeyInteriorNode",
+          "type_short": "VarKeyInteriorNode",
+          "comment": ""
+        },
+        {
+          "name": "rightNode",
+          "type_long": "db.VarKeyInteriorNode",
+          "type_short": "VarKeyInteriorNode",
+          "comment": ""
+        },
+        {
+          "name": "count",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if movement occurred, else false"
+      },
+      "throws": []
+    },
+    {
+      "name": "moveKeysLeft",
+      "comment": "Move some or all of the keys from the right node into the left node.\n If all keys are moved, the caller is responsible for deleting the right\n node.",
+      "javadoc": "Move some or all of the keys from the right node into the left node.\n If all keys are moved, the caller is responsible for deleting the right\n node.\n@param leftNode\n@param rightNode\n@param count",
+      "static": true,
+      "params": [
+        {
+          "name": "leftNode",
+          "type_long": "db.VarKeyInteriorNode",
+          "type_short": "VarKeyInteriorNode",
+          "comment": ""
+        },
+        {
+          "name": "rightNode",
+          "type_long": "db.VarKeyInteriorNode",
+          "type_short": "VarKeyInteriorNode",
+          "comment": ""
+        },
+        {
+          "name": "count",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBufferReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int[]",
+        "type_short": "int[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLeftmostKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isRightmostKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

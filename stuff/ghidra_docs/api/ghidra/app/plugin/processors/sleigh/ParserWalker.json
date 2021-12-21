@@ -1,0 +1,672 @@
+{
+  "name": "ParserWalker",
+  "comment": "Class for walking the Sleigh Parser tree.  The nodes of the tree are the Sleigh Constructors arranged for a particular\n instruction.  This tree is walked for various purposes:\n \n     SleighInstructionPrototype.resolve        - initial parsing of instruction and building the tree\n     SleighInstructionPrototype.resolveHandles - filling in Varnode values for all the Constructor exports\n     PcodeEmit                                 - for weaving together p-code for an instruction\n ",
+  "javadoc": "Class for walking the Sleigh Parser tree.  The nodes of the tree are the Sleigh Constructors arranged for a particular\n instruction.  This tree is walked for various purposes:\n \u003cul\u003e\n     \u003cli\u003eSleighInstructionPrototype.resolve        - initial parsing of instruction and building the tree\n     \u003cli\u003eSleighInstructionPrototype.resolveHandles - filling in Varnode values for all the Constructor exports\n     \u003cli\u003ePcodeEmit                                 - for weaving together p-code for an instruction\n \u003c/ul\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "MAX_PARSE_DEPTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "64"
+    },
+    {
+      "name": "context",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.processors.sleigh.SleighParserContext",
+      "type_short": "SleighParserContext",
+      "constant_value": null
+    },
+    {
+      "name": "cross_context",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.processors.sleigh.SleighParserContext",
+      "type_short": "SleighParserContext",
+      "constant_value": null
+    },
+    {
+      "name": "point",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.processors.sleigh.ConstructState",
+      "type_short": "ConstructState",
+      "constant_value": null
+    },
+    {
+      "name": "depth",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "breadcrumb",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighParserContext",
+          "type_short": "SleighParserContext",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "For use with pcode cross-build",
+      "javadoc": "For use with pcode cross-build\n@param c context\n@param cross cross context",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighParserContext",
+          "type_short": "SleighParserContext",
+          "comment": "context"
+        },
+        {
+          "name": "cross",
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighParserContext",
+          "type_short": "SleighParserContext",
+          "comment": "cross context"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParserContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.processors.sleigh.SleighParserContext",
+        "type_short": "SleighParserContext",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "baseState",
+      "comment": "Initialize a walk of the tree",
+      "javadoc": "Initialize a walk of the tree",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "subTreeState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "subtree",
+          "type_long": "ghidra.app.plugin.processors.sleigh.ConstructState",
+          "type_short": "ConstructState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "snippetState",
+      "comment": "Create state suitable for parsing a just a p-code semantics snippet",
+      "javadoc": "Create state suitable for parsing a just a p-code semantics snippet",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isState",
+      "comment": "Are we at the end of the tree walk",
+      "javadoc": "Are we at the end of the tree walk\n@return true if there is more walk to go",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is more walk to go"
+      },
+      "throws": []
+    },
+    {
+      "name": "getState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.processors.sleigh.ConstructState",
+        "type_short": "ConstructState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "pushOperand",
+      "comment": "Move down to a particular child of the current node.  Store what would be the next sibling to walk",
+      "javadoc": "Move down to a particular child of the current node.  Store what would be the next sibling to walk\n@param i is the index of the desired child",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the index of the desired child"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "allocateOperand",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.UnknownInstructionException",
+          "type_short": "UnknownInstructionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "popOperand",
+      "comment": "Move to the parent of the current node",
+      "javadoc": "Move to the parent of the current node",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOperand",
+      "comment": "Find the next child that needs to be traversed",
+      "javadoc": "Find the next child that needs to be traversed\n@return the index of the child",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the index of the child"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFixedHandle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.processors.sleigh.FixedHandle",
+        "type_short": "FixedHandle",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParentHandle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.processors.sleigh.FixedHandle",
+        "type_short": "FixedHandle",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffset",
+      "comment": "Get the offset into the instruction for the current node (i\u003d-1) or one of the current node\u0027s children",
+      "javadoc": "Get the offset into the instruction for the current node (i\u003d-1) or one of the current node\u0027s children\n@param i selects the desired child of the current node\n@return the offset (in bytes) for the selected node",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "selects the desired child of the current node"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the offset (in bytes) for the selected node"
+      },
+      "throws": []
+    },
+    {
+      "name": "setOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "off",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCurrentLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "calcCurrentLength",
+      "comment": "Calculate the length of the current constructor state\n assuming all its operands are constructed",
+      "javadoc": "Calculate the length of the current constructor state\n assuming all its operands are constructed",
+      "static": false,
+      "params": [
+        {
+          "name": "minLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "numopers",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConstructor",
+      "comment": "",
+      "javadoc": "@return the Constructor for the current node in the walk",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.processors.sleigh.Constructor",
+        "type_short": "Constructor",
+        "comment": "the Constructor for the current node in the walk"
+      },
+      "throws": []
+    },
+    {
+      "name": "setConstructor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ct",
+          "type_long": "ghidra.app.plugin.processors.sleigh.Constructor",
+          "type_short": "Constructor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNaddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSpace",
+        "type_short": "AddressSpace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConstSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSpace",
+        "type_short": "AddressSpace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowRefAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowDestAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInstructionBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "byteoff",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "numbytes",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getContextBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "byteoff",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "numbytes",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInstructionBits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startbit",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getContextBits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startbit",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setOutOfBandState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ct",
+          "type_long": "ghidra.app.plugin.processors.sleigh.Constructor",
+          "type_short": "Constructor",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "tempstate",
+          "type_long": "ghidra.app.plugin.processors.sleigh.ConstructState",
+          "type_short": "ConstructState",
+          "comment": ""
+        },
+        {
+          "name": "otherwalker",
+          "type_long": "ghidra.app.plugin.processors.sleigh.ParserWalker",
+          "type_short": "ParserWalker",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentSubtableName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

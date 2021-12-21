@@ -1,0 +1,898 @@
+{
+  "name": "TextFieldAutocompleter",
+  "comment": "An autocompleter that may be attached to one or more JTextField.\n \n Each autocompleter instance has one associated window (displaying the list of suggestions) and\n one associated model (generating the list of suggestions). Thus, the list can only be active on\n one of the attached text fields at a time. This is usually the desired behavior, and it allows\n for one autocompleter to be reused on many fields. Behavior is undefined when multiple\n autocompleters are attached to the same text field. More likely, you should implement a\n composite model if you wish to present completions from multiple models on a single text field.\n \n By default, the autocompleter is activated when the user presses CTRL-SPACE, at which point, the\n model is queried for possible suggestions. The completer gives the model all the text preceding\n the current field\u0027s caret. This behavior can be changed by overriding the\n #getPrefix(JTextField) method. This may be useful, e.g., to obtain a prefix for\n the current word, rather than the full field contents, preceding the caret. The list is\n displayed such that its top-left corner is placed directly under the current field\u0027s caret. As\n the user continues typing, the suggestions are re-computed, and the list tracks with the caret.\n This positioning behavior can be modified by overriding the\n #getCompletionWindowPosition() method. As a convenience, the\n #getCaretPositionOnScreen(JTextField) method is available to compute the default\n position.\n \n Whether or not the list is currently displayed, when the user presses CTRL-SPACE, if only one\n completion is possible, it is automatically activated. This logic is applied again and again,\n until either no suggestions are given, or more than one suggestion is given (or until the\n autocompleter detects an infinite loop). This behavior can by modified on an item-by-item basis\n by overriding the #getCompletionCanDefault(Object) method. This same behavior can be\n activated by calling the #startCompletion(JTextField) method, which may be useful, e.g.,\n to bind a different key sequence to start autocompletion.\n \n The appearance of each item in the suggestion list can be modified by overriding the various\n  methods. Note that it\u0027s possible for an item to be displayed one way,\n but cause the insertion of different text. In any case, it is best to ensure any modification\n produces an intuitive behavior.\n \n The simplest use case is to create a text field, create an autocompleter with a custom model,\n and then attach and show.\n \n\n \n JTextField field \u003d new JTextField();\n \n {\n     Override\n      {\n         ... // Populate the completion list based on the given prefix.\n     }\n }\n ",
+  "javadoc": "An autocompleter that may be attached to one or more {@link JTextField}.\n \n Each autocompleter instance has one associated window (displaying the list of suggestions) and\n one associated model (generating the list of suggestions). Thus, the list can only be active on\n one of the attached text fields at a time. This is usually the desired behavior, and it allows\n for one autocompleter to be reused on many fields. Behavior is undefined when multiple\n autocompleters are attached to the same text field. More likely, you should implement a\n composite model if you wish to present completions from multiple models on a single text field.\n \n By default, the autocompleter is activated when the user presses CTRL-SPACE, at which point, the\n model is queried for possible suggestions. The completer gives the model all the text preceding\n the current field\u0027s caret. This behavior can be changed by overriding the\n {@link #getPrefix(JTextField)} method. This may be useful, e.g., to obtain a prefix for\n the current word, rather than the full field contents, preceding the caret. The list is\n displayed such that its top-left corner is placed directly under the current field\u0027s caret. As\n the user continues typing, the suggestions are re-computed, and the list tracks with the caret.\n This positioning behavior can be modified by overriding the\n {@link #getCompletionWindowPosition()} method. As a convenience, the\n {@link #getCaretPositionOnScreen(JTextField)} method is available to compute the default\n position.\n \n Whether or not the list is currently displayed, when the user presses CTRL-SPACE, if only one\n completion is possible, it is automatically activated. This logic is applied again and again,\n until either no suggestions are given, or more than one suggestion is given (or until the\n autocompleter detects an infinite loop). This behavior can by modified on an item-by-item basis\n by overriding the {@link #getCompletionCanDefault(Object) getCompletionCanDefault(T)} method. This same behavior can be\n activated by calling the {@link #startCompletion(JTextField)} method, which may be useful, e.g.,\n to bind a different key sequence to start autocompletion.\n \n The appearance of each item in the suggestion list can be modified by overriding the various\n {@code getCompletion...} methods. Note that it\u0027s possible for an item to be displayed one way,\n but cause the insertion of different text. In any case, it is best to ensure any modification\n produces an intuitive behavior.\n \n The simplest use case is to create a text field, create an autocompleter with a custom model,\n and then attach and show.\n \n\n \u003cpre\u003e\n JTextField field \u003d new JTextField();\n \n {@code AutocompletionModel\u003cString\u003e model \u003d new AutocompletionModel\u003cString\u003e() }{\n     \u0026#64;Override\n     {@code public Collection\u003cString\u003e computeCompletions(String text)} {\n         ... // Populate the completion list based on the given prefix.\n     }\n }\n {@code TextFieldAutocompleter\u003cString\u003e completer \u003d new TextFieldAutocompleter\u003cString\u003e(model);\n completer.attachTo(field);\n ... // Add the field to, e.g., a dialog, and show.\n }\u003c/pre\u003e\n@param \u003cT\u003e the type of suggestions presented by this autocompleter.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DEFAULT_UPDATE_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10"
+    },
+    {
+      "name": "DEFAULT_MAX_UPDATE_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2000"
+    },
+    {
+      "name": "MIN_HEIGHT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "100"
+    },
+    {
+      "name": "MIN_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "200"
+    },
+    {
+      "name": "DEFAULT_HEIGHT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "300"
+    },
+    {
+      "name": "DEFAULT_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "200"
+    },
+    {
+      "name": "model",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.autocomplete.AutocompletionModel\u003cT\u003e",
+      "type_short": "AutocompletionModel",
+      "constant_value": null
+    },
+    {
+      "name": "attachees",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cjavax.swing.JTextField\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "focus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTextField",
+      "type_short": "JTextField",
+      "constant_value": null
+    },
+    {
+      "name": "autocompletionListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.autocomplete.AutocompletionListener\u003cT\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "completionWindow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JWindow",
+      "type_short": "JWindow",
+      "constant_value": null
+    },
+    {
+      "name": "content",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "scrollPane",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JScrollPane",
+      "type_short": "JScrollPane",
+      "constant_value": null
+    },
+    {
+      "name": "listModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.DefaultListModel\u003cT\u003e",
+      "type_short": "DefaultListModel",
+      "constant_value": null
+    },
+    {
+      "name": "blankModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.DefaultListModel\u003cT\u003e",
+      "type_short": "DefaultListModel",
+      "constant_value": null
+    },
+    {
+      "name": "list",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JList\u003cT\u003e",
+      "type_short": "JList",
+      "constant_value": null
+    },
+    {
+      "name": "listener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.autocomplete.TextFieldAutocompleter\u003cT\u003e.MyListener",
+      "type_short": "MyListener",
+      "constant_value": null
+    },
+    {
+      "name": "pendingTextUpdate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "updateManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.SwingUpdateManager",
+      "type_short": "SwingUpdateManager",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addContent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "contentPanel",
+          "type_long": "javax.swing.JPanel",
+          "type_short": "JPanel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new autocompleter associated with the given model.",
+      "javadoc": "Create a new autocompleter associated with the given model.\n@param model the model giving the suggestions.",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.autocomplete.AutocompletionModel\u003cT\u003e",
+          "type_short": "AutocompletionModel",
+          "comment": "the model giving the suggestions."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateDisplayLocation",
+      "comment": "Recompute the display location and move with list window.\n \n This is useful, e.g., when the window containing the associated text field(s) moves.",
+      "javadoc": "Recompute the display location and move with list window.\n \n This is useful, e.g., when the window containing the associated text field(s) moves.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateDisplayContents",
+      "comment": "Update the contents of the suggestion list.\n \n This entails taking the prefix, querying the model, and rendering the list.",
+      "javadoc": "Update the contents of the suggestion list.\n \n This entails taking the prefix, querying the model, and rendering the list.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doUpdateDisplayContents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "destroyCompletionWindow",
+      "comment": "Dispose of the completion window resources.",
+      "javadoc": "Dispose of the completion window resources.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildCompletionWindow",
+      "comment": "Build the completion window, parented to the attached field that last had focus.",
+      "javadoc": "Build the completion window, parented to the attached field that last had focus.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCompletionListVisible",
+      "comment": "Show or hide the completion list window",
+      "javadoc": "Show or hide the completion list window\n@param visible true to show, false to hide",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to show, false to hide"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCompletionListVisible",
+      "comment": "Check if the completion list window is visible.\n \n If it is visible, this implies that the user is actively using the autocompleter.",
+      "javadoc": "Check if the completion list window is visible.\n \n If it is visible, this implies that the user is actively using the autocompleter.\n@return true if shown, false if hidden.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if shown, false if hidden."
+      },
+      "throws": []
+    },
+    {
+      "name": "doUpdateDisplayLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrefix",
+      "comment": "Gets the prefix from the given text field, used to query the model.",
+      "javadoc": "Gets the prefix from the given text field, used to query the model.\n@param field an attached field, usually the one with focus.\n@return the prefix to use as the query.",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "an attached field, usually the one with focus."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the prefix to use as the query."
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionWindowPosition",
+      "comment": "Get the preferred location (on screen) of the completion list window.\n \n Typically, this is a location near the focused field. Ideally, it is positioned such that\n the displayed suggestions coincide with the applicable text in the focused field. For\n example, if the suggestions display some portion of the prefix, the window could be\n positioned such that the portion in the suggestion appears directly below the same portion\n in the field.",
+      "javadoc": "Get the preferred location (on screen) of the completion list window.\n \n Typically, this is a location near the focused field. Ideally, it is positioned such that\n the displayed suggestions coincide with the applicable text in the focused field. For\n example, if the suggestions display some portion of the prefix, the window could be\n positioned such that the portion in the suggestion appears directly below the same portion\n in the field.\n@return the point giving the top-left corner of the completion window",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Point",
+        "type_short": "Point",
+        "comment": "the point giving the top-left corner of the completion window"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultCompletionWindowDimension",
+      "comment": "Get the preferred dimensions of the completion list window.\n \n Typically, this is the width of the focused field.",
+      "javadoc": "Get the preferred dimensions of the completion list window.\n \n Typically, this is the width of the focused field.\n@return the dimension giving the preferred height and width. A value can be -1 to indicate\n         no preference.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Dimension",
+        "type_short": "Dimension",
+        "comment": "the dimension giving the preferred height and width. A value can be -1 to indicate\n         no preference."
+      },
+      "throws": []
+    },
+    {
+      "name": "getCaretPositionOnScreen",
+      "comment": "A convenience function that returns the bottom on-screen position of the given field\u0027s\n caret.",
+      "javadoc": "A convenience function that returns the bottom on-screen position of the given field\u0027s\n caret.\n@param field the field, typically the one having focus\n@return the on-screen position of the caret\u0027s bottom.",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "the field, typically the one having focus"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Point",
+        "type_short": "Point",
+        "comment": "the on-screen position of the caret\u0027s bottom."
+      },
+      "throws": []
+    },
+    {
+      "name": "buildListCellRenderer",
+      "comment": "Builds the list cell renderer for the autocompletion list.\n \n A programmer may override this if the various  methods prove\n insufficient for customizing the display of the suggestions. Please remember that\n JLabels can render HTML, so #getCompletionDisplay(Object) is quite powerful\n with the default AutocompletionCellRenderer.",
+      "javadoc": "Builds the list cell renderer for the autocompletion list.\n \n A programmer may override this if the various {@code getCompletion...} methods prove\n insufficient for customizing the display of the suggestions. Please remember that\n {@link JLabel}s can render HTML, so {@link #getCompletionDisplay(Object) getCompletionDisplay(T)} is quite powerful\n with the default {@link AutocompletionCellRenderer}.\n@return a list cell renderer for the completion list.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.ListCellRenderer\u003c? super T\u003e",
+        "type_short": "ListCellRenderer",
+        "comment": "a list cell renderer for the completion list."
+      },
+      "throws": []
+    },
+    {
+      "name": "attachTo",
+      "comment": "Attach the autocompleter to the given text field.\n \n If this method is never called, then the autocompleter can never appear.",
+      "javadoc": "Attach the autocompleter to the given text field.\n \n If this method is never called, then the autocompleter can never appear.\n@param field the field that will gain this autocompletion feature\n@return true, if this field is not already attached",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "the field that will gain this autocompletion feature"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true, if this field is not already attached"
+      },
+      "throws": []
+    },
+    {
+      "name": "detachFrom",
+      "comment": "Deprive the given field of this autocompleter.",
+      "javadoc": "Deprive the given field of this autocompleter.\n@param field the field that will lose this autocompletion feature\n@return true, if this field was actually attached",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "the field that will lose this autocompletion feature"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true, if this field was actually attached"
+      },
+      "throws": []
+    },
+    {
+      "name": "activateCurrentCompletion",
+      "comment": "Cause the currently-selected suggestion to be activated.\n \n By default, this is called when the user presses ENTER or clicks a suggestion.",
+      "javadoc": "Cause the currently-selected suggestion to be activated.\n \n By default, this is called when the user presses ENTER or clicks a suggestion.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireAutocompletionListeners",
+      "comment": "Fire the registered autocompletion listeners on the given event.\n \n Each registered listener is invoked in order of registration. If any listener consumes the\n event, then later-registered listeners will not be notified of the event. If any listener\n cancels the event, then the suggested text will not be inserted.",
+      "javadoc": "Fire the registered autocompletion listeners on the given event.\n \n Each registered listener is invoked in order of registration. If any listener consumes the\n event, then later-registered listeners will not be notified of the event. If any listener\n cancels the event, then the suggested text will not be inserted.\n@param ev the event\n@return true, if no listener cancelled the event",
+      "static": false,
+      "params": [
+        {
+          "name": "ev",
+          "type_long": "docking.widgets.autocomplete.AutocompletionEvent\u003cT\u003e",
+          "type_short": "AutocompletionEvent",
+          "comment": "the event"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true, if no listener cancelled the event"
+      },
+      "throws": []
+    },
+    {
+      "name": "completionActivated",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addAutocompletionListener",
+      "comment": "Register the given auto-completion listener",
+      "javadoc": "Register the given auto-completion listener\n@param l the listener to register",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "docking.widgets.autocomplete.AutocompletionListener\u003cT\u003e",
+          "type_short": "AutocompletionListener",
+          "comment": "the listener to register"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAutocompletionListener",
+      "comment": "Unregister the given auto-completion listener",
+      "javadoc": "Unregister the given auto-completion listener\n@param l the listener to unregister",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "docking.widgets.autocomplete.AutocompletionListener\u003cT\u003e",
+          "type_short": "AutocompletionListener",
+          "comment": "the listener to unregister"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAutocompletionListeners",
+      "comment": "Get all the registered auto-completion listeners",
+      "javadoc": "Get all the registered auto-completion listeners\n@return an array of registered listeners",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.autocomplete.AutocompletionListener\u003cT\u003e[]",
+        "type_short": "docking.widgets.autocomplete.AutocompletionListener\u003cT\u003e[]",
+        "comment": "an array of registered listeners"
+      },
+      "throws": []
+    },
+    {
+      "name": "getListeners",
+      "comment": "Get all registered listeners of the given type",
+      "javadoc": "Get all registered listeners of the given type\n@param listenerType the type of listeners to get\n@return an array of registered listeners",
+      "static": false,
+      "params": [
+        {
+          "name": "listenerType",
+          "type_long": "java.lang.Class\u003cT\u003e",
+          "type_short": "Class",
+          "comment": "the type of listeners to get"
+        }
+      ],
+      "return": {
+        "type_long": "T[]",
+        "type_short": "T[]",
+        "comment": "an array of registered listeners"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionText",
+      "comment": "Get the text to insert when the given suggestion is activated",
+      "javadoc": "Get the text to insert when the given suggestion is activated\n@param sel the activated suggestion\n@return the text to insert",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the activated suggestion"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the text to insert"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionDisplay",
+      "comment": "Get the (possibly HTML) text to display for the given suggestion in the list",
+      "javadoc": "Get the (possibly HTML) text to display for the given suggestion in the list\n@param sel the suggestion to display\n@return the text or HTML representing the suggestion",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the suggestion to display"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the text or HTML representing the suggestion"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionForeground",
+      "comment": "Get the foreground color to display for the given suggestion in the list",
+      "javadoc": "Get the foreground color to display for the given suggestion in the list\n@param sel the suggestion to display\n@param isSelected true if the suggestion is currently selected\n@param cellHasFocus true if the suggestion currently has focus\n@return the foreground color for the suggestion",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the suggestion to display"
+        },
+        {
+          "name": "isSelected",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion is currently selected"
+        },
+        {
+          "name": "cellHasFocus",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion currently has focus"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Color",
+        "type_short": "Color",
+        "comment": "the foreground color for the suggestion"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionBackground",
+      "comment": "Get the background color to display for the given suggestion in the list",
+      "javadoc": "Get the background color to display for the given suggestion in the list\n@param sel the suggestion to display\n@param isSelected true if the suggestion is currently selected\n@param cellHasFocus true if the suggestion currently has focus\n@return the background color for the suggestion",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the suggestion to display"
+        },
+        {
+          "name": "isSelected",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion is currently selected"
+        },
+        {
+          "name": "cellHasFocus",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion currently has focus"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Color",
+        "type_short": "Color",
+        "comment": "the background color for the suggestion"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionIcon",
+      "comment": "Get the icon to display with the given suggestion in the list",
+      "javadoc": "Get the icon to display with the given suggestion in the list\n@param sel the suggestion to display\n@param isSelected true if the suggestion is currently selected\n@param cellHasFocus true if the suggestion currently has focus\n@return the icon to display with the suggestion",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the suggestion to display"
+        },
+        {
+          "name": "isSelected",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion is currently selected"
+        },
+        {
+          "name": "cellHasFocus",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion currently has focus"
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.Icon",
+        "type_short": "Icon",
+        "comment": "the icon to display with the suggestion"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionFont",
+      "comment": "Get the font for the given suggestion in the list",
+      "javadoc": "Get the font for the given suggestion in the list\n@param sel the suggestion to display\n@param isSelected true if the suggestion is currently selected\n@param cellHasFocus true if the suggestion currently has focus\n@return the font to use",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the suggestion to display"
+        },
+        {
+          "name": "isSelected",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion is currently selected"
+        },
+        {
+          "name": "cellHasFocus",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the suggestion currently has focus"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Font",
+        "type_short": "Font",
+        "comment": "the font to use"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletionCanDefault",
+      "comment": "Decide whether the given suggestion can be automatically activated.\n \n When autocompletion is started (via #startCompletion(JTextField)) or when the user\n presses CTRL-SPACE, if there is only a single suggestion, it is taken automatically, and the\n process repeats until there is not a sole suggestion. Before the suggestion is taken,\n though, it calls this method. If it returns false, the single suggestion is displayed in a\n 1-long list instead. This is useful to prevent consequential actions from being\n automatically activated by the autocompleter.",
+      "javadoc": "Decide whether the given suggestion can be automatically activated.\n \n When autocompletion is started (via {@link #startCompletion(JTextField)}) or when the user\n presses CTRL-SPACE, if there is only a single suggestion, it is taken automatically, and the\n process repeats until there is not a sole suggestion. Before the suggestion is taken,\n though, it calls this method. If it returns false, the single suggestion is displayed in a\n 1-long list instead. This is useful to prevent consequential actions from being\n automatically activated by the autocompleter.\n@param sel the potentially auto-activated suggestion.\n@return true to permit auto-activation, false to prevent it.",
+      "static": false,
+      "params": [
+        {
+          "name": "sel",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the potentially auto-activated suggestion."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true to permit auto-activation, false to prevent it."
+      },
+      "throws": []
+    },
+    {
+      "name": "startCompletion",
+      "comment": "Starts the autocompleter on the given text field.\n \n First, this repeatedly attempts auto-activation. When there are many suggestions, or when\n auto-activation is prevented (see #getCompletionCanDefault(Object)), a list is displayed\n (usually below the caret) containing the suggestions given the fields current contents. The\n list remains open until either the user cancels it (usually via ESC) or the user activates\n a suggestion. \n \n NOTE: The text field must already be attached.",
+      "javadoc": "Starts the autocompleter on the given text field.\n \n First, this repeatedly attempts auto-activation. When there are many suggestions, or when\n auto-activation is prevented (see {@link #getCompletionCanDefault(Object) getCompletionCanDefault(T)}), a list is displayed\n (usually below the caret) containing the suggestions given the fields current contents. The\n list remains open until either the user cancels it (usually via ESC) or the user activates\n a suggestion. \n \n NOTE: The text field must already be attached.\n@param field the field on which to start autocompletion.",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "the field on which to start autocompletion."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "select",
+      "comment": "Cause the suggestion at the given index to be selected",
+      "javadoc": "Cause the suggestion at the given index to be selected\n@param index the index of the selection",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the selection"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectNext",
+      "comment": "Cause the next suggestion to be selected, wrapping if applicable",
+      "javadoc": "Cause the next suggestion to be selected, wrapping if applicable",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectPrev",
+      "comment": "Cause the previous suggestion to be selected, wrapping if applicable",
+      "javadoc": "Cause the previous suggestion to be selected, wrapping if applicable",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectNextPage",
+      "comment": "Advance the selection down a page",
+      "javadoc": "Advance the selection down a page",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectPrevPage",
+      "comment": "Advance the selection up a page",
+      "javadoc": "Advance the selection up a page",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectFirst",
+      "comment": "Select the first suggestion",
+      "javadoc": "Select the first suggestion",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectLast",
+      "comment": "Select the last suggestion",
+      "javadoc": "Select the last suggestion",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

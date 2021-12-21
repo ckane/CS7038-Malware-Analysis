@@ -1,0 +1,818 @@
+{
+  "name": "FrontEndTool",
+  "comment": "Tool that serves as the the Ghidra Project Window. Only those plugins that\n implement the FrontEndable interface may be directly added to this\n tool by the user. Other plugins that are not marked as FrontEndable may get\n pulled in because the FrontEndable plugins depend on them. These plugins are\n aware of what tool they live in so that they can behave in the appropriate\n manner.",
+  "javadoc": "Tool that serves as the the Ghidra Project Window. Only those plugins that\n implement the FrontEndable interface may be \u003ci\u003edirectly\u003c/i\u003e added to this\n tool by the user. Other plugins that are not marked as FrontEndable may get\n pulled in because the FrontEndable plugins depend on them. These plugins are\n aware of what tool they live in so that they can behave in the appropriate\n manner.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.options.OptionsChangeListener"
+  ],
+  "extends": "ghidra.framework.plugintool.PluginTool",
+  "fields": [
+    {
+      "name": "AUTOMATICALLY_SAVE_TOOLS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Automatically Save Tools\""
+    },
+    {
+      "name": "USE_ALERT_ANIMATION_OPTION_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Use Notification Animation\""
+    },
+    {
+      "name": "ENABLE_COMPRESSED_DATABUFFER_OUTPUT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Use DataBuffer Output Compression\""
+    },
+    {
+      "name": "MIN_HEIGHT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "600"
+    },
+    {
+      "name": "GHIDRA_SHOW_WHATS_NEW",
+      "comment": "Preference name for whether to show the \"What\u0027s New\" help page when the\n Ghidra Project Window is displayed.",
+      "javadoc": "Preference name for whether to show the \"What\u0027s New\" help page when the\n Ghidra Project Window is displayed.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"GhidraShowWhatsNew\""
+    },
+    {
+      "name": "GHIDRA_MAIN_PANEL_DIVIDER_LOC",
+      "comment": "Window state preference for the location of the divider for the split\n pane in the Ghidra Project Window. The divider is visible when another\n project view is opened.",
+      "javadoc": "Window state preference for the location of the divider for the split\n pane in the Ghidra Project Window. The divider is visible when another\n project view is opened.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"GhidraMainPanelDividerLocation\""
+    },
+    {
+      "name": "FRONT_END_TOOL_XML_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"FRONTEND\""
+    },
+    {
+      "name": "FRONT_END_FILE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"FrontEndTool.xml\""
+    },
+    {
+      "name": "CONFIGURE_GROUP",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Configure\""
+    },
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cghidra.framework.model.ProjectListener\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "plugin",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.FrontEndPlugin",
+      "type_short": "FrontEndPlugin",
+      "constant_value": null
+    },
+    {
+      "name": "compProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.ComponentProvider",
+      "type_short": "ComponentProvider",
+      "constant_value": null
+    },
+    {
+      "name": "logProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.FrontEndTool.LogComponentProvider",
+      "type_short": "LogComponentProvider",
+      "constant_value": null
+    },
+    {
+      "name": "windowListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.event.WindowListener",
+      "type_short": "WindowListener",
+      "constant_value": null
+    },
+    {
+      "name": "configureToolAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.action.DockingAction",
+      "type_short": "DockingAction",
+      "constant_value": null
+    },
+    {
+      "name": "pluginClassManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.util.PluginClassManager",
+      "type_short": "PluginClassManager",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new Ghidra Project Window.",
+      "javadoc": "Construct a new Ghidra Project Window.\n@param pm project manager",
+      "static": false,
+      "params": [
+        {
+          "name": "pm",
+          "type_long": "ghidra.framework.model.ProjectManager",
+          "type_short": "ProjectManager",
+          "comment": "project manager"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ensureSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPluginClassManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.util.PluginClassManager",
+        "type_short": "PluginClassManager",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "files",
+          "type_long": "java.util.Set\u003cghidra.framework.model.DomainFile\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadToolConfigurationFromDisk",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveToolConfigurationToDisk",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFrontEndPlugin",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initFrontEndOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "optionsChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "options",
+          "type_long": "ghidra.framework.options.ToolOptions",
+          "type_short": "ToolOptions",
+          "comment": ""
+        },
+        {
+          "name": "optionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "exit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setActiveProject",
+      "comment": "Set the active project.",
+      "javadoc": "Set the active project.\n@param project may be null if there is no active project",
+      "static": false,
+      "params": [
+        {
+          "name": "project",
+          "type_long": "ghidra.framework.model.Project",
+          "type_short": "Project",
+          "comment": "may be null if there is no active project"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addProjectListener",
+      "comment": "Add the given project listener.",
+      "javadoc": "Add the given project listener.\n@param l listener to add",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.framework.model.ProjectListener",
+          "type_short": "ProjectListener",
+          "comment": "listener to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeProjectListener",
+      "comment": "Remove the given project listener.",
+      "javadoc": "Remove the given project listener.\n@param l listener to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.framework.model.ProjectListener",
+          "type_short": "ProjectListener",
+          "comment": "listener to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkRepositoryConnected",
+      "comment": "NOTE: do not call this from a non-Swing thread",
+      "javadoc": "NOTE: do not call this from a non-Swing thread\n@param tool the tool\n@return true if the repository is null or is connected.",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "the tool"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the repository is null or is connected."
+      },
+      "throws": []
+    },
+    {
+      "name": "checkIn",
+      "comment": "Check in the given domain file.",
+      "javadoc": "Check in the given domain file.\n@param tool tool that has the domain file opened\n@param domainFile domain file to check in",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool that has the domain file opened"
+        },
+        {
+          "name": "domainFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": "domain file to check in"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkIn",
+      "comment": "Check in the list of domain files.",
+      "javadoc": "Check in the list of domain files.\n@param tool tool that has the domain files opened\n@param fileList list of DomainFile objects\n@param parent parent of dialog if an error occurs during checkin",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool that has the domain files opened"
+        },
+        {
+          "name": "fileList",
+          "type_long": "java.util.List\u003cghidra.framework.model.DomainFile\u003e",
+          "type_short": "List",
+          "comment": "list of DomainFile objects"
+        },
+        {
+          "name": "parent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "parent of dialog if an error occurs during checkin"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the latest version in the repository with the given checked out\n domain file. Upon completion of the merge, the domain file appears as\n though the latest version was checked out.",
+      "javadoc": "Merge the latest version in the repository with the given checked out\n domain file. Upon completion of the merge, the domain file appears as\n though the latest version was checked out.\n@param tool tool that has the domain file opened\n@param domainFile domain file where latest version will be merged into\n@param taskListener listener that is notified when the merge task\n            completes",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool that has the domain file opened"
+        },
+        {
+          "name": "domainFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": "domain file where latest version will be merged into"
+        },
+        {
+          "name": "taskListener",
+          "type_long": "ghidra.util.task.TaskListener",
+          "type_short": "TaskListener",
+          "comment": "listener that is notified when the merge task\n            completes"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the latest version (in the repository) of each checked out file in\n fileList. Upon completion of the merge, the domain file appears as though\n the latest version was checked out.",
+      "javadoc": "Merge the latest version (in the repository) of each checked out file in\n fileList. Upon completion of the merge, the domain file appears as though\n the latest version was checked out.\n@param tool tool that has the domain files opened\n@param fileList list of files that are checked out and are to be merged\n@param taskListener listener that is notified when the merge task\n            completes",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool that has the domain files opened"
+        },
+        {
+          "name": "fileList",
+          "type_long": "java.util.List\u003cghidra.framework.model.DomainFile\u003e",
+          "type_short": "List",
+          "comment": "list of files that are checked out and are to be merged"
+        },
+        {
+          "name": "taskListener",
+          "type_long": "ghidra.util.task.TaskListener",
+          "type_short": "TaskListener",
+          "comment": "listener that is notified when the merge task\n            completes"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "visibility",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "busy",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addManageExtensionsAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addManagePluginsAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToolTemplate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "includeConfigState",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.ToolTemplate",
+        "type_short": "ToolTemplate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getListeners",
+      "comment": "Get project listeners.",
+      "javadoc": "Get project listeners.\n@return ProjectListener[]",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Iterable\u003cghidra.framework.model.ProjectListener\u003e",
+        "type_short": "Iterable",
+        "comment": "ProjectListener[]"
+      },
+      "throws": []
+    },
+    {
+      "name": "getProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ComponentProvider",
+        "type_short": "ComponentProvider",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSaveableDisplayData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.options.SaveState",
+        "type_short": "SaveState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSaveableDisplayData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFrontEndablePlugins",
+      "comment": "Add those plugins that implement the FrontEndable interface and have a\n RELEASED status and not (example || testing) category.",
+      "javadoc": "Add those plugins that implement the FrontEndable interface and have a\n RELEASED status and not (example || testing) category.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refresh",
+      "comment": "Refresh the plugins in the Ghidra Project Window based on what is\n contained in the given XML Element.",
+      "javadoc": "Refresh the plugins in the Ghidra Project Window based on what is\n contained in the given XML Element.\n@param tc object that contains an entry for each plugin and its\n            configuration state",
+      "static": false,
+      "params": [
+        {
+          "name": "tc",
+          "type_long": "ghidra.framework.model.ToolTemplate",
+          "type_short": "ToolTemplate",
+          "comment": "object that contains an entry for each plugin and its\n            configuration state"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createActions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDividerLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parse",
+      "comment": "Get the int value for the given string.",
+      "javadoc": "Get the int value for the given string.\n@param value the string value to parse\n@param defaultValue return this value if a NumberFormatException is\n            thrown during the parseInt() method",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string value to parse"
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "return this value if a NumberFormatException is\n            thrown during the parseInt() method"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkWhatsNewPreference",
+      "comment": "Check the \"What\u0027s New\" preference; if it has not been set, then show the\n \"What\u0027s New\" help page. This should only happen if the preference was\n never set.",
+      "javadoc": "Check the \"What\u0027s New\" preference; if it has not been set, then show the\n \"What\u0027s New\" help page. This should only happen if the preference was\n never set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canCloseDomainFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "df",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showGhidraUserLogFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

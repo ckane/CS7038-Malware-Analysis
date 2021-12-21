@@ -1,0 +1,1226 @@
+{
+  "name": "ProgramMergeManager",
+  "comment": "ProgramMergeManager is a class for merging the differences between two\n programs as specified by a ProgramMergeFilter and the address \n ranges to be merged.\n Program1 is the program being modified by the merge. Program2 is source\n for obtaining differences to apply to program1.\n \n ProgramDiff is being used to determine the differences between\n the two programs.\n If name conflicts occur while merging, the item (for example, symbol) will\n be merged with a new name that consists of the original name followed by \"_conflict\"\n and a one up number.",
+  "javadoc": "\u003cCODE\u003eProgramMergeManager\u003c/CODE\u003e is a class for merging the differences between two\n programs as specified by a \u003cCODE\u003eProgramMergeFilter\u003c/CODE\u003e and the address \n ranges to be merged.\n \u003cP\u003eProgram1 is the program being modified by the merge. Program2 is source\n for obtaining differences to apply to program1.\n \u003cP\u003e\n \u003cCODE\u003eProgramDiff\u003c/CODE\u003e is being used to determine the differences between\n the two programs.\n \u003cP\u003eIf name conflicts occur while merging, the item (for example, symbol) will\n be merged with a new name that consists of the original name followed by \"_conflict\"\n and a one up number.\n@see ghidra.program.util.ProgramMergeFilter\n@see ghidra.program.util.ProgramDiff",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "errorMsg",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.StringBuffer",
+      "type_short": "StringBuffer",
+      "constant_value": null
+    },
+    {
+      "name": "infoMsg",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.StringBuffer",
+      "type_short": "StringBuffer",
+      "constant_value": null
+    },
+    {
+      "name": "program1",
+      "comment": "The first program (used as read only) for the merge.",
+      "javadoc": "The first program (used as read only) for the merge.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "program2",
+      "comment": "The second program (used as read only) for the merge.",
+      "javadoc": "The second program (used as read only) for the merge.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "diffFilter",
+      "comment": "The last filter externally applied to the ProgramDiff.",
+      "javadoc": "The last filter externally applied to the ProgramDiff.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiffFilter",
+      "type_short": "ProgramDiffFilter",
+      "constant_value": null
+    },
+    {
+      "name": "programDiff",
+      "comment": "Differences between program1 and program2 determined thus far.",
+      "javadoc": "Differences between program1 and program2 determined thus far.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiff",
+      "type_short": "ProgramDiff",
+      "constant_value": null
+    },
+    {
+      "name": "mergeFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMergeFilter",
+      "type_short": "ProgramMergeFilter",
+      "constant_value": null
+    },
+    {
+      "name": "merger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMerge",
+      "type_short": "ProgramMerge",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "ProgramMergeManager allows the merging of differences from program1\n or program2 into the merged program.",
+      "javadoc": "\u003cCODE\u003eProgramMergeManager\u003c/CODE\u003e allows the merging of differences from program1\n or program2 into the merged program.\n@param program1 the first program (read only) for the merge.\n@param program2 the second program (read only) for the merge.\n@param monitor the task monitor for indicating progress at determining\n  the differences. This also allows the user to cancel the merge.\n@throws ProgramConflictException if the memory blocks, that overlap\n between the two programs, do not match. This indicates that programs\n couldn\u0027t be compared to determine the differences.",
+      "static": false,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the first program (read only) for the merge."
+        },
+        {
+          "name": "program2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the second program (read only) for the merge."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating progress at determining\n  the differences. This also allows the user to cancel the merge."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if the memory blocks, that overlap\n between the two programs, do not match. This indicates that programs\n couldn\u0027t be compared to determine the differences."
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "ProgramMergeManager allows the merging of differences from program1\n or program2 into the merged program.",
+      "javadoc": "\u003cCODE\u003eProgramMergeManager\u003c/CODE\u003e allows the merging of differences from program1\n or program2 into the merged program.\n@param program1 the first program for the merge. This program will get \n modified by merge.\n@param program2 the second program (read only) for the merge.\n@param p1LimitedAddressSet the limited address set. program differences\n can only be merged if they overlap this address set. null means find\n differences in each of the entire programs.\n The addresses in this set should be derived from program1.\n@param monitor the task monitor for indicating progress at determining\n  the differences. This also allows the user to cancel the merge.\n@throws ProgramConflictException if the memory blocks, that overlap\n between the two programs, do not match. This indicates that programs\n couldn\u0027t be compared to determine the differences.",
+      "static": false,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the first program for the merge. This program will get \n modified by merge."
+        },
+        {
+          "name": "program2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the second program (read only) for the merge."
+        },
+        {
+          "name": "p1LimitedAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the limited address set. program differences\n can only be merged if they overlap this address set. null means find\n differences in each of the entire programs.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating progress at determining\n  the differences. This also allows the user to cancel the merge."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if the memory blocks, that overlap\n between the two programs, do not match. This indicates that programs\n couldn\u0027t be compared to determine the differences."
+        }
+      ]
+    },
+    {
+      "name": "memoryMatches",
+      "comment": "Determine whether memory between the two programs matches.\n For example, if one program has more memory than the other then it \n doesn\u0027t match or if the address ranges for memory are different for \n the two programs then they don\u0027t match.",
+      "javadoc": "Determine whether memory between the two programs matches.\n For example, if one program has more memory than the other then it \n doesn\u0027t match or if the address ranges for memory are different for \n the two programs then they don\u0027t match.\n@return whether the memory matches between the two programs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "whether the memory matches between the two programs."
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilteredDifferences",
+      "comment": "Gets the filtered program differences for this merge. Only differences are\n indicated for merge filter categories that are enabled and for address\n that have not been marked as ignored.",
+      "javadoc": "Gets the filtered program differences for this merge. Only differences are\n indicated for merge filter categories that are enabled and for address\n that have not been marked as ignored.\n@return the program differences.\n The addresses in this address set are derived from program2.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the program differences.\n The addresses in this address set are derived from program2."
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilteredDifferences",
+      "comment": "Gets the filtered program differences for this merge. Only differences are\n indicated for merge filter categories that are enabled and for address\n that have not been marked as ignored.",
+      "javadoc": "Gets the filtered program differences for this merge. Only differences are\n indicated for merge filter categories that are enabled and for address\n that have not been marked as ignored.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null.\n@return the program differences.\n The addresses in this address set are derived from program2.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the program differences.\n The addresses in this address set are derived from program2."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getDiffFilter",
+      "comment": "Get a copy of the diff filter that the merge is using.",
+      "javadoc": "Get a copy of the diff filter that the merge is using.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.util.ProgramDiffFilter",
+        "type_short": "ProgramDiffFilter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDiffFilter",
+      "comment": "Set the filter that indicates which parts of the Program should be \n diffed.",
+      "javadoc": "Set the filter that indicates which parts of the Program should be \n diffed.\n@param filter the filter indicating the types of differences to be \n determined by this ProgramMerge.",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramDiffFilter",
+          "type_short": "ProgramDiffFilter",
+          "comment": "the filter indicating the types of differences to be \n determined by this ProgramMerge."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMergeFilter",
+      "comment": "Get a copy of the filter that indicates which parts of the Program \n should be merged.",
+      "javadoc": "Get a copy of the filter that indicates which parts of the Program \n should be merged.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.util.ProgramMergeFilter",
+        "type_short": "ProgramMergeFilter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMergeFilter",
+      "comment": "Set the filter that indicates which parts of the Program should be \n applied from the second program to the first program.",
+      "javadoc": "Set the filter that indicates which parts of the Program should be \n applied from the second program to the first program.\n@param filter the filter indicating the types of differences to apply.",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the filter indicating the types of differences to apply."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCombinedAddresses",
+      "comment": "Returns the addresses from combining the address sets in program1 and program2",
+      "javadoc": "Returns the addresses from combining the address sets in program1 and program2\n@return the addresses for both program1 and program2.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the addresses for both program1 and program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressesInCommon",
+      "comment": "Returns the addresses in common between program1 and program2",
+      "javadoc": "Returns the addresses in common between program1 and program2\n@return the addresses in common between program1 and program2.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the addresses in common between program1 and program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressesOnlyInOne",
+      "comment": "Returns the addresses that are in program1, but not in program2",
+      "javadoc": "Returns the addresses that are in program1, but not in program2\n@return the addresses that are in program1, but not in program2.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the addresses that are in program1, but not in program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressesOnlyInTwo",
+      "comment": "Returns the addresses that are in program2, but not in program1",
+      "javadoc": "Returns the addresses that are in program2, but not in program1\n@return the addresses that are in program2, but not in program1.\n The addresses in this address set are derived from program2.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the addresses that are in program2, but not in program1.\n The addresses in this address set are derived from program2."
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgramOne",
+      "comment": "Gets the first program being compared by the ProgramDiff.",
+      "javadoc": "Gets the first program being compared by the ProgramDiff.\n@return program1. This is the program being modified by the merge.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "program1. This is the program being modified by the merge.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgramTwo",
+      "comment": "Gets the second program being compared by the ProgramDiff.",
+      "javadoc": "Gets the second program being compared by the ProgramDiff.\n@return program2. This is the program for obtaining the program information to merge.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "program2. This is the program for obtaining the program information to merge."
+      },
+      "throws": []
+    },
+    {
+      "name": "getIgnoreAddressSet",
+      "comment": "Get the address set indicating the addresses to be ignored (not checked) when determining\n differences between the two programs.",
+      "javadoc": "Get the address set indicating the addresses to be ignored (not checked) when determining\n differences between the two programs.\n@return the set of addresses to ignore.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the set of addresses to ignore.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getLimitedAddressSet",
+      "comment": "Get the address set that the process of determining differences is limited to. \n In other words, only addresses in this set will be checked by the Diff.",
+      "javadoc": "Get the address set that the process of determining differences is limited to. \n In other words, only addresses in this set will be checked by the Diff.\n@return the address set\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the address set\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getWarnings",
+      "comment": "Gets a string indicating warnings that occurred during the initial Diff \n of the two programs.",
+      "javadoc": "Gets a string indicating warnings that occurred during the initial Diff \n of the two programs.\n@return the warnings",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the warnings"
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the differences from the indicated program at the specified\n  address with the indicated filtering.",
+      "javadoc": "Merge the differences from the indicated program at the specified\n  address with the indicated filtering.\n@param p2Address the address to be merged. \n This address should be derived from program2.\n@param filter the filter indicating what types of differences to merge.\n@return true if merge succeeds\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p2Address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to be merged. \n This address should be derived from program2."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the filter indicating what types of differences to merge."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if merge succeeds"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the differences from the indicated program at the specified\n  address with the current filtering.",
+      "javadoc": "Merge the differences from the indicated program at the specified\n  address with the current filtering.\n@param p2Address the address to be merged. \n This address should be derived from program2.\n@param monitor monitor for reporting merge status to the user.\n@return true if merge succeeds\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p2Address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to be merged. \n This address should be derived from program2."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "monitor for reporting merge status to the user."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if merge succeeds"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the differences from the indicated program at the specified\n  address with the indicated filtering.",
+      "javadoc": "Merge the differences from the indicated program at the specified\n  address with the indicated filtering.\n@param p2Address the address to be merged. \n This address should be derived from program2.\n@param filter the filter indicating what types of differences to merge.\n@param monitor monitor for reporting merge status to the user.\n@return true if merge succeeds\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p2Address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to be merged. \n This address should be derived from program2."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the filter indicating what types of differences to merge."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "monitor for reporting merge status to the user."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if merge succeeds"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "ignore",
+      "comment": "Ignore the differences for the indicated address set.",
+      "javadoc": "Ignore the differences for the indicated address set.\n@param p1AddressSet the address set to be merged. \n The addresses in this set should be derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1AddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to be merged. \n The addresses in this set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restrictResults",
+      "comment": "Restrict the resulting differences to the indicated address set.\n Although the Diff will check for differences based on the limited set, the resulting\n differences from calls to getDifferences() will only return addresses contained in\n this restricted address set.",
+      "javadoc": "Restrict the resulting differences to the indicated address set.\n Although the Diff will check for differences based on the limited set, the resulting\n differences from calls to getDifferences() will only return addresses contained in\n this restricted address set.\n@param p1AddressSet the address set to restrict the getFilteredDifferences() to.\n The addresses in this set are derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1AddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to restrict the getFilteredDifferences() to.\n The addresses in this set are derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRestrictedAddressSet",
+      "comment": "Return the address set that is currently being used to restrict the\n differences that get returned.",
+      "javadoc": "Return the address set that is currently being used to restrict the\n differences that get returned.\n@return the address set being used to restrict the Diff results.\n The addresses in this set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the address set being used to restrict the Diff results.\n The addresses in this set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "removeResultRestrictions",
+      "comment": "Remove the restriction for the resulting differences to the indicated address set.",
+      "javadoc": "Remove the restriction for the resulting differences to the indicated address set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getErrorMessage",
+      "comment": "Get the error messages that resulted from doing the merge.",
+      "javadoc": "Get the error messages that resulted from doing the merge.\n@return String empty string if there were no problems with the merge.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "String empty string if there were no problems with the merge."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInfoMessage",
+      "comment": "Get the informational messages that resulted from doing the merge.",
+      "javadoc": "Get the informational messages that resulted from doing the merge.\n@return String empty string if there were no information messages\n generated during the merge.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "String empty string if there were no information messages\n generated during the merge."
+      },
+      "throws": []
+    },
+    {
+      "name": "clearMessages",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the differences from the indicated program on the specified\n  address set with the indicated filtering.",
+      "javadoc": "Merge the differences from the indicated program on the specified\n  address set with the indicated filtering.\n@param p1MergeSet the address set to be merged. \n The addresses in this set should be derived from program1.\n@param filter the filter indicating what types of differences to merge.\n@return true if merge succeeds\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to be merged. \n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the filter indicating what types of differences to merge."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if merge succeeds"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the differences from the indicated program on the specified\n  address set with the filtering that is currently set.",
+      "javadoc": "Merge the differences from the indicated program on the specified\n  address set with the filtering that is currently set.\n@param p1MergeSet the address set to be merged\n The addresses in this set should be derived from program1.\n@param monitor task monitor for reporting merge status to the user.\n@return true if merge succeeds\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to be merged\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for reporting merge status to the user."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if merge succeeds"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "comment": "Merge the differences from the indicated program on the specified\n  address set with the indicated filtering.",
+      "javadoc": "Merge the differences from the indicated program on the specified\n  address set with the indicated filtering.\n@param p1MergeSet the address set to be merged\n The addresses in this set should be derived from program1.\n@param filter the filter indicating what types of differences to merge.\n@param monitor task monitor for reporting merge status to the user.\n@return true if merge succeeds\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to be merged\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the filter indicating what types of differences to merge."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor for reporting merge status to the user."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if merge succeeds"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "hasMergeAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "p1AddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeProgramContext",
+      "comment": "mergeProgramContext merges all program context register values\n (as indicated) in the specified address set from the second program. \n It merges them into the merge program.",
+      "javadoc": "\u003cCODE\u003emergeProgramContext\u003c/CODE\u003e merges all program context register values\n (as indicated) in the specified address set from the second program. \n It merges them into the merge program.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeBytes",
+      "comment": "mergeBytes merges byte differences within the specified\n  address set. The program number indicates whether to get the bytes from\n  program1 or program2 of the merge.",
+      "javadoc": "\u003cCODE\u003emergeBytes\u003c/CODE\u003e merges byte differences within the specified\n  address set. The program number indicates whether to get the bytes from\n  program1 or program2 of the merge.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeCodeUnits",
+      "comment": "mergeCodeUnits merges all instructions and/or data\n (as indicated) in the specified address set from the second program. \n It merges them into the merge program. When merging\n instructions, the bytes are also moved if they differ.",
+      "javadoc": "\u003cCODE\u003emergeCodeUnits\u003c/CODE\u003e merges all instructions and/or data\n (as indicated) in the specified address set from the second program. \n It merges them into the merge program. When merging\n instructions, the bytes are also moved if they differ.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws MemoryAccessException if bytes can\u0027t be copied.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeFunctionTags",
+      "comment": "Determines which addresses in the given set contain function tag differences \n between the two programs being compared. This address set is then passed\n to the ProgramMerge to be processed.",
+      "javadoc": "Determines which addresses in the given set contain function tag differences \n between the two programs being compared. This address set is then passed\n to the {@link ProgramMerge} to be processed.\n@param p1AddressSet the address set to be merged\n@param filter the types of differences to merge\n@param monitor task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "p1AddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to be merged"
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the types of differences to merge"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeComments",
+      "comment": "mergeComments merges all comments\n in the specified address set from the second program \n based on the current merge filter setting.\n It merges them into the merge program.\n This merges eol, pre, post, and plate comments.",
+      "javadoc": "\u003cCODE\u003emergeComments\u003c/CODE\u003e merges all comments\n in the specified address set from the second program \n based on the current merge filter setting.\n It merges them into the merge program.\n This merges eol, pre, post, and plate comments.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeTypeOfComments",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "p1AddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "mergeCommentType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "applyType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceFunctionSymbols",
+      "comment": "replaceFunctionSymbols merges function symbol differences within the specified\n  address set. The program number indicates whether to get the functions from\n  program1 or program2 of the merge.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionSymbols\u003c/CODE\u003e merges function symbol differences within the specified\n  address set. The program number indicates whether to get the functions from\n  program1 or program2 of the merge.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeFunctions",
+      "comment": "mergeFunctions merges function differences within the specified\n  address set based on the current merge filter setting.",
+      "javadoc": "\u003cCODE\u003emergeFunctions\u003c/CODE\u003e merges function differences within the specified\n  address set based on the current merge filter setting.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeReferences",
+      "comment": "mergeReferences merges all references\n in the specified address set from the second program\n based on the current merge filter setting.\n It merges them into the merge program.",
+      "javadoc": "\u003cCODE\u003emergeReferences\u003c/CODE\u003e merges all references\n in the specified address set from the second program\n based on the current merge filter setting.\n It merges them into the merge program.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeLabels",
+      "comment": "mergeLabels merges all symbols and aliases\n in the specified address set from the second program \n based on the current merge filter setting.\n It merges them into the merge program.",
+      "javadoc": "\u003cCODE\u003emergeLabels\u003c/CODE\u003e merges all symbols and aliases\n in the specified address set from the second program \n based on the current merge filter setting.\n It merges them into the merge program.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeBookmarks",
+      "comment": "mergeBookmarks merges bookmark differences \n  within the specified address set.",
+      "javadoc": "\u003cCODE\u003emergeBookmarks\u003c/CODE\u003e merges bookmark differences \n  within the specified address set.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeProperties",
+      "comment": "mergeProperties merges user defined property differences \n  within the specified address set based on the current merge filter setting.",
+      "javadoc": "\u003cCODE\u003emergeProperties\u003c/CODE\u003e merges user defined property differences \n  within the specified address set based on the current merge filter setting.\n@param p1MergeSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param filter the current merge filter settings indicating what types\n of differences should be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "p1MergeSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramMergeFilter",
+          "type_short": "ProgramMergeFilter",
+          "comment": "the current merge filter settings indicating what types\n of differences should be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

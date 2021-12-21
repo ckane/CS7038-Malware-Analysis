@@ -1,0 +1,578 @@
+{
+  "name": "GThreadedTablePanel",
+  "comment": "A convenience component designed specifically for rendering threaded table models.\n This panel will automatically create a threaded table and a task monitor component.",
+  "javadoc": "A convenience component designed specifically for rendering threaded table models.\n This panel will automatically create a threaded table and a task monitor component.\n@param \u003cT\u003e the type",
+  "static": false,
+  "implements": [],
+  "extends": "javax.swing.JPanel",
+  "fields": [
+    {
+      "name": "SHOW_PROGRESS_DEFAULT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1000"
+    },
+    {
+      "name": "MIN_UPDATE_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1000"
+    },
+    {
+      "name": "MAX_UPDATE_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "300000"
+    },
+    {
+      "name": "MIN_INCREMENTAL_UPDATE_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "250"
+    },
+    {
+      "name": "MAX_INCREMENTAL_UPDATE_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2000"
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.GTable",
+      "type_short": "GTable",
+      "constant_value": null
+    },
+    {
+      "name": "threadedModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+      "type_short": "ThreadedTableModel",
+      "constant_value": null
+    },
+    {
+      "name": "tableListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.ThreadedTableModelListener",
+      "type_short": "ThreadedTableModelListener",
+      "constant_value": null
+    },
+    {
+      "name": "defaultMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.GThreadedTablePanel\u003cT\u003e.MessagePassingTaskMonitor",
+      "type_short": "MessagePassingTaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "incrementalMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.GThreadedTablePanel\u003cT\u003e.IncrementalLoadingTaskMonitor",
+      "type_short": "IncrementalLoadingTaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "pendingPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "loadingProgressMonitor",
+      "comment": "The progress monitor that shows the loading process (defined dynamically, based on model)",
+      "javadoc": "The progress monitor that shows the loading process (defined dynamically, based on model)",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitorComponent",
+      "type_short": "TaskMonitorComponent",
+      "constant_value": null
+    },
+    {
+      "name": "loadedComponent",
+      "comment": "The monitor loaded into the GUI",
+      "javadoc": "The monitor loaded into the GUI",
+      "static": false,
+      "type_long": "javax.swing.JComponent",
+      "type_short": "JComponent",
+      "constant_value": null
+    },
+    {
+      "name": "refreshButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.EmptyBorderButton",
+      "type_short": "EmptyBorderButton",
+      "constant_value": null
+    },
+    {
+      "name": "showTimer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.Timer",
+      "type_short": "Timer",
+      "constant_value": null
+    },
+    {
+      "name": "showProgressRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "showPendingRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "updateCompleteRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "minUpdateDelay",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "maxUpdateDelay",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new threaded table panel.",
+      "javadoc": "Constructs a new threaded table panel.\n@param model the threaded table model",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": "the threaded table model"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new threaded table panel.",
+      "javadoc": "Constructs a new threaded table panel.\n@param model the threaded table model\n@param minUpdateDelay the minimum amount of time to wait before the table model will\n        update its data",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": "the threaded table model"
+        },
+        {
+          "name": "minUpdateDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the minimum amount of time to wait before the table model will\n        update its data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new threaded table panel.",
+      "javadoc": "Constructs a new threaded table panel.\n@param model the threaded table model\n@param minUpdateDelay the minimum amount of time to wait before the table model will\n        update its data\n@param maxUpdateDelay the maximum amount of time to wait before the table model will\n        update its data",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": "the threaded table model"
+        },
+        {
+          "name": "minUpdateDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the minimum amount of time to wait before the table model will\n        update its data"
+        },
+        {
+          "name": "maxUpdateDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the maximum amount of time to wait before the table model will\n        update its data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.GTable",
+        "type_short": "GTable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTaskMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.task.TaskMonitor",
+        "type_short": "TaskMonitor",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refresh",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildPending",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTable",
+      "comment": "Returns the underlying table",
+      "javadoc": "Returns the underlying table\n@return the table",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.GTable",
+        "type_short": "GTable",
+        "comment": "the table"
+      },
+      "throws": []
+    },
+    {
+      "name": "handleUpdatePending",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleUpdating",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleUpdateComplete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doUpdateComplete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "startShowProgressTimer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doShowProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doShowLoadingProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doShowNonLoadingProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doHideProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doShowPendingPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinDelay",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003c?,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxDelay",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003c?,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,2349 @@
+{
+  "name": "ProgramDiff",
+  "comment": "ProgramDiff is a class for comparing two programs and\n determining where there are differences between them.\n \n Currently, the differences can be determined if the two programs have\n equivalent address spaces. If the programs have different program context\n registers, the Diff can still occur but will not determine program context\n differences.\n ",
+  "javadoc": "\u003cCODE\u003eProgramDiff\u003c/CODE\u003e is a class for comparing two programs and\n determining where there are differences between them.\n \u003cP\u003e\n Currently, the differences can be determined if the two programs have\n equivalent address spaces. If the programs have different program context\n registers, the Diff can still occur but will not determine program context\n differences.\n \u003cP\u003e\n@see ghidra.program.util.ProgramDiffFilter",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "reDiffFilter",
+      "comment": "A filter for keeping track of all types of differences determined by\n this ProgramDiff so that it knows what differences to recompute.",
+      "javadoc": "A filter for keeping track of all types of differences determined by\n this ProgramDiff so that it knows what differences to recompute.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiffFilter",
+      "type_short": "ProgramDiffFilter",
+      "constant_value": null
+    },
+    {
+      "name": "program1",
+      "comment": "The first program for the diff.",
+      "javadoc": "The first program for the diff.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "program2",
+      "comment": "The second program for the diff.",
+      "javadoc": "The second program for the diff.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "listing1",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "listing2",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "pgmMemComp",
+      "comment": "Comparator that holds information about differences between the\n  two programs memory blocks.",
+      "javadoc": "Comparator that holds information about differences between the\n  two programs memory blocks.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramMemoryComparator",
+      "type_short": "ProgramMemoryComparator",
+      "constant_value": null
+    },
+    {
+      "name": "sameProgramContext",
+      "comment": "Indicator of whether or not the two programs have the same program context registers.",
+      "javadoc": "Indicator of whether or not the two programs have the same program context registers.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "showAddressSpace",
+      "comment": "Indicator of whether or not to display the address space name in task monitor status messages.",
+      "javadoc": "Indicator of whether or not to display the address space name in task monitor status messages.",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "BYTE_DIFF_GRAB_SIZE",
+      "comment": "The number of bytes to get at a time when determining byte differences\n between program1 and program2.",
+      "javadoc": "The number of bytes to get at a time when determining byte differences\n between program1 and program2.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1024"
+    },
+    {
+      "name": "pdf",
+      "comment": "The filter for indicating program differences we are interested in.",
+      "javadoc": "The filter for indicating program differences we are interested in.",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramDiffFilter",
+      "type_short": "ProgramDiffFilter",
+      "constant_value": null
+    },
+    {
+      "name": "diffAddrSets",
+      "comment": "Hash table for holding address sets for each of the primary difference types.\n  The addresses in these address sets are derived from program1.\n  The union of these address sets gives all program differences.",
+      "javadoc": "Hash table for holding address sets for each of the primary difference types.\n  The addresses in these address sets are derived from program1.\n  The union of these address sets gives all program differences.",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cjava.lang.Integer,ghidra.program.model.address.AddressSet\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "cancelled",
+      "comment": "Whether or not the user cancelled the last getDifferences.",
+      "javadoc": "Whether or not the user cancelled the last getDifferences.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "currentDiffs",
+      "comment": "The differences from the last getDifferences() call.\n  The addresses in this address set are derived from program1.",
+      "javadoc": "The differences from the last getDifferences() call.\n  The addresses in this address set are derived from program1.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "diffsToReturn",
+      "comment": "The returned diff address set is the current diffs less the ignore\n  address set and constrained by the restrict address set.\n  The addresses in this address set are derived from program1.",
+      "javadoc": "The returned diff address set is the current diffs less the ignore\n  address set and constrained by the restrict address set.\n  The addresses in this address set are derived from program1.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "checkAddressSet",
+      "comment": "The address set that is checked by this Program Diff.\n  The addresses in this address set are derived from program1.",
+      "javadoc": "The address set that is checked by this Program Diff.\n  The addresses in this address set are derived from program1.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "restrictAddressSet",
+      "comment": "The address set to use for restricting the view of addresses where\n  differences are currently reported.\n  The addresses in this address set are derived from program1.",
+      "javadoc": "The address set to use for restricting the view of addresses where\n  differences are currently reported.\n  The addresses in this address set are derived from program1.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "ignoreAddressSet",
+      "comment": "The set of addresses that should currently not appear as part of the differences.\n  The addresses in this address set are derived from program1.",
+      "javadoc": "The set of addresses that should currently not appear as part of the differences.\n  The addresses in this address set are derived from program1.",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSet",
+      "type_short": "AddressSet",
+      "constant_value": null
+    },
+    {
+      "name": "filterChanged",
+      "comment": "Indicates that the filter has been changed since the last getDifferences().\n  The addresses in this address set are derived from program1.",
+      "javadoc": "Indicates that the filter has been changed since the last getDifferences().\n  The addresses in this address set are derived from program1.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "monitorMsg",
+      "comment": "The current prefix message to appear in the monitor\u0027s message area.",
+      "javadoc": "The current prefix message to appear in the monitor\u0027s message area.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "warnings",
+      "comment": "String indicating a warning message if the program context registers are not the same.",
+      "javadoc": "String indicating a warning message if the program context registers are not the same.",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "BOOKMARK_TYPE_COMPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.program.model.listing.BookmarkTypeComparator",
+      "type_short": "BookmarkTypeComparator",
+      "constant_value": null
+    },
+    {
+      "name": "BOOKMARK_COMPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.program.model.listing.BookmarkComparator",
+      "type_short": "BookmarkComparator",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "ProgramDiff is used to determine the addresses where\n there are differences between two programs.\n Possible differences are:\n the actual bytes at an address, comments, labels, mnemonics,\n references, equates, properties, functions, program context.\n Currently, the differences can be determined only if the address\n spaces match between the programs.",
+      "javadoc": "\u003cCODE\u003eProgramDiff\u003c/CODE\u003e is used to determine the addresses where\n there are differences between two programs.\n Possible differences are:\n the actual bytes at an address, comments, labels, mnemonics,\n references, equates, properties, functions, program context.\n \u003cP\u003eCurrently, the differences can be determined only if the address\n spaces match between the programs.\n@param program1 the first program\n@param program2 the second program\n@throws ProgramConflictException indicates that programs\n couldn\u0027t be compared to determine the differences.\n \u003cP\u003eFor example,\n \u003cP\u003ethe two programs have different address spaces.\n@throws IllegalArgumentException if one of the programs is null.",
+      "static": false,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the first program"
+        },
+        {
+          "name": "program2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the second program"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "indicates that programs\n couldn\u0027t be compared to determine the differences.\n For example,\n the two programs have different address spaces."
+        },
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": "if one of the programs is null."
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "ProgramDiff is used to determine the addresses where\n there are differences between two programs.\n Possible differences are:\n the actual bytes at an address, comments, labels, mnemonics,\n references, equates, properties, functions, program context.\n Currently, the differences can be determined only if the address\n spaces match between the programs.",
+      "javadoc": "\u003cCODE\u003eProgramDiff\u003c/CODE\u003e is used to determine the addresses where\n there are differences between two programs.\n Possible differences are:\n the actual bytes at an address, comments, labels, mnemonics,\n references, equates, properties, functions, program context.\n \u003cP\u003eCurrently, the differences can be determined only if the address\n spaces match between the programs.\n@param program1 the first program\n@param program2 the second program\n@param checkAddressSet the address set to be used to constrain where\n differences are found.\n The addresses in this address set should be derived from program1.\n@throws ProgramConflictException indicates that programs\n couldn\u0027t be compared to determine the differences.\n \u003cP\u003eFor example,\n \u003cP\u003ethe two programs have different address spaces.\n between the two programs, do not match.\n@throws IllegalArgumentException if one of the programs is null.",
+      "static": false,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the first program"
+        },
+        {
+          "name": "program2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the second program"
+        },
+        {
+          "name": "checkAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to be used to constrain where\n differences are found.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "indicates that programs\n couldn\u0027t be compared to determine the differences.\n For example,\n the two programs have different address spaces.\n between the two programs, do not match."
+        },
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": "if one of the programs is null."
+        }
+      ]
+    },
+    {
+      "name": "getCombinedAddressSet",
+      "comment": "Determines all of the addresses that are in the Diff\u0027s two programs\n for the indicated address set and that are compatible with the first program.\n Any program2 addresses for which an equivalent (compatible) address can\u0027t be determined will not be\n included in the combined set.",
+      "javadoc": "Determines all of the addresses that are in the Diff\u0027s two programs\n for the indicated address set and that are compatible with the first program.\n Any program2 addresses for which an equivalent (compatible) address can\u0027t be determined will not be\n included in the combined set.\n@param addrs the addresses to combine from the first program.\n@return the addresses which are derived from the two programs combined addresses that are in common\n with the ones in the address set that is passed in as a parameter.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to combine from the first program."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses which are derived from the two programs combined addresses that are in common\n with the ones in the address set that is passed in as a parameter."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInCommonAddressSet",
+      "comment": "Determines the addresses that are in common between the Diff\u0027s two programs\n for the indicated address set.",
+      "javadoc": "Determines the addresses that are in common between the Diff\u0027s two programs\n for the indicated address set.\n@param addrs the addresses to intersect with the initialized addresses\n in common between our two programs.\n The addresses in this address set should be derived from program1.\n@return the addresses from the indicated address set that are initialized and in common.\n The addresses in the returned address set are derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to intersect with the initialized addresses\n in common between our two programs.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses from the indicated address set that are initialized and in common.\n The addresses in the returned address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getCommonInitializedAddressSet",
+      "comment": "Determines the addresses where both programs have initialized memory.",
+      "javadoc": "Determines the addresses where both programs have initialized memory.\n@param addrs the addresses to intersect with the initialized addresses\n in common between the two programs.\n The addresses in this address set should be derived from program1.\n@return the addresses from the indicated address set that are initialized and in common.\n The addresses in the returned address set are derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to intersect with the initialized addresses\n in common between the two programs.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses from the indicated address set that are initialized and in common.\n The addresses in the returned address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getCommonUninitializedAddressSet",
+      "comment": "Determines the addresses where both programs have uninitialized memory.",
+      "javadoc": "Determines the addresses where both programs have uninitialized memory.\n@param addrs the addresses to intersect with the uninitialized addresses\n in common between the two programs.\n The addresses in this address set should be derived from program1.\n@return the addresses from the indicated address set that are uninitialized and in common.\n The addresses in the returned address set are derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to intersect with the uninitialized addresses\n in common between the two programs.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses from the indicated address set that are uninitialized and in common.\n The addresses in the returned address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInitializationDiffersAddressSet",
+      "comment": "Determines the addresses where one program initialized memory and the other didn\u0027t.",
+      "javadoc": "Determines the addresses where one program initialized memory and the other didn\u0027t.\n@param addrs the addresses to intersect with the addresses where initialization differs\n between the two programs.\n The addresses in this address set should be derived from program1.\n@return the addresses from the indicated address set whre initialization differs.\n The addresses in the returned address set are derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to intersect with the addresses where initialization differs\n between the two programs.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses from the indicated address set whre initialization differs.\n The addresses in the returned address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getNonCommonAddressSet",
+      "comment": "Determines the addresses that are NOT in common between the Diff\u0027s two programs\n for the indicated address set.",
+      "javadoc": "Determines the addresses that are NOT in common between the Diff\u0027s two programs\n for the indicated address set.\n@param addrs the addresses to intersect with the addresses\n not in common between the two programs.\n The addresses in this address set should be derived from program1.\n@return the addresses from the indicated address set that are not in common.\n The addresses in the returned address set are derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to intersect with the addresses\n not in common between the two programs.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses from the indicated address set that are not in common.\n The addresses in the returned address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "memoryMatches",
+      "comment": "Return true if the programs to compare have matching memory maps.",
+      "javadoc": "Return true if the programs to compare have matching memory maps.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clone",
+      "comment": "Returns a copy of this ProgramDiff.",
+      "javadoc": "Returns a copy of this ProgramDiff.\n@return the copy of this ProgramDiff or null if a\n  MemoryConflictException occurs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": "the copy of this ProgramDiff or null if a\n  MemoryConflictException occurs."
+      },
+      "throws": []
+    },
+    {
+      "name": "getWarnings",
+      "comment": "Get a message indicating any warnings about this PRogramDiff. For example,\n if the program context registers don\u0027t match between the programs, the\n string is a message indicating this.",
+      "javadoc": "Get a message indicating any warnings about this PRogramDiff. For example,\n if the program context registers don\u0027t match between the programs, the\n string is a message indicating this.\n@return the warning message string. null if no warnings.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the warning message string. null if no warnings."
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilter",
+      "comment": "Returns a new ProgramDiffFilter equal to the one in this program diff.\n The filter indicates which types of differences are to be determined.",
+      "javadoc": "Returns a new ProgramDiffFilter equal to the one in this program diff.\n The filter indicates which types of differences are to be determined.\n@return a copy of the program diff filter currently in use.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.util.ProgramDiffFilter",
+        "type_short": "ProgramDiffFilter",
+        "comment": "a copy of the program diff filter currently in use."
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilter",
+      "comment": "Sets the ProgramDiffFilter for this program diff. The filter indicates\n which types of differences are to be determined.",
+      "javadoc": "Sets the ProgramDiffFilter for this program diff. The filter indicates\n which types of differences are to be determined.\n@param filter the program diff filter",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramDiffFilter",
+          "type_short": "ProgramDiffFilter",
+          "comment": "the program diff filter"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgramOne",
+      "comment": "Gets the first program being compared by the ProgramDiff.",
+      "javadoc": "Gets the first program being compared by the ProgramDiff.\n@return program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgramTwo",
+      "comment": "Gets the second program being compared by the ProgramDiff.",
+      "javadoc": "Gets the second program being compared by the ProgramDiff.\n@return program2.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "program2."
+      },
+      "throws": []
+    },
+    {
+      "name": "getCombinedAddresses",
+      "comment": "Returns the addresses from combining the address sets in program1 and program2.",
+      "javadoc": "Returns the addresses from combining the address sets in program1 and program2.\n@return the addresses for both program1 and program2.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the addresses for both program1 and program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInitializedInCommon",
+      "comment": "Returns the initialized memory addresses in common between\n program1 and program2.",
+      "javadoc": "Returns the initialized memory addresses in common between\n program1 and program2.\n@return the initialized memory addresses in common between\n program1 and program2.\n The addresses in the this set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the initialized memory addresses in common between\n program1 and program2.\n The addresses in the this set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressesInCommon",
+      "comment": "Returns the addresses in common between program1 and program2.",
+      "javadoc": "Returns the addresses in common between program1 and program2.\n@return the addresses in common between program1 and program2.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses in common between program1 and program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressesOnlyInOne",
+      "comment": "Returns the addresses that are in program1, but not in program2.",
+      "javadoc": "Returns the addresses that are in program1, but not in program2.\n@return the addresses that are in program1, but not in program2.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses that are in program1, but not in program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressesOnlyInTwo",
+      "comment": "Returns the addresses that are in program2, but not in program1.",
+      "javadoc": "Returns the addresses that are in program2, but not in program1.\n@return the addresses that are in program2, but not in program1.\n The addresses in this address set are derived from program2.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses that are in program2, but not in program1.\n The addresses in this address set are derived from program2."
+      },
+      "throws": []
+    },
+    {
+      "name": "getDifferences",
+      "comment": "getDifferences is used to determine\n the addresses where there are differences between two programs using\n the current filter. This\n method only indicates that there is a difference at the address, not what\n type of difference it is. Possible differences are:\n the actual bytes at an address, comments, labels, code units,\n references, equates, properties, and program context register values.",
+      "javadoc": "\u003cCODE\u003egetDifferences\u003c/CODE\u003e is used to determine\n the addresses where there are differences between two programs using\n the current filter. This\n method only indicates that there is a difference at the address, not what\n type of difference it is. Possible differences are:\n the actual bytes at an address, comments, labels, code units,\n references, equates, properties, and program context register values.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null.\n@return an address set of where differences were found between the two\n programs based on the current filter setting.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "an address set of where differences were found between the two\n programs based on the current filter setting.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getDifferences",
+      "comment": "getDifferences is used to determine\n the addresses where there are differences between two programs. This\n method only indicates that there is a difference at the address, not what\n type of difference it is. Possible differences are:\n the actual bytes at an address, comments, labels, code units,\n references, equates, properties, tags and program context register values.\n The specified filter will become the new current filter.",
+      "javadoc": "\u003cCODE\u003egetDifferences\u003c/CODE\u003e is used to determine\n the addresses where there are differences between two programs. This\n method only indicates that there is a difference at the address, not what\n type of difference it is. Possible differences are:\n the actual bytes at an address, comments, labels, code units,\n references, equates, properties, tags and program context register values.\n \u003cP\u003eThe specified filter will become the new current filter.\n@param filter the filter to use instead of the current filter defined for\n this ProgramDiff.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null.\n@return an address set of where differences were found between the two\n programs based on the specified filter setting.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.util.ProgramDiffFilter",
+          "type_short": "ProgramDiffFilter",
+          "comment": "the filter to use instead of the current filter defined for\n this ProgramDiff."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "an address set of where differences were found between the two\n programs based on the specified filter setting.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "reDiffSubSet",
+      "comment": "reDiffSubSet re-determines the differences between the\n two programs for the indicated address set.",
+      "javadoc": "\u003cCODE\u003ereDiffSubSet\u003c/CODE\u003e re-determines the differences between the\n two programs for the indicated address set.\n@param subSet the address set indicating which addresses should have\n their differences re-determined.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null.",
+      "static": false,
+      "params": [
+        {
+          "name": "subSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set indicating which addresses should have\n their differences re-determined.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor also allows the user to cancel if\n the diff takes too long. If no monitor is desired, use null."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getUserDefinedDiffs",
+      "comment": "Returns an address set indicating where the user defined property differs\n between the Diff\u0027s two programs within the specified address set.",
+      "javadoc": "Returns an address set indicating where the user defined property differs\n between the Diff\u0027s two programs within the specified address set.\n@param property the user defined property\n@param addrs the address set for limiting checking.\n The addresses in this address set should be derived from program1.\n@param monitor the progress monitor.\n@return the address set indicating where the property differs.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "property",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the user defined property"
+        },
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set for limiting checking.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the progress monitor."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the address set indicating where the property differs.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getTypeDiffs",
+      "comment": "Creates an address set indicating the differences between program1 and\n program2 of the specified type.",
+      "javadoc": "Creates an address set indicating the differences between program1 and\n program2 of the specified type.\n@param diffType the type of difference to look for between the programs.\n@param addrs the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the address set indicating the differences.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "diffType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of difference to look for between the programs."
+        },
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the address set indicating the differences.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getLimitedAddressSet",
+      "comment": "Get the address set that the diff process is limited to when checking for differences.\n Returns null if the diff is not limited (i.e. the entire program is being diffed).\n The addresses in the returned address set are derived from program1.",
+      "javadoc": "Get the address set that the diff process is limited to when checking for differences.\n Returns null if the diff is not limited (i.e. the entire program is being diffed).\n The addresses in the returned address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLimitedAddressSet",
+      "comment": "Set the address set that the diff process is limited to when checking for differences.",
+      "javadoc": "Set the address set that the diff process is limited to when checking for differences.\n@param checkSet the set of addresses to limit checking. null indicates the entire program.\n The addresses in this address set should be derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "checkSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses to limit checking. null indicates the entire program.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRestrictedAddressSet",
+      "comment": "Get the address set that the getDifferences method results are restricted to.\n null indicates no current restrictions.\n The addresses in the returned address set are derived from program1.",
+      "javadoc": "Get the address set that the getDifferences method results are restricted to.\n null indicates no current restrictions.\n The addresses in the returned address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRestrictedAddressSet",
+      "comment": "Set the address set that the getDifferences method results are restricted to.",
+      "javadoc": "Set the address set that the getDifferences method results are restricted to.\n@param restrictSet the address set to restrict results to. null indicates no restriction.\n The addresses in this address set should be derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "restrictSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the address set to restrict results to. null indicates no restriction.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeRestrictedAddressSet",
+      "comment": "Removes the address set which was restricting the results of the getDifferences method.",
+      "javadoc": "Removes the address set which was restricting the results of the getDifferences method.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIgnoreAddressSet",
+      "comment": "Get the address set that contains addresses that should not be indicated as\n having any differences.\n The addresses in this address set are derived from program1.",
+      "javadoc": "Get the address set that contains addresses that should not be indicated as\n having any differences.\n The addresses in this address set are derived from program1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ignore",
+      "comment": "Set the indicated additional addresses that should not report any\n differences that are found at them.",
+      "javadoc": "Set the indicated additional addresses that should not report any\n differences that are found at them.\n@param addrs the set of addresses to add to the current ignore set.\n The addresses in this address set should be derived from program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses to add to the current ignore set.\n The addresses in this address set should be derived from program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearIgnoreAddressSet",
+      "comment": "Clear the set of addresses that are ignored. Ignored addresses will not\n have differences reported by the getDifferences call.",
+      "javadoc": "Clear the set of addresses that are ignored. Ignored addresses will not\n have differences reported by the \u003cCODE\u003egetDifferences\u003c/CODE\u003e call.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "computeDiffsToReturn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCancelled",
+      "comment": "Returns whether the last getDifferences call was cancelled.\n If a TaskMonitor displays a progress dialog to the user, then the cancel\n button could have been pressed.",
+      "javadoc": "Returns whether the last \u003cCODE\u003egetDifferences\u003c/CODE\u003e call was cancelled.\n If a TaskMonitor displays a progress dialog to the user, then the cancel\n button could have been pressed.\n@return true if the last \u003cCODE\u003egetDifferences\u003c/CODE\u003e call was cancelled.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the last getDifferences call was cancelled."
+      },
+      "throws": []
+    },
+    {
+      "name": "checkCancelled",
+      "comment": "Checks the task associated with the indicated monitor to determine if it has\n been canceled.",
+      "javadoc": "Checks the task associated with the indicated monitor to determine if it has\n been canceled.\n@param monitor the task monitor, associated with getting differences from this Diff,\n to be checked\n@throws CancelledException if the getDifferences() task has been canceled by the user.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor, associated with getting differences from this Diff,\n to be checked"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the getDifferences() task has been canceled by the user."
+        }
+      ]
+    },
+    {
+      "name": "printDifferences",
+      "comment": "Print the differences that have been found so far by calls to\n getDifferences.",
+      "javadoc": "Print the differences that have been found so far by calls to\n \u003cCODE\u003egetDifferences\u003c/CODE\u003e.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printKnownDifferences",
+      "comment": "Print the differences matching the types indicated that were found thus\n far by all calls to getDifferences.",
+      "javadoc": "Print the differences matching the types indicated that were found thus\n far by all calls to \u003cCODE\u003egetDifferences\u003c/CODE\u003e.\n@param type the type(s) of differences we want to see.\n Valid types are: BYTE_DIFFS, CODE_UNIT_DIFFS,\n COMMENT_DIFFS, REFERENCE_DIFFS, USER_DEFINED_DIFFS,\n SYMBOL_DIFFS, EQUATE_DIFFS, PROGRAM_CONTEXT_DIFFS.",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type(s) of differences we want to see.\n Valid types are: BYTE_DIFFS, CODE_UNIT_DIFFS,\n COMMENT_DIFFS, REFERENCE_DIFFS, USER_DEFINED_DIFFS,\n SYMBOL_DIFFS, EQUATE_DIFFS, PROGRAM_CONTEXT_DIFFS."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printKnownDifferencesByType",
+      "comment": "Print the differences matching the types indicated that were found thus\n far by all calls to getDifferences. The differences are grouped by\n each of the primary difference types.",
+      "javadoc": "Print the differences matching the types indicated that were found thus\n far by all calls to getDifferences. The differences are grouped by\n each of the primary difference types.\n@param type the type(s) of differences we want to see.\n Valid types are: BYTE_DIFFS, CODE_UNIT_DIFFS,\n COMMENT_DIFFS, REFERENCE_DIFFS, USER_DEFINED_DIFFS,\n SYMBOL_DIFFS, EQUATE_DIFFS, PROGRAM_CONTEXT_DIFFS.",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type(s) of differences we want to see.\n Valid types are: BYTE_DIFFS, CODE_UNIT_DIFFS,\n COMMENT_DIFFS, REFERENCE_DIFFS, USER_DEFINED_DIFFS,\n SYMBOL_DIFFS, EQUATE_DIFFS, PROGRAM_CONTEXT_DIFFS."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createAddressSet",
+      "comment": "Creates an address set indicating the differences between program1 and\n program2 of the specified type.\n The addresses in this address set are derived from program1\n and put into diffAddrSets using the diffType number as an index.",
+      "javadoc": "Creates an address set indicating the differences between program1 and\n program2 of the specified type.\n The addresses in this address set are derived from program1\n and put into diffAddrSets using the diffType number as an index.\n@param diffType the type of difference to look for between the programs.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@throws ProgramConflictException if the two programs are not comparable since registers differ.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "diffType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of difference to look for between the programs."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if the two programs are not comparable since registers differ."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "compareBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "limitedRange",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": ""
+        },
+        {
+          "name": "differences",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getByteDifferences",
+      "comment": "Determines the addresses within the two programs where bytes differ.\n If a byte difference is found, the entire code unit is added to the address set.\n This also indicates addresses in program1 that are not in program2 as well as\n program2 addresses that are compatible with program1 but not in program1 memory.",
+      "javadoc": "Determines the addresses within the two programs where bytes differ.\n If a byte difference is found, the entire code unit is added to the address set.\n This also indicates addresses in program1 that are not in program2 as well as\n program2 addresses that are compatible with program1 but not in program1 memory.\n@param addrs the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where there were different byte values including where\n one program has bytes and the other does not.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user canceled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where there were different byte values including where\n one program has bytes and the other does not.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user canceled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getCodeUnitDifferences",
+      "comment": "Determines the addresses for the code units that differ between program1\n and program2.",
+      "javadoc": "Determines the addresses for the code units that differ between program1\n and program2.\n@param addrs the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where there were different code units.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where there were different code units.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getProgramContextDifferences",
+      "comment": "Gets the addresses where the Program Context (register bits) differ\n between two programs.",
+      "javadoc": "Gets the addresses where the Program Context (register bits) differ\n between two programs.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses of code units where the program context (register\n bits values) differs.\n The addresses in this address set are derived from program1.\n@throws ProgramConflictException if the two programs are not comparable since registers differ.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses of code units where the program context (register\n bits values) differs.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.util.ProgramConflictException",
+          "type_short": "ProgramConflictException",
+          "comment": "if the two programs are not comparable since registers differ."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getProgramContextDifferences",
+      "comment": "Gets the addresses where the Program Context (register bits) differ\n between two programs for the specified registers (which should generally match).",
+      "javadoc": "Gets the addresses where the Program Context (register bits) differ\n between two programs for the specified registers (which should generally match).\n@param pc1 program context for 1st program\n@param reg1 register corresponding to pc1 (should generally be the same as reg2)\n@param pc2 program context for 2nd program\n@param reg2 register corresponding to pc2 (should generally be the same as reg1)\n@param addressSet the addresses (in common to both programs) to check for differences.\n The addresses in this address set should be derived from program1.\n@param differences the addresses of code units where the register value differs will be\n added to this set. The addresses in this address set are derived from the 1st program.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@throws ProgramConflictException if the two programs can\u0027t are not comparable.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "pc1",
+          "type_long": "ghidra.program.model.listing.ProgramContext",
+          "type_short": "ProgramContext",
+          "comment": "program context for 1st program"
+        },
+        {
+          "name": "reg1",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "register corresponding to pc1 (should generally be the same as reg2)"
+        },
+        {
+          "name": "pc2",
+          "type_long": "ghidra.program.model.listing.ProgramContext",
+          "type_short": "ProgramContext",
+          "comment": "program context for 2nd program"
+        },
+        {
+          "name": "reg2",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "register corresponding to pc2 (should generally be the same as reg1)"
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses (in common to both programs) to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "differences",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "the addresses of code units where the register value differs will be\n added to this set. The addresses in this address set are derived from the 1st program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getContextRegisterDifferences",
+      "comment": "Gets the addresses where the context-register value differs\n between two programs.",
+      "javadoc": "Gets the addresses where the context-register value differs\n between two programs.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses of code units where the program context (register\n bits values) differs.\n The addresses in this address set are derived from program1.\n@throws ProgramConflictException if the two programs can\u0027t are not comparable.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses of code units where the program context (register\n bits values) differs.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getUserDefinedDifferences",
+      "comment": "Gets the addresses where the user defined properties differ between\n two programs.",
+      "javadoc": "Gets the addresses where the user defined properties differ between\n two programs.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses of code units where the user defined properties differed.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses of code units where the user defined properties differed.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getBookmarkDifferences",
+      "comment": "Gets the addresses where bookmarks differ between two programs.",
+      "javadoc": "Gets the addresses where bookmarks differ between two programs.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses of code units where the user defined properties differed.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses of code units where the user defined properties differed.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getLabelDifferences",
+      "comment": "Determines the addresses where program1 and program2 have different\n  labels (symbols or aliases) specified.",
+      "javadoc": "Determines the addresses where program1 and program2 have different\n  labels (symbols or aliases) specified.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where there were different labels.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where there were different labels.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getEquateDifferences",
+      "comment": "Determines the addresses where program1 and program2 have different equates\n specified.",
+      "javadoc": "Determines the addresses where program1 and program2 have different equates\n specified.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where the equates differed between program1 and program2.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where the equates differed between program1 and program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "isSameOperandEquates",
+      "comment": "Determines if the two programs have the same equates specified at\n the indicated address and operand",
+      "javadoc": "Determines if the two programs have the same equates specified at\n the indicated address and operand\n@param address the address\n This address should be derived from program1.\n@param opIndex the operand index\n@return true if both programs have the same operands.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address\n This address should be derived from program1."
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the operand index"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if both programs have the same operands."
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceDifferences",
+      "comment": "Determines the addresses where program1 and program2 have different\n references specified.",
+      "javadoc": "Determines the addresses where program1 and program2 have different\n references specified.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where the memory references differed between program1 and program2.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where the memory references differed between program1 and program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getFunctionDifferences",
+      "comment": "Determines the addresses where program1 and program2 have different\n function information specified. This may be the signature, comment,\n stack variables, or register variables.",
+      "javadoc": "Determines the addresses where program1 and program2 have different\n function information specified. This may be the signature, comment,\n stack variables, or register variables.\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where the equates differed between program1 and program2.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where the equates differed between program1 and program2.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getFunctionTagDifferences",
+      "comment": "Returns the function start addresses of all functions where there is a difference\n in tags between program 1 and program 2.",
+      "javadoc": "Returns the function start addresses of all functions where there is a difference\n in tags between program 1 and program 2.\n@param addressSet\n@param monitor\n@return \n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getCuiDiffs",
+      "comment": "Determines the code unit addresses where there are differences of the\n indicated type between program1 and program2.",
+      "javadoc": "Determines the code unit addresses where there are differences of the\n indicated type between program1 and program2.\n@param cuiType the type of difference on the code unit. These are defined\n in \u003cCODE\u003eCodeUnit\u003c/CODE\u003e. (i.e. CodeUnit.EOL_COMMENT_PROPERTY).\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param c the comparator to use for determining where the differences are.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where there were code unit differences of the\n specified type.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.\n@see ghidra.program.model.listing.CodeUnit",
+      "static": false,
+      "params": [
+        {
+          "name": "cuiType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the type of difference on the code unit. These are defined\n in CodeUnit. (i.e. CodeUnit.EOL_COMMENT_PROPERTY)."
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "c",
+          "type_long": "ghidra.program.util.ProgramDiff.CodeUnitComparator",
+          "type_short": "CodeUnitComparator",
+          "comment": "the comparator to use for determining where the differences are."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where there were code unit differences of the\n specified type.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getCommentDiffs",
+      "comment": "Determines the code unit addresses where there are comment differences of the\n indicated type between program1 and program2.",
+      "javadoc": "Determines the code unit addresses where there are comment differences of the\n indicated type between program1 and program2.\n@param commentType the type of comment. These are defined\n in \u003cCODE\u003eCodeUnit\u003c/CODE\u003e. (i.e. CodeUnit.EOL_COMMENT).\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param c the comparator to use for determining where the differences are.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where there were code unit differences of the\n specified type.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.\n@see ghidra.program.model.listing.CodeUnit",
+      "static": false,
+      "params": [
+        {
+          "name": "commentType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the type of comment. These are defined\n in CodeUnit. (i.e. CodeUnit.EOL_COMMENT)."
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "c",
+          "type_long": "ghidra.program.util.ProgramDiff.CommentTypeComparator",
+          "type_short": "CommentTypeComparator",
+          "comment": "the comparator to use for determining where the differences are."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where there were code unit differences of the\n specified type.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "getAdjustedCuiDiffs",
+      "comment": "Determines the code unit addresses where there are differences of the\n indicated type between program1 and program2. If address ranges in the\n address set begin inside a code unit instead of at the beginning, the\n entire code unit will be added to the address set.",
+      "javadoc": "Determines the code unit addresses where there are differences of the\n indicated type between program1 and program2. If address ranges in the\n address set begin inside a code unit instead of at the beginning, the\n entire code unit will be added to the address set.\n@param cuiType the type of difference on the code unit. These are defined\n in \u003cCODE\u003eCodeUnit\u003c/CODE\u003e. (i.e. CodeUnit.EOL_COMMENT_PROPERTY).\n@param addressSet the addresses to check for differences.\n The addresses in this address set should be derived from program1.\n@param c the comparator to use for determining where the differences are.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where there were code unit differences of the\n specified type.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user cancelled the Diff.\n@see ghidra.program.model.listing.CodeUnit",
+      "static": false,
+      "params": [
+        {
+          "name": "cuiType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the type of difference on the code unit. These are defined\n in CodeUnit. (i.e. CodeUnit.EOL_COMMENT_PROPERTY)."
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to check for differences.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "c",
+          "type_long": "ghidra.program.util.ProgramDiff.CodeUnitComparator",
+          "type_short": "CodeUnitComparator",
+          "comment": "the comparator to use for determining where the differences are."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where there were code unit differences of the\n specified type.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancelled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "adjustCodeUnitAddressSet",
+      "comment": "adjustCodeUnitAddressSet creates a new address set from the initial\n address set by adjusting the address ranges so that they contain\n complete code units as indicated by the program listing.",
+      "javadoc": "adjustCodeUnitAddressSet creates a new address set from the initial\n address set by adjusting the address ranges so that they contain\n complete code units as indicated by the program listing.\n@param initialAddressSet the initial address set\n The addresses in this address set should be derived from the program\n passed as a parameter.\n@param program the program to get the code units from.\n@return the new address set\n The addresses in this address set are derived from the program\n that was passed as a parameter.\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "initialAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the initial address set\n The addresses in this address set should be derived from the program\n passed as a parameter."
+        },
+        {
+          "name": "listing",
+          "type_long": "ghidra.program.model.listing.Listing",
+          "type_short": "Listing",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the new address set\n The addresses in this address set are derived from the program\n that was passed as a parameter."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getObjectDiffs",
+      "comment": "Determines where the property of interest to the comparator is different\n between program1 and program2. This is for use with object iterators as\n opposed to determining differences using a code unit iterator.\n (For example, object iterators are used for equates and functions.)",
+      "javadoc": "Determines where the property of interest to the comparator is different\n between program1 and program2. This is for use with object iterators as\n opposed to determining differences using a code unit iterator.\n (For example, object iterators are used for equates and functions.)\n@param c the comparator to use for determining where the differences are.\n@param iter1 the program1 object iterator for where the property type\n to be compared exists.\n@param iter2 the program2 object iterator for where the property type\n to be compared exists.\n@param monitor the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user.\n@return the addresses where the comparator determined the property type\n of interest was different. null if canceled.\n The addresses in this address set are derived from program1.\n@throws CancelledException if the user canceled the Diff.",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "ghidra.program.util.ProgramDiff.ProgramDiffComparator",
+          "type_short": "ProgramDiffComparator",
+          "comment": "the comparator to use for determining where the differences are."
+        },
+        {
+          "name": "iter1",
+          "type_long": "ghidra.program.util.ProgramDiff.IteratorWrapper",
+          "type_short": "IteratorWrapper",
+          "comment": "the program1 object iterator for where the property type\n to be compared exists."
+        },
+        {
+          "name": "iter2",
+          "type_long": "ghidra.program.util.ProgramDiff.IteratorWrapper",
+          "type_short": "IteratorWrapper",
+          "comment": "the program2 object iterator for where the property type\n to be compared exists."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for indicating the progress of\n determining differences. This monitor reports the progress to the user."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the addresses where the comparator determined the property type\n of interest was different. null if canceled.\n The addresses in this address set are derived from program1."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user canceled the Diff."
+        }
+      ]
+    },
+    {
+      "name": "equivalentBookmarkArrays",
+      "comment": "Compares an array of bookmarks from program1 with an array of bookmarks from program2 to see if they are equivalent.",
+      "javadoc": "Compares an array of bookmarks from program1 with an array of bookmarks from program2 to see if they are equivalent.\n@param pgm1 program1\n@param bookmarks1 program1 array of bookmarks\n@param pgm2 program2\n@param bookmarks2 program2 array of bookmarks\n@return true if the arrays of bookmarks are equal.",
+      "static": true,
+      "params": [
+        {
+          "name": "pgm1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program1"
+        },
+        {
+          "name": "pgm2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program2"
+        },
+        {
+          "name": "bookmarks1",
+          "type_long": "ghidra.program.model.listing.Bookmark[]",
+          "type_short": "ghidra.program.model.listing.Bookmark[]",
+          "comment": "program1 array of bookmarks"
+        },
+        {
+          "name": "bookmarks2",
+          "type_long": "ghidra.program.model.listing.Bookmark[]",
+          "type_short": "ghidra.program.model.listing.Bookmark[]",
+          "comment": "program2 array of bookmarks"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the arrays of bookmarks are equal."
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentBookmarks",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "pgm1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "pgm2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "bookmark1",
+          "type_long": "ghidra.program.model.listing.Bookmark",
+          "type_short": "Bookmark",
+          "comment": ""
+        },
+        {
+          "name": "bookmark2",
+          "type_long": "ghidra.program.model.listing.Bookmark",
+          "type_short": "Bookmark",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentVariableArrays",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "vars1",
+          "type_long": "ghidra.program.model.listing.Variable[]",
+          "type_short": "ghidra.program.model.listing.Variable[]",
+          "comment": ""
+        },
+        {
+          "name": "vars2",
+          "type_long": "ghidra.program.model.listing.Variable[]",
+          "type_short": "ghidra.program.model.listing.Variable[]",
+          "comment": ""
+        },
+        {
+          "name": "checkParamStorage",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "var1",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "var2",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "checkStorage",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "f1",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "f2",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "f1",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "f2",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "ignoreName",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEquivalentThunk",
+      "comment": "Compares two thunk functions from different programs to determine if they are \n equivalent to each other (effectively the same thunk function in the other program).",
+      "javadoc": "Compares two thunk functions from different programs to determine if they are \n equivalent to each other (effectively the same thunk function in the other program).\n@param thunkFunction1 the first thunk function\n@param thunkFunction2 the second thunk function\n@return true if the functions are equivalent thunk functions.",
+      "static": true,
+      "params": [
+        {
+          "name": "thunkFunction1",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the first thunk function"
+        },
+        {
+          "name": "thunkFunction2",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the second thunk function"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the functions are equivalent thunk functions."
+      },
+      "throws": []
+    },
+    {
+      "name": "sameFunctionNames",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "f1",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "f2",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDefaultName",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentTagSets",
+      "comment": "Returns true if the two sets contain function tags with the same\n name/comment pairs.",
+      "javadoc": "Returns true if the two sets contain function tags with the same\n name/comment pairs.\n@param setA the first set\n@param setB the second set\n@return true if sets contain tags with the same name/comment pairs",
+      "static": true,
+      "params": [
+        {
+          "name": "setA",
+          "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Set",
+          "comment": "the first set"
+        },
+        {
+          "name": "setB",
+          "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Set",
+          "comment": "the second set"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if sets contain tags with the same name/comment pairs"
+      },
+      "throws": []
+    },
+    {
+      "name": "equalRefArrays",
+      "comment": "Compares an array of references from program1 with an array of references from program2 to see if they are equivalent.",
+      "javadoc": "Compares an array of references from program1 with an array of references from program2 to see if they are equivalent.\n@param refs1 program1 array of references\n@param refs2 program2 array of references\n@return true if the arrays of references are equal.",
+      "static": false,
+      "params": [
+        {
+          "name": "refs1",
+          "type_long": "ghidra.program.model.symbol.Reference[]",
+          "type_short": "ghidra.program.model.symbol.Reference[]",
+          "comment": "program1 array of references"
+        },
+        {
+          "name": "refs2",
+          "type_long": "ghidra.program.model.symbol.Reference[]",
+          "type_short": "ghidra.program.model.symbol.Reference[]",
+          "comment": "program2 array of references"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the arrays of references are equal."
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentReferenceArrays",
+      "comment": "Compares an array of references from program1 with an array of references from program2 to see if they are equivalent.",
+      "javadoc": "Compares an array of references from program1 with an array of references from program2 to see if they are equivalent.\n@param pgm1 program1\n@param pgm2 program2\n@param refs1 program1 array of references\n@param refs2 program2 array of references\n@return true if the arrays of references are equal.",
+      "static": true,
+      "params": [
+        {
+          "name": "pgm1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program1"
+        },
+        {
+          "name": "pgm2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program2"
+        },
+        {
+          "name": "refs1",
+          "type_long": "ghidra.program.model.symbol.Reference[]",
+          "type_short": "ghidra.program.model.symbol.Reference[]",
+          "comment": "program1 array of references"
+        },
+        {
+          "name": "refs2",
+          "type_long": "ghidra.program.model.symbol.Reference[]",
+          "type_short": "ghidra.program.model.symbol.Reference[]",
+          "comment": "program2 array of references"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the arrays of references are equal."
+      },
+      "throws": []
+    },
+    {
+      "name": "equalRefs",
+      "comment": "Compares reference from program1 with reference from program2 to see if they are equivalent.",
+      "javadoc": "Compares reference from program1 with reference from program2 to see if they are equivalent.\n@param ref1 program1 reference\n@param ref2 program2 reference\n@return true if they are equivalent",
+      "static": false,
+      "params": [
+        {
+          "name": "ref1",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "program1 reference"
+        },
+        {
+          "name": "ref2",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "program2 reference"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if they are equivalent"
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentReferences",
+      "comment": "Compares reference from program1 with reference from program2 to see if they are equivalent.",
+      "javadoc": "Compares reference from program1 with reference from program2 to see if they are equivalent.\n@param p1 program1\n@param p2 program2\n@param ref1 program1 reference\n@param ref2 program2 reference\n@return true if they are equivalent",
+      "static": true,
+      "params": [
+        {
+          "name": "p1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program1"
+        },
+        {
+          "name": "p2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program2"
+        },
+        {
+          "name": "ref1",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "program1 reference"
+        },
+        {
+          "name": "ref2",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "program2 reference"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if they are equivalent"
+      },
+      "throws": []
+    },
+    {
+      "name": "isEquivalent",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "extLoc1",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "extLoc2",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentReferences",
+      "comment": "",
+      "javadoc": "@param addressTranslator\n@param p1Ref\n@param p2Ref\n@return ",
+      "static": true,
+      "params": [
+        {
+          "name": "p2ToP1Translator",
+          "type_long": "ghidra.program.util.AddressTranslator",
+          "type_short": "AddressTranslator",
+          "comment": ""
+        },
+        {
+          "name": "p1Ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        },
+        {
+          "name": "p2Ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDiffRefs",
+      "comment": "Gets the references that need to be checked for differences from those that are handed\n to it via the refs parameter.",
+      "javadoc": "Gets the references that need to be checked for differences from those that are handed\n to it via the refs parameter.\n@param refs the references before removing those that we don\u0027t want to diff.\n@return only the references that should be part of the diff.",
+      "static": true,
+      "params": [
+        {
+          "name": "refs",
+          "type_long": "ghidra.program.model.symbol.Reference[]",
+          "type_short": "ghidra.program.model.symbol.Reference[]",
+          "comment": "the references before removing those that we don\u0027t want to diff."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference[]",
+        "type_short": "ghidra.program.model.symbol.Reference[]",
+        "comment": "only the references that should be part of the diff."
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentInstructionPrototypes",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "i1",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "i2",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSameFallthrough",
+      "comment": "Determines whether the fallthrough is the same for the two indicated instructions.",
+      "javadoc": "Determines whether the fallthrough is the same for the two indicated instructions.\n@param program1 the program for the first instruction\n@param i1 the first instruction\n@param program2 the program for the second instruction\n@param i2 the second instruction\n@return true if the fallthrough is the same for the two instructions.",
+      "static": true,
+      "params": [
+        {
+          "name": "program1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program for the first instruction"
+        },
+        {
+          "name": "i1",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "the first instruction"
+        },
+        {
+          "name": "program2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program for the second instruction"
+        },
+        {
+          "name": "i2",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "the second instruction"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the fallthrough is the same for the two instructions."
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "p1",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "p2",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "p1Symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "p2Symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equivalentSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "p2ToP1Translator",
+          "type_long": "ghidra.program.util.AddressTranslator",
+          "type_short": "AddressTranslator",
+          "comment": ""
+        },
+        {
+          "name": "p1Symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "p2Symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

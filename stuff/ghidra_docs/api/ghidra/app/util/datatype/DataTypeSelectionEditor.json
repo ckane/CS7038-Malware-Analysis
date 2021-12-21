@@ -1,0 +1,611 @@
+{
+  "name": "DataTypeSelectionEditor",
+  "comment": "An editor that is used to show the DropDownSelectionTextField for the entering of\n data types by name and offers the user of a completion window.  This editor also provides a\n browse button that when pressed will show a data type tree so that the user may browse a tree\n of known data types.\n \n The typical usage of this class is in conjunction with the DataTypeChooserDialog.   The\n dialog uses this editor as part of its DataType selection process.  Users seeking a dialog\n that allows users to choose DataTypes are encouraged to use that dialog.  If you wish to add\n this editor to a widget directly, then see below.\n \n Stand Alone Usage\n In order to use this component directly you need to call #getEditorComponent().  This\n will give you a Component for editing.\n \n In order to know when changes are made to the component you need to add a DocumentListener\n via the #addDocumentListener(DocumentListener) method.  The added listener will be\n notified as the user enters text into the editor\u0027s text field.  Then, to determine when there\n is as valid DataType in the field you may call #validateUserSelection().",
+  "javadoc": "An editor that is used to show the {@link DropDownSelectionTextField} for the entering of\n data types by name and offers the user of a completion window.  This editor also provides a\n browse button that when pressed will show a data type tree so that the user may browse a tree\n of known data types.\n \u003cp\u003e\n The typical usage of this class is in conjunction with the {@link DataTypeChooserDialog}.   The\n dialog uses this editor as part of its DataType selection process.  Users seeking a dialog\n that allows users to choose DataTypes are encouraged to use that dialog.  If you wish to add\n this editor to a widget directly, then see below.\n \u003cp\u003e\n \u003cu\u003eStand Alone Usage\u003c/u\u003e\u003cbr\u003e\n In order to use this component directly you need to call {@link #getEditorComponent()}.  This\n will give you a Component for editing.\n \u003cp\u003e\n In order to know when changes are made to the component you need to add a DocumentListener\n via the {@link #addDocumentListener(DocumentListener)} method.  The added listener will be\n notified as the user enters text into the editor\u0027s text field.  Then, to determine when there\n is as valid DataType in the field you may call {@link #validateUserSelection()}.",
+  "static": false,
+  "implements": [],
+  "extends": "javax.swing.AbstractCellEditor",
+  "fields": [
+    {
+      "name": "editorPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "selectionField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.DropDownSelectionTextField\u003cghidra.program.model.data.DataType\u003e",
+      "type_short": "DropDownSelectionTextField",
+      "constant_value": null
+    },
+    {
+      "name": "browseButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JButton",
+      "type_short": "JButton",
+      "constant_value": null
+    },
+    {
+      "name": "dataTypeManagerService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.services.DataTypeManagerService",
+      "type_short": "DataTypeManagerService",
+      "constant_value": null
+    },
+    {
+      "name": "dataTypeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataTypeManager",
+      "type_short": "DataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "allowedDataTypes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.data.DataTypeParser.AllowedDataTypes",
+      "type_short": "AllowedDataTypes",
+      "constant_value": null
+    },
+    {
+      "name": "keyListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.event.KeyAdapter",
+      "type_short": "KeyAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "navigationDirection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.datatype.NavigationDirection",
+      "type_short": "NavigationDirection",
+      "constant_value": null
+    },
+    {
+      "name": "initiallySelectedTreePath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.tree.TreePath",
+      "type_short": "TreePath",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "serviceProvider",
+          "type_long": "ghidra.framework.plugintool.ServiceProvider",
+          "type_short": "ServiceProvider",
+          "comment": ""
+        },
+        {
+          "name": "allowedDataTypes",
+          "type_long": "ghidra.util.data.DataTypeParser.AllowedDataTypes",
+          "type_short": "AllowedDataTypes",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "service",
+          "type_long": "ghidra.app.services.DataTypeManagerService",
+          "type_short": "DataTypeManagerService",
+          "comment": ""
+        },
+        {
+          "name": "allowedDataTypes",
+          "type_long": "ghidra.util.data.DataTypeParser.AllowedDataTypes",
+          "type_short": "AllowedDataTypes",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPreferredDataTypeManager",
+      "comment": "Sets the DataTypeManager to use when the chooser is forced to parse the given\n data type text to resolve the data type.  If the users chooses a type, then this value\n is not used.  Note that setting this value does not restrict the parser to just the \n given value, but rather the given value is the preferred manager and is thus searched\n first.",
+      "javadoc": "Sets the {@link DataTypeManager} to use when the chooser is forced to parse the given\n data type text to resolve the data type.  If the users chooses a type, then this value\n is not used.  Note that setting this value does not restrict the parser to just the \n given value, but rather the given value is the preferred manager and is thus searched\n first.\n@param dataTypeManager the preferred data type manager",
+      "static": false,
+      "params": [
+        {
+          "name": "dataTypeManager",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "the preferred data type manager"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setConsumeEnterKeyPress",
+      "comment": "Sets whether this editor should consumer Enter key presses",
+      "javadoc": "Sets whether this editor should consumer Enter key presses\n@see DropDownSelectionTextField#setConsumeEnterKeyPress(boolean)\n@param consume true to consume",
+      "static": false,
+      "params": [
+        {
+          "name": "consume",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to consume"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCellEditorValue",
+      "comment": "",
+      "javadoc": "@see javax.swing.CellEditor#getCellEditorValue()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCellEditorValueAsDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCellEditorValueAsText",
+      "comment": "Returns the text value of the editor\u0027s text field.",
+      "javadoc": "Returns the text value of the editor\u0027s text field.\n@return the text value of the editor\u0027s text field.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the text value of the editor\u0027s text field."
+      },
+      "throws": []
+    },
+    {
+      "name": "getEditorComponent",
+      "comment": "Returns the component that allows the user to edit.",
+      "javadoc": "Returns the component that allows the user to edit.\n@return the component that allows the user to edit.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": "the component that allows the user to edit."
+      },
+      "throws": []
+    },
+    {
+      "name": "getDropDownTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.DropDownSelectionTextField\u003cghidra.program.model.data.DataType\u003e",
+        "type_short": "DropDownSelectionTextField",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBrowseButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JButton",
+        "type_short": "JButton",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDefaultSelectedTreePath",
+      "comment": "Sets the initially selected node in the data type tree that the user can choose to \n show.",
+      "javadoc": "Sets the initially selected node in the data type tree that the user can choose to \n show.\n@param path The path to set",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": "The path to set"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "requestFocus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectCellEditorValue",
+      "comment": "Highlights the text of the cell editor.",
+      "javadoc": "Highlights the text of the cell editor.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCellEditorValue",
+      "comment": "Sets the value to be edited on this cell editor.",
+      "javadoc": "Sets the value to be edited on this cell editor.\n@param dataType The data type which is to be edited.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "The data type which is to be edited."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCellEditorValueAsText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addDocumentListener",
+      "comment": "Adds a document listener to the text field editing component of this editor so that users\n can be notified when the text contents of the editor change.  You may verify whether the \n text changes represent a valid DataType by calling #validateUserSelection().",
+      "javadoc": "Adds a document listener to the text field editing component of this editor so that users\n can be notified when the text contents of the editor change.  You may verify whether the \n text changes represent a valid DataType by calling {@link #validateUserSelection()}.\n@param listener the listener to add.\n@see #validateUserSelection()",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.DocumentListener",
+          "type_short": "DocumentListener",
+          "comment": "the listener to add."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeDocumentListener",
+      "comment": "Removes a previously added document listener.",
+      "javadoc": "Removes a previously added document listener.\n@param listener the listener to remove.s",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.DocumentListener",
+          "type_short": "DocumentListener",
+          "comment": "the listener to remove.s"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFocusListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.FocusListener",
+          "type_short": "FocusListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeFocusListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.FocusListener",
+          "type_short": "FocusListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTabCommitsEdit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "doesCommit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNavigationDirection",
+      "comment": "Returns the direction of the user triggered navigation; null if the user did not trigger\n navigation out of this component.",
+      "javadoc": "Returns the direction of the user triggered navigation; null if the user did not trigger\n navigation out of this component.\n@return the direction",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.datatype.NavigationDirection",
+        "type_short": "NavigationDirection",
+        "comment": "the direction"
+      },
+      "throws": []
+    },
+    {
+      "name": "addKeyListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.KeyListener",
+          "type_short": "KeyListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeKeyListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.KeyListener",
+          "type_short": "KeyListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateUserSelection",
+      "comment": "Returns true if the current value of the data type editor is a know data type.",
+      "javadoc": "Returns true if the current value of the data type editor is a know data type.\n@return true if the current value of the data type editor is a know data type.\n@throws InvalidDataTypeException If the current text in the editor\u0027s text field could not\n         be parsed into a valid DataType",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the current value of the data type editor is a know data type."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": "If the current text in the editor\u0027s text field could not\n         be parsed into a valid DataType"
+        }
+      ]
+    },
+    {
+      "name": "containsValidDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getDataTypeRootForCurrentText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseDataTypeTextEntry",
+      "comment": "Parse datatype text entry using DataTypeParser.  Allows addition\n of supported modifiers (e.g., arrays, pointers, etc.).",
+      "javadoc": "Parse datatype text entry using {@link DataTypeParser}.  Allows addition\n of supported modifiers (e.g., arrays, pointers, etc.).\n@return true if parse successful else false",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if parse successful else false"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "showDataTypeBrowser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

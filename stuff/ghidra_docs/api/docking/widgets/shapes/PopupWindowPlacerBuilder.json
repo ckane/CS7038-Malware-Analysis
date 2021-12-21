@@ -1,0 +1,286 @@
+{
+  "name": "PopupWindowPlacerBuilder",
+  "comment": "This class builds a PopWindowPlacer that can have subsequent PopWindowPlacers.\n \n General categories of placers available are edge placers, overlapped-corner\n placers, and a clean-up assert placer.  Additionally, there are rotational placers\n that are composed of edge placers.\n \n \n  \n \n Edge Placers\n  \n \n The edge placers are the leftEdge, rightEdge, topEdge, and bottomEdge methods that take\n Location arguments that one can think of as \"cells\" for optimal placement, but which have some\n flexibility in making the placement.  One such cell is the TOP Location of the rightEdge,\n specified by rightEdge(Location.TOP).  If the placement does not quite fit this\n cell because the optimal placement extend above the top of the screen, the placement may be\n shifted down by a  allowed amount so that it still fits.  If more than the allowed amount is\n needed, the placement fails.\n \n Each edge placer takes a variable number of Location arguments.  These arguments work in the\n same way for each method, though some arguments are not valid for some edges; for instance,\n Location.TOP is only valid for left and right edges.\n \n \n Two or More Location Arguments\n \n \n When two or more arguments are used, the first argument specifies the nominal placement cell\n and the second argument specifies how far the solution is allowed to shift.  If a solution is\n not found and if there are more than two arguments, another placement attempt is made where\n the second argument specifies the nominal placement cell and the third argument specifies how\n far the solution is allowed to shift. To specify a \"no-shift\" solution, one specifies the same\n placement cell twice (e.g., rightEdge(Location.TOP, Location.TOP)).\n \n \n One Location Argument\n \n \n When one argument is used, the solution is the same as when two arguments are specified except\n that the second argument is automatically set to the nearest neighboring cell.  Thus,\n rightEdge(Location.TOP) is the same as\n rightEdge(Location.TOP, Location.CENTER).  When the single argument is\n Location.CENTER, two attempts are built, the first being the BOTTOM or RIGHT cell\n and the second being the TOP or LEFT cell.\n \n \n No Arguments\n \n \n When no arguments are specified, two arguments to the underlying placer are automatically set\n to BOTTOM or RIGHT for the first and TOP or LEFT for the second.\n \n \n Examples\n \n \n Builds a placer that first attempts a placement at the bottom of the right edge with no\n shift, then tries the top of the right edge with no shift, then top center with no shift:\n \n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge(Location.BOTTOM,Location.BOTTOM)\n            .rightEdge(Location.TOP, Location.TOP)\n            .topEdge(Location.CENTER, Location.CENTER)\n            .build();\n Builds a placer that attempts a placement on the right edge from bottom to top, followed by\n the top edge from center to right, then center to left:\n \n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge()\n            .topEdge(Location.CENTER);\n            .build();\n \n \n \n \n Rotational Placers\n \n \n There are clockwise and counter-clockwise rotational placers that built up from edge placers.\n These are:\n \n    rotateClockwise(Location major, Location minor)\n    rotateCounterClockwise(Location major, Location minor)\n    thenRotateClockwise()\n    thenRotateCounterClockwise()\n The first two of these take two Location arguments the specify the starting cell.  For instance,\n rotateClockwise(Location.BOTTOM, Location.RIGHT).  This specifies a set of edge\n placers that attempt placement starting from the specified cell, and making attempt in a\n clockwise fashion until the starting cell is revisited, at which time the attempt fails if a\n viable placement has not been found.  The rotateCounterClockwise placer works the\n same, but in a counter-clockwise fashion.  The thenRotateClockwise and\n thenRotateCounterClockwise placers are the same as the previous two placers\n except that they start at the \"beginning\" cell where the most previous placer had left off.  If\n there was not a previous placer, then the BOTTOM RIGHT cell is chosen as the starting cell.\n \n \n \n \n Overlapping Corner Placer\n \n \n There is one corner placer, leastOverlapCorner().  This placer tries to make a\n placement at each of the corners of the context area and shifts into the context region as much\n as necessary to fit the screen bounds.  The corner that overlaps the context area the least is\n chosen as the solution placement corner.  In case of a tie (e.g., no overlap on some corners),\n the placement order chosen in this preference order: bottom right, bottom left, top right, and\n top left.  Unless ill-constructed (sized of context area, screen, and pop-up dimension), this\n placer should always find a solution.\n \n \n \n \n Assert Placer\n \n \n The throwsAssertException() placer is available, which automatically throws an\n AssertException.  This placer is only intended to be used by the client in such as case when\n it is believed that a placement should have already been found, such as after the\n leastOverlapCorner() placer.  This just throws an exception instead of returning\n the null return value that would be returned from previous placement attempts.\n \n \n \n \n Composite Placer\n \n \n Builds a placer that first attempts a placement at the right edge from bottom to top, then\n left edge from bottom to top, then top edge from right to left, then bottom edge from right to\n left, followed by a least-overlap-corner solution, followed by a failure assert:\n \n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge()\n            .leftEdge()\n            .topEdge()\n            .bottomEdge()\n            .leastOverlapCorner()\n            .throwsAssertException()\n            .build();\n \n Builds a placer that first attempts each of the four major corners in a specific order, with no\n shifting, followed by an assertion failure:\n \n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge(Location.BOTTOM, Location.BOTTOM)\n            .leftEdge(Location.TOP, Location.TOP)\n            .rightEdge(Location.TOP, Location.TOP)\n            .leftEdge(Location.BOTTOM, Location.BOTTOM)\n            .throwsAssertException()\n            .build();\n \n Builds a placer that attempt to make a placement at the bottom right corner, first shifting up\n to the center location then shifting left to the center location, then failing only with a\n null return:\n \n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge(Location.BOTTOM)\n            .bottomEdge(Location.RIGHT)\n            .build();\n \n Builds a placer that attempts a placement at the top, left corner, the tries to make a placement\n in a clockwise fashion, followed by a failure assert:\n \n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .topEdge(Location.LEFT, Location.LEFT)\n            .thenRotateClockwise()\n            .throwsAssertException()\n            .build();",
+  "javadoc": "This class builds a PopWindowPlacer that can have subsequent PopWindowPlacers.\n \u003cp\u003e\n General categories of placers available are \u003cB\u003eedge\u003c/B\u003e placers, \u003cB\u003eoverlapped-corner\u003c/B\u003e\n placers, and a clean-up \u003cB\u003eassert\u003c/B\u003e placer.  Additionally, there are \u003cB\u003erotational\u003c/B\u003e placers\n that are composed of edge placers.\n \u003cp\u003e\n \u003cBR\u003e\n \u003cBR\u003e \n \n \u003cH1\u003eEdge Placers\u003c/H1\u003e\n  \n \u003cp\u003e\n The \u003cB\u003eedge\u003c/B\u003e placers are the leftEdge, rightEdge, topEdge, and bottomEdge methods that take\n Location arguments that one can think of as \"cells\" for optimal placement, but which have some\n flexibility in making the placement.  One such cell is the TOP Location of the rightEdge,\n specified by \u003ccode\u003erightEdge(Location.TOP)\u003c/code\u003e.  If the placement does not quite fit this\n cell because the optimal placement extend above the top of the screen, the placement may be\n shifted down by a  allowed amount so that it still fits.  If more than the allowed amount is\n needed, the placement fails.\n \u003cp\u003e\n Each edge placer takes a variable number of Location arguments.  These arguments work in the\n same way for each method, though some arguments are not valid for some edges; for instance,\n \u003ccode\u003eLocation.TOP\u003c/code\u003e is only valid for left and right edges.\n \u003cp\u003e\n \n \u003cH2\u003eTwo or More Location Arguments\u003c/H2\u003e\n \n \u003cp\u003e\n When two or more arguments are used, the first argument specifies the nominal placement cell\n and the second argument specifies how far the solution is allowed to shift.  If a solution is\n not found and if there are more than two arguments, another placement attempt is made where\n the second argument specifies the nominal placement cell and the third argument specifies how\n far the solution is allowed to shift. To specify a \"no-shift\" solution, one specifies the same\n placement cell twice (e.g., \u003ccode\u003erightEdge(Location.TOP, Location.TOP)\u003c/code\u003e).\n \u003cp\u003e\n \n \u003cH2\u003eOne Location Argument\u003c/H2\u003e\n \n \u003cp\u003e\n When one argument is used, the solution is the same as when two arguments are specified except\n that the second argument is automatically set to the nearest neighboring cell.  Thus,\n \u003ccode\u003erightEdge(Location.TOP)\u003c/code\u003e is the same as\n \u003ccode\u003erightEdge(Location.TOP, Location.CENTER)\u003c/code\u003e.  When the single argument is\n \u003ccode\u003eLocation.CENTER\u003c/code\u003e, two attempts are built, the first being the BOTTOM or RIGHT cell\n and the second being the TOP or LEFT cell.\n \u003cp\u003e\n \n \u003cH2\u003eNo Arguments\u003c/H2\u003e\n \n \u003cp\u003e\n When no arguments are specified, two arguments to the underlying placer are automatically set\n to BOTTOM or RIGHT for the first and TOP or LEFT for the second.\n \u003cp\u003e\n \n \u003cH2\u003eExamples\u003c/H2\u003e\n \n \u003cp\u003e\n Builds a placer that first attempts a placement at the bottom of the right edge with no\n shift, then tries the top of the right edge with no shift, then top center with no shift:\n \u003cpre\u003e\n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge(Location.BOTTOM,Location.BOTTOM)\n            .rightEdge(Location.TOP, Location.TOP)\n            .topEdge(Location.CENTER, Location.CENTER)\n            .build();\u003c/pre\u003e\n Builds a placer that attempts a placement on the right edge from bottom to top, followed by\n the top edge from center to right, then center to left:\n \u003cpre\u003e\n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge()\n            .topEdge(Location.CENTER);\n            .build();\u003c/pre\u003e\n \u003cp\u003e\n \u003cBR\u003e\n \u003cBR\u003e\n \n \u003cH1\u003eRotational Placers\u003c/H1\u003e\n \n \u003cp\u003e\n There are clockwise and counter-clockwise rotational placers that built up from edge placers.\n These are:\n \u003cpre\u003e\n    rotateClockwise(Location major, Location minor)\n    rotateCounterClockwise(Location major, Location minor)\n    thenRotateClockwise()\n    thenRotateCounterClockwise()\u003c/pre\u003e\n The first two of these take two Location arguments the specify the starting cell.  For instance,\n \u003ccode\u003erotateClockwise(Location.BOTTOM, Location.RIGHT)\u003c/code\u003e.  This specifies a set of edge\n placers that attempt placement starting from the specified cell, and making attempt in a\n clockwise fashion until the starting cell is revisited, at which time the attempt fails if a\n viable placement has not been found.  The \u003ccode\u003erotateCounterClockwise\u003c/code\u003e placer works the\n same, but in a counter-clockwise fashion.  The \u003ccode\u003ethenRotateClockwise\u003c/code\u003e and\n \u003ccode\u003ethenRotateCounterClockwise\u003c/code\u003e placers are the same as the previous two placers\n except that they start at the \"beginning\" cell where the most previous placer had left off.  If\n there was not a previous placer, then the BOTTOM RIGHT cell is chosen as the starting cell.\n \u003cp\u003e\n \u003cBR\u003e\n \u003cBR\u003e\n \n \u003cH1\u003eOverlapping Corner Placer\u003c/H1\u003e\n \n \u003cp\u003e\n There is one corner placer, \u003ccode\u003eleastOverlapCorner()\u003c/code\u003e.  This placer tries to make a\n placement at each of the corners of the context area and shifts into the context region as much\n as necessary to fit the screen bounds.  The corner that overlaps the context area the least is\n chosen as the solution placement corner.  In case of a tie (e.g., no overlap on some corners),\n the placement order chosen in this preference order: bottom right, bottom left, top right, and\n top left.  Unless ill-constructed (sized of context area, screen, and pop-up dimension), this\n placer should always find a solution.\n \u003cp\u003e\n \u003cBR\u003e\n \u003cBR\u003e\n \n \u003cH1\u003eAssert Placer\u003c/H1\u003e\n \n \u003cp\u003e\n The \u003ccode\u003ethrowsAssertException()\u003c/code\u003e placer is available, which automatically throws an\n AssertException.  This placer is only intended to be used by the client in such as case when\n it is believed that a placement should have already been found, such as after the\n \u003ccode\u003eleastOverlapCorner()\u003c/code\u003e placer.  This just throws an exception instead of returning\n the \u003ccode\u003enull\u003c/code\u003e return value that would be returned from previous placement attempts.\n \u003cp\u003e\n \u003cBR\u003e\n \u003cBR\u003e\n \n \u003cH1\u003eComposite Placer\u003c/H1\u003e\n \n \u003cp\u003e\n Builds a placer that first attempts a placement at the right edge from bottom to top, then\n left edge from bottom to top, then top edge from right to left, then bottom edge from right to\n left, followed by a least-overlap-corner solution, followed by a failure assert:\n \u003cpre\u003e\n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge()\n            .leftEdge()\n            .topEdge()\n            .bottomEdge()\n            .leastOverlapCorner()\n            .throwsAssertException()\n            .build();\u003c/pre\u003e\n \u003cp\u003e\n Builds a placer that first attempts each of the four major corners in a specific order, with no\n shifting, followed by an assertion failure:\n \u003cpre\u003e\n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge(Location.BOTTOM, Location.BOTTOM)\n            .leftEdge(Location.TOP, Location.TOP)\n            .rightEdge(Location.TOP, Location.TOP)\n            .leftEdge(Location.BOTTOM, Location.BOTTOM)\n            .throwsAssertException()\n            .build();\u003c/pre\u003e\n \u003cp\u003e\n Builds a placer that attempt to make a placement at the bottom right corner, first shifting up\n to the center location then shifting left to the center location, then failing only with a\n null return:\n \u003cpre\u003e\n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .rightEdge(Location.BOTTOM)\n            .bottomEdge(Location.RIGHT)\n            .build();\u003c/pre\u003e\n \u003cp\u003e\n Builds a placer that attempts a placement at the top, left corner, the tries to make a placement\n in a clockwise fashion, followed by a failure assert:\n \u003cpre\u003e\n    PopupWindowPlacer placer \u003d\n        new PopupWindowPlacerBuilder()\n            .topEdge(Location.LEFT, Location.LEFT)\n            .thenRotateClockwise()\n            .throwsAssertException()\n            .build();\u003c/pre\u003e\n@see PopupWindowPlacer",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "head",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.shapes.PopupWindowPlacer",
+      "type_short": "PopupWindowPlacer",
+      "constant_value": null
+    },
+    {
+      "name": "current",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.shapes.PopupWindowPlacer",
+      "type_short": "PopupWindowPlacer",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "build",
+      "comment": "Builds the final PopupWindowPlacer.",
+      "javadoc": "Builds the final PopupWindowPlacer.\n@return the PopupWindowPlacer",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacer",
+        "type_short": "PopupWindowPlacer",
+        "comment": "the PopupWindowPlacer"
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "next",
+          "type_long": "docking.widgets.shapes.PopupWindowPlacer",
+          "type_short": "PopupWindowPlacer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "rightEdge",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement at the right\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement at the right\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.\n@param minors the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge.\n@return this builder",
+      "static": false,
+      "params": [
+        {
+          "name": "minors",
+          "type_long": "docking.widgets.shapes.Location[]",
+          "type_short": "docking.widgets.shapes.Location[]",
+          "comment": "the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge."
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "leftEdge",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement at the left\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement at the left\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.\n@param minors the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge.\n@return this builder",
+      "static": false,
+      "params": [
+        {
+          "name": "minors",
+          "type_long": "docking.widgets.shapes.Location[]",
+          "type_short": "docking.widgets.shapes.Location[]",
+          "comment": "the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge."
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "bottomEdge",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement at the bottom\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement at the bottom\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.\n@param minors the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge.\n@return this builder",
+      "static": false,
+      "params": [
+        {
+          "name": "minors",
+          "type_long": "docking.widgets.shapes.Location[]",
+          "type_short": "docking.widgets.shapes.Location[]",
+          "comment": "the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge."
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "topEdge",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement at the top\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement at the top\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.\n@param minors the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge.\n@return this builder",
+      "static": false,
+      "params": [
+        {
+          "name": "minors",
+          "type_long": "docking.widgets.shapes.Location[]",
+          "type_short": "docking.widgets.shapes.Location[]",
+          "comment": "the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge."
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "edge",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement on the major\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement on the major\n edge of the inner bounds (context) without exceeding outer bounds (screen), using\n an ordered, preferred placements on that edge.  Invalid values will error.\n@param major the major edge of the context area\n@param minors the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge.\n@return this builder",
+      "static": false,
+      "params": [
+        {
+          "name": "major",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "the major edge of the context area"
+        },
+        {
+          "name": "minors",
+          "type_long": "docking.widgets.shapes.Location[]",
+          "type_short": "docking.widgets.shapes.Location[]",
+          "comment": "the ordered, preferred placements on the edge. If not specified, goes from\n greater-valued end of the edge to the lesser-valued end of the edge."
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "thenRotateClockwise",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n the last-used  and  and continues clockwise\n to find a solution.  If there was no last-used location set, then BOTTOM, RIGHT is used.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n the last-used {@code majorBegin} and {@code minorBegin} and continues clockwise\n to find a solution.  If there was no last-used location set, then BOTTOM, RIGHT is used.\n@return this builder",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "rotateClockwise",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n a point specified by  and  and continues\n clockwise to find a solution.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n a point specified by {@code majorBegin} and {@code minorBegin} and continues\n clockwise to find a solution.\n@param majorBegin the major coordinate location of the starting point\n@param minorBegin the minor coordinate location of the starting point\n@return this builder",
+      "static": false,
+      "params": [
+        {
+          "name": "majorBegin",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "the major coordinate location of the starting point"
+        },
+        {
+          "name": "minorBegin",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "the minor coordinate location of the starting point"
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "thenRotateCounterClockwise",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n the last-used  and  and continues counter-clockwise\n to find a solution.  If there was no last-used location set, then RIGHT, BOTTOM is used.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n the last-used {@code majorBegin} and {@code minorBegin} and continues counter-clockwise\n to find a solution.  If there was no last-used location set, then RIGHT, BOTTOM is used.\n@return this builder",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "rotateCounterClockwise",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n a point specified by  and  and continues\n counter-clockwise to find a solution.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement by starting at\n a point specified by {@code majorBegin} and {@code minorBegin} and continues\n counter-clockwise to find a solution.\n@param majorBegin the major coordinate location of the starting point\n@param minorBegin the minor coordinate location of the starting point\n@return this builder",
+      "static": false,
+      "params": [
+        {
+          "name": "majorBegin",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "the major coordinate location of the starting point"
+        },
+        {
+          "name": "minorBegin",
+          "type_long": "docking.widgets.shapes.Location",
+          "type_short": "Location",
+          "comment": "the minor coordinate location of the starting point"
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "leastOverlapCorner",
+      "comment": "Set the next PopupWindowPlacer to be one that tries to make the placement that is\n allowed to overlap the inner bounds, but with the least overlap area.  Tie-breaker\n order is first in this order: Bottom Right, Bottom Left, Top Right, Top  Left.\n \n Should never return null, except if using impractical parameters, such as using\n outer bounds that are smaller than inner bounds.",
+      "javadoc": "Set the next PopupWindowPlacer to be one that tries to make the placement that is\n allowed to overlap the inner bounds, but with the least overlap area.  Tie-breaker\n order is first in this order: Bottom Right, Bottom Left, Top Right, Top  Left.\n \u003cp\u003e\n Should never return null, except if using impractical parameters, such as using\n outer bounds that are smaller than inner bounds.\n@return this builder",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    },
+    {
+      "name": "throwsAssertException",
+      "comment": "Set the next PopupWindowPlacer that throws an AssertException because no solution has\n been found by the time this placer is tried.  This is intended to be used when the coder\n has already guaranteed that there is a solution (i.e., the #leastOverlapCorner()\n placer has been used and the pop-up area will fit within the outer bounds).",
+      "javadoc": "Set the next PopupWindowPlacer that throws an AssertException because no solution has\n been found by the time this placer is tried.  This is intended to be used when the coder\n has already guaranteed that there is a solution (i.e., the {@link #leastOverlapCorner()}\n placer has been used and the pop-up area will fit within the outer bounds).\n@return this builder",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.shapes.PopupWindowPlacerBuilder",
+        "type_short": "PopupWindowPlacerBuilder",
+        "comment": "this builder"
+      },
+      "throws": []
+    }
+  ]
+}

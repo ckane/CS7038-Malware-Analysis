@@ -1,0 +1,479 @@
+{
+  "name": "DWARFDataTypeConflictHandler",
+  "comment": "This DataTypeConflictHandler attempts to match\n conflicting Composite (structure or union) when\n they have compatible data layouts. (Data types that are exactly equiv will\n not be subjected to conflict handling and will never reach here)\n \n A default/empty sized structure, or structures with the same size are\n candidates for matching.\n \n Structures that have a subset of the other\u0027s field definition are candidates\n for matching.\n \n When a candidate data type is matched with an existing data type, this\n conflict handler will specify that the new data type is:\n \n \n discarded and replaced by the existing data type\n (ConflictResult#USE_EXISTING)\n used to overwrite the existing data type\n (ConflictResult#REPLACE_EXISTING)\n \n or the candidate data type was NOT matched with an existing data type,\n and the new data type is:\n \n \n kept, but renamed with a .conflictNNNN suffix to make it unique\n (ConflictResult#RENAME_AND_ADD)\n \n NOTE: structures with alignment (instead of being statically laid out)\n are not treated specially and will not match other aligned or non-aligned\n structures.",
+  "javadoc": "This {@link DataTypeConflictHandler conflict handler} attempts to match\n conflicting {@link Composite composite data types} (structure or union) when\n they have compatible data layouts. (Data types that are exactly equiv will\n not be subjected to conflict handling and will never reach here)\n \u003cp\u003e\n A default/empty sized structure, or structures with the same size are\n candidates for matching.\n \u003cp\u003e\n Structures that have a subset of the other\u0027s field definition are candidates\n for matching.\n \u003cp\u003e\n When a candidate data type is matched with an existing data type, this\n conflict handler will specify that the new data type is:\n \u003cp\u003e\n \u003cul\u003e\n \u003cli\u003ediscarded and replaced by the existing data type\n ({@link ConflictResult#USE_EXISTING})\n \u003cli\u003eused to overwrite the existing data type\n ({@link ConflictResult#REPLACE_EXISTING})\n \u003c/ul\u003e\n or the candidate data type was \u003cb\u003eNOT\u003c/b\u003e matched with an existing data type,\n and the new data type is:\n \u003cp\u003e\n \u003cul\u003e\n \u003cli\u003ekept, but renamed with a .conflictNNNN suffix to make it unique\n ({@link ConflictResult#RENAME_AND_ADD})\n \u003c/ul\u003e\n \u003cb\u003eNOTE:\u003c/b\u003e structures with alignment (instead of being statically laid out)\n are not treated specially and will not match other aligned or non-aligned\n structures.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.program.model.data.DataTypeConflictHandler",
+  "fields": [
+    {
+      "name": "INSTANCE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFDataTypeConflictHandler",
+      "type_short": "DWARFDataTypeConflictHandler",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSizeCompatible",
+      "comment": "Returns true if src can overwrite the target composite based on size",
+      "javadoc": "Returns true if src can overwrite the target composite based on size\n@param src\n@param target\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "src",
+          "type_long": "ghidra.program.model.data.Composite",
+          "type_short": "Composite",
+          "comment": ""
+        },
+        {
+          "name": "target",
+          "type_long": "ghidra.program.model.data.Composite",
+          "type_short": "Composite",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCompositeDefault",
+      "comment": "Determines if the given composite is either empty or filled with default\n values (no defined components).",
+      "javadoc": "Determines if the given composite is either empty or filled with default\n values (no defined components).\n@param composite composite to check\n@return true if empty or default and false otherwise",
+      "static": false,
+      "params": [
+        {
+          "name": "composite",
+          "type_long": "ghidra.program.model.data.Composite",
+          "type_short": "Composite",
+          "comment": "composite to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if empty or default and false otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "isCompositePart",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "full",
+          "type_long": "ghidra.program.model.data.Composite",
+          "type_short": "Composite",
+          "comment": ""
+        },
+        {
+          "name": "part",
+          "type_long": "ghidra.program.model.data.Composite",
+          "type_short": "Composite",
+          "comment": ""
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUnionPart",
+      "comment": "Returns true if one union is a subset of another union.\n \n Each component of the candidate partial union must be present in the \u0027full\u0027\n union and must be \u0027equiv\u0027.\n \n Order of components is ignored, except for unnamed components, which receive\n a default name created using their ordinal position.",
+      "javadoc": "Returns true if one union is a subset of another union.\n \u003cp\u003e\n Each component of the candidate partial union must be present in the \u0027full\u0027\n union and must be \u0027equiv\u0027.\n \u003cp\u003e\n Order of components is ignored, except for unnamed components, which receive\n a default name created using their ordinal position.\n@param full {@link Union} datatype that is expected to be a\n                         superset of the next param.\n@param part {@link Union} datatype that is expected to be a\n                         subset of the previous param.\n@param visitedDataTypes identity map of datatypes to prevent loops.\n@return true if part is a subset (or equal) to full.",
+      "static": false,
+      "params": [
+        {
+          "name": "full",
+          "type_long": "ghidra.program.model.data.Union",
+          "type_short": "Union",
+          "comment": "Union datatype that is expected to be a\n                         superset of the next param."
+        },
+        {
+          "name": "part",
+          "type_long": "ghidra.program.model.data.Union",
+          "type_short": "Union",
+          "comment": "Union datatype that is expected to be a\n                         subset of the previous param."
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": "identity map of datatypes to prevent loops."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if part is a subset (or equal) to full."
+      },
+      "throws": []
+    },
+    {
+      "name": "isStructurePart",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "full",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": ""
+        },
+        {
+          "name": "part",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": ""
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBestMatchingDTC",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "struct",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": ""
+        },
+        {
+          "name": "matchCriteria",
+          "type_long": "ghidra.program.model.data.DataTypeComponent",
+          "type_short": "DataTypeComponent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isMemberFieldPartiallyCompatible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fullDTC",
+          "type_long": "ghidra.program.model.data.DataTypeComponent",
+          "type_short": "DataTypeComponent",
+          "comment": ""
+        },
+        {
+          "name": "partDTC",
+          "type_long": "ghidra.program.model.data.DataTypeComponent",
+          "type_short": "DataTypeComponent",
+          "comment": ""
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBitfieldByOffsets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "full",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": ""
+        },
+        {
+          "name": "partDTC",
+          "type_long": "ghidra.program.model.data.DataTypeComponent",
+          "type_short": "DataTypeComponent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doStrictCompare",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "existingDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeConflictHandler.ConflictResult",
+        "type_short": "ConflictResult",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "compareFuncDef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addedFunc",
+          "type_long": "ghidra.program.model.data.FunctionDefinition",
+          "type_short": "FunctionDefinition",
+          "comment": ""
+        },
+        {
+          "name": "existingFunc",
+          "type_long": "ghidra.program.model.data.FunctionDefinition",
+          "type_short": "FunctionDefinition",
+          "comment": ""
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeConflictHandler.ConflictResult",
+        "type_short": "ConflictResult",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doRelaxedCompare",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "existingDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeConflictHandler.ConflictResult",
+        "type_short": "ConflictResult",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDTPairKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType1",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dataType2",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addVisited",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType1",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dataType2",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "visitedDataTypes",
+          "type_long": "java.util.Set\u003cjava.lang.Long\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "existingDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeConflictHandler.ConflictResult",
+        "type_short": "ConflictResult",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shouldUpdate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "localDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSubsequentHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeConflictHandler",
+        "type_short": "DataTypeConflictHandler",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

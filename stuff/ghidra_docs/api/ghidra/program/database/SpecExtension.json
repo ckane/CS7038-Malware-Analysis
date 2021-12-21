@@ -1,0 +1,710 @@
+{
+  "name": "SpecExtension",
+  "comment": "Utility class for installing/removing \"specification extensions\" to a Program.\n A specification extension is a program specific version of either a:\n   - Prototype Model\n   - Call Fixup or \n   - Callother Fixup\n Normally these objects are provided by the language specific configuration files (.cspec or .pspec),\n but this class allows additional objects to be added that are specific to the program.\n \n Internally, each spec extension is stored as an XML document as a formal Program Option. Each type of\n extension is described by a specific XML tag and is parsed as it would be in a .cspec or .pspec file.\n The XML tags are:\n   - \\        - describing a Call Fixup\n   - \\   - describing a Callother Fixup\n   - \\        - describing a typical Prototype Model\n   - \\ - describing a Prototype Model merged from other models\n   \n Each type of object has a unique name or target, which must be specified as part of the XML tag,\n which is referred to in this class as the extension\u0027s \"formal name\".  In the \\ tag,\n the formal name is given by the \"targetop\" attribute; for all the other tags, the formal name is\n given by the \"name\" attribute\".\n \n The parent option for all extensions is given by the static field SPEC_EXTENSION. Under the parent\n option, each extension is stored as a string with an option name, constructed by\n concatenating the extension\u0027s formal name with a prefix corresponding to the extension\u0027s XML tag name.\n\n testExtensionDocument() is used independently to extensively test whether a document\n describes a valid extension.\n \n Extensions are installed on a program via addReplaceCompilerSpecExtension().\n Extensions are removed from a program via removeCompilerSpecExtension().",
+  "javadoc": "Utility class for installing/removing \"specification extensions\" to a Program.\n A specification extension is a program specific version of either a:\n   - Prototype Model\n   - Call Fixup or \n   - Callother Fixup\n Normally these objects are provided by the language specific configuration files (.cspec or .pspec),\n but this class allows additional objects to be added that are specific to the program.\n \n Internally, each spec extension is stored as an XML document as a formal Program Option. Each type of\n extension is described by a specific XML tag and is parsed as it would be in a .cspec or .pspec file.\n The XML tags are:\n   - \\\u003ccallfixup\u003e        - describing a Call Fixup\n   - \\\u003ccallotherfixup\u003e   - describing a Callother Fixup\n   - \\\u003cprototype\u003e        - describing a typical Prototype Model\n   - \\\u003cresolveprototype\u003e - describing a Prototype Model merged from other models\n   \n Each type of object has a unique name or target, which must be specified as part of the XML tag,\n which is referred to in this class as the extension\u0027s \"formal name\".  In the \\\u003ccallotherfixup\u003e tag,\n the formal name is given by the \"targetop\" attribute; for all the other tags, the formal name is\n given by the \"name\" attribute\".\n \n The parent option for all extensions is given by the static field SPEC_EXTENSION. Under the parent\n option, each extension is stored as a string with an option name, constructed by\n concatenating the extension\u0027s formal name with a prefix corresponding to the extension\u0027s XML tag name.\n\n testExtensionDocument() is used independently to extensively test whether a document\n describes a valid extension.\n \n Extensions are installed on a program via addReplaceCompilerSpecExtension().\n Extensions are removed from a program via removeCompilerSpecExtension().",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "SPEC_EXTENSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Specification Extensions\""
+    },
+    {
+      "name": "FORMAT_VERSION_OPTIONNAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"FormatVersion\""
+    },
+    {
+      "name": "VERSION_COUNTER_OPTIONNAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"VersionCounter\""
+    },
+    {
+      "name": "FORMAT_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramDB",
+      "type_short": "ProgramDB",
+      "constant_value": null
+    },
+    {
+      "name": "cspecValidator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguageValidator",
+      "type_short": "SleighLanguageValidator",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an extension manager attached to a specific program.\n Multiple add/remove/test actions can be performed.  Validator state is cached between calls.",
+      "javadoc": "Construct an extension manager attached to a specific program.\n Multiple add/remove/test actions can be performed.  Validator state is cached between calls.\n@param program is the specific Program",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the specific Program"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExtensionType",
+      "comment": "Get the extension type either from the XML tag name or the option name",
+      "javadoc": "Get the extension type either from the XML tag name or the option name\n@param nm is the XML tag or option name\n@param isXML is true for an XML tag, false for an option name\n@return the extension type\n@throws SleighException if no type matches the name",
+      "static": true,
+      "params": [
+        {
+          "name": "nm",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the XML tag or option name"
+        },
+        {
+          "name": "isXML",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "is true for an XML tag, false for an option name"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.SpecExtension.Type",
+        "type_short": "Type",
+        "comment": "the extension type"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "if no type matches the name"
+        }
+      ]
+    },
+    {
+      "name": "isCompilerProperty",
+      "comment": "Check if the given option name corresponds to an extension",
+      "javadoc": "Check if the given option name corresponds to an extension\n@param nm is the given option name\n@return true if the name labels a spec extension",
+      "static": true,
+      "params": [
+        {
+          "name": "nm",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the given option name"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the name labels a spec extension"
+      },
+      "throws": []
+    },
+    {
+      "name": "getVersionCounter",
+      "comment": "Get version of CompilerSpec extensions stored with the Program",
+      "javadoc": "Get version of CompilerSpec extensions stored with the Program\n@param program is the given Program\n@return the version number",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the given Program"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the version number"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompilerSpecExtensions",
+      "comment": "Get all compiler spec extensions for the program. The extensions are XML documents\n strings, with an associated \"option name\" string.\n Return a list of (optionname,document) pairs, which may be empty",
+      "javadoc": "Get all compiler spec extensions for the program. The extensions are XML documents\n strings, with an associated \"option name\" string.\n Return a list of (optionname,document) pairs, which may be empty\n@param program is the Program to get extensions for\n@return the list of (optionname,document) pairs",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the Program to get extensions for"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cgeneric.stl.Pair\u003cjava.lang.String,java.lang.String\u003e\u003e",
+        "type_short": "List",
+        "comment": "the list of (optionname,document) pairs"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompilerSpecExtension",
+      "comment": "Get the raw string making up an extension, given its type and name",
+      "javadoc": "Get the raw string making up an extension, given its type and name\n@param program is the program to extract the extension from\n@param type is the type of extension\n@param name is the formal name of the extension\n@return the extension string or null",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the program to extract the extension from"
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.database.SpecExtension.Type",
+          "type_short": "Type",
+          "comment": "is the type of extension"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the formal name of the extension"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the extension string or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkFormatVersion",
+      "comment": "Check the format version for spec extensions for a given program.\n If the program reports a version that does not match the current\n number attached to the running tool (FORMAT_VERSION), a VersionException is thrown",
+      "javadoc": "Check the format version for spec extensions for a given program.\n If the program reports a version that does not match the current\n number attached to the running tool (FORMAT_VERSION), a VersionException is thrown\n@param program is the given Program\n@throws VersionException the reported version does not match the tool",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the given Program"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "the reported version does not match the tool"
+        }
+      ]
+    },
+    {
+      "name": "registerOptions",
+      "comment": "Register the options system allowing spec extensions with the given Program",
+      "javadoc": "Register the options system allowing spec extensions with the given Program\n@param program is the given Program",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the given Program"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFormalName",
+      "comment": "Get the formal name of an extension from its option name.",
+      "javadoc": "Get the formal name of an extension from its option name.\n@param optionName is the option name\n@return the formal name",
+      "static": true,
+      "params": [
+        {
+          "name": "optionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the option name"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the formal name"
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidFormalName",
+      "comment": "Determine if the desired formal name is a valid identifier",
+      "javadoc": "Determine if the desired formal name is a valid identifier\n@param formalName is the formal name to check\n@return true if the name is valid",
+      "static": true,
+      "params": [
+        {
+          "name": "formalName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the formal name to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the name is valid"
+      },
+      "throws": []
+    },
+    {
+      "name": "getErrorHandler",
+      "comment": "Generate an XML error handler suitable for parsing a specification document.\n   - Warnings are logged.\n   - Errors cause a SAXParseException",
+      "javadoc": "Generate an XML error handler suitable for parsing a specification document.\n   - Warnings are logged.\n   - Errors cause a SAXParseException\n@param docTitle is the title of the document\n@return the error handler object",
+      "static": true,
+      "params": [
+        {
+          "name": "docTitle",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the title of the document"
+        }
+      ],
+      "return": {
+        "type_long": "org.xml.sax.ErrorHandler",
+        "type_short": "ErrorHandler",
+        "comment": "the error handler object"
+      },
+      "throws": []
+    },
+    {
+      "name": "parseExtension",
+      "comment": "Parse an XML string and build the corresponding compiler spec extension object.\n Currently this can either be a\n    - PrototypeModel or\n    - InjectPayload\n \n For InjectPayloadCallfixup or InjectPayloadCallother, the p-code \\ tag\n is also parsed, and the caller can control whether any parse errors\n cause an exception or whether a dummy payload is provided instead.",
+      "javadoc": "Parse an XML string and build the corresponding compiler spec extension object.\n Currently this can either be a\n    - PrototypeModel or\n    - InjectPayload\n \n For InjectPayloadCallfixup or InjectPayloadCallother, the p-code \\\u003cbody\u003e tag\n is also parsed, and the caller can control whether any parse errors\n cause an exception or whether a dummy payload is provided instead.\n@param optionName is the option name the extension is attached to\n@param extension is the XML document as a String\n@param cspec is the compiler spec the new extension is for\n@param provideDummy if true, provide a dummy payload if necessary\n@return the extension object\n@throws SAXException is there are XML format errors\n@throws XmlParseException if the XML document is badly formed\n@throws SleighException if internal p-code does not parse",
+      "static": true,
+      "params": [
+        {
+          "name": "optionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the option name the extension is attached to"
+        },
+        {
+          "name": "extension",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the XML document as a String"
+        },
+        {
+          "name": "cspec",
+          "type_long": "ghidra.program.model.lang.CompilerSpec",
+          "type_short": "CompilerSpec",
+          "comment": "is the compiler spec the new extension is for"
+        },
+        {
+          "name": "provideDummy",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, provide a dummy payload if necessary"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": "the extension object"
+      },
+      "throws": [
+        {
+          "type_long": "org.xml.sax.SAXException",
+          "type_short": "SAXException",
+          "comment": "is there are XML format errors"
+        },
+        {
+          "type_long": "ghidra.xml.XmlParseException",
+          "type_short": "XmlParseException",
+          "comment": "if the XML document is badly formed"
+        },
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "if internal p-code does not parse"
+        }
+      ]
+    },
+    {
+      "name": "checkCallFixup",
+      "comment": "Check that the proposed callfixup extension does not collide with built-in fixups",
+      "javadoc": "Check that the proposed callfixup extension does not collide with built-in fixups\n@param doc is info about the proposed extension\n@throws SleighException is there is a collision",
+      "static": false,
+      "params": [
+        {
+          "name": "doc",
+          "type_long": "ghidra.program.database.SpecExtension.DocInfo",
+          "type_short": "DocInfo",
+          "comment": "is info about the proposed extension"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "is there is a collision"
+        }
+      ]
+    },
+    {
+      "name": "checkCallotherFixup",
+      "comment": "Check that the proposed callotherfixup extension targets a user-defined op\n that exists.  Check if the extension would override a built-in fixup.",
+      "javadoc": "Check that the proposed callotherfixup extension targets a user-defined op\n that exists.  Check if the extension would override a built-in fixup.\n@param doc is info on the proposed extension\n@throws SleighException if the targeted op does not exist",
+      "static": false,
+      "params": [
+        {
+          "name": "doc",
+          "type_long": "ghidra.program.database.SpecExtension.DocInfo",
+          "type_short": "DocInfo",
+          "comment": "is info on the proposed extension"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "if the targeted op does not exist"
+        }
+      ]
+    },
+    {
+      "name": "checkPrototype",
+      "comment": "Check that the proposed prototype extension does not collide with a\n built-in prototype.",
+      "javadoc": "Check that the proposed prototype extension does not collide with a\n built-in prototype.\n@param doc is info on the proposed prototype\n@throws SleighException if there is a collision",
+      "static": false,
+      "params": [
+        {
+          "name": "doc",
+          "type_long": "ghidra.program.database.SpecExtension.DocInfo",
+          "type_short": "DocInfo",
+          "comment": "is info on the proposed prototype"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "if there is a collision"
+        }
+      ]
+    },
+    {
+      "name": "checkExtension",
+      "comment": "Check the given document information against existing objects already in the compiler spec.\n Any problem (like name collisions) causes an exception to get thrown.\n Checks may populate additional document information",
+      "javadoc": "Check the given document information against existing objects already in the compiler spec.\n Any problem (like name collisions) causes an exception to get thrown.\n Checks may populate additional document information\n@param doc is the document information: name, type\n@throws SleighException if there is a problem",
+      "static": false,
+      "params": [
+        {
+          "name": "doc",
+          "type_long": "ghidra.program.database.SpecExtension.DocInfo",
+          "type_short": "DocInfo",
+          "comment": "is the document information: name, type"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "if there is a problem"
+        }
+      ]
+    },
+    {
+      "name": "testExtensionDocument",
+      "comment": "Test if the given XML document describes a suitable spec extension.\n The document must fully parse and validate and must not conflict with the existing spec;\n otherwise an exception is thrown. If all tests pass, an object describing basic properties\n of the document is returned.",
+      "javadoc": "Test if the given XML document describes a suitable spec extension.\n The document must fully parse and validate and must not conflict with the existing spec;\n otherwise an exception is thrown. If all tests pass, an object describing basic properties\n of the document is returned.\n@param document is the given XML document\n@return info about the document\n@throws SleighException if validity checks fail\n@throws XmlParseException if the XML is badly formed\n@throws SAXException if there are parse errors",
+      "static": false,
+      "params": [
+        {
+          "name": "document",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the given XML document"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.SpecExtension.DocInfo",
+        "type_short": "DocInfo",
+        "comment": "info about the document"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "if validity checks fail"
+        },
+        {
+          "type_long": "org.xml.sax.SAXException",
+          "type_short": "SAXException",
+          "comment": "if there are parse errors"
+        },
+        {
+          "type_long": "ghidra.xml.XmlParseException",
+          "type_short": "XmlParseException",
+          "comment": "if the XML is badly formed"
+        }
+      ]
+    },
+    {
+      "name": "removeCallFixup",
+      "comment": "Clean up references to a callfixup that is going to be removed",
+      "javadoc": "Clean up references to a callfixup that is going to be removed\n@param fixupName is the name of the fixup\n@param monitor is a task monitor\n@throws CancelledException if the task is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "fixupName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the name of the fixup"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is a task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "removeCallotherFixup",
+      "comment": "Clean up any references to a callotherfixup that is going to be removed",
+      "javadoc": "Clean up any references to a callotherfixup that is going to be removed\n@param fixupName is the name of the callother fixup\n@param monitor is a task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "fixupName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the name of the callother fixup"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is a task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearPrototypeEvaluationModel",
+      "comment": "If the indicated evaluation model matches the given name,\n clear the evaluation model to the default",
+      "javadoc": "If the indicated evaluation model matches the given name,\n clear the evaluation model to the default\n@param modelType is the indicated evaluation model\n@param modelName is the given name needing to be cleared",
+      "static": false,
+      "params": [
+        {
+          "name": "modelType",
+          "type_long": "ghidra.program.model.lang.CompilerSpec.EvaluationModelType",
+          "type_short": "EvaluationModelType",
+          "comment": "is the indicated evaluation model"
+        },
+        {
+          "name": "modelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the given name needing to be cleared"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removePrototype",
+      "comment": "Clean up references to a prototype extension that is about to be removed.\n Functions that use this prototype are changed to have an \"unknown\" prototype.",
+      "javadoc": "Clean up references to a prototype extension that is about to be removed.\n Functions that use this prototype are changed to have an \"unknown\" prototype.\n@param modelName is the name of the prototype being removed\n@param monitor is a task monitor\n@throws CancelledException if the task is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "modelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the name of the prototype being removed"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is a task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "addReplaceCompilerSpecExtension",
+      "comment": "Install or replace a spec extension to the program.  The extension is presented as\n an XML document, from which a name is extracted.  If an extension previously existed\n with the same name, it is overwritten.  Otherwise the document is treated as a new\n extension.  Testing is performed before installation:\n    - Document is parsed as XML and is verified against spec grammars\n    - Internal p-code tags from InjectPayloads are compiled\n    - Name collisions are checked for",
+      "javadoc": "Install or replace a spec extension to the program.  The extension is presented as\n an XML document, from which a name is extracted.  If an extension previously existed\n with the same name, it is overwritten.  Otherwise the document is treated as a new\n extension.  Testing is performed before installation:\n    - Document is parsed as XML and is verified against spec grammars\n    - Internal p-code tags from InjectPayloads are compiled\n    - Name collisions are checked for\n@param document is the XML document describing the extension\n@param monitor is a task monitor\n@throws LockException if the caller does not exclusive access to the program\n@throws XmlParseException for a badly formed extension document\n@throws SAXException for parse errors in the extension document\n@throws SleighException for a document that fails verification",
+      "static": false,
+      "params": [
+        {
+          "name": "document",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the XML document describing the extension"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is a task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if the caller does not exclusive access to the program"
+        },
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "for a document that fails verification"
+        },
+        {
+          "type_long": "org.xml.sax.SAXException",
+          "type_short": "SAXException",
+          "comment": "for parse errors in the extension document"
+        },
+        {
+          "type_long": "ghidra.xml.XmlParseException",
+          "type_short": "XmlParseException",
+          "comment": "for a badly formed extension document"
+        }
+      ]
+    },
+    {
+      "name": "removeCompilerSpecExtension",
+      "comment": "Remove the indicated spec extension from the program.\n Depending on the type, references to the extension are removed or altered\n first, to facilitate final removal of the extension.\n All changes are made in a single transaction that can be cancelled.",
+      "javadoc": "Remove the indicated spec extension from the program.\n Depending on the type, references to the extension are removed or altered\n first, to facilitate final removal of the extension.\n All changes are made in a single transaction that can be cancelled.\n@param optionName is the option name where the extension is stored\n@param monitor is a provided monitor that can trigger cancellation\n@throws LockException if the caller does not have exclusive access to the program\n@throws CancelledException if the caller cancels the operation via the task monitor",
+      "static": false,
+      "params": [
+        {
+          "name": "optionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the option name where the extension is stored"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is a provided monitor that can trigger cancellation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": "if the caller does not have exclusive access to the program"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the caller cancels the operation via the task monitor"
+        }
+      ]
+    }
+  ]
+}

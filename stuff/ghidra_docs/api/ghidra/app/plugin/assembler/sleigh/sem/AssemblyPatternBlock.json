@@ -1,0 +1,805 @@
+{
+  "name": "AssemblyPatternBlock",
+  "comment": "The analog of PatternBlock, designed for use by the assembler\n \n It is suitable for the assembler because it is represented byte-by-byte, and it offers a number\n of useful conversions and operations.\n \n TODO A lot of this could probably be factored into the PatternBlock class, but it was\n best to experiment in another class altogether to avoid breaking things.",
+  "javadoc": "The analog of {@link PatternBlock}, designed for use by the assembler\n \n It is suitable for the assembler because it is represented byte-by-byte, and it offers a number\n of useful conversions and operations.\n \n TODO A lot of this could probably be factored into the {@link PatternBlock} class, but it was\n best to experiment in another class altogether to avoid breaking things.",
+  "static": false,
+  "implements": [
+    "java.lang.Comparable"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "SHIFT_STR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"SS:\""
+    },
+    {
+      "name": "SHIFT_STR_END",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"SS\""
+    },
+    {
+      "name": "offset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "mask",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "byte[]",
+      "type_short": "byte[]",
+      "constant_value": null
+    },
+    {
+      "name": "vals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "byte[]",
+      "type_short": "byte[]",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new pattern block with the given mask, values, and offset",
+      "javadoc": "Construct a new pattern block with the given mask, values, and offset\n@param offset an offset (0-up, left-to-right) where the pattern actually starts\n@param mask a mask: only {@code 1} bits are included in the pattern\n@param vals the value, excluding corresponding {@code 0} bits in the mask",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "an offset (0-up, left-to-right) where the pattern actually starts"
+        },
+        {
+          "name": "mask",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "a mask: only  bits are included in the pattern"
+        },
+        {
+          "name": "vals",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "the value, excluding corresponding  bits in the mask"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new empty pattern block at the given offset, prepared with the given capacity",
+      "javadoc": "Construct a new empty pattern block at the given offset, prepared with the given capacity\n@param offset an offset (0-up, left-to-right) where the pattern will start\n@param capacity the space to allocate for the mask and values",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "an offset (0-up, left-to-right) where the pattern will start"
+        },
+        {
+          "name": "capacity",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the space to allocate for the mask and values"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "nop",
+      "comment": "Get an empty pattern block",
+      "javadoc": "Get an empty pattern block\n@return the pattern block",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the pattern block"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromBytes",
+      "comment": "Get a pattern block with the given (fully-included) values at the given offset",
+      "javadoc": "Get a pattern block with the given (fully-included) values at the given offset\n@param offset the offset (0-up, left-to-right)\n@param vals the values\n@return a pattern block (having a full mask)",
+      "static": true,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the offset (0-up, left-to-right)"
+        },
+        {
+          "name": "vals",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "the values"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "a pattern block (having a full mask)"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromLong",
+      "comment": "Convert the given long to a pattern block (having offset 0 and a full mask)\n NOTE: The result will be 8 bytes in length",
+      "javadoc": "Convert the given long to a pattern block (having offset 0 and a full mask)\n NOTE: The result will be 8 bytes in length\n@param value the value to convert\n@return the pattern block containing the big-endian representation of the value",
+      "static": true,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the value to convert"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the pattern block containing the big-endian representation of the value"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromMaskedLong",
+      "comment": "Convert the given masked long to a pattern block (having offset 0)\n NOTE: The result will be 8 bytes in length",
+      "javadoc": "Convert the given masked long to a pattern block (having offset 0)\n NOTE: The result will be 8 bytes in length\n@param ml the masked long, whose values and mask to convert\n@return the pattern block containing the big-endian representation of the value",
+      "static": true,
+      "params": [
+        {
+          "name": "ml",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+          "type_short": "MaskedLong",
+          "comment": "the masked long, whose values and mask to convert"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the pattern block containing the big-endian representation of the value"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromString",
+      "comment": "Convert a string representation to a pattern block",
+      "javadoc": "Convert a string representation to a pattern block\n@see NumericUtilities#convertHexStringToMaskedValue(AtomicLong, AtomicLong, String, int, int, String)\n@param str the string to convert\n@return the resulting pattern block",
+      "static": true,
+      "params": [
+        {
+          "name": "str",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string to convert"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the resulting pattern block"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromPattern",
+      "comment": "Convert a block from a disjoint pattern into an assembly pattern block",
+      "javadoc": "Convert a block from a disjoint pattern into an assembly pattern block\n@param pat the pattern to convert\n@param context true to select the context block, false to select the instruction block\n@return the converted pattern block",
+      "static": true,
+      "params": [
+        {
+          "name": "pat",
+          "type_long": "ghidra.app.plugin.processors.sleigh.pattern.DisjointPattern",
+          "type_short": "DisjointPattern",
+          "comment": "the pattern to convert"
+        },
+        {
+          "name": "minLen",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "context",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to select the context block, false to select the instruction block"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the converted pattern block"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromTokenField",
+      "comment": "Encode the given masked long into a pattern block as specified by a given token field",
+      "javadoc": "Encode the given masked long into a pattern block as specified by a given token field\n@param tf the token field specifying the location of the value to encode\n@param val the value to encode\n@return the pattern block with the encoded value",
+      "static": true,
+      "params": [
+        {
+          "name": "tf",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.TokenField",
+          "type_short": "TokenField",
+          "comment": "the token field specifying the location of the value to encode"
+        },
+        {
+          "name": "val",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+          "type_short": "MaskedLong",
+          "comment": "the value to encode"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the pattern block with the encoded value"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromContextField",
+      "comment": "Encode the given masked long into a pattern block as specified by a given context field",
+      "javadoc": "Encode the given masked long into a pattern block as specified by a given context field\n@param cf the context field specifying the location of the value to encode\n@param val the value to encode\n@return the pattern block with the encoded value",
+      "static": true,
+      "params": [
+        {
+          "name": "cf",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.ContextField",
+          "type_short": "ContextField",
+          "comment": "the context field specifying the location of the value to encode"
+        },
+        {
+          "name": "val",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+          "type_short": "MaskedLong",
+          "comment": "the value to encode"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the pattern block with the encoded value"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromRegisterValue",
+      "comment": "Convert a register value into a pattern block",
+      "javadoc": "Convert a register value into a pattern block\n@param rv the register value\n@return the pattern block\n \n This is used primarily to compute default context register values, and pass them into an\n assembler.",
+      "static": true,
+      "params": [
+        {
+          "name": "rv",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "the register value"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the pattern block\n \n This is used primarily to compute default context register values, and pass them into an\n assembler."
+      },
+      "throws": []
+    },
+    {
+      "name": "fromLength",
+      "comment": "Allocate a fully-undefined pattern block of the given length",
+      "javadoc": "Allocate a fully-undefined pattern block of the given length\n@param length the length in bytes\n@return the block of all unknown bits",
+      "static": true,
+      "params": [
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length in bytes"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the block of all unknown bits"
+      },
+      "throws": []
+    },
+    {
+      "name": "copy",
+      "comment": "Duplicate this pattern block",
+      "javadoc": "Duplicate this pattern block\n@return the duplicate",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the duplicate"
+      },
+      "throws": []
+    },
+    {
+      "name": "length",
+      "comment": "Get the length (plus the offset) of this pattern block",
+      "javadoc": "Get the length (plus the offset) of this pattern block\n@return the total length",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the total length"
+      },
+      "throws": []
+    },
+    {
+      "name": "shift",
+      "comment": "Shift, i.e., increase the offset of, this pattern block",
+      "javadoc": "Shift, i.e., increase the offset of, this pattern block\n@param amt the amount to shift right\n@return the shifted pattern block",
+      "static": false,
+      "params": [
+        {
+          "name": "amt",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the amount to shift right"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the shifted pattern block"
+      },
+      "throws": []
+    },
+    {
+      "name": "truncate",
+      "comment": "Truncate (unshift) this pattern block by removing bytes from the left",
+      "javadoc": "Truncate (unshift) this pattern block by removing bytes from the left\n@param amt the amount to truncate or shift left\n@return the truncated pattern block",
+      "static": false,
+      "params": [
+        {
+          "name": "amt",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the amount to truncate or shift left"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the truncated pattern block"
+      },
+      "throws": []
+    },
+    {
+      "name": "combine",
+      "comment": "Combine this pattern block with another given block\n \n Two blocks can be combined in their corresponding defined bits agree. When blocks are\n combined, their bytes are aligned according to their shifts, and the defined bits are taken\n from either block. If neither block defines a bit (i.e., the mask bit at that position is\n  for both input blocks, then the output has an undefined bit in the corresponding\n position. If both blocks define the bit, but they have opposite values, then the result is\n an error.",
+      "javadoc": "Combine this pattern block with another given block\n \n Two blocks can be combined in their corresponding defined bits agree. When blocks are\n combined, their bytes are aligned according to their shifts, and the defined bits are taken\n from either block. If neither block defines a bit (i.e., the mask bit at that position is\n {@code 0} for both input blocks, then the output has an undefined bit in the corresponding\n position. If both blocks define the bit, but they have opposite values, then the result is\n an error.\n@param that the other block\n@return the new combined block, or null if the blocks disagree for any bit",
+      "static": false,
+      "params": [
+        {
+          "name": "that",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": "the other block"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the new combined block, or null if the blocks disagree for any bit"
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "compareTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "that",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkRead",
+      "comment": "Read an array, returning a default if the index is out of bounds",
+      "javadoc": "Read an array, returning a default if the index is out of bounds\n@param arr the array to read\n@param idx the index\n@param def the default value\n@return the read value",
+      "static": true,
+      "params": [
+        {
+          "name": "arr",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "the array to read"
+        },
+        {
+          "name": "idx",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index"
+        },
+        {
+          "name": "def",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the default value"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the read value"
+      },
+      "throws": []
+    },
+    {
+      "name": "writeContextOp",
+      "comment": "Encode the given value into a copy of this pattern block as specified by a context operation\n \n NOTE: this method is given as a special operation, instead of a conversion factory method,\n because this is a write operation, not a combine operation. As such, the bits (including\n undefined bits) replace the bits in the existing pattern block. Were this a conversion\n method, we would lose the distinction between unknown bits being written, and bits whose\n values are simply not included in the write.",
+      "javadoc": "Encode the given value into a copy of this pattern block as specified by a context operation\n \n NOTE: this method is given as a special operation, instead of a conversion factory method,\n because this is a write operation, not a combine operation. As such, the bits (including\n undefined bits) replace the bits in the existing pattern block. Were this a conversion\n method, we would lose the distinction between unknown bits being written, and bits whose\n values are simply not included in the write.\n@param cop the context operation specifying the location of the value to encode\n@param val the value to encode\n@return the new copy with the encoded value",
+      "static": false,
+      "params": [
+        {
+          "name": "cop",
+          "type_long": "ghidra.app.plugin.processors.sleigh.ContextOp",
+          "type_short": "ContextOp",
+          "comment": "the context operation specifying the location of the value to encode"
+        },
+        {
+          "name": "val",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+          "type_short": "MaskedLong",
+          "comment": "the value to encode"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the new copy with the encoded value"
+      },
+      "throws": []
+    },
+    {
+      "name": "readContextOp",
+      "comment": "Read the input of a context operation from this pattern block",
+      "javadoc": "Read the input of a context operation from this pattern block\n@param cop the context operation\n@return the decoded input, as a masked value",
+      "static": false,
+      "params": [
+        {
+          "name": "cop",
+          "type_long": "ghidra.app.plugin.processors.sleigh.ContextOp",
+          "type_short": "ContextOp",
+          "comment": "the context operation"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+        "type_short": "MaskedLong",
+        "comment": "the decoded input, as a masked value"
+      },
+      "throws": []
+    },
+    {
+      "name": "maskOut",
+      "comment": "Set all bits read by a given context operation to unknown",
+      "javadoc": "Set all bits read by a given context operation to unknown\n@param cop the context operation\n@return the result\n \n This is used during resolution to remove a context requirement passed upward by a child.\n When a parent constructor writes the required value to the context register, that\n requirement need not be passed further upward, since the write satisfies the requirement.",
+      "static": false,
+      "params": [
+        {
+          "name": "cop",
+          "type_long": "ghidra.app.plugin.processors.sleigh.ContextOp",
+          "type_short": "ContextOp",
+          "comment": "the context operation"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the result\n \n This is used during resolution to remove a context requirement passed upward by a child.\n When a parent constructor writes the required value to the context register, that\n requirement need not be passed further upward, since the write satisfies the requirement."
+      },
+      "throws": []
+    },
+    {
+      "name": "getVals",
+      "comment": "Get the values array",
+      "javadoc": "Get the values array\n@return the array",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": "the array"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMask",
+      "comment": "Get the mask array",
+      "javadoc": "Get the mask array\n@return the array",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": "the array"
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffset",
+      "comment": "Get the number of undefined bytes preceding the mask and values arrays",
+      "javadoc": "Get the number of undefined bytes preceding the mask and values arrays\n@return the offset",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "readValBytes",
+      "comment": "Decode  len value bytes in big-endian format, beginning at ",
+      "javadoc": "Decode {@code} len value bytes in big-endian format, beginning at {@code start}\n@param start the first byte to decode\n@param len the number of bytes to decode\n@return the decoded long",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the first byte to decode"
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the number of bytes to decode"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the decoded long"
+      },
+      "throws": []
+    },
+    {
+      "name": "readMaskBytes",
+      "comment": "Decode  len mask bytes in big-endian format, beginning at ",
+      "javadoc": "Decode {@code} len mask bytes in big-endian format, beginning at {@code start}\n@param start the first byte to decode\n@param len the number of bytes to decode\n@return the decoded long",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the first byte to decode"
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the number of bytes to decode"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the decoded long"
+      },
+      "throws": []
+    },
+    {
+      "name": "readBytes",
+      "comment": "Decode  len bytes (values and mask) in big-endian format, beginning at ",
+      "javadoc": "Decode {@code} len bytes (values and mask) in big-endian format, beginning at {@code start}\n@param start the first byte to decode\n@param len the number of bytes to decode\n@return the decoded masked long",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the first byte to decode"
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the number of bytes to decode"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+        "type_short": "MaskedLong",
+        "comment": "the decoded masked long"
+      },
+      "throws": []
+    },
+    {
+      "name": "fillMask",
+      "comment": "Fill all unknown bits with  bits",
+      "javadoc": "Fill all unknown bits with {@code 0} bits\n@return the result",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+        "type_short": "AssemblyPatternBlock",
+        "comment": "the result"
+      },
+      "throws": []
+    },
+    {
+      "name": "isFullMask",
+      "comment": "Check if there are any unknown bits",
+      "javadoc": "Check if there are any unknown bits\n@return true if no unknown bits are present, false otherwise",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if no unknown bits are present, false otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "isZero",
+      "comment": "Check if all bits are  bits",
+      "javadoc": "Check if all bits are {@code 0} bits\n@return true if all are {@code 0}, false otherwise",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if all are , false otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "toBigInteger",
+      "comment": "Decode the values array into a BigInteger of length  bytes\n \n The array is either truncated or zero-extended on the right to match the requested\n number of bytes, then decoded in big-endian format as an unsigned value.",
+      "javadoc": "Decode the values array into a {@link BigInteger} of length {@code n} bytes\n \n The array is either truncated or zero-extended \u003cem\u003eon the right\u003c/em\u003e to match the requested\n number of bytes, then decoded in big-endian format as an unsigned value.\n@param n the number of bytes (left-to-right) to decode\n@return the decoded big integer",
+      "static": false,
+      "params": [
+        {
+          "name": "n",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the number of bytes (left-to-right) to decode"
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the decoded big integer"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSpecificity",
+      "comment": "Counts the total number of known bits in the pattern\n \n At a slightly lower level, counts the number of 1-bits in the mask.",
+      "javadoc": "Counts the total number of known bits in the pattern\n \n At a slightly lower level, counts the number of 1-bits in the mask.\n@return the count",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the count"
+      },
+      "throws": []
+    },
+    {
+      "name": "countPossibleVals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "possibleVals",
+      "comment": "Get an iterable over all the possible fillings of the value, given a partial mask\n \n This is meant to be used idiomatically, as in an enhanced for loop:\n \n \n \n \n \n NOTE: A single byte array is instantiated with the call to Iterable#iterator(). Each\n call to Iterator#next() modifies the one byte array and returns it. As such, if you\n intend to preserve the value in the array for later use, you must make a copy.",
+      "javadoc": "Get an iterable over all the possible fillings of the value, given a partial mask\n \n This is meant to be used idiomatically, as in an enhanced for loop:\n \n \u003cpre\u003e\n {@code\n for (byte[] val : pattern.possibleVals()) {\n     System.out.println(format(val));\n }\n }\n \u003c/pre\u003e\n \n NOTE: A single byte array is instantiated with the call to {@link Iterable#iterator()}. Each\n call to {@link Iterator#next()} modifies the one byte array and returns it. As such, if you\n intend to preserve the value in the array for later use, you \u003cem\u003emust\u003c/em\u003e make a copy.\n@return the iterable.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Iterable\u003cbyte[]\u003e",
+        "type_short": "Iterable",
+        "comment": "the iterable."
+      },
+      "throws": []
+    }
+  ]
+}

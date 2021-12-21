@@ -1,0 +1,861 @@
+{
+  "name": "ImporterDialog",
+  "comment": "Dialog for importing a file into Ghidra as a program.",
+  "javadoc": "Dialog for importing a file into Ghidra as a program.",
+  "static": false,
+  "implements": [],
+  "extends": "docking.DialogComponentProvider",
+  "fields": [
+    {
+      "name": "LAST_IMPORTFILE_PREFERENCE_KEY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Importer.LastFile\""
+    },
+    {
+      "name": "tool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.PluginTool",
+      "type_short": "PluginTool",
+      "constant_value": null
+    },
+    {
+      "name": "programManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.services.ProgramManager",
+      "type_short": "ProgramManager",
+      "constant_value": null
+    },
+    {
+      "name": "fsrl",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FSRL",
+      "type_short": "FSRL",
+      "constant_value": null
+    },
+    {
+      "name": "options",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.app.util.Option\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "loaderMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.opinion.LoaderMap",
+      "type_short": "LoaderMap",
+      "constant_value": null
+    },
+    {
+      "name": "selectedLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.LanguageCompilerSpecPair",
+      "type_short": "LanguageCompilerSpecPair",
+      "constant_value": null
+    },
+    {
+      "name": "destinationFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.DomainFolder",
+      "type_short": "DomainFolder",
+      "constant_value": null
+    },
+    {
+      "name": "languageNeeded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "suggestedDestinationPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "byteProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.ByteProvider",
+      "type_short": "ByteProvider",
+      "constant_value": null
+    },
+    {
+      "name": "filenameTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTextField",
+      "type_short": "JTextField",
+      "constant_value": null
+    },
+    {
+      "name": "userHasChangedName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "folderButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JButton",
+      "type_short": "JButton",
+      "constant_value": null
+    },
+    {
+      "name": "languageButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JButton",
+      "type_short": "JButton",
+      "constant_value": null
+    },
+    {
+      "name": "languageTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTextField",
+      "type_short": "JTextField",
+      "constant_value": null
+    },
+    {
+      "name": "optionsButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JButton",
+      "type_short": "JButton",
+      "constant_value": null
+    },
+    {
+      "name": "folderNameTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTextField",
+      "type_short": "JTextField",
+      "constant_value": null
+    },
+    {
+      "name": "loaderComboBox",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.combobox.GhidraComboBox\u003cghidra.app.util.opinion.Loader\u003e",
+      "type_short": "GhidraComboBox",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new dialog for importing a file as a new program into Ghidra.",
+      "javadoc": "Construct a new dialog for importing a file as a new program into Ghidra.\n@param tool the active tool that spawned this dialog.\n@param programManager program manager to open imported file with or null\n@param loaderMap the loaders and their corresponding load specifications\n@param byteProvider the ByteProvider for getting the bytes from the file to be imported.  The\n        dialog takes ownership of the ByteProvider and it will be closed when the dialog is closed\n@param suggestedDestinationPath optional string path that will be pre-pended to the destination\n filename.  Any path specified in the destination filename field will be created when\n the user performs the import (as opposed to the {@link #setDestinationFolder(DomainFolder) destination folder}\n option which requires the DomainFolder to already exist). The two destination paths work together\n to specify the final Ghidra project folder where the imported binary is placed.",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "the active tool that spawned this dialog."
+        },
+        {
+          "name": "programManager",
+          "type_long": "ghidra.app.services.ProgramManager",
+          "type_short": "ProgramManager",
+          "comment": "program manager to open imported file with or null"
+        },
+        {
+          "name": "loaderMap",
+          "type_long": "ghidra.app.util.opinion.LoaderMap",
+          "type_short": "LoaderMap",
+          "comment": "the loaders and their corresponding load specifications"
+        },
+        {
+          "name": "byteProvider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": "the ByteProvider for getting the bytes from the file to be imported.  The\n        dialog takes ownership of the ByteProvider and it will be closed when the dialog is closed"
+        },
+        {
+          "name": "suggestedDestinationPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "optional string path that will be pre-pended to the destination\n filename.  Any path specified in the destination filename field will be created when\n the user performs the import (as opposed to the #setDestinationFolder(DomainFolder)\n option which requires the DomainFolder to already exist). The two destination paths work together\n to specify the final Ghidra project folder where the imported binary is placed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "title",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        },
+        {
+          "name": "loaderMap",
+          "type_long": "ghidra.app.util.opinion.LoaderMap",
+          "type_short": "LoaderMap",
+          "comment": ""
+        },
+        {
+          "name": "byteProvider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "suggestedDestinationPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDestinationFolder",
+      "comment": "Sets the destination folder for the imported program.",
+      "javadoc": "Sets the destination folder for the imported program.\n@param folder the folder to store the imported program.",
+      "static": false,
+      "params": [
+        {
+          "name": "folder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": "the folder to store the imported program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildWorkPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildMainPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildFilenameTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSuggestedFilename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildFolderPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildLanguagePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildLoaderChooser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildLoaderInfoButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showSupportedImportFormats",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSupported",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "loader",
+          "type_long": "ghidra.app.util.opinion.Loader",
+          "type_short": "Loader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectedLoaderChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLanguageNeeded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "loader",
+          "type_long": "ghidra.app.util.opinion.Loader",
+          "type_short": "Loader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildButtonPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildOptionsButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "okCallback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTrailingSlashes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOrCreateImportFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentFolder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": ""
+        },
+        {
+          "name": "programPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFolder",
+        "type_short": "DomainFolder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "loadSpec",
+          "type_long": "ghidra.app.util.opinion.LoadSpec",
+          "type_short": "LoadSpec",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.Option\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAnchorForSelectedLoader",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "loader",
+          "type_long": "ghidra.app.util.opinion.Loader",
+          "type_short": "Loader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedLoadSpec",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "loader",
+          "type_long": "ghidra.app.util.opinion.Loader",
+          "type_short": "Loader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.opinion.LoadSpec",
+        "type_short": "LoadSpec",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedLoader",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.opinion.Loader",
+        "type_short": "Loader",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateFormInput",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateFilename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "warnedAboutInvalidFilenameChars",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isMissingFilename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDuplicateFilename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFilenameTooLong",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "lcsPair",
+          "type_long": "ghidra.program.model.lang.LanguageCompilerSpecPair",
+          "type_short": "LanguageCompilerSpecPair",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPreferredLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "loader",
+          "type_long": "ghidra.app.util.opinion.Loader",
+          "type_short": "Loader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.LanguageCompilerSpecPair",
+        "type_short": "LanguageCompilerSpecPair",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectRootFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFolder",
+        "type_short": "DomainFolder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "chooseProjectFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFormatComboBox",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComboBox\u003cghidra.app.util.opinion.Loader\u003e",
+        "type_short": "JComboBox",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLanguageTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JTextField",
+        "type_short": "JTextField",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilenameTextField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JTextField",
+        "type_short": "JTextField",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,2204 @@
+{
+  "name": "ProcessorEmulatorTestAdapter",
+  "comment": "ProcessorEmulatorTestAdapter provides an abstract JUnit test implementation\n for processor-specific test cases.  All test cases which extend this class must have a\n class name which ends with \u0027EmulatorTest\u0027 and starts with the processor designator which\n will be used to identify associated test binaries within either the processor module\u0027s\n data/pcodetests/ directory or the Ghidra/Test/TestResources/data/pcodetests/ directory generally \n contained within the binary repository (e.g., ghidra.bin).\n \n Within the pcodetests directory all files and folders which start with the prefix\n  will be processed.  All files contained within a matching\n subdirectory will be treated as related binaries and imported.  Any *.gzf file will be\n imported but assumed to be pre-analyzed.  Binary files to be imported and analyzed must\n utilize the *.out file extension.\n \n JUnit X86EmulatorTest could utilize the following binary file naming strategy:\n \n pcodetests/X86_PCodeTests\n - binary1.o\n - binary2.o\n - binary3.gzf\n pcodetests/X86_PCodeTests/data (could be used for any associated files not to be imported)\n - binary3.o\n - binary3.d\n\n or, a single binary file could suffice:\n - pcodetests/X86_PCodeTest.out\n \n\n Any *.out binary found will be imported and analyzed.  The resulting program will\n be stored as a gzf in the test-output cache directory.  These cached files will be used\n instead of a test resource binary if that binary\u0027s md5 checksum has not changed since its cached\n gzf was created.  This use of cache files will allow the tests to run quickly on subsequent\n executions.  If re-analysis is required, the cache will need to be cleared manually.\n \n NOTES:\n 1. Dummy Test Methods must be added for all known test groups.  See bottom of this file.  This\n    all allows for the single test trace mode execution to work within Eclipse.\n 2. Trace logging disabled by default when all test groups are run (see buildEmulatorTestSuite method).\n    Specific traceLevel and traceLog file controlled via environment properties\n    EmuTestTraceLevel and EmuTestTraceFile.\n 3. The TestInfo structure must be properly maintained within the datatype archive EmuTesting.gdt\n    and field naming consistent with use in PCodeTestControlBlock.java\n 4. The #initializeState(EmulatorTestRunner, Program) may be overriden to initialize the\n    register values if needed.  This should be based upon symbols or other program information\n    if possible since hardcoded constants may not track future builds of a test binaries.  \n    An attempt is made to initialize the stack pointer automatically based upon well known\n    stack initialization symbols.",
+  "javadoc": "\u003ccode\u003eProcessorEmulatorTestAdapter\u003c/code\u003e provides an abstract JUnit test implementation\n for processor-specific test cases.  All test cases which extend this class must have a\n class name which ends with \u0027EmulatorTest\u0027 and starts with the processor designator which\n will be used to identify associated test binaries within either the processor module\u0027s\n data/pcodetests/ directory or the Ghidra/Test/TestResources/data/pcodetests/ directory generally \n contained within the binary repository (e.g., ghidra.bin).\n \u003cp\u003e\n Within the pcodetests directory all files and folders which start with the prefix\n {@literal \u003cprocessor-designator\u003e_pcodetest*} will be processed.  All files contained within a matching\n subdirectory will be treated as related binaries and imported.  Any *.gzf file will be\n imported but assumed to be pre-analyzed.  Binary files to be imported and analyzed must\n utilize the *.out file extension.\n \u003cp\u003e\n JUnit X86EmulatorTest could utilize the following binary file naming strategy:\n \u003cpre\u003e\n pcodetests/X86_PCodeTests\n - binary1.o\n - binary2.o\n - binary3.gzf\n pcodetests/X86_PCodeTests/data (could be used for any associated files not to be imported)\n - binary3.o\n - binary3.d\n\n or, a single binary file could suffice:\n - pcodetests/X86_PCodeTest.out\n \u003c/pre\u003e\n\n Any *.out binary found will be imported and analyzed.  The resulting program will\n be stored as a gzf in the test-output cache directory.  These cached files will be used\n instead of a test resource binary if that binary\u0027s md5 checksum has not changed since its cached\n gzf was created.  This use of cache files will allow the tests to run quickly on subsequent\n executions.  If re-analysis is required, the cache will need to be cleared manually.\n \n NOTES:\n 1. Dummy Test Methods must be added for all known test groups.  See bottom of this file.  This\n    all allows for the single test trace mode execution to work within Eclipse.\n 2. Trace logging disabled by default when all test groups are run (see buildEmulatorTestSuite method).\n    Specific traceLevel and traceLog file controlled via environment properties\n    EmuTestTraceLevel and EmuTestTraceFile.\n 3. The TestInfo structure must be properly maintained within the datatype archive EmuTesting.gdt\n    and field naming consistent with use in PCodeTestControlBlock.java\n 4. The {@link #initializeState(EmulatorTestRunner, Program)} may be overriden to initialize the\n    register values if needed.  This should be based upon symbols or other program information\n    if possible since hardcoded constants may not track future builds of a test binaries.  \n    An attempt is made to initialize the stack pointer automatically based upon well known\n    stack initialization symbols.",
+  "static": false,
+  "implements": [
+    "ghidra.test.processors.support.ExecutionListener"
+  ],
+  "extends": "junit.framework.TestCase",
+  "fields": [
+    {
+      "name": "BATCH_MODE_OUTPUT_DIR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "DEFAULT_PROCESSOR_TEST_MODULE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Test/TestResources\""
+    },
+    {
+      "name": "TEST_INFO_STRUCT_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"TestInfo\""
+    },
+    {
+      "name": "GROUP_INFO_STRUCT_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"GroupInfo\""
+    },
+    {
+      "name": "PCODE_TEST_FILE_BASE_REGEX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"_PCodeTest.*\""
+    },
+    {
+      "name": "EMULATOR_TEST_SUFFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"EmulatorTest\""
+    },
+    {
+      "name": "EMULATOR_TRACE_LEVEL_PROPERTY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"EmuTestTraceLevel\""
+    },
+    {
+      "name": "traceLevel",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "logDataMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Map\u003cjava.lang.Class\u003c?\u003e,ghidra.test.processors.support.ProcessorEmulatorTestAdapter.LogData\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "lastTestClass",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Class\u003c?\u003e",
+      "type_short": "Class",
+      "constant_value": null
+    },
+    {
+      "name": "EMULATOR_TRACE_DISABLE_PROPERTY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"EmuTestTraceDisable\""
+    },
+    {
+      "name": "traceDisabled",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "MAX_REGDUMP_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "80"
+    },
+    {
+      "name": "EXECUTION_TIMEOUT_MS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "240000"
+    },
+    {
+      "name": "MAX_EXECUTION_STEPS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2000000"
+    },
+    {
+      "name": "GZF_FILE_EXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".gzf\""
+    },
+    {
+      "name": "BINARY_FILE_EXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".out\""
+    },
+    {
+      "name": "TEST_OUTPUT_PATH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"test-output\""
+    },
+    {
+      "name": "GZF_CACHEDIR_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"cache\""
+    },
+    {
+      "name": "LOG_DIR_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"logs\""
+    },
+    {
+      "name": "RESULTS_DIR_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"results\""
+    },
+    {
+      "name": "TEST_RESOURCE_PATH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"data/pcodetests\""
+    },
+    {
+      "name": "FAILURE_RESULT_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"failure\""
+    },
+    {
+      "name": "TEST_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"test_\""
+    },
+    {
+      "name": "outputDir",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "resourcesCacheDir",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "logDir",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "resultsDir",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "combinedResults",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.test.processors.support.PCodeTestCombinedTestResults",
+      "type_short": "PCodeTestCombinedTestResults",
+      "constant_value": null
+    },
+    {
+      "name": "resultsWriter",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "initialized",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "processorDesignator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "testControlBlocksMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.util.List\u003cghidra.test.processors.support.PCodeTestControlBlock\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "testControlBlocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.test.processors.support.PCodeTestControlBlock\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "testGroupMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.test.processors.support.PCodeTestGroup\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "language",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Language",
+      "type_short": "Language",
+      "constant_value": null
+    },
+    {
+      "name": "compilerSpec",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.CompilerSpec",
+      "type_short": "CompilerSpec",
+      "constant_value": null
+    },
+    {
+      "name": "regDumpSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register[]",
+      "type_short": "ghidra.program.model.lang.Register[]",
+      "constant_value": null
+    },
+    {
+      "name": "floatRegSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.program.model.lang.Register\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "ignoredBlocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cjava.lang.String\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "env",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.test.TestEnv",
+      "type_short": "TestEnv",
+      "constant_value": null
+    },
+    {
+      "name": "logData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.test.processors.support.ProcessorEmulatorTestAdapter.LogData",
+      "type_short": "LogData",
+      "constant_value": null
+    },
+    {
+      "name": "applicationRootDirectories",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Collection\u003cgeneric.jar.ResourceFile\u003e",
+      "type_short": "Collection",
+      "constant_value": null
+    },
+    {
+      "name": "resourcesTestDataDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "archiveDtMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.FileDataTypeManager",
+      "type_short": "FileDataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "testInfoStruct",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.Structure",
+      "type_short": "Structure",
+      "constant_value": null
+    },
+    {
+      "name": "groupInfoStruct",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.Structure",
+      "type_short": "Structure",
+      "constant_value": null
+    },
+    {
+      "name": "parallelHelper",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.ParallelInstructionLanguageHelper",
+      "type_short": "ParallelInstructionLanguageHelper",
+      "constant_value": null
+    },
+    {
+      "name": "deleteResultFilesOnStartup",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "testFailureMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Map\u003cjava.lang.Class\u003c?\u003e,ghidra.test.processors.support.ProcessorEmulatorTestAdapter.MyTestFailure\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "cleanupTempData",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteResultFilesOnStartup",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeSharedResources",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "languageID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "compilerSpecID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "regDumpSetNames",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.LanguageNotFoundException",
+          "type_short": "LanguageNotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.CompilerSpecNotFoundException",
+          "type_short": "CompilerSpecNotFoundException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "languageID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "compilerSpecID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "regDumpSetNames",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        },
+        {
+          "name": "floatRegSetNames",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.LanguageNotFoundException",
+          "type_short": "LanguageNotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.CompilerSpecNotFoundException",
+          "type_short": "CompilerSpecNotFoundException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRegisters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "regNames",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register[]",
+        "type_short": "ghidra.program.model.lang.Register[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setIgnoredBlocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "blockNames",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRestrictedSearchSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCause",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Throwable",
+        "type_short": "Throwable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTestFailure",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "emulatorTestClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        },
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "junit.framework.Test",
+        "type_short": "Test",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildEmulatorTestSuite",
+      "comment": "Create TestSuite based upon available test groups contained within binary\n test files associated with target processor.",
+      "javadoc": "Create TestSuite based upon available test groups contained within binary\n test files associated with target processor.\n@param emulatorTestClass test which extends \u003ccode\u003eProcessorEmulatorTestAdapter\u003c/code\u003e\n and whose name ends with \"EmulatorTest\".\n@return test suite",
+      "static": true,
+      "params": [
+        {
+          "name": "emulatorTestClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "test which extends ProcessorEmulatorTestAdapter\n and whose name ends with \"EmulatorTest\"."
+        }
+      ],
+      "return": {
+        "type_long": "junit.framework.Test",
+        "type_short": "Test",
+        "comment": "test suite"
+      },
+      "throws": []
+    },
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testGroup",
+          "type_long": "ghidra.test.processors.support.PCodeTestGroup",
+          "type_short": "PCodeTestGroup",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testGroup",
+          "type_long": "ghidra.test.processors.support.PCodeTestGroup",
+          "type_short": "PCodeTestGroup",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCallAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "logState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "logState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "emulatorTestRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        },
+        {
+          "name": "dumpAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "dumpSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "elementSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "elementFormat",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner.DumpFormat",
+          "type_short": "DumpFormat",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "logUnimplemented",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "unimplementedSet",
+          "type_long": "java.util.TreeSet\u003cjava.lang.String\u003e",
+          "type_short": "TreeSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flipBytes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "formatAssignmentString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "values",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "logRead",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "values",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "logWrite",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "values",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stepCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "exceptionToString",
+      "comment": "Converts the stack trace into a string",
+      "javadoc": "Converts the stack trace into a string",
+      "static": true,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findTestResourceDirectory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "relativeModulePath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setUp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRelativeModulePath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "myModuleRootDirectory",
+          "type_long": "generic.jar.ResourceFile",
+          "type_short": "ResourceFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeLog",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "testClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.test.processors.support.ProcessorEmulatorTestAdapter.LogData",
+        "type_short": "LogData",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.FileNotFoundException",
+          "type_short": "FileNotFoundException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "tearDown",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "runTest",
+      "comment": "Single unit test which handles named test group specified during test\n instantiation.",
+      "javadoc": "Single unit test which handles named test group specified during test\n instantiation.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkStackPointerValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findAnyMatchingSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "names",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initStackPointer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        },
+        {
+          "name": "spReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPreferredStackSymbolName",
+      "comment": "Get symbol name which defines initial stack pointer offset",
+      "javadoc": "Get symbol name which defines initial stack pointer offset\n@return stack symbol or null",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "stack symbol or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "failTest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkInstructionDecodeFailure",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxDefinedMemoryAddress",
+      "comment": "Get the maximum defined memory address ignoring any overlays which have been defined.",
+      "javadoc": "Get the maximum defined memory address ignoring any overlays which have been defined.\n@return max defined physical address",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "max defined physical address"
+      },
+      "throws": []
+    },
+    {
+      "name": "getProcessorDesignator",
+      "comment": "Get the processor designator used to identify test binary files/folder.\n The default implementation requires the JUnit test class name to end with\n \"EmulatorTest\" where the portion of the name proceeding this suffix will be\n used as the processor designator",
+      "javadoc": "Get the processor designator used to identify test binary files/folder.\n The default implementation requires the JUnit test class name to end with\n \"EmulatorTest\" where the portion of the name proceeding this suffix will be\n used as the processor designator\n@return processor designator",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "processor designator"
+      },
+      "throws": []
+    },
+    {
+      "name": "buildTestFileDesignator",
+      "comment": "Get CUint file designator if use of A, B, C... is not suitable.",
+      "javadoc": "Get CUint file designator if use of A, B, C... is not suitable.\n@param fileIndex file index within sorted list\n@param filePath binary file path\n@return short file designator for use in qualified test name",
+      "static": false,
+      "params": [
+        {
+          "name": "fileIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "file index within sorted list"
+        },
+        {
+          "name": "filePath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "binary file path"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "short file designator for use in qualified test name"
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeState",
+      "comment": "Invoked for each program immediately prior to executing a test group.\n By default this method will initialize the register states based upon the \n specific register values/context stored at the test group function entry point.\n Such register values may have been established via the processor specification,\n loader or analyzers.  A specific test may override or extend\n this behavior for other registers as needed.",
+      "javadoc": "Invoked for each program immediately prior to executing a test group.\n By default this method will initialize the register states based upon the \n specific register values/context stored at the test group function entry point.\n Such register values may have been established via the processor specification,\n loader or analyzers.  A specific test may override or extend\n this behavior for other registers as needed.\n@param testRunner emulator group test runner/facilitator\n@param program\n@throws Exception if initialization criteria has not been satisfied",
+      "static": false,
+      "params": [
+        {
+          "name": "testRunner",
+          "type_long": "ghidra.test.processors.support.EmulatorTestRunner",
+          "type_short": "EmulatorTestRunner",
+          "comment": "emulator group test runner/facilitator"
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if initialization criteria has not been satisfied"
+        }
+      ]
+    },
+    {
+      "name": "postImport",
+      "comment": "Invoked immediately following import allow byte processing prior to\n control structure identification.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.",
+      "javadoc": "Invoked immediately following import allow byte processing prior to\n control structure identification.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.\n@param program\n@throws Exception",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "preAnalyze",
+      "comment": "Invoked prior to analysis to allow analysis options or other pre-analysis\n inspection/modification to be performed.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.",
+      "javadoc": "Invoked prior to analysis to allow analysis options or other pre-analysis\n inspection/modification to be performed.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.\n@param program\n@throws Exception",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "postAnalyze",
+      "comment": "Invoked for non-gzf files immediately after the analyze method to\n perform any follow-up changes of inspection of the program.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.",
+      "javadoc": "Invoked for non-gzf files immediately after the analyze method to\n perform any follow-up changes of inspection of the program.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.\n@param program\n@throws Exception",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "analyze",
+      "comment": "Invoked for non-gzf files to perform auto-analysis.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.",
+      "javadoc": "Invoked for non-gzf files to perform auto-analysis.\n NOTE: This method will only be invoked once during the first test setup\n for all test binaries found.  This method will not be invoked\n during subsequent tests since the analyzed program will be cached.\n@param program\n@throws Exception",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "testControlBlock",
+          "type_long": "ghidra.test.processors.support.PCodeTestControlBlock",
+          "type_short": "PCodeTestControlBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setAnalysisOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "analysisOptions",
+          "type_long": "ghidra.framework.options.Options",
+          "type_short": "Options",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFunctionStartDisassemblyPoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "functionAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "functionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "disassembleStarts",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSymbol",
+      "comment": "Create symbol at known function location if missing",
+      "javadoc": "Create symbol at known function location if missing",
+      "static": false,
+      "params": [
+        {
+          "name": "functionAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "functionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLoaderClass",
+      "comment": "Get the loader class which should be used.  A null value should be\n return to use the preferred loader.",
+      "javadoc": "Get the loader class which should be used.  A null value should be\n return to use the preferred loader.\n@return loader class or null",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Class\u003c? extends ghidra.app.util.opinion.Loader\u003e",
+        "type_short": "Class",
+        "comment": "loader class or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "findBinaryTestFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "testResourceDir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.test.processors.support.PCodeTestFile\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003cjava.lang.String\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "pathPrefix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGzfProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "gzfProgName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getGzfProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "gzfProgName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "failOnDisassemblyErrors",
+      "comment": "",
+      "javadoc": "@return true if test run should fail up-front if binary contains disassembly errors",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if test run should fail up-front if binary contains disassembly errors"
+      },
+      "throws": []
+    },
+    {
+      "name": "failOnRelocationErrors",
+      "comment": "",
+      "javadoc": "@return true if test run should fail up-front if binary contains relocation errors",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if test run should fail up-front if binary contains relocation errors"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkForProgramIssues",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "resourceFilePath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "testControlBlock",
+          "type_long": "ghidra.test.processors.support.PCodeTestControlBlock",
+          "type_short": "PCodeTestControlBlock",
+          "comment": ""
+        },
+        {
+          "name": "testResults",
+          "type_long": "ghidra.test.processors.support.PCodeTestResults",
+          "type_short": "PCodeTestResults",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ingestTestBinaries",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "cleanupResidualSegmentData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.framework.store.LockException",
+          "type_short": "LockException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "sortTestControlBlocks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueGlobalSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildTestFileDigest",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "duplicateTests",
+          "type_long": "java.util.HashSet\u003cjava.lang.String\u003e",
+          "type_short": "HashSet",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "alignAddressOffset",
+      "comment": "Force proper code address alignment to compensate for address encoding schemes (e.g., Thumb mode)",
+      "javadoc": "Force proper code address alignment to compensate for address encoding schemes (e.g., Thumb mode)\n@param offset\n@param alignment\n@return ",
+      "static": true,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "alignment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "alignAddress",
+      "comment": "Force proper code address alignment to compensate for address encoding schemes (e.g., Thumb mode)",
+      "javadoc": "Force proper code address alignment to compensate for address encoding schemes (e.g., Thumb mode)\n@param addr\n@param alignment\n@return ",
+      "static": true,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "alignment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_asm",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_BIOPS_DOUBLE",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_BIOPS_FLOAT",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_BIOPS_LONGLONG",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_BIOPS",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_BIOPS2",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_BIOPS4",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_BitManipulation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_DecisionMaking",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_GlobalVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_IterativeProcessingDoWhile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_IterativeProcessingFor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_IterativeProcessingWhile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_misc",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_ParameterPassing1",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_ParameterPassing2",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_ParameterPassing3",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_PointerManipulation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "test_StructUnionManipulation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

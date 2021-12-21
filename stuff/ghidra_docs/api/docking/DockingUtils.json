@@ -1,0 +1,289 @@
+{
+  "name": "DockingUtils",
+  "comment": "Notes about how to use HTML safely:\n Java\u0027s built-in HTML rendering in UI components is very useful, but can also introduce security\n issues when a hostile actor is providing the text strings that are being rendered.\n \n Before using a native Java UI component, search for a corresponding \u0027G\u0027hidra component, and\n if possible choose the non-HTML version of that component (if available).\n \n For instance, instead of using JLabel, use either GLabel or GHtmlLabel\n (and their variants).\n \n (native JLabel, JCheckbox, etc, usage is actually disallowed in the Ghidra project)\n \n When using a UI component that is HTML enabled, care must be used when constructing the text\n that is being rendered.\n \n During string-building or concatenation, appending a non-literal string value (ie. \n  ), the non-literal string value should be escaped using \n HTMLUtilities#escapeHTML(String) (ie. .\n \n Of course, there are exceptions to every rule, and if the string value can be definitely be \n traced to its source and there are no user-supplied origins, the HTML escaping can be skipped.\n \n Note: just using a UI component that is HTML enabled does not mean that it will treat its\n text as HTML text.  If you need to HTML escape any values that are being fed to the component, you\n need to force the HTML mode \u0027on\u0027 by pre-pending a \"HTML\" at the beginning of the string.\n If you fail to do this, the escaped substrings will look wrong because any \u0027\u0027 and \u0027\u0027 chars\n (and others) in the substring will be mangled when rendered in plain-text mode.\n \n When working with plain text, try to avoid allowing a user supplied string being the first \n value of text that could be fed to a UI component.  This will prevent the possibly hostile \n string from having a leading HTML start tag.  \n (ie. when displaying an error to the user about a bad file, don\u0027t put the filename\n value at the start of the string, but instead put a quote or some other delimiter to prevent\n html mode).\n \n Recommended Ghidra UI Components:\n \n \n \tNative ComponentRecommended Component\n \tJLabelGLabelGDLabelGHtmlLabelGDHtmlLabelGIconLabel\n \tJCheckBoxGCheckBoxGHtmlCheckBox\n \tJComboBoxGComboBoxGhidraComboBox\n \tJListGList\n \tListCellRendererDefaultListCellRendererGListCellRenderer\n \tTableCellRendererGTableCellRenderer\n \tTreeCellRendererDefaultTreeCellRendererGTreeRendererDnDTreeCellRenderer\n \tJRadioButtonGRadioButton\n \tJButton???tbd???\n ",
+  "javadoc": "\u003ch2\u003eNotes about how to use HTML safely:\u003c/h2\u003e\n Java\u0027s built-in HTML rendering in UI components is very useful, but can also introduce security\n issues when a hostile actor is providing the text strings that are being rendered.\n \u003cp\u003e\n Before using a native Java UI component, search for a corresponding \u0027G\u0027hidra component, and\n if possible choose the non-HTML version of that component (if available).\n \u003cp\u003e\n For instance, instead of using {@link JLabel}, use either {@link GLabel} or {@link GHtmlLabel}\n (and their variants).\n \u003cp\u003e\n (native JLabel, JCheckbox, etc, usage is actually disallowed in the Ghidra project)\n \u003cp\u003e\n When using a UI component that is HTML enabled, care must be used when constructing the text\n that is being rendered.\n \u003cp\u003e\n During string-building or concatenation, appending a non-literal string value (ie. \n {@code \"Hello \" + getFoo();} ), the non-literal string value should be escaped using \n {@link HTMLUtilities#escapeHTML(String)} (ie. {@code \"Hello \" + HTMLUtilities.escapeHTML(getFoo());}.\n \u003cp\u003e\n Of course, there are exceptions to every rule, and if the string value can be definitely be \n traced to its source and there are no user-supplied origins, the HTML escaping can be skipped.\n \u003cp\u003e\n Note: just using a UI component that is HTML enabled does not mean that it will treat its\n text as HTML text.  If you need to HTML escape any values that are being fed to the component, you\n need to force the HTML mode \u0027on\u0027 by pre-pending a \"\u0026lt;HTML\u0026gt;\" at the beginning of the string.\n If you fail to do this, the escaped substrings will look wrong because any \u0027\u0026lt;\u0027 and \u0027\u0026gt;\u0027 chars\n (and others) in the substring will be mangled when rendered in plain-text mode.\n \u003cp\u003e\n When working with plain text, try to avoid allowing a user supplied string being the first \n value of text that could be fed to a UI component.  This will prevent the possibly hostile \n string from having a leading HTML start tag.  \n (ie. when displaying an error to the user about a bad file, don\u0027t put the filename\n value at the start of the string, but instead put a quote or some other delimiter to prevent\n html mode).\n \u003cp\u003e\n \u003ch3\u003eRecommended Ghidra UI Components:\u003c/h3\u003e\n \u003cp\u003e\n \u003ctable border\u003d1\u003e\u003ccaption\u003e\u003c/caption\u003e\n \t\u003ctr\u003e\u003cth\u003eNative Component\u003c/th\u003e\u003cth\u003eRecommended Component\u003c/th\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link JLabel}\u003c/td\u003e\u003ctd\u003e{@link GLabel}\u003cbr\u003e{@link GDLabel}\u003cbr\u003e{@link GHtmlLabel}\u003cbr\u003e{@link GDHtmlLabel}\u003cbr\u003e{@link GIconLabel}\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link JCheckBox}\u003c/td\u003e\u003ctd\u003e{@link GCheckBox}\u003cbr\u003e{@link GHtmlCheckBox}\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link JComboBox}\u003c/td\u003e\u003ctd\u003e{@link GComboBox}\u003cbr\u003e{@link GhidraComboBox}\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link JList}\u003c/td\u003e\u003ctd\u003e{@link GList}\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link ListCellRenderer}\u003cbr\u003e{@link DefaultListCellRenderer}\u003c/td\u003e\u003ctd\u003e{@link GListCellRenderer}\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link TableCellRenderer}\u003c/td\u003e\u003ctd\u003e{@link GTableCellRenderer}\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link TreeCellRenderer}\u003cbr\u003e{@link DefaultTreeCellRenderer}\u003c/td\u003e\u003ctd\u003e{@link GTreeRenderer}\u003cbr\u003e\u003ccode\u003eDnDTreeCellRenderer\u003c/code\u003e\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link JRadioButton}\u003c/td\u003e\u003ctd\u003e{@link GRadioButton}\u003c/td\u003e\u003c/tr\u003e\n \t\u003ctr\u003e\u003ctd\u003e{@link JButton}\u003c/td\u003e\u003ctd\u003e???tbd???\u003c/td\u003e\u003c/tr\u003e\n \u003c/table\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "ICON_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16"
+    },
+    {
+      "name": "CONTROL_KEY_MODIFIER_MASK",
+      "comment": "System dependent mask for the Ctrl key",
+      "javadoc": "System dependent mask for the Ctrl key",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "CONTROL_KEY_MODIFIER_MASK_DEPRECATED",
+      "comment": "A version the control key modifiers that is based upon the pre-Java 9 InputEvent\n usage.  This mask is here for those clients that cannot be upgraded, such as those with \n dependencies on 3rd-party libraries that still use the old mask style.",
+      "javadoc": "A version the control key modifiers that is based upon the pre-Java 9 {@link InputEvent}\n usage.  This mask is here for those clients that cannot be upgraded, such as those with \n dependencies on 3rd-party libraries that still use the old mask style.\n@deprecated use instead {@link #CONTROL_KEY_MODIFIER_MASK}",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "CONTROL_KEY_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "UNDO_KEYSTROKE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.KeyStroke",
+      "type_short": "KeyStroke",
+      "constant_value": null
+    },
+    {
+      "name": "REDO_KEYSTROKE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "javax.swing.KeyStroke",
+      "type_short": "KeyStroke",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createToolbarSeparator",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JSeparator",
+        "type_short": "JSeparator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scaleIconAsNeeded",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "icon",
+          "type_long": "javax.swing.Icon",
+          "type_short": "Icon",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.Icon",
+        "type_short": "Icon",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isControlModifier",
+      "comment": "Checks if the mouseEvent has the \"control\" key down.  On windows, this is actually\n the control key.  On Mac, it is the command key.",
+      "javadoc": "Checks if the mouseEvent has the \"control\" key down.  On windows, this is actually\n the \u003ccode\u003econtrol\u003c/code\u003e key.  On Mac, it is the \u003ccode\u003ecommand\u003c/code\u003e key.\n@param mouseEvent the event to check\n@return true if the control key is pressed",
+      "static": true,
+      "params": [
+        {
+          "name": "mouseEvent",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": "the event to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the control key is pressed"
+      },
+      "throws": []
+    },
+    {
+      "name": "isControlModifier",
+      "comment": "Checks if the mouseEvent has the \"control\" key down.  On windows, this is actually\n the control key.  On Mac, it is the command key.",
+      "javadoc": "Checks if the mouseEvent has the \"control\" key down.  On windows, this is actually\n the \u003ccode\u003econtrol\u003c/code\u003e key.  On Mac, it is the \u003ccode\u003ecommand\u003c/code\u003e key.\n@param keyEvent the event to check\n@return true if the control key is pressed",
+      "static": true,
+      "params": [
+        {
+          "name": "keyEvent",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": "the event to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the control key is pressed"
+      },
+      "throws": []
+    },
+    {
+      "name": "installUndoRedo",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "textComponent",
+          "type_long": "javax.swing.text.JTextComponent",
+          "type_short": "JTextComponent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.UndoRedoKeeper",
+        "type_short": "UndoRedoKeeper",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "forAllDescendants",
+      "comment": "Perform some operation on a component and all of its descendants, recursively\n \n This traverses the swing/awt component tree starting at the given container and descends\n recursively through all containers. Any time a component of type (or subclass of type) is\n found, the given callback is executed on it. If order is\n TreeTraversalOrder#CHILDREN_FIRST, then the traversal will execute the callback on\n the children of a container before executing the callback on the container itself; if\n TreeTraversalOrder#PARENT_FIRST, then the traversal will execute the callback on the\n container before descending.\n \n The callback must return one of three result values. In normal circumstances, it should\n return TreeTraversalResult#CONTINUE, allowing traversal to continue to the next\n element. If the callback wishes to terminate traversal \"successfully,\" e.g., because it\n needed to locate the first element satisfying some predicate, then it should return\n TreeTraversalResult#FINISH. If an error occurs during traversal, then it should\n either return TreeTraversalResult#TERMINATE or throw an appropriate exception to\n terminate traversal \"unsuccessfully.\"\n \n This method will also return a value of TreeTraversalResult indicating how traversal\n terminated. If TreeTraversalResult#CONTINUE, then every element in the subtree was\n visited, and traversal was successful. If TreeTraversalResult#FINISH, then some\n elements may have been omitted, but traversal was still successful. If\n TreeTraversalResult#TERMINATE, then some elements may have been omitted, and\n traversal was not successful.",
+      "javadoc": "Perform some operation on a component and all of its descendants, recursively\n \n This traverses the swing/awt component tree starting at the given container and descends\n recursively through all containers. Any time a component of type (or subclass of type) is\n found, the given callback is executed on it. If order is\n {@link TreeTraversalOrder#CHILDREN_FIRST}, then the traversal will execute the callback on\n the children of a container before executing the callback on the container itself; if\n {@link TreeTraversalOrder#PARENT_FIRST}, then the traversal will execute the callback on the\n container before descending.\n \n The callback must return one of three result values. In normal circumstances, it should\n return {@link TreeTraversalResult#CONTINUE}, allowing traversal to continue to the next\n element. If the callback wishes to terminate traversal \"successfully,\" e.g., because it\n needed to locate the first element satisfying some predicate, then it should return\n {@link TreeTraversalResult#FINISH}. If an error occurs during traversal, then it should\n either return {@link TreeTraversalResult#TERMINATE} or throw an appropriate exception to\n terminate traversal \"unsuccessfully.\"\n \n This method will also return a value of {@link TreeTraversalResult} indicating how traversal\n terminated. If {@link TreeTraversalResult#CONTINUE}, then every element in the subtree was\n visited, and traversal was successful. If {@link TreeTraversalResult#FINISH}, then some\n elements may have been omitted, but traversal was still successful. If\n {@link TreeTraversalResult#TERMINATE}, then some elements may have been omitted, and\n traversal was not successful.\n@param start the \"root\" container of the subtree on which to operate\n@param type the type of components on which to operate\n@param order whether to operation on children or parents first\n@param cb the callback to perform the actual operation\n@return a result indicating whether or not traversal completed successfully",
+      "static": true,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "java.awt.Container",
+          "type_short": "Container",
+          "comment": "the \"root\" container of the subtree on which to operate"
+        },
+        {
+          "name": "type",
+          "type_long": "java.lang.Class\u003cT\u003e",
+          "type_short": "Class",
+          "comment": "the type of components on which to operate"
+        },
+        {
+          "name": "order",
+          "type_long": "docking.DockingUtils.TreeTraversalOrder",
+          "type_short": "TreeTraversalOrder",
+          "comment": "whether to operation on children or parents first"
+        },
+        {
+          "name": "cb",
+          "type_long": "docking.DockingUtils.ComponentCallback\u003cT\u003e",
+          "type_short": "ComponentCallback",
+          "comment": "the callback to perform the actual operation"
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockingUtils.TreeTraversalResult",
+        "type_short": "TreeTraversalResult",
+        "comment": "a result indicating whether or not traversal completed successfully"
+      },
+      "throws": []
+    },
+    {
+      "name": "forAllDescendants",
+      "comment": "Perform some operation on a component and all of its descendents, recursively.\n \n This applies the operation to all components in the tree, children first.",
+      "javadoc": "Perform some operation on a component and all of its descendents, recursively.\n \n This applies the operation to all components in the tree, children first.\n@param start the \"root\" container of the subtree on which to operate\n@param cb the callback to perform the actual operation\n@return a result indicating whether or not traversal completed successfully\n@see DockingUtils#forAllDescendants(Container, Class, TreeTraversalOrder, ComponentCallback)",
+      "static": true,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "java.awt.Container",
+          "type_short": "Container",
+          "comment": "the \"root\" container of the subtree on which to operate"
+        },
+        {
+          "name": "cb",
+          "type_long": "docking.DockingUtils.ComponentCallback\u003cjava.awt.Component\u003e",
+          "type_short": "ComponentCallback",
+          "comment": "the callback to perform the actual operation"
+        }
+      ],
+      "return": {
+        "type_long": "docking.DockingUtils.TreeTraversalResult",
+        "type_short": "TreeTraversalResult",
+        "comment": "a result indicating whether or not traversal completed successfully"
+      },
+      "throws": []
+    },
+    {
+      "name": "setTransparent",
+      "comment": "Sets the given component to transparent, which allows the parent component\u0027s background\n to be painted.\n \n Notes\n Historically, to make a component transparent you would call \n JComponent#setOpaque(boolean) with a false value.  However, it turns out\n that the definition and the implementation of this method are at odds.  setOpaque(false)\n is meant to signal that some part of the component is transparent, so the parent component\n needs to be painted.  Most LaFs implemented this by not painting the background of the\n component, but used the parent\u0027s color instead.  The Nimbus LaF actually honors the \n contract of setOpaque(), which has the effect of painting the components \n background by default.\n \n This method allows components to achieve transparency when they used to \n rely on setOpaque(false).",
+      "javadoc": "Sets the given component to transparent, which allows the parent component\u0027s background\n to be painted.\n \u003cp\u003e\n \u003cu\u003eNotes\u003c/u\u003e\n Historically, to make a component transparent you would call \n {@link JComponent#setOpaque(boolean)} with a \u003ccode\u003efalse\u003c/code\u003e value.  However, it turns out\n that the definition and the implementation of this method are at odds.  \u003ccode\u003esetOpaque(false)\u003c/code\u003e\n is meant to signal that some part of the component is transparent, so the parent component\n needs to be painted.  Most LaFs implemented this by not painting the background of the\n component, but used the parent\u0027s color instead.  The Nimbus LaF actually honors the \n contract of \u003ccode\u003esetOpaque()\u003c/code\u003e, which has the effect of painting the components \n background by default.\n \u003cp\u003e\n This method allows components to achieve transparency when they used to \n rely on \u003ccode\u003esetOpaque(false)\u003c/code\u003e.\n@param c the component to be made transparent",
+      "static": true,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": "the component to be made transparent"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetTransparent",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "javax.swing.JComponent",
+          "type_short": "JComponent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hideTipWindow",
+      "comment": "Hides any open tooltip window",
+      "javadoc": "Hides any open tooltip window",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

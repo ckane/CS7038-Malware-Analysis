@@ -1,0 +1,539 @@
+{
+  "name": "ThreadedTableModelUpdateMgr",
+  "comment": "Manages the updating of ThreadTableModels.  As requests to load, sort, filter, add/remove item\n in a ThreadedTableModel occur, this class schedules a TableUpdateJob to do the work.  It uses\n a SwingUpdateManager to coalesce add/remove so that the table does not constantly update when\n are large number of table changing events are incoming.",
+  "javadoc": "Manages the updating of ThreadTableModels.  As requests to load, sort, filter, add/remove item\n in a ThreadedTableModel occur, this class schedules a TableUpdateJob to do the work.  It uses\n a SwingUpdateManager to coalesce add/remove so that the table does not constantly update when\n are large number of table changing events are incoming.\n@param \u003cT\u003e the row type",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5000"
+    },
+    {
+      "name": "MAX_DELAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1200000"
+    },
+    {
+      "name": "TOO_MANY_ADD_REMOVES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "3000"
+    },
+    {
+      "name": "model",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+      "type_short": "ThreadedTableModel",
+      "constant_value": null
+    },
+    {
+      "name": "addRemoveUpdater",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.SwingUpdateManager",
+      "type_short": "SwingUpdateManager",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.ConcurrentListenerSet\u003cdocking.widgets.table.threaded.ThreadedTableModelListener\u003e",
+      "type_short": "ConcurrentListenerSet",
+      "constant_value": null
+    },
+    {
+      "name": "pendingJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableUpdateJob\u003cT\u003e",
+      "type_short": "TableUpdateJob",
+      "constant_value": null
+    },
+    {
+      "name": "currentJob",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.threaded.TableUpdateJob\u003cT\u003e",
+      "type_short": "TableUpdateJob",
+      "constant_value": null
+    },
+    {
+      "name": "thread",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Thread",
+      "type_short": "Thread",
+      "constant_value": null
+    },
+    {
+      "name": "addRemoveWaitList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.table.AddRemoveListItem\u003cT\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "maxAddRemoveCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "notifyPending",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "notifyUpdating",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "notifyDone",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "notifyCancelled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    },
+    {
+      "name": "threadRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "threadedTableModel",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModel\u003cT,?\u003e",
+          "type_short": "ThreadedTableModel",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateMonitor",
+      "comment": "Ensures that the result of this call is a cancellable monitor.\n \n If the monitor used by the jobs of this class is not cancellable, then the jobs cannot\n properly move from state to state, since they are reused for new requests.",
+      "javadoc": "Ensures that the result of this call is a cancellable monitor.\n \n \u003cP\u003eIf the monitor used by the jobs of this class is not cancellable, then the jobs cannot\n properly move from state to state, since they are reused for new requests.",
+      "static": false,
+      "params": [
+        {
+          "name": "clientMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.util.task.TaskMonitor",
+        "type_short": "TaskMonitor",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSynchronizingLock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxAddRemoveCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelAllJobs",
+      "comment": "Warning!:  This cancels the current job, pending jobs and anything waiting in the update\n  manager.  This method is meant to be used outside of normal usage.  That is, it should\n  be used when you really have to cancel everything that is going on in order to restart\n  things.",
+      "javadoc": "Warning!:  This cancels the current job, pending jobs and anything waiting in the update\n  manager.  This method is meant to be used outside of normal usage.  That is, it should\n  be used when you really have to cancel everything that is going on in order to restart\n  things.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reload",
+      "comment": "Called when the table data needs to be totally reloaded.  An example is when a undo or redo\n is performed.  It also is called if too many add/removes have been accumulated.",
+      "javadoc": "Called when the table data needs to be totally reloaded.  An example is when a undo or redo\n is performed.  It also is called if too many add/removes have been accumulated.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reloadSpecificData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sort",
+      "comment": "Tells this update manager that the table data needs to be resorted.  If a current job\n is running, it will attempt to add the sort work directly to the running job.  If the running\n job has not gotten to the sort phase yet, the new sort will replace the currently scheduled sort.\n If the current job is sorting or has already sorted, it will be interrupted and return to\n the sorted state.\n \n If a pending job is already waiting, the sort will be added to the pending job.\n \n If no jobs exists, a new job will be created to do the sort and runJob will be called to\n start a thread to do the work.",
+      "javadoc": "Tells this update manager that the table data needs to be resorted.  If a current job\n is running, it will attempt to add the sort work directly to the running job.  If the running\n job has not gotten to the sort phase yet, the new sort will replace the currently scheduled sort.\n If the current job is sorting or has already sorted, it will be interrupted and return to\n the sorted state.\n \u003cp\u003e\n If a pending job is already waiting, the sort will be added to the pending job.\n \u003cp\u003e\n If no jobs exists, a new job will be created to do the sort and runJob will be called to\n start a thread to do the work.\n@param sortingContext the context used to sort the data\n@param forceSort True signals to re-sort the data (useful when the data changes and needs\n                  to be re-sorted.",
+      "static": false,
+      "params": [
+        {
+          "name": "sortingContext",
+          "type_long": "docking.widgets.table.TableSortingContext\u003cT\u003e",
+          "type_short": "TableSortingContext",
+          "comment": "the context used to sort the data"
+        },
+        {
+          "name": "forceSort",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True signals to re-sort the data (useful when the data changes and needs\n                  to be re-sorted."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "filter",
+      "comment": "Tells this update manager that the table data needs to be re-filtered.  If a current job\n is running, it will attempt to add the filter work directly to the running job.  If the running\n job has not gotten to the filter phase yet, nothing needs to be done since the data will be\n re-filtered anyway\n If the current job is currently filtering or has already filtered, it will be \n interrupted and return to the filter state.\n \n If a pending job is already waiting, the filter job will be added to the pending job.\n \n if no jobs exists, a new job will be created to do the filter and runJob will be called to\n start a thread to do the work.",
+      "javadoc": "Tells this update manager that the table data needs to be re-filtered.  If a current job\n is running, it will attempt to add the filter work directly to the running job.  If the running\n job has not gotten to the filter phase yet, nothing needs to be done since the data will be\n re-filtered anyway\n If the current job is currently filtering or has already filtered, it will be \n interrupted and return to the filter state.\n \u003cp\u003e\n If a pending job is already waiting, the filter job will be added to the pending job.\n \u003cp\u003e\n if no jobs exists, a new job will be created to do the filter and runJob will be called to\n start a thread to do the work.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addRemove",
+      "comment": "Tells this update manager that a new row item has been added or removed.  Add/removes never\n affect any currently running job.  If a pending job exists, the add/remove will be added\n to the pending job.\n \n if no pending jobs exists, the add/remove item will be added to a list to be processed later\n when the swing update manager\u0027s timer expires.",
+      "javadoc": "Tells this update manager that a new row item has been added or removed.  Add/removes never\n affect any currently running job.  If a pending job exists, the add/remove will be added\n to the pending job.\n \n if no pending jobs exists, the add/remove item will be added to a list to be processed later\n when the swing update manager\u0027s timer expires.\n@param item the add/remove item to process.",
+      "static": false,
+      "params": [
+        {
+          "name": "item",
+          "type_long": "docking.widgets.table.AddRemoveListItem\u003cT\u003e",
+          "type_short": "AddRemoveListItem",
+          "comment": "the add/remove item to process."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processAddRemoveItems",
+      "comment": "Processes the accumulated list of add/remove items.\n Called when the swing update manager decides its time to run.",
+      "javadoc": "Processes the accumulated list of add/remove items.\n Called when the swing update manager decides its time to run.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "Returns true if there is any scheduled work that has not been completed, including any\n deferred add/removes.",
+      "javadoc": "Returns true if there is any scheduled work that has not been completed, including any\n deferred add/removes.\n@return true if there is work to be done.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is work to be done."
+      },
+      "throws": []
+    },
+    {
+      "name": "setUpdateDelay",
+      "comment": "Sets the delay for the swing update managers",
+      "javadoc": "Sets the delay for the swing update managers\n@param updateDelayMillis the new delay for the swing update manager\n@param maxUpdateDelayMillis the new max update delay; updates will not wait past this time",
+      "static": false,
+      "params": [
+        {
+          "name": "updateDelayMillis",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the new delay for the swing update manager"
+        },
+        {
+          "name": "maxUpdateDelayMillis",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the new max update delay; updates will not wait past this time"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTaskMonitor",
+      "comment": "Sets the task monitor for this manager.",
+      "javadoc": "Sets the task monitor for this manager.\n@param monitor the new monitor to use.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the new monitor to use."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTaskMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.task.TaskMonitor",
+        "type_short": "TaskMonitor",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addThreadedTableListener",
+      "comment": "Sets the ThreadedTableListener.  Only one listener is supported, so setting a new listener\n will replace any existing listener.",
+      "javadoc": "Sets the ThreadedTableListener.  Only one listener is supported, so setting a new listener\n will replace any existing listener.\n@param listener the new ThreadedTableListener to use.",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModelListener",
+          "type_short": "ThreadedTableModelListener",
+          "comment": "the new ThreadedTableListener to use."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeThreadedTableListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.table.threaded.ThreadedTableModelListener",
+          "type_short": "ThreadedTableModelListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Disposes the updateManager resource.",
+      "javadoc": "Disposes the updateManager resource.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateNow",
+      "comment": "Kicks the swing update manager to immediately process any accumulated add/removes.",
+      "javadoc": "Kicks the swing update manager to immediately process any accumulated add/removes.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runJob",
+      "comment": "Called when there is work to be done.  It creates a thread if none is running to do the\n work that is built into the pending job.",
+      "javadoc": "Called when there is work to be done.  It creates a thread if none is running to do the\n work that is built into the pending job.",
+      "static": false,
+      "params": [
+        {
+          "name": "job",
+          "type_long": "docking.widgets.table.threaded.TableUpdateJob\u003cT\u003e",
+          "type_short": "TableUpdateJob",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextJob",
+      "comment": "Transitions the pending job to the current job is a thread safe way.",
+      "javadoc": "Transitions the pending job to the current job is a thread safe way.\n@return the new current job.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.threaded.TableUpdateJob\u003cT\u003e",
+        "type_short": "TableUpdateJob",
+        "comment": "the new current job."
+      },
+      "throws": []
+    },
+    {
+      "name": "jobDone",
+      "comment": "Called when the current jobs has been completed.  It notifies the listener, clears the\n thread variable, and checks if any add/removes are pending, in which case it set the state\n to work pending.",
+      "javadoc": "Called when the current jobs has been completed.  It notifies the listener, clears the\n thread variable, and checks if any add/removes are pending, in which case it set the state\n to work pending.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

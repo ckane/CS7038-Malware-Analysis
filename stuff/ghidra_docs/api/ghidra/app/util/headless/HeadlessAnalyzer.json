@@ -1,0 +1,1097 @@
+{
+  "name": "HeadlessAnalyzer",
+  "comment": "The class used kick-off and interact with headless processing.  All headless options have been \n broken out into their own class: HeadlessOptions.  This class is intended to be used \n one of two ways:\n \n   Used by AnalyzeHeadless to perform headless analysis based on arguments specified \n   on the command line.\n   Used by another tool as a library to perform headless analysis.\n \n \n Note: This class is not thread safe.",
+  "javadoc": "The class used kick-off and interact with headless processing.  All headless options have been \n broken out into their own class: {@link HeadlessOptions}.  This class is intended to be used \n one of two ways:\n \u003cul\u003e\n   \u003cli\u003eUsed by {@link AnalyzeHeadless} to perform headless analysis based on arguments specified \n   on the command line.\u003c/li\u003e\n   \u003cli\u003eUsed by another tool as a library to perform headless analysis.\u003c/li\u003e\n \u003c/ul\u003e\n \u003cp\u003e\n Note: This class is not thread safe.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "instance",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.util.headless.HeadlessAnalyzer",
+      "type_short": "HeadlessAnalyzer",
+      "constant_value": null
+    },
+    {
+      "name": "options",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.headless.HeadlessOptions",
+      "type_short": "HeadlessOptions",
+      "constant_value": null
+    },
+    {
+      "name": "projectManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.headless.HeadlessAnalyzer.HeadlessGhidraProjectManager",
+      "type_short": "HeadlessGhidraProjectManager",
+      "constant_value": null
+    },
+    {
+      "name": "project",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.Project",
+      "type_short": "Project",
+      "constant_value": null
+    },
+    {
+      "name": "analysisTimedOut",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "saveDomainFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.model.DomainFolder",
+      "type_short": "DomainFolder",
+      "constant_value": null
+    },
+    {
+      "name": "storage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Object\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "classLoaderForDotClassScripts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.net.URLClassLoader",
+      "type_short": "URLClassLoader",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "getLoggableInstance",
+      "comment": "Gets a headless analyzer, initializing the application if necessary with the specified \n logging parameters.  An IllegalStateException will be thrown if the application has \n already been initialized or a headless analyzer has already been retrieved.  In these cases,\n the headless analyzer should be gotten with HeadlessAnalyzer#getInstance().",
+      "javadoc": "Gets a headless analyzer, initializing the application if necessary with the specified \n logging parameters.  An {@link IllegalStateException} will be thrown if the application has \n already been initialized or a headless analyzer has already been retrieved.  In these cases,\n the headless analyzer should be gotten with {@link HeadlessAnalyzer#getInstance()}.\n@param logFile The desired application log file.  If null, no application logging will take place.\n@param scriptLogFile The desired scripting log file.  If null, no script logging will take place.\n@param useLog4j true if log4j is to be used; otherwise, false.  If this class is being used by \n     another tool as a library, using log4j might interfere with that tool.\n@return An instance of a new headless analyzer.\n@throws IllegalStateException if an application or headless analyzer instance has already been initialized.\n@throws IOException if there was a problem reading the application.properties file.",
+      "static": true,
+      "params": [
+        {
+          "name": "logFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "The desired application log file.  If null, no application logging will take place."
+        },
+        {
+          "name": "scriptLogFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "The desired scripting log file.  If null, no script logging will take place."
+        },
+        {
+          "name": "useLog4j",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if log4j is to be used; otherwise, false.  If this class is being used by \n     another tool as a library, using log4j might interfere with that tool."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.headless.HeadlessAnalyzer",
+        "type_short": "HeadlessAnalyzer",
+        "comment": "An instance of a new headless analyzer."
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalStateException",
+          "type_short": "IllegalStateException",
+          "comment": "if an application or headless analyzer instance has already been initialized."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was a problem reading the application.properties file."
+        }
+      ]
+    },
+    {
+      "name": "getInstance",
+      "comment": "Gets a headless analyzer instance, with the assumption that the application has already been\n initialized.  If this is called before the application has been initialized, it will \n initialize the application with no logging.",
+      "javadoc": "Gets a headless analyzer instance, with the assumption that the application has already been\n initialized.  If this is called before the application has been initialized, it will \n initialize the application with no logging.\n@return An instance of a new headless analyzer.\n@throws IOException if there was a problem reading the application.properties file (only possible\n     if the application had not be initialized).",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.headless.HeadlessAnalyzer",
+        "type_short": "HeadlessAnalyzer",
+        "comment": "An instance of a new headless analyzer."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was a problem reading the application.properties file (only possible\n     if the application had not be initialized)."
+        }
+      ]
+    },
+    {
+      "name": "getApplicationLayout",
+      "comment": "Gets the appropriate Ghidra application layout for this headless analyzer.\n \n The headless analyzer can be used in both \"normal\" mode and single jar mode, so\n we need to use the appropriate layout for either case.",
+      "javadoc": "Gets the appropriate Ghidra application layout for this headless analyzer.\n \u003cp\u003e\n The headless analyzer can be used in both \"normal\" mode and single jar mode, so\n we need to use the appropriate layout for either case.\n@return The appropriate Ghidra application layout for this headless analyzer.\n@throws IOException if there was a problem getting an appropriate application layout.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.GhidraApplicationLayout",
+        "type_short": "GhidraApplicationLayout",
+        "comment": "The appropriate Ghidra application layout for this headless analyzer."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was a problem getting an appropriate application layout."
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new headless analyzer object with default settings.",
+      "javadoc": "Creates a new headless analyzer object with default settings.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reset",
+      "comment": "Resets the state of the headless analyzer to the default settings.",
+      "javadoc": "Resets the state of the headless analyzer to the default settings.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOptions",
+      "comment": "Gets the headless analyzer\u0027s options.",
+      "javadoc": "Gets the headless analyzer\u0027s options.\n@return The headless analyer\u0027s options.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.headless.HeadlessOptions",
+        "type_short": "HeadlessOptions",
+        "comment": "The headless analyer\u0027s options."
+      },
+      "throws": []
+    },
+    {
+      "name": "processURL",
+      "comment": "Process the optional import file/directory list and process each imported file:\n \n execute ordered list of pre-scripts\n perform auto-analysis if not disabled\n execute ordered list of post-scripts\n \n If no import files or directories have been specified the ordered list \n of pre/post scripts will be executed once.",
+      "javadoc": "Process the optional import file/directory list and process each imported file:\n \u003col\u003e\n \u003cli\u003eexecute ordered list of pre-scripts\u003c/li\u003e\n \u003cli\u003eperform auto-analysis if not disabled\u003c/li\u003e\n \u003cli\u003eexecute ordered list of post-scripts\u003c/li\u003e\n \u003c/ol\u003e\n If no import files or directories have been specified the ordered list \n of pre/post scripts will be executed once.\n@param ghidraURL ghidra URL for existing server repository and optional\n                  folder path\n@param filesToImport directories and files to be imported (null or empty \n                      is acceptable if we are in -process mode)\n@throws IOException if there was an IO-related problem\n@throws MalformedURLException specified URL is invalid",
+      "static": false,
+      "params": [
+        {
+          "name": "ghidraURL",
+          "type_long": "java.net.URL",
+          "type_short": "URL",
+          "comment": "ghidra URL for existing server repository and optional\n                  folder path"
+        },
+        {
+          "name": "filesToImport",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": "directories and files to be imported (null or empty \n                      is acceptable if we are in -process mode)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an IO-related problem"
+        },
+        {
+          "type_long": "java.net.MalformedURLException",
+          "type_short": "MalformedURLException",
+          "comment": "specified URL is invalid"
+        }
+      ]
+    },
+    {
+      "name": "processLocal",
+      "comment": "Process the optional import file/directory list and process each imported file:\n \n execute ordered list of pre-scripts\n perform auto-analysis if not disabled\n execute ordered list of post-scripts\n \n If no import files or directories have been specified the ordered list \n of pre/post scripts will be executed once.",
+      "javadoc": "Process the optional import file/directory list and process each imported file:\n \u003col\u003e\n \u003cli\u003eexecute ordered list of pre-scripts\u003c/li\u003e\n \u003cli\u003eperform auto-analysis if not disabled\u003c/li\u003e\n \u003cli\u003eexecute ordered list of post-scripts\u003c/li\u003e\n \u003c/ol\u003e\n If no import files or directories have been specified the ordered list \n of pre/post scripts will be executed once.\n@param projectLocation directory path of project \n \t\t\t\t\t\t  If project exists it will be opened, otherwise it will be created.\n@param projectName project name\n@param rootFolderPath root folder for imports\n@param filesToImport directories and files to be imported (null or empty is acceptable if\n        \t\t\t\twe are in -process mode)\n@throws IOException if there was an IO-related problem",
+      "static": false,
+      "params": [
+        {
+          "name": "projectLocation",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "directory path of project \n \t\t\t\t\t\t  If project exists it will be opened, otherwise it will be created."
+        },
+        {
+          "name": "projectName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "project name"
+        },
+        {
+          "name": "rootFolderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "root folder for imports"
+        },
+        {
+          "name": "filesToImport",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": "directories and files to be imported (null or empty is acceptable if\n        \t\t\t\twe are in -process mode)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an IO-related problem"
+        }
+      ]
+    },
+    {
+      "name": "checkAnalysisTimedOut",
+      "comment": "Checks to see if the most recent analysis timed out.",
+      "javadoc": "Checks to see if the most recent analysis timed out.\n@return true if the most recent analysis timed out; otherwise, false.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the most recent analysis timed out; otherwise, false."
+      },
+      "throws": []
+    },
+    {
+      "name": "setSaveFolder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "domFolder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addVariableToStorage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "nameOfVar",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "valOfVar",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStorageKeys",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cjava.lang.String\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVariableFromStorage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "nameOfVar",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDomainFolder",
+      "comment": "Get/Create specified folder path within project",
+      "javadoc": "Get/Create specified folder path within project\n@param folderPath the folder path within the project\n@param create if true, folder will be created if it does not exist\n@return DomainFolder for specified path\n@throws InvalidNameException if folder name is invalid\n@throws IOException if folder can not be created",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the folder path within the project"
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, folder will be created if it does not exist"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFolder",
+        "type_short": "DomainFolder",
+        "comment": "DomainFolder for specified path"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if folder can not be created"
+        },
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": "if folder name is invalid"
+        }
+      ]
+    },
+    {
+      "name": "storageContainsKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "nameOfVar",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runScript",
+      "comment": "Runs the specified script with the specified state.",
+      "javadoc": "Runs the specified script with the specified state.\n@param scriptState State representing environment variables that the script is able\n \t\t\t\t\t  to access.\n@param script Script to be run.\n@return whether the script successfully completed running",
+      "static": false,
+      "params": [
+        {
+          "name": "scriptState",
+          "type_long": "ghidra.app.script.GhidraState",
+          "type_short": "GhidraState",
+          "comment": "State representing environment variables that the script is able\n \t\t\t\t\t  to access."
+        },
+        {
+          "name": "script",
+          "type_long": "ghidra.app.script.GhidraScript",
+          "type_short": "GhidraScript",
+          "comment": "Script to be run."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "whether the script successfully completed running"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkUpdateOptions",
+      "comment": "Check file update options (i.e., readOnly, commit) and change defaults if needed.",
+      "javadoc": "Check file update options (i.e., readOnly, commit) and change defaults if needed.\n@return true if OK to continue",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if OK to continue"
+      },
+      "throws": []
+    },
+    {
+      "name": "isCommitAllowed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseScriptPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "scriptPaths",
+          "type_long": "java.util.List\u003cjava.lang.String\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.String\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showConfiguredScriptPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findScript",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "scriptName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkScript",
+      "comment": "Checks the script name to ensure it exists. If the script type has a GhidraScriptProvider\n (any type of script but .class), then return the ResourceFile that represents that script.\n \n If the script is a class file, return null (one class loader is stored to allow the\n Headless Analyzer to find all the class files).\n \n GhidraScript is not instantiated here, because it is important that each script be\n instantiated at the time it\u0027s used. If a GhidraScript object is re-used, this causes\n problems where GhidraScript variables aren\u0027t being re-initialized at each use of the script.",
+      "javadoc": "Checks the script name to ensure it exists. If the script type has a GhidraScriptProvider\n (any type of script but .class), then return the ResourceFile that represents that script.\n \n If the script is a class file, return null (one class loader is stored to allow the\n Headless Analyzer to find all the class files).\n \n GhidraScript is not instantiated here, because it is important that each script be\n instantiated at the time it\u0027s used. If a GhidraScript object is re-used, this causes\n problems where GhidraScript variables aren\u0027t being re-initialized at each use of the script.\n@param scriptName The name of the script to check\n@return ResourceFile representing the source file, or null (if script is a .class file)",
+      "static": false,
+      "params": [
+        {
+          "name": "scriptName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The name of the script to check"
+        }
+      ],
+      "return": {
+        "type_long": "generic.jar.ResourceFile",
+        "type_short": "ResourceFile",
+        "comment": "ResourceFile representing the source file, or null (if script is a .class file)"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkScriptsList",
+      "comment": "Creates mapping from script name to actual Script object",
+      "javadoc": "Creates mapping from script name to actual Script object\n@param scriptsList List of scripts\n@return mapping of script name to its associated Script object",
+      "static": false,
+      "params": [
+        {
+          "name": "scriptsList",
+          "type_long": "java.util.List\u003cgeneric.stl.Pair\u003cjava.lang.String,java.lang.String[]\u003e\u003e",
+          "type_short": "List",
+          "comment": "List of scripts"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,generic.jar.ResourceFile\u003e",
+        "type_short": "Map",
+        "comment": "mapping of script name to its associated Script object"
+      },
+      "throws": []
+    },
+    {
+      "name": "compileScripts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "runScriptsList",
+      "comment": "Run a list of scripts",
+      "javadoc": "Run a list of scripts\n@param scriptsList list of script names to run\n@param scriptFileMap mapping of script names to Script objects\n@param scriptState the GhidraState to be passed into each script\n@param continueOption option that could have been set by script(s)\n@return option that could have been set by script(s)",
+      "static": false,
+      "params": [
+        {
+          "name": "scriptsList",
+          "type_long": "java.util.List\u003cgeneric.stl.Pair\u003cjava.lang.String,java.lang.String[]\u003e\u003e",
+          "type_short": "List",
+          "comment": "list of script names to run"
+        },
+        {
+          "name": "scriptFileMap",
+          "type_long": "java.util.Map\u003cjava.lang.String,generic.jar.ResourceFile\u003e",
+          "type_short": "Map",
+          "comment": "mapping of script names to Script objects"
+        },
+        {
+          "name": "scriptState",
+          "type_long": "ghidra.app.script.GhidraState",
+          "type_short": "GhidraState",
+          "comment": "the GhidraState to be passed into each script"
+        },
+        {
+          "name": "continueOption",
+          "type_long": "ghidra.app.util.headless.HeadlessScript.HeadlessContinuationOption",
+          "type_short": "HeadlessContinuationOption",
+          "comment": "option that could have been set by script(s)"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.headless.HeadlessScript.HeadlessContinuationOption",
+        "type_short": "HeadlessContinuationOption",
+        "comment": "option that could have been set by script(s)"
+      },
+      "throws": []
+    },
+    {
+      "name": "getInitialProgramState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.script.GhidraState",
+        "type_short": "GhidraState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "analyzeProgram",
+      "comment": "",
+      "javadoc": "{@literal Run prescripts -\u003e analysis -\u003e postscripts (any of these steps is optional).}\n@param fileAbsolutePath Path of the file to analyze.\n@param program The program to analyze.\n@return true if the program file should be kept.  If analysis or scripts have marked\n \t\t\tthe program as temporary changes should not be saved.  Returns false in \n \t\t\tthese cases:\n \t\t- One of the scripts sets the Headless Continuation Option to \"ABORT_AND_DELETE\" or \n \t\t\t\"CONTINUE_THEN_DELETE\".",
+      "static": false,
+      "params": [
+        {
+          "name": "fileAbsolutePath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "Path of the file to analyze."
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "The program to analyze."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the program file should be kept.  If analysis or scripts have marked\n \t\t\tthe program as temporary changes should not be saved.  Returns false in \n \t\t\tthese cases:\n \t\t- One of the scripts sets the Headless Continuation Option to \"ABORT_AND_DELETE\" or \n \t\t\t\"CONTINUE_THEN_DELETE\"."
+      },
+      "throws": []
+    },
+    {
+      "name": "processFileNoImport",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "domFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteDomainFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "domFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processFolderNoImport",
+      "comment": "Process all files within parentFolder which satisfies the specified filenamePattern.\n If filenamePattern is null, all files will be processed",
+      "javadoc": "Process all files within parentFolder which satisfies the specified filenamePattern.\n If filenamePattern is null, all files will be processed\n@param parentFolder domain folder to be searched\n@param filenamePattern filename pattern or null for all files\n@return true if one or more files processed\n@throws IOException if an IO problem occurred.",
+      "static": false,
+      "params": [
+        {
+          "name": "parentFolder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": "domain folder to be searched"
+        },
+        {
+          "name": "filenamePattern",
+          "type_long": "java.util.regex.Pattern",
+          "type_short": "Pattern",
+          "comment": "filename pattern or null for all files"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if one or more files processed"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an IO problem occurred."
+        }
+      ]
+    },
+    {
+      "name": "processFolderNoImport",
+      "comment": "Process the specified filename within parentFolder.",
+      "javadoc": "Process the specified filename within parentFolder.\n@param parentFolder domain folder to be searched\n@param filename name of file to be imported\n@return true if one or more files processed\n@throws IOException if an IO problem occurred.",
+      "static": false,
+      "params": [
+        {
+          "name": "parentFolder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": "domain folder to be searched"
+        },
+        {
+          "name": "filename",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of file to be imported"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if one or more files processed"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an IO problem occurred."
+        }
+      ]
+    },
+    {
+      "name": "processNoImport",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rootFolderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createFilenamePattern",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.regex.Pattern",
+        "type_short": "Pattern",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkOverwrite",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "df",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "commitProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "df",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processFileWithImport",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processWithImport",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "isFirstTime",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processWithImport",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "inputDirFiles",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "openProject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "locator",
+          "type_long": "ghidra.framework.model.ProjectLocator",
+          "type_short": "ProjectLocator",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.Project",
+        "type_short": "Project",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkValidFilename",
+      "comment": "Checks to make sure the given file contains only valid characters in its name.",
+      "javadoc": "Checks to make sure the given file contains only valid characters in its name.\n@param currFile The file to check.\n@throws InvalidInputException if the given file contains invalid characters in it.",
+      "static": true,
+      "params": [
+        {
+          "name": "currFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "The file to check."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the given file contains invalid characters in it."
+        }
+      ]
+    },
+    {
+      "name": "getProjectManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.headless.HeadlessAnalyzer.HeadlessGhidraProjectManager",
+        "type_short": "HeadlessGhidraProjectManager",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

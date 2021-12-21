@@ -1,0 +1,659 @@
+{
+  "name": "RowObjectSelectionManager",
+  "comment": "A class to track and restore selections made in a table.  We use this in the docking\n environment primarily due to the heavy usage of filtering for most tables.  As tables are\n filtered, the contents change (and then change back when the filter is removed).  It is nice\n to be able to filter a table, select an item of interest, and then unfilter the table to see\n that item in more context.",
+  "javadoc": "A class to track and restore selections made in a table.  We use this in the docking\n environment primarily due to the heavy usage of filtering for most tables.  As tables are\n filtered, the contents change (and then change back when the filter is removed).  It is nice\n to be able to filter a table, select an item of interest, and then unfilter the table to see\n that item in more context.\n@param \u003cT\u003e the row type",
+  "static": false,
+  "implements": [
+    "docking.widgets.table.SelectionManager"
+  ],
+  "extends": "javax.swing.DefaultListSelectionModel",
+  "fields": [
+    {
+      "name": "ARTIFICIAL_ROW_COUNT_THRESHOLD",
+      "comment": "How big is too big?  Some things to consider:\n \n 1) There are many tables in the tool that could be active at once\n 2) Many tables will reload during analysis or undo/redo\n 3) Each reload will trigger a \u0027selection restore\u0027 *when there is a selection in the table*\n 4) Each selection restore will trigger a map to be created, where each key is a row object\n 5) Each map is built in the Swing thread\n 6) There may be many maps being built for a major domain object change\n 7) The potential memory consumption is (number of maps * size of each table)\n \n Each map will be immediately available for garbage collection.  But, there still seems\n to be some reasonable upper-bound that we can put in place to not fall into a degenerate\n case that consumes too much memory.  (Not to mention the work of building and collecting\n the maps).\n \n This value can always be changed if it seems to restrictive (user selections do not\n persist) or too much work is being done (we haven\u0027t yet noticed this, but it could be\n happening to end-users).",
+      "javadoc": "How big is too big?  Some things to consider:\n \u003cpre\u003e\n 1) There are many tables in the tool that could be active at once\n 2) Many tables will reload during analysis or undo/redo\n 3) Each reload will trigger a \u0027selection restore\u0027 *when there is a selection in the table*\n 4) Each selection restore will trigger a map to be created, where each key is a row object\n 5) Each map is built in the Swing thread\n 6) There may be many maps being built for a major domain object change\n 7) The potential memory consumption is (number of maps * size of each table)\n \u003c/pre\u003e\n Each map will be immediately available for garbage collection.  But, there still seems\n to be some reasonable upper-bound that we can put in place to not fall into a degenerate\n case that consumes too much memory.  (Not to mention the work of building and collecting\n the maps).\n \u003cP\u003e\n This value can always be changed if it seems to restrictive (user selections do not\n persist) or too much work is being done (we haven\u0027t yet noticed this, but it could be\n happening to end-users).",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "10000"
+    },
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "org.apache.logging.log4j.Logger",
+      "type_short": "Logger",
+      "constant_value": null
+    },
+    {
+      "name": "DATE_FORMAT",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.text.DateFormat",
+      "type_short": "DateFormat",
+      "constant_value": null
+    },
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cdocking.widgets.table.SelectionManagerListener\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTable",
+      "type_short": "JTable",
+      "constant_value": null
+    },
+    {
+      "name": "modelAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.RowObjectSelectionManager\u003cT\u003e.FilterModelAdapter",
+      "type_short": "FilterModelAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "lastSelectionUpdateTimeStamp",
+      "comment": "A flag used to track when updates or requests to update the selection are made.  This is\n used to throw away requests to repair selections that have been superseded by new requests.",
+      "javadoc": "A flag used to track when updates or requests to update the selection are made.  This is\n used to throw away requests to repair selections that have been superseded by new requests.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "ignoreSelectionChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "restoringSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "table",
+          "type_long": "javax.swing.JTable",
+          "type_short": "JTable",
+          "comment": ""
+        },
+        {
+          "name": "model",
+          "type_long": "docking.widgets.table.RowObjectTableModel\u003cT\u003e",
+          "type_short": "RowObjectTableModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addSelectionManagerListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.table.SelectionManagerListener",
+          "type_short": "SelectionManagerListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeSelectionManagerListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.table.SelectionManagerListener",
+          "type_short": "SelectionManagerListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "installListSelectionListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearSavedSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireValueChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "firstIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "lastIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isAdjusting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "superFireValueChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "firstIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "lastIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isAdjusting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "isTrackingSelectionChange",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shouldTrackSelection",
+      "comment": "checks to see if we are ignoring selection changes AND will reset the ignore state",
+      "javadoc": "checks to see if we are ignoring selection changes AND will reset the ignore state",
+      "static": false,
+      "params": [
+        {
+          "name": "isAdjusting",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "firstIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveSelectionState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "selectedRows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "translateRowsToValues",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "viewRows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cT\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "rowsToString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tableChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "javax.swing.event.TableModelEvent",
+          "type_short": "TableModelEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "maybeRepairSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "repairSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "translateSavedObjectSelectionToRowIndexes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int[]",
+        "type_short": "int[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "translateRowObjectsToIndices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rowObjects",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "objectRowMap",
+          "type_long": "java.util.Map\u003cjava.lang.Object,java.util.List\u003cjava.lang.Integer\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.Integer\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mapAllTableRowObjectToIndexes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.Object,java.util.List\u003cjava.lang.Integer\u003e\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTimestampString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "timestamp",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectRows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "selectedViewRows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreSelectedRows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "notifyRestoringSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "isPreRestore",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "trace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "trace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "traceRows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "rows",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectionHistoryExpired",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "currentTimestamp",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

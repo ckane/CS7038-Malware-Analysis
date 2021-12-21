@@ -1,0 +1,2421 @@
+{
+  "name": "ReferenceDBManager",
+  "comment": "Reference manager implementation for the database.",
+  "javadoc": "Reference manager implementation for the database.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.symbol.ReferenceManager",
+    "ghidra.program.database.ManagerDB",
+    "db.util.ErrorHandler"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "NO_REFS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.program.model.symbol.Reference[]",
+      "type_short": "ghidra.program.model.symbol.Reference[]",
+      "constant_value": null
+    },
+    {
+      "name": "functionCacher",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.references.ReferenceDBManager.FunctionVariableReferenceCacher",
+      "type_short": "FunctionVariableReferenceCacher",
+      "constant_value": null
+    },
+    {
+      "name": "oldStackRefAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.references.OldStackRefDBAdpater",
+      "type_short": "OldStackRefDBAdpater",
+      "constant_value": null
+    },
+    {
+      "name": "addrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMap",
+      "type_short": "AddressMap",
+      "constant_value": null
+    },
+    {
+      "name": "fromAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.references.FromAdapter",
+      "type_short": "FromAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "toAdapter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.references.ToAdapter",
+      "type_short": "ToAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramDB",
+      "type_short": "ProgramDB",
+      "constant_value": null
+    },
+    {
+      "name": "symbolMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.symbol.SymbolManager",
+      "type_short": "SymbolManager",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.Lock",
+      "type_short": "Lock",
+      "constant_value": null
+    },
+    {
+      "name": "fromCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.DBObjectCache\u003cghidra.program.database.references.RefList\u003e",
+      "type_short": "DBObjectCache",
+      "constant_value": null
+    },
+    {
+      "name": "toCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.DBObjectCache\u003cghidra.program.database.references.RefList\u003e",
+      "type_short": "DBObjectCache",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new reference manager.",
+      "javadoc": "Construct a new reference manager.\n@param dbHandle handle to the database\n@param addrMap map to convert addresses to longs and longs to addresses\n@param openMode one of ProgramDB.CREATE, UPDATE, UPGRADE, or READ_ONLY\n@param lock the program synchronization lock\n@param monitor Task monitor for upgrading\n@throws CancelledException if the user cancels the loading of this db\n@throws IOException if a database io error occurs.\n@throws VersionException if the database version is different from the expected version",
+      "static": false,
+      "params": [
+        {
+          "name": "dbHandle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "handle to the database"
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMap",
+          "type_short": "AddressMap",
+          "comment": "map to convert addresses to longs and longs to addresses"
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of ProgramDB.CREATE, UPDATE, UPGRADE, or READ_ONLY"
+        },
+        {
+          "name": "lock",
+          "type_long": "ghidra.util.Lock",
+          "type_short": "Lock",
+          "comment": "the program synchronization lock"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "Task monitor for upgrading"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the loading of this db"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a database io error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": "if the database version is different from the expected version"
+        }
+      ]
+    },
+    {
+      "name": "initializeAdapters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        },
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.VersionException",
+          "type_short": "VersionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.database.ProgramDB",
+          "type_short": "ProgramDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programReady",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "openMode",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentRevision",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "convertOldReferences",
+      "comment": "Convert old namespace and Variable addresses to normal stack/register addresses.\n Relies on ProgramDB version change (Version 12) to trigger upgrade requirement.",
+      "javadoc": "Convert old namespace and Variable addresses to normal stack/register addresses.\n Relies on ProgramDB version change (Version 12) to trigger upgrade requirement.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "convertOldReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toIterator",
+          "type_long": "ghidra.program.model.address.AddressIterator",
+          "type_short": "AddressIterator",
+          "comment": ""
+        },
+        {
+          "name": "typeOfRef",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeAllTo",
+      "comment": "Remove all references that have the \"To\" address as\n the given address.  NOTE: This method relies on the use of the ToRefs list!\n Beyond version-12 of ProgramDB, Stack and Register addresses are no longer stored in the\n ToRefs list.",
+      "javadoc": "Remove all references that have the \"To\" address as\n the given address.  NOTE: This method relies on the use of the ToRefs list!\n Beyond version-12 of ProgramDB, Stack and Register addresses are no longer stored in the\n ToRefs list.\n@return number of references removed",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of references removed"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processOldAdapterStackRefs",
+      "comment": "Convert stack references from old adapter.",
+      "javadoc": "Convert stack references from old adapter.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isIncompatible",
+      "comment": "Check an existing reference to determine if there is the possibility of merging\n reference-types",
+      "javadoc": "Check an existing reference to determine if there is the possibility of merging\n reference-types\n@param ref existing reference\n@param isOffset true if new reference is an offset reference\n@param isShifted true if new reference is a shifted reference\n@param offsetOrShift the offset or shift amount\n@return true if incompatible",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "existing reference"
+        },
+        {
+          "name": "isOffset",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if new reference is an offset reference"
+        },
+        {
+          "name": "isShifted",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if new reference is a shifted reference"
+        },
+        {
+          "name": "offsetOrShift",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the offset or shift amount"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if incompatible"
+      },
+      "throws": []
+    },
+    {
+      "name": "combineReferenceType",
+      "comment": "When adding a reference on top of an existing reference, attempt to combine\n the reference types giving preference to the most specific type.",
+      "javadoc": "When adding a reference on top of an existing reference, attempt to combine\n the reference types giving preference to the most specific type.\n@param newType the new type\n@param oldType the old type\n@return combined reference type, or the newType if unable to combine",
+      "static": false,
+      "params": [
+        {
+          "name": "newType",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": "the new type"
+        },
+        {
+          "name": "oldType",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": "the old type"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.RefType",
+        "type_short": "RefType",
+        "comment": "combined reference type, or the newType if unable to combine"
+      },
+      "throws": []
+    },
+    {
+      "name": "addRef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isOffset",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "isShifted",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "offsetOrShift",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.references.ReferenceDB",
+        "type_short": "ReferenceDB",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addMemoryReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addStackReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "stackOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeNonMemRefs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addRegisterReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addOffsetMemReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addShiftedMemReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "shiftValue",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addExternalReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "location",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExternalReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "libraryName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addExternalReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "extNamespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "extLabel",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "extAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "sourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getReferencedVariable",
+      "comment": "Attempts to determine which if any of the local functions variables are referenced by the specified\n reference.  In utilizing the firstUseOffset scoping model, negative offsets (relative to the functions\n entry) are shifted beyond the maximum positive offset within the function.  While this does not account for the\n actual instruction flow, it is hopefully accurate enough for most situations.",
+      "javadoc": "Attempts to determine which if any of the local functions variables are referenced by the specified\n reference.  In utilizing the firstUseOffset scoping model, negative offsets (relative to the functions\n entry) are shifted beyond the maximum positive offset within the function.  While this does not account for the\n actual instruction flow, it is hopefully accurate enough for most situations.\n@see ghidra.program.model.symbol.ReferenceManager#getReferencedVariable(ghidra.program.model.symbol.Reference)",
+      "static": false,
+      "params": [
+        {
+          "name": "reference",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferencesTo",
+      "comment": "Attempts to determine the set of references which refer to the specified variable.\n In utilizing the firstUseOffset scoping model, negative offsets (relative to the functions\n entry) are shifted beyond the maximum positive offset within the function.  While this does not account for the\n actual instruction flow, it is hopefully accurate enough for most situations.",
+      "javadoc": "Attempts to determine the set of references which refer to the specified variable.\n In utilizing the firstUseOffset scoping model, negative offsets (relative to the functions\n entry) are shifted beyond the maximum positive offset within the function.  While this does not account for the\n actual instruction flow, it is hopefully accurate enough for most situations.\n@see ghidra.program.model.symbol.ReferenceManager#getReferencesTo(ghidra.program.model.listing.Variable)",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference[]",
+        "type_short": "ghidra.program.model.symbol.Reference[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findVariableScope",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "varSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.references.ReferenceDBManager.Scope",
+        "type_short": "Scope",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getScopedVariableReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "storage",
+          "type_long": "ghidra.program.model.listing.VariableStorage",
+          "type_short": "VariableStorage",
+          "comment": ""
+        },
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "scope",
+          "type_long": "ghidra.program.database.references.ReferenceDBManager.Scope",
+          "type_short": "Scope",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.symbol.Reference\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getScopedVarnodeReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "matchingReferences",
+          "type_long": "java.util.List\u003cghidra.program.model.symbol.Reference\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "varnode",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        },
+        {
+          "name": "dataReferences",
+          "type_long": "java.util.SortedMap\u003cghidra.program.model.address.Address,java.util.List\u003cghidra.program.model.symbol.Reference\u003e\u003e",
+          "type_short": "SortedMap",
+          "comment": ""
+        },
+        {
+          "name": "scope",
+          "type_long": "ghidra.program.database.references.ReferenceDBManager.Scope",
+          "type_short": "Scope",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPrimary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        },
+        {
+          "name": "isPrimary",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference[]",
+        "type_short": "ghidra.program.model.symbol.Reference[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference[]",
+        "type_short": "ghidra.program.model.symbol.Reference[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceCountFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceCountTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceDestinationCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceSourceCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferences",
+      "comment": "Get all memory references with the given from address at opIndex.",
+      "javadoc": "Get all memory references with the given from address at opIndex.\n@param fromAddr the from address\n@param opIndex the operand index\n@return the references",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the from address"
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the operand index"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference[]",
+        "type_short": "ghidra.program.model.symbol.Reference[]",
+        "comment": "the references"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrimaryReferenceFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceDestinationIterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceDestinationIterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceSourceIterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceIterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ReferenceIterator",
+        "type_short": "ReferenceIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferenceSourceIterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "forward",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasFlowReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasReferencesTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAllReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "beginAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAllReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAllReferencesTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "symbolRemoved",
+      "comment": "Symbol is about to be removed",
+      "javadoc": "Symbol is about to be removed\n@param symbol the symbol that will be removed",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the symbol that will be removed"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "symbolAdded",
+      "comment": "Symbol has been added",
+      "javadoc": "Symbol has been added\n@param sym new symbol",
+      "static": false,
+      "params": [
+        {
+          "name": "sym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "new symbol"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkFunctionChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setAssociation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "s",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        },
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAssociation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateRefType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        },
+        {
+          "name": "refType",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferencesTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ReferenceIterator",
+        "type_short": "ReferenceIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidateCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "all",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveReferencesTo",
+      "comment": "Move all references to the specified oldAddr.  Any symbol binding will be discarded since\n these are intended for memory label references only.\n This method is intended specifically to support upgrading of certain references\n (i.e., Stack, Register and External addresses).\n NOTE! After ProgramDB version 12, this method will no longer be useful for\n upgrading stack and register references since they will not exist\n within the ReferenceTo-list.",
+      "javadoc": "Move all references to the specified oldAddr.  Any symbol binding will be discarded since\n these are intended for memory label references only.\n This method is intended specifically to support upgrading of certain references\n (i.e., Stack, Register and External addresses).\n NOTE! After ProgramDB version 12, this method will no longer be useful for\n upgrading stack and register references since they will not exist\n within the ReferenceTo-list.\n@param oldToAddr old reference to address\n@param newToAddr new reference to address\n@param monitor the monitor\n@return number of references updated\n@throws CancelledException if the task is cancelled\n@throws IOException if a database exception occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "oldToAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "old reference to address"
+        },
+        {
+          "name": "newToAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "new reference to address"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the monitor"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of references updated"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the task is cancelled"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a database exception occurs"
+        }
+      ]
+    },
+    {
+      "name": "deleteAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getReferenceLevel",
+      "comment": "Returns the reference level for the references to the given address",
+      "javadoc": "Returns the reference level for the references to the given address\n@param toAddr the address at which to find the highest reference level",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to find the highest reference level"
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalEntryIterator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressIterator",
+        "type_short": "AddressIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isExternalEntryPoint",
+      "comment": "Return whether the address is an external entry point",
+      "javadoc": "Return whether the address is an external entry point\n@param toAddr the address to test for external entry point\n@return true if the address is an external entry point",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to test for external entry point"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the address is an external entry point"
+      },
+      "throws": []
+    },
+    {
+      "name": "addExternalEntryPointRef",
+      "comment": "Create a memory reference to the given address to mark it as\n an external entry point.",
+      "javadoc": "Create a memory reference to the given address to mark it as\n an external entry point.\n@param toAddr the address at which to make an external entry point",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to make an external entry point"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExternalEntryPoint",
+      "comment": "Removes the external entry point at the given address",
+      "javadoc": "Removes the external entry point at the given address\n@param addr that address at which to remove the external entry point attribute.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "that address at which to remove the external entry point attribute."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "externalEntryPointAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "externalEntryPointRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFromRefs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "from",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.references.RefList",
+        "type_short": "RefList",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToRefs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "to",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.references.RefList",
+        "type_short": "RefList",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAllFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeAllFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSymbolID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        },
+        {
+          "name": "symbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "referenceAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "referenceRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "referenceTypeChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        },
+        {
+          "name": "oldType",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        },
+        {
+          "name": "newType",
+          "type_long": "ghidra.program.model.symbol.RefType",
+          "type_short": "RefType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "referencePrimaryChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dbError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ReferenceIterator",
+        "type_short": "ReferenceIterator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addReference",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferencesFrom",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference[]",
+        "type_short": "ghidra.program.model.symbol.Reference[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.ProgramDB",
+        "type_short": "ProgramDB",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

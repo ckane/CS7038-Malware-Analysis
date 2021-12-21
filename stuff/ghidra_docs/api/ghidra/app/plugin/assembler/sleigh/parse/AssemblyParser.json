@@ -1,0 +1,455 @@
+{
+  "name": "AssemblyParser",
+  "comment": "A class to encapsulate LALR(1) parsing for a given grammar\n \n This class constructs the Action/Goto table (and all the other trappings) of a LALR(1) parser\n and provides a #parse(String) method to parse actual sentences.\n \n This implementation is somewhat unconventional in that it permits ambiguous grammars. Instead of\n complaining, it produces the set of all possible parse trees. Of course, this comes at the cost\n of some efficiency.\n \n See Alfred V. Aho, Monica S. Lam, Ravi Sethi, Jeffrey D. Ullman, Compilers: Principles,\n Techniques,  Tools. Bostom, MA: Pearson, 2007.\n \n See Jackson, Stephen. LALR(1) Parsing.\n Halifax, Nova Scotia, Canada: Dalhousie University.\n http://web.cs.dal.ca/~sjackson/lalr1.html",
+  "javadoc": "A class to encapsulate LALR(1) parsing for a given grammar\n \n This class constructs the Action/Goto table (and all the other trappings) of a LALR(1) parser\n and provides a {@link #parse(String)} method to parse actual sentences.\n \n This implementation is somewhat unconventional in that it permits ambiguous grammars. Instead of\n complaining, it produces the set of all possible parse trees. Of course, this comes at the cost\n of some efficiency.\n \n See Alfred V. Aho, Monica S. Lam, Ravi Sethi, Jeffrey D. Ullman, \u003ci\u003eCompilers: Principles,\n Techniques, \u0026amp; Tools\u003c/i\u003e. Bostom, MA: Pearson, 2007.\n \n See Jackson, Stephen. \u003ca href\u003d\"http://web.cs.dal.ca/~sjackson/lalr1.html\"\u003eLALR(1) Parsing\u003c/a\u003e.\n Halifax, Nova Scotia, Canada: Dalhousie University.\n \u0026lt;http://web.cs.dal.ca/~sjackson/lalr1.html\u0026gt;",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "grammar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+      "type_short": "AssemblyGrammar",
+      "constant_value": null
+    },
+    {
+      "name": "ff",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyFirstFollow",
+      "type_short": "AssemblyFirstFollow",
+      "constant_value": null
+    },
+    {
+      "name": "states",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseState\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseTransitionTable",
+      "type_short": "AssemblyParseTransitionTable",
+      "constant_value": null
+    },
+    {
+      "name": "extendedGrammar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyExtendedGrammar",
+      "type_short": "AssemblyExtendedGrammar",
+      "constant_value": null
+    },
+    {
+      "name": "extff",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyFirstFollow",
+      "type_short": "AssemblyFirstFollow",
+      "constant_value": null
+    },
+    {
+      "name": "mergers",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParser.MergeKey,ghidra.app.plugin.assembler.sleigh.parse.AssemblyParser.MergeValue\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "actions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseActionGotoTable",
+      "type_short": "AssemblyParseActionGotoTable",
+      "constant_value": null
+    },
+    {
+      "name": "EMPTY_LABELS",
+      "comment": "A convenience to specify no labels in #parse(String, Map)",
+      "javadoc": "A convenience to specify no labels in {@link #parse(String, Map)}",
+      "static": true,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "dbg",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.util.DbgTimer",
+      "type_short": "DbgTimer",
+      "constant_value": null
+    },
+    {
+      "name": "dbg_detail",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": "false"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a LALR(1) parser from the given grammar",
+      "javadoc": "Construct a LALR(1) parser from the given grammar\n@param grammar the grammar",
+      "static": false,
+      "params": [
+        {
+          "name": "grammar",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+          "type_short": "AssemblyGrammar",
+          "comment": "the grammar"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildLR0Machine",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addLR0State",
+      "comment": "Add a newly-constructed LR0 state, and return it\u0027s assigned number",
+      "javadoc": "Add a newly-constructed LR0 state, and return it\u0027s assigned number\n@param state the newly-constructed state\n@return the assigned number\n \n If the state already exists, this just returns its previously assigned number",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseState",
+          "type_short": "AssemblyParseState",
+          "comment": "the newly-constructed state"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the assigned number\n \n If the state already exists, this just returns its previously assigned number"
+      },
+      "throws": []
+    },
+    {
+      "name": "buildExtendedGrammar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "extend",
+      "comment": "Extend a production, using the given LR0 start state",
+      "javadoc": "Extend a production, using the given LR0 start state\n@param prod the production to extend\n@param start the starting LR0 state\n@return the extended production, if the start state is valid for it",
+      "static": false,
+      "params": [
+        {
+          "name": "prod",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyProduction",
+          "type_short": "AssemblyProduction",
+          "comment": "the production to extend"
+        },
+        {
+          "name": "start",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the starting LR0 state"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyExtendedProduction",
+        "type_short": "AssemblyExtendedProduction",
+        "comment": "the extended production, if the start state is valid for it"
+      },
+      "throws": []
+    },
+    {
+      "name": "buildActionGotoTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parse",
+      "comment": "Parse the given sentence",
+      "javadoc": "Parse the given sentence\n@param input the sentence to parse\n@return all possible parse trees (and possible errors)",
+      "static": false,
+      "params": [
+        {
+          "name": "input",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the sentence to parse"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Iterable\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseResult\u003e",
+        "type_short": "Iterable",
+        "comment": "all possible parse trees (and possible errors)"
+      },
+      "throws": []
+    },
+    {
+      "name": "parse",
+      "comment": "Parse the given sentence with the given defined labels",
+      "javadoc": "Parse the given sentence with the given defined labels\n@param input the sentence to parser\n@param labels a map of label to number substitutions\n@return all possible parse results (trees and errors)\n \n The tokenizer for numeric terminals also accepts any key in {@code labels.} In such cases,\n the resulting token is assigned the value of the label.",
+      "static": false,
+      "params": [
+        {
+          "name": "input",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the sentence to parser"
+        },
+        {
+          "name": "labels",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": "a map of label to number substitutions"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseResult\u003e",
+        "type_short": "Collection",
+        "comment": "all possible parse results (trees and errors)\n \n The tokenizer for numeric terminals also accepts any key in  In such cases,\n the resulting token is assigned the value of the label."
+      },
+      "throws": []
+    },
+    {
+      "name": "printGrammar",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printLR0States",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printLR0TransitionTable",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printExtendedGrammar",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printGeneralFF",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printExtendedFF",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printMergers",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printParseTable",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "printStuff",
+      "comment": "For debugging",
+      "javadoc": "For debugging",
+      "static": false,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintStream",
+          "type_short": "PrintStream",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGrammar",
+      "comment": "Get the grammar used to construct this parser",
+      "javadoc": "Get the grammar used to construct this parser\n@return the grammar",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+        "type_short": "AssemblyGrammar",
+        "comment": "the grammar"
+      },
+      "throws": []
+    }
+  ]
+}

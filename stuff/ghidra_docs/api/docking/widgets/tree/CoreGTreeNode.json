@@ -1,0 +1,432 @@
+{
+  "name": "CoreGTreeNode",
+  "comment": "This class exists to help prevent threading errors in GTreeNode and subclasses,\n by privately maintaining synchronous access to the parent and children of a node. \n \n This implementation uses a CopyOnWriteArrayList to store its children. The theory is\n that this will allow direct thread-safe access to the children without having to worry about\n ConcurrentModificationExceptions while iterating the children.  Also, the assumption\n is that accessing the children will occur much more frequently than modifying the children.  \n This should only be a problem if a direct descendent of GTreeNode creates its children by calling\n addNode many times. But in that case, the tree should be using Lazy or \n SlowLoading nodes which always load into another list first and all the children will be set \n on a node in a single operation.\n \n Subclasses that need access to the children can call the #children() method which will\n ensure that the children are loaded (not null). Since this class uses a\n CopyOnWriteArrayList, subclasses that call the #children() method can safely\n iterate the list without having to worry about getting a ConcurrentModificationException.  \n \n This class uses synchronization to assure that the parent/children relationship is stable across\n threads.  To avoid deadlocks, the sychronization strategy is that if you have the lock on\n a parent node, you can safely acquire the lock on any of its descendants, but never its \n ancestors.  To facilitate this strategy, the #getParent() is not synchronized, but it\n is made volatile to assure the current value is always used.\n \n Except for the #doSetChildren(List) method, all other calls that mutate the\n children must be called on the swing thread.  The idea is that bulk operations can work efficiently\n by avoiding constantly switching to the swing thread to mutate the tree. This works because\n the bulk setting of the children generates a coarse \"node structure changed\" event, which causes the\n underlying JTree to rebuild its internal cache of the tree.  Individual add/remove operations\n have to be done very carefully such that the JTree is always updated on one change before any\n additional changes are done.  This is why those operations are required to be done on the swing\n thread, which combined with the fact that all mutate operations are synchronized, keeps the JTree\n happy.",
+  "javadoc": "This class exists to help prevent threading errors in {@link GTreeNode} and subclasses,\n by privately maintaining synchronous access to the parent and children of a node. \n \u003cP\u003e\n This implementation uses a {@link CopyOnWriteArrayList} to store its children. The theory is\n that this will allow direct thread-safe access to the children without having to worry about\n {@link ConcurrentModificationException}s while iterating the children.  Also, the assumption\n is that accessing the children will occur much more frequently than modifying the children.  \n This should only be a problem if a direct descendent of GTreeNode creates its children by calling\n addNode many times. But in that case, the tree should be using Lazy or \n SlowLoading nodes which always load into another list first and all the children will be set \n on a node in a single operation.\n \u003cP\u003e\n Subclasses that need access to the children can call the {@link #children()} method which will\n ensure that the children are loaded (not null). Since this class uses a\n {@link CopyOnWriteArrayList}, subclasses that call the {@link #children()} method can safely\n iterate the list without having to worry about getting a {@link ConcurrentModificationException}.  \n \u003cP\u003e\n This class uses synchronization to assure that the parent/children relationship is stable across\n threads.  To avoid deadlocks, the sychronization strategy is that if you have the lock on\n a parent node, you can safely acquire the lock on any of its descendants, but never its \n ancestors.  To facilitate this strategy, the {@link #getParent()} is not synchronized, but it\n is made volatile to assure the current value is always used.\n \u003cP\u003e\n Except for the {@link #doSetChildren(List)} method, all other calls that mutate the\n children must be called on the swing thread.  The idea is that bulk operations can work efficiently\n by avoiding constantly switching to the swing thread to mutate the tree. This works because\n the bulk setting of the children generates a coarse \"node structure changed\" event, which causes the\n underlying {@link JTree} to rebuild its internal cache of the tree.  Individual add/remove operations\n have to be done very carefully such that the {@link JTree} is always updated on one change before any\n additional changes are done.  This is why those operations are required to be done on the swing\n thread, which combined with the fact that all mutate operations are synchronized, keeps the JTree\n happy.",
+  "static": false,
+  "implements": [
+    "java.lang.Cloneable"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "parent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTreeNode",
+      "type_short": "GTreeNode",
+      "constant_value": null
+    },
+    {
+      "name": "children",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.tree.GTreeNode\u003e",
+      "type_short": "List",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParent",
+      "comment": "Returns the parent of this node.\n \n Note: this method is deliberately not synchronized (See comments above)",
+      "javadoc": "Returns the parent of this node.\n \n Note: this method is deliberately not synchronized (See comments above)\n@return the parent of this node.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": "the parent of this node."
+      },
+      "throws": []
+    },
+    {
+      "name": "isRoot",
+      "comment": "Returns true if this is a root node of a GTree",
+      "javadoc": "Returns true if this is a root node of a GTree\n@return true if this is a root node of a GTree",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is a root node of a GTree"
+      },
+      "throws": []
+    },
+    {
+      "name": "setParent",
+      "comment": "Sets the parent of this node.  This method should only be used by a parent\n node when a new child is added to that parent node.",
+      "javadoc": "Sets the parent of this node.  This method should only be used by a parent\n node when a new child is added to that parent node.\n@param parent the node that this node is being added to.",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "the node that this node is being added to."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "children",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cdocking.widgets.tree.GTreeNode\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "generateChildren",
+      "comment": "Subclasses implement this method to initially load the children.",
+      "javadoc": "Subclasses implement this method to initially load the children.\n@return a list of the initial children for this node.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cdocking.widgets.tree.GTreeNode\u003e",
+        "type_short": "List",
+        "comment": "a list of the initial children for this node."
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetChildrenAndFireEvent",
+      "comment": "Sets the children of this node to the given list of child nodes and fires the appropriate\n tree event to kick the tree to update the display.  Note: This method must be called\n from the swing thread because it will notify the underlying JTree.",
+      "javadoc": "Sets the children of this node to the given list of child nodes and fires the appropriate\n tree event to kick the tree to update the display.  Note: This method must be called\n from the swing thread because it will notify the underlying JTree.\n@param childList the list of child nodes to assign as children to this node\n@see #doSetChildren(List) if calling from a background thread.",
+      "static": false,
+      "params": [
+        {
+          "name": "childList",
+          "type_long": "java.util.List\u003cdocking.widgets.tree.GTreeNode\u003e",
+          "type_short": "List",
+          "comment": "the list of child nodes to assign as children to this node"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetChildren",
+      "comment": "Sets the children of this node to the given list of child nodes, but does not notify the\n tree. This method does not have to be called from the swing thread.  It is intended to be\n used by background threads that want to populate all or part of the tree, but wait until\n the bulk operations are completed before notifying the tree.",
+      "javadoc": "Sets the children of this node to the given list of child nodes, but does not notify the\n tree. This method does not have to be called from the swing thread.  It is intended to be\n used by background threads that want to populate all or part of the tree, but wait until\n the bulk operations are completed before notifying the tree.\n@param childList the list of child nodes to assign as children to this node",
+      "static": false,
+      "params": [
+        {
+          "name": "childList",
+          "type_long": "java.util.List\u003cdocking.widgets.tree.GTreeNode\u003e",
+          "type_short": "List",
+          "comment": "the list of child nodes to assign as children to this node"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doAddNode",
+      "comment": "Adds a node to this node\u0027s children. Must be called from the swing thread.",
+      "javadoc": "Adds a node to this node\u0027s children. Must be called from the swing thread.\n@param node the node to add as a child to this node",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "the node to add as a child to this node"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doAddNode",
+      "comment": "Adds a node to this node\u0027s children at the given index and notifies the tree.\n Must be called from the swing thread.",
+      "javadoc": "Adds a node to this node\u0027s children at the given index and notifies the tree.\n Must be called from the swing thread.\n@param index the index at which to add the new node\n@param node the node to add as a child to this node",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index at which to add the new node"
+        },
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "the node to add as a child to this node"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doRemoveNode",
+      "comment": "Removes the node from this node\u0027s children and notifies the tree.  Must be called\n from the swing thread.",
+      "javadoc": "Removes the node from this node\u0027s children and notifies the tree.  Must be called\n from the swing thread.\n@param node the node to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "the node to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doAddNodes",
+      "comment": "Adds the given nodes to this node\u0027s children. Must be called from the swing thread.",
+      "javadoc": "Adds the given nodes to this node\u0027s children. Must be called from the swing thread.\n@param nodes the nodes to add to the children this node",
+      "static": false,
+      "params": [
+        {
+          "name": "nodes",
+          "type_long": "java.util.List\u003cdocking.widgets.tree.GTreeNode\u003e",
+          "type_short": "List",
+          "comment": "the nodes to add to the children this node"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clone",
+      "comment": "Creates a clone of this node.  The clone should contain a shallow copy of all the node\u0027s\n attributes except that the parent and children are null.",
+      "javadoc": "Creates a clone of this node.  The clone should contain a shallow copy of all the node\u0027s\n attributes except that the parent and children are null.\n@return the clone of this object.\n@throws CloneNotSupportedException if some implementation prevents itself from being cloned.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": "the clone of this object."
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.CloneNotSupportedException",
+          "type_short": "CloneNotSupportedException",
+          "comment": "if some implementation prevents itself from being cloned."
+        }
+      ]
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposeClones",
+      "comment": "This is used to dispose filtered \"clone\" nodes. When a filter is applied to the tree,\n the nodes that matched are \"shallow\" cloned, so when the filter is removed, we don\u0027t\n want to do a full dispose on the nodes, just clean up the parent-child references.",
+      "javadoc": "This is used to dispose filtered \"clone\" nodes. When a filter is applied to the tree,\n the nodes that matched are \"shallow\" cloned, so when the filter is removed, we don\u0027t\n want to do a full dispose on the nodes, just clean up the parent-child references.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInProgress",
+      "comment": "Returns true if the node is in the process of loading its children. \n See GTreeSlowLoadingNode",
+      "javadoc": "Returns true if the node is in the process of loading its children. \n See {@link GTreeSlowLoadingNode}\n@return true if the node is in the process of loading its children.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the node is in the process of loading its children."
+      },
+      "throws": []
+    },
+    {
+      "name": "isLoaded",
+      "comment": "True if the children for this node have been loaded yet.  Some GTree nodes are lazy in that they\n don\u0027t load their children until needed. Nodes that have the IN_PROGRESS node as it child\n is considered loaded if in the swing thread, otherwise they are considered not loaded.",
+      "javadoc": "True if the children for this node have been loaded yet.  Some GTree nodes are lazy in that they\n don\u0027t load their children until needed. Nodes that have the IN_PROGRESS node as it child\n is considered loaded if in the swing thread, otherwise they are considered not loaded.\n@return true if the children for this node have been loaded.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the children for this node have been loaded."
+      },
+      "throws": []
+    },
+    {
+      "name": "getTree",
+      "comment": "Returns the GTree that this node is attached to",
+      "javadoc": "Returns the GTree that this node is attached to\n@return the GTree that this node is attached to",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTree",
+        "type_short": "GTree",
+        "comment": "the GTree that this node is attached to"
+      },
+      "throws": []
+    },
+    {
+      "name": "isInProgress",
+      "comment": "Returns true if the node is in the process of loading its children.  For nodes\n that directly extend GTreeNode, this is always false.  See GTreeSlowLoadingNode\n for information on nodes that that can be in the progress of loading.",
+      "javadoc": "Returns true if the node is in the process of loading its children.  For nodes\n that directly extend GTreeNode, this is always false.  See {@link GTreeSlowLoadingNode}\n for information on nodes that that can be in the progress of loading.\n@param childList the list to test.\n@return true if the node is in the progress of loading its children.",
+      "static": false,
+      "params": [
+        {
+          "name": "childList",
+          "type_long": "java.util.List\u003cdocking.widgets.tree.GTreeNode\u003e",
+          "type_short": "List",
+          "comment": "the list to test."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the node is in the progress of loading its children."
+      },
+      "throws": []
+    },
+    {
+      "name": "doFireNodeAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newNode",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doFireNodeRemoved",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "removedNode",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doFireNodeStructureChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doFireNodeChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "assertSwing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

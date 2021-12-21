@@ -1,0 +1,900 @@
+{
+  "name": "CoffLoader",
+  "comment": "",
+  "javadoc": "",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.util.opinion.AbstractLibrarySupportLoader",
+  "fields": [
+    {
+      "name": "COFF_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Common Object File Format (COFF)\""
+    },
+    {
+      "name": "FAKE_LINK_OPTION_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Attempt to link sections located at 0x0\""
+    },
+    {
+      "name": "FAKE_LINK_OPTION_DEFAULT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": "true"
+    },
+    {
+      "name": "COFF_NULL_SANITY_CHECK_LEN",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "64"
+    },
+    {
+      "name": "EMPTY_START_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8192"
+    },
+    {
+      "name": "MIN_BYTE_LENGTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "22"
+    },
+    {
+      "name": "ALIGNMENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "256"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isMicrosoftFormat",
+      "comment": "",
+      "javadoc": "@return true if this loader assumes the Microsoft variant of the COFF format",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this loader assumes the Microsoft variant of the COFF format"
+      },
+      "throws": []
+    },
+    {
+      "name": "isVisualStudio",
+      "comment": "Try to determine if this COFF file was produced by the Microsoft Visual Studio tools\n Currently we look for specific sections that are indicative of Visual Studio\n   The .drectve contains options that are passed to the linker\n   The .debug$S is a non-standard debug section (which usually has the string \"Microsoft\" in it)\n These particular sections seem to be universally present over many versions of Visual Studio\n GNU bfd recognizes these sections as Microsoft Visual Studio specific",
+      "javadoc": "Try to determine if this COFF file was produced by the Microsoft Visual Studio tools\n Currently we look for specific sections that are indicative of Visual Studio\n   The .drectve contains options that are passed to the linker\n   The .debug$S is a non-standard debug section (which usually has the string \"Microsoft\" in it)\n These particular sections seem to be universally present over many versions of Visual Studio\n GNU bfd recognizes these sections as Microsoft Visual Studio specific\n@param header is the CoffFileHeader with parse() or parseSectionHeaders() run\n@return true is (either section is present and) we think this is Visual Studio",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": "is the CoffFileHeader with parse() or parseSectionHeaders() run"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true is (either section is present and) we think this is Visual Studio"
+      },
+      "throws": []
+    },
+    {
+      "name": "isCLI",
+      "comment": "Checks to see if the COFF is CLI.",
+      "javadoc": "Checks to see if the COFF is CLI.\n@param header The COFF\u0027s headers.\n@return True if the COFF is CLI; otherwise, false.",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": "The COFF\u0027s headers."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "True if the COFF is CLI; otherwise, false."
+      },
+      "throws": []
+    },
+    {
+      "name": "findSupportedLoadSpecs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.app.util.opinion.LoadSpec\u003e",
+        "type_short": "Collection",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getDefaultOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "loadSpec",
+          "type_long": "ghidra.app.util.opinion.LoadSpec",
+          "type_short": "LoadSpec",
+          "comment": ""
+        },
+        {
+          "name": "domainObject",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": ""
+        },
+        {
+          "name": "loadIntoProgram",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.Option\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "loadSpec",
+          "type_long": "ghidra.app.util.opinion.LoadSpec",
+          "type_short": "LoadSpec",
+          "comment": ""
+        },
+        {
+          "name": "options",
+          "type_long": "java.util.List\u003cghidra.app.util.Option\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "performFakeLinking",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "options",
+          "type_long": "java.util.List\u003cghidra.app.util.Option\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "load",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "loadSpec",
+          "type_long": "ghidra.app.util.opinion.LoadSpec",
+          "type_short": "LoadSpec",
+          "comment": ""
+        },
+        {
+          "name": "options",
+          "type_long": "java.util.List\u003cghidra.app.util.Option\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processEntryPoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        },
+        {
+          "name": "sectionsMap",
+          "type_long": "java.util.Map\u003cghidra.app.util.bin.format.coff.CoffSectionHeader,ghidra.program.model.address.Address\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "symbolsMap",
+          "type_long": "java.util.Map\u003cghidra.app.util.bin.format.coff.CoffSymbol,ghidra.program.model.symbol.Symbol\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExternalBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        },
+        {
+          "name": "externalAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "externalAddressStart",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createUndefined",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listing",
+          "type_long": "ghidra.program.model.listing.Listing",
+          "type_short": "Listing",
+          "comment": ""
+        },
+        {
+          "name": "memory",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Data",
+        "type_short": "Data",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.util.CodeUnitInsertionException",
+          "type_short": "CodeUnitInsertionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.data.DataTypeConflictException",
+          "type_short": "DataTypeConflictException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "findFreeAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPointerSizeAligned",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "space",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processSectionHeaders",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        },
+        {
+          "name": "map",
+          "type_long": "java.util.Map\u003cghidra.app.util.bin.format.coff.CoffSectionHeader,ghidra.program.model.address.Address\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "performFakeLinking",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createInitializedBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "fileBytes",
+          "type_long": "ghidra.program.database.mem.FileBytes",
+          "type_short": "FileBytes",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        },
+        {
+          "name": "language",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        },
+        {
+          "name": "sectionNumber",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffSectionHeader",
+          "type_short": "CoffSectionHeader",
+          "comment": ""
+        },
+        {
+          "name": "sectionSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "sectionAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "isOverlay",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.mem.MemoryBlock",
+        "type_short": "MemoryBlock",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "possiblyRelocateSections",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": ""
+        },
+        {
+          "name": "map",
+          "type_long": "java.util.Map\u003cghidra.app.util.bin.format.coff.CoffSectionHeader,ghidra.program.model.address.Address\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "align",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "relocateSection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": ""
+        },
+        {
+          "name": "section",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffSectionHeader",
+          "type_short": "CoffSectionHeader",
+          "comment": ""
+        },
+        {
+          "name": "sectionNumber",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processRelocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.coff.CoffFileHeader",
+          "type_short": "CoffFileHeader",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "sectionsMap",
+          "type_long": "java.util.Map\u003cghidra.app.util.bin.format.coff.CoffSectionHeader,ghidra.program.model.address.Address\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "symbolsMap",
+          "type_long": "java.util.Map\u003cghidra.app.util.bin.format.coff.CoffSymbol,ghidra.program.model.symbol.Symbol\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleRelocationError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

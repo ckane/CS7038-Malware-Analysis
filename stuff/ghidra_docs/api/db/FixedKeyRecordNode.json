@@ -1,0 +1,845 @@
+{
+  "name": "FixedKeyRecordNode",
+  "comment": "FixedKeyRecordNode is an abstract implementation of a BTree leaf node\n which utilizes fixed-length binary key values and stores records.\n \n This type of node has the following partial layout within a single DataBuffer \n (field size in bytes):\n \n   | NodeType(1) | KeyCount(4) | PrevLeafId(4) | NextLeafId(4) ...\n ",
+  "javadoc": "\u003ccode\u003eFixedKeyRecordNode\u003c/code\u003e is an abstract implementation of a BTree leaf node\n which utilizes fixed-length binary key values and stores records.\n \u003cp\u003e\n This type of node has the following partial layout within a single DataBuffer \n (field size in bytes):\n \u003cpre\u003e\n   | NodeType(1) | KeyCount(4) | PrevLeafId(4) | NextLeafId(4) ...\n \u003c/pre\u003e",
+  "static": false,
+  "implements": [
+    "db.FieldKeyRecordNode"
+  ],
+  "extends": "db.FixedKeyNode",
+  "fields": [
+    {
+      "name": "ID_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "PREV_LEAF_ID_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "NEXT_LEAF_ID_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "9"
+    },
+    {
+      "name": "RECORD_LEAF_HEADER_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "13"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an existing fixed-length key record leaf node.",
+      "javadoc": "Construct an existing fixed-length key record leaf node.\n@param nodeMgr table node manager instance\n@param buf node buffer\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager instance"
+        },
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "node buffer"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new fixed-length key record leaf node.",
+      "javadoc": "Construct a new fixed-length key record leaf node.\n@param nodeMgr table node manager instance\n@param nodeType node type\n@param prevLeafId node buffer id for previous leaf - left sibling ( \u0026lt; 0: no leaf)\n@param nextLeafId node buffer id for next leaf - right sibling ( \u0026lt; 0 : no leaf)\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager instance"
+        },
+        {
+          "name": "nodeType",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "node type"
+        },
+        {
+          "name": "prevLeafId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "node buffer id for previous leaf - left sibling (  0: no leaf)"
+        },
+        {
+          "name": "nextLeafId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "node buffer id for next leaf - right sibling (  0 : no leaf)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "logConsistencyError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tableName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isConsistent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tableName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "compareKeyField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "k",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        },
+        {
+          "name": "keyIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyOffset",
+      "comment": "Get the key offset within the node\u0027s data buffer",
+      "javadoc": "Get the key offset within the node\u0027s data buffer\n@param index key/record index\n@return positive record offset within buffer",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key/record index"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "positive record offset within buffer"
+      },
+      "throws": []
+    },
+    {
+      "name": "getLeafNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLeftmostLeafNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRightmostLeafNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "hasNextLeaf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getNextLeaf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "hasPreviousLeaf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getPreviousLeaf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getKeyIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "split",
+      "comment": "Split this leaf node in half and update tree.\n When a split is performed, the next operation must be performed\n from the root node since the tree may have been restructured.",
+      "javadoc": "Split this leaf node in half and update tree.\n When a split is performed, the next operation must be performed\n from the root node since the tree may have been restructured.\n@return root node which may have changed.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": "root node which may have changed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "appendLeaf",
+      "comment": "Append a leaf which contains one or more keys and update tree.  Leaf is inserted\n as the new right sibling of this leaf.",
+      "javadoc": "Append a leaf which contains one or more keys and update tree.  Leaf is inserted\n as the new right sibling of this leaf.\n@param leaf new right sibling leaf (must be same node type as this leaf)\n@return root node which may have changed.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "leaf",
+          "type_long": "db.FixedKeyRecordNode",
+          "type_short": "FixedKeyRecordNode",
+          "comment": "new right sibling leaf (must be same node type as this leaf)"
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": "root node which may have changed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "removeLeaf",
+      "comment": "Remove this leaf from the tree.",
+      "javadoc": "Remove this leaf from the tree.\n@return root node which may have changed.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": "root node which may have changed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "splitData",
+      "comment": "Split the contents of this leaf node; placing the right half of the records into the\n empty leaf node provided.",
+      "javadoc": "Split the contents of this leaf node; placing the right half of the records into the\n empty leaf node provided.\n@param newRightLeaf empty right sibling leaf",
+      "static": false,
+      "params": [
+        {
+          "name": "newRightLeaf",
+          "type_long": "db.FixedKeyRecordNode",
+          "type_short": "FixedKeyRecordNode",
+          "comment": "empty right sibling leaf"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createNewLeaf",
+      "comment": "Create a new leaf and add to the node manager.\n The new leaf\u0027s parent is unknown.",
+      "javadoc": "Create a new leaf and add to the node manager.\n The new leaf\u0027s parent is unknown.\n@param prevNodeId node buffer id for previous leaf - left sibling ( \u0026lt; 0: no leaf)\n@param nextNodeId node buffer id for next leaf - right sibling ( \u0026lt; 0 : no leaf)\n@return new leaf node.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "prevNodeId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "node buffer id for previous leaf - left sibling (  0: no leaf)"
+        },
+        {
+          "name": "nextNodeId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "node buffer id for next leaf - right sibling (  0 : no leaf)"
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": "new leaf node."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "putRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": ""
+        },
+        {
+          "name": "table",
+          "type_long": "db.Table",
+          "type_short": "Table",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "appendNewLeaf",
+      "comment": "Append a new leaf and insert the specified record.",
+      "javadoc": "Append a new leaf and insert the specified record.\n@param record data record with long key\n@return root node which may have changed.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "data record with long key"
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": "root node which may have changed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "deleteRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        },
+        {
+          "name": "table",
+          "type_long": "db.Table",
+          "type_short": "Table",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.FieldKeyNode",
+        "type_short": "FieldKeyNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "insertRecord",
+      "comment": "Inserts the record at the given index if there is sufficient space in\n the buffer.",
+      "javadoc": "Inserts the record at the given index if there is sufficient space in\n the buffer.\n@param index insertion index\n@param record record to be inserted\n@return true if the record was successfully inserted.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "insertion index"
+        },
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "record to be inserted"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the record was successfully inserted."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "updateRecord",
+      "comment": "Updates the record at the given index.",
+      "javadoc": "Updates the record at the given index.\n@param index record index\n@param record new record\n@return root node which may have changed.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "record index"
+        },
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "new record"
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": "root node which may have changed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRecordBefore",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        },
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRecordAfter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        },
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRecordAtOrBefore",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        },
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRecordAtOrAfter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        },
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createRecordNode",
+      "comment": "Create a new record node with no siblings attached.",
+      "javadoc": "Create a new record node with no siblings attached.\n@param nodeMgr table node manager instance\n@return new record leaf node\n@throws IOException thrown if IO error occurs",
+      "static": true,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager instance"
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": "new record leaf node"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    }
+  ]
+}

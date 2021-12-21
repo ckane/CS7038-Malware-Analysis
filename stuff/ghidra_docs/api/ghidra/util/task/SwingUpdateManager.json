@@ -1,0 +1,189 @@
+{
+  "name": "SwingUpdateManager",
+  "comment": "A class to allow clients to buffer events.  UI components may receive numbers events to make\n changes to their underlying data model.  Further, for many of these clients, it is sufficient\n to perform one update to capture all of the changes.  In this scenario, the client can use this\n class to keep pushing off internal updates until: 1) the flurry of events has settled down, or\n 2) some specified amount of time has expired.\n \n The various methods dictate when the client will get a callback:\n \n \t#update() - if this is the first call to update, then do the work\n                          immediately; otherwise, buffer the update request until the\n                          timeout has expired.\n  #updateNow() - perform the callback now.\n  #updateLater() - buffer the update request until the timeout has expired.\n  Non-blocking update now - this is a conceptual use-case, where the client wishes to perform an\n                          immediate update, but not during the current Swing event.  To achieve\n                          this, you could call something like:\n                          \n  \n \n\n  This class is safe to use in a multi-threaded environment.   State variables are guarded\n via synchronization on this object.   The Swing thread is used to perform updates, which\n guarantees that only one update will happen at a time.",
+  "javadoc": "A class to allow clients to buffer events.  UI components may receive numbers events to make\n changes to their underlying data model.  Further, for many of these clients, it is sufficient\n to perform one update to capture all of the changes.  In this scenario, the client can use this\n class to keep pushing off internal updates until: 1) the flurry of events has settled down, or\n 2) some specified amount of time has expired.\n \u003cp\u003e\n The various methods dictate when the client will get a callback:\u003cp\u003e\n \u003cul\u003e\n \t\u003cli\u003e{@link #update()} - if this is the first call to \u003ccode\u003eupdate\u003c/code\u003e, then do the work\n                          immediately; otherwise, buffer the update request until the\n                          timeout has expired.\u003c/li\u003e\n  \u003cli\u003e{@link #updateNow()} - perform the callback now.\u003c/li\u003e\n  \u003cli\u003e{@link #updateLater()} - buffer the update request until the timeout has expired.\u003c/li\u003e\n  \u003cli\u003eNon-blocking update now - this is a conceptual use-case, where the client wishes to perform an\n                          immediate update, but not during the current Swing event.  To achieve\n                          this, you could call something like:\n                          \u003cpre\u003e{@literal\n                          \tSwingUtilities.invokeLater(() -\u003e updateManager.updateNow());\n                          }\u003c/pre\u003e\n  \u003c/li\u003e\n \u003c/ul\u003e\n\n \u003cP\u003e This class is safe to use in a multi-threaded environment.   State variables are guarded\n via synchronization on this object.   The Swing thread is used to perform updates, which\n guarantees that only one update will happen at a time.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.util.task.AbstractSwingUpdateManager",
+  "fields": [
+    {
+      "name": "clientRunnable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Runnable",
+      "type_short": "Runnable",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new SwingUpdateManager with default values for min and max delay.  See\n #DEFAULT_MIN_DELAY and .",
+      "javadoc": "Constructs a new SwingUpdateManager with default values for min and max delay.  See\n {@link #DEFAULT_MIN_DELAY} and {@value #DEFAULT_MAX_DELAY}.\n@param r the runnable that performs the client work.",
+      "static": false,
+      "params": [
+        {
+          "name": "r",
+          "type_long": "java.lang.Runnable",
+          "type_short": "Runnable",
+          "comment": "the runnable that performs the client work."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new SwingUpdateManager\n \n Note: The minDelay will always be at least #MIN_DELAY_FLOOR, \n regardless of the given value.",
+      "javadoc": "Constructs a new SwingUpdateManager\n \u003cp\u003e\n \u003cb\u003eNote: \u003c/b\u003eThe \u003ccode\u003eminDelay\u003c/code\u003e will always be at least {@link #MIN_DELAY_FLOOR}, \n regardless of the given value.\n@param minDelay the minimum number of milliseconds to wait once the event stream stops\n                 coming in before actually updating the screen.\n@param r the runnable that performs the client work.",
+      "static": false,
+      "params": [
+        {
+          "name": "minDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the minimum number of milliseconds to wait once the event stream stops\n                 coming in before actually updating the screen."
+        },
+        {
+          "name": "r",
+          "type_long": "java.lang.Runnable",
+          "type_short": "Runnable",
+          "comment": "the runnable that performs the client work."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new SwingUpdateManager\n \n Note: The minDelay will always be at least #MIN_DELAY_FLOOR, \n regardless of the given value.",
+      "javadoc": "Constructs a new SwingUpdateManager\n \u003cp\u003e\n \u003cb\u003eNote: \u003c/b\u003eThe \u003ccode\u003eminDelay\u003c/code\u003e will always be at least {@link #MIN_DELAY_FLOOR}, \n regardless of the given value.\n@param minDelay the minimum number of milliseconds to wait once the event stream stops\n                 coming in before actually updating the screen.\n@param maxDelay the maximum amount of time to wait between gui updates.\n@param r the runnable that performs the client work.",
+      "static": false,
+      "params": [
+        {
+          "name": "minDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the minimum number of milliseconds to wait once the event stream stops\n                 coming in before actually updating the screen."
+        },
+        {
+          "name": "maxDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the maximum amount of time to wait between gui updates."
+        },
+        {
+          "name": "r",
+          "type_long": "java.lang.Runnable",
+          "type_short": "Runnable",
+          "comment": "the runnable that performs the client work."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new SwingUpdateManager\n \n Note: The minDelay will always be at least #MIN_DELAY_FLOOR, regardless of\n the given value.",
+      "javadoc": "Constructs a new SwingUpdateManager\n \u003cp\u003e\n \u003cb\u003eNote: \u003c/b\u003eThe \u003ccode\u003eminDelay\u003c/code\u003e will always be at least {@link #MIN_DELAY_FLOOR}, regardless of\n the given value.\n@param minDelay the minimum number of milliseconds to wait once the event stream stops\n                 coming in before actually updating the screen.\n@param maxDelay the maximum amount of time to wait between gui updates.\n@param name The name of this update manager; this allows for selective trace logging\n@param r the runnable that performs the client work.",
+      "static": false,
+      "params": [
+        {
+          "name": "minDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the minimum number of milliseconds to wait once the event stream stops\n                 coming in before actually updating the screen."
+        },
+        {
+          "name": "maxDelay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the maximum amount of time to wait between gui updates."
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The name of this update manager; this allows for selective trace logging"
+        },
+        {
+          "name": "r",
+          "type_long": "java.lang.Runnable",
+          "type_short": "Runnable",
+          "comment": "the runnable that performs the client work."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "swingDoWork",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "update",
+      "comment": "Signals to perform an update.  See the class header for the usage of the various\n update methods.",
+      "javadoc": "Signals to perform an update.  See the class header for the usage of the various\n update methods.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateLater",
+      "comment": "Signals to perform an update.  See the class header for the usage of the various\n update methods.",
+      "javadoc": "Signals to perform an update.  See the class header for the usage of the various\n update methods.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateNow",
+      "comment": "Signals to perform an update.  See the class header for the usage of the various\n update methods.",
+      "javadoc": "Signals to perform an update.  See the class header for the usage of the various\n update methods.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

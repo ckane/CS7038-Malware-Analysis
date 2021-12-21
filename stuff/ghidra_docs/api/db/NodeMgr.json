@@ -1,0 +1,486 @@
+{
+  "name": "NodeMgr",
+  "comment": "The NodeMgr manages all database nodes associated with \n a table.  Each table should use a separate instance of a NodeMgr.\n The NodeMgr is resposible for interacting with the BufferMgr performing \n buffer allocations, retrievals and releases as required.   The NodeMgr\n also performs hard caching of all buffers until the releaseNodes\n method is invoked. \n \n Legacy Issues (prior to Ghidra 9.2):\n \n Legacy Table implementation incorrectly employed VarKeyNode \n   storage with primitive fixed-length primary keys other than LongField \n   (e.g., ByteField).  With improved support for fixed-length keys\n   legacy data poses a backward capatibility issue.  This has been \n   addressed through the use of a hack whereby a Schema is forced to\n   treat the primary key as variable length \n   (see Schema#forceUseOfVariableLengthKeyNodes().  The detection\n   for this rare condition is provided by TableRecord during\n   schema instantiation.\n   \n Legacy Table implementation incorrectly employed variable \n   length storage when both primary key and indexed fields were \n   LongField types.  This issue has been addressed by treating the \n   Field#LEGACY_INDEX_LONG_TYPE (0x8) as variable-length (see \n   implementation LegacyIndexField).\n ",
+  "javadoc": "The \u003ccode\u003eNodeMgr\u003c/code\u003e manages all database nodes associated with \n a table.  Each table should use a separate instance of a NodeMgr.\n The NodeMgr is resposible for interacting with the BufferMgr performing \n buffer allocations, retrievals and releases as required.   The NodeMgr\n also performs hard caching of all buffers until the releaseNodes\n method is invoked. \n \n Legacy Issues (prior to Ghidra 9.2):\n \u003cul\u003e\n \u003cli\u003eLegacy {@link Table} implementation incorrectly employed {@link VarKeyNode} \n   storage with primitive fixed-length primary keys other than {@link LongField} \n   (e.g., {@link ByteField}).  With improved support for fixed-length keys\n   legacy data poses a backward capatibility issue.  This has been \n   addressed through the use of a hack whereby a {@link Schema} is forced to\n   treat the primary key as variable length \n   (see {@link Schema#forceUseOfVariableLengthKeyNodes()}.  The detection\n   for this rare condition is provided by {@link TableRecord} during\n   schema instantiation.\u003c/li\u003e\n   \n \u003cli\u003eLegacy {@link Table} implementation incorrectly employed variable \n   length storage when both primary key and indexed fields were \n   LongField types.  This issue has been addressed by treating the \n   {@link Field#LEGACY_INDEX_LONG_TYPE} (0x8) as variable-length (see \n   implementation {@link LegacyIndexField}).\u003c/li\u003e\n \u003c/ul\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "NODE_TYPE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "NODE_TYPE_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "NODE_HEADER_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "LONGKEY_INTERIOR_NODE",
+      "comment": "Node type for long-key interior tree nodes",
+      "javadoc": "Node type for long-key interior tree nodes\n@see db.LongKeyInteriorNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "0"
+    },
+    {
+      "name": "LONGKEY_VAR_REC_NODE",
+      "comment": "Node type for long key variable-length record leaf nodes",
+      "javadoc": "Node type for long key variable-length record leaf nodes\n@see db.VarRecNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "1"
+    },
+    {
+      "name": "LONGKEY_FIXED_REC_NODE",
+      "comment": "Node type for long key fixed-length record leaf nodes",
+      "javadoc": "Node type for long key fixed-length record leaf nodes\n@see db.FixedRecNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "2"
+    },
+    {
+      "name": "VARKEY_INTERIOR_NODE",
+      "comment": "Node type for Field key interior tree nodes",
+      "javadoc": "Node type for Field key interior tree nodes\n@see db.VarKeyInteriorNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "3"
+    },
+    {
+      "name": "VARKEY_REC_NODE",
+      "comment": "Node type for Field key variable-length record tree nodes",
+      "javadoc": "Node type for Field key variable-length record tree nodes\n@see db.VarKeyRecordNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "4"
+    },
+    {
+      "name": "FIXEDKEY_INTERIOR_NODE",
+      "comment": "Node type for fixed-length key interior tree nodes",
+      "javadoc": "Node type for fixed-length key interior tree nodes\n@see db.FixedKeyInteriorNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "5"
+    },
+    {
+      "name": "FIXEDKEY_VAR_REC_NODE",
+      "comment": "Node type for fixed-length key variable-length record leaf nodes",
+      "javadoc": "Node type for fixed-length key variable-length record leaf nodes\n@see db.FixedKeyVarRecNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "6"
+    },
+    {
+      "name": "FIXEDKEY_FIXED_REC_NODE",
+      "comment": "Node type for fixed-length key fixed-length record leaf nodes",
+      "javadoc": "Node type for fixed-length key fixed-length record leaf nodes\n@see db.FixedKeyFixedRecNode",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "7"
+    },
+    {
+      "name": "CHAINED_BUFFER_INDEX_NODE",
+      "comment": "Node type for chained buffer index nodes",
+      "javadoc": "Node type for chained buffer index nodes\n@see db.DBBuffer",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "8"
+    },
+    {
+      "name": "CHAINED_BUFFER_DATA_NODE",
+      "comment": "Node type for chained buffer data nodes",
+      "javadoc": "Node type for chained buffer data nodes\n@see db.DBBuffer",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "9"
+    },
+    {
+      "name": "bufferMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.BufferMgr",
+      "type_short": "BufferMgr",
+      "constant_value": null
+    },
+    {
+      "name": "schema",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Schema",
+      "type_short": "Schema",
+      "constant_value": null
+    },
+    {
+      "name": "tableName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "leafRecordCnt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "nodeTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.Integer,db.BTreeNode\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a node manager for a specific table.",
+      "javadoc": "Construct a node manager for a specific table.\n@param table associated table\n@param bufferMgr buffer manager.",
+      "static": false,
+      "params": [
+        {
+          "name": "table",
+          "type_long": "db.Table",
+          "type_short": "Table",
+          "comment": "associated table"
+        },
+        {
+          "name": "bufferMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "buffer manager."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBufferMgr",
+      "comment": "Get the buffer manager used by this node manager.",
+      "javadoc": "Get the buffer manager used by this node manager.\n@return BufferMgr",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.BufferMgr",
+        "type_short": "BufferMgr",
+        "comment": "BufferMgr"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableSchema",
+      "comment": "Get the table schema associated with this node manager",
+      "javadoc": "Get the table schema associated with this node manager\n@return table schema",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.Schema",
+        "type_short": "Schema",
+        "comment": "table schema"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableName",
+      "comment": "Get the table name associated with this node manager",
+      "javadoc": "Get the table name associated with this node manager\n@return table name",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "table name"
+      },
+      "throws": []
+    },
+    {
+      "name": "releaseNodes",
+      "comment": "Release all nodes held by this node manager.\n This method must be invoked before a database transaction can be committed.",
+      "javadoc": "Release all nodes held by this node manager.\n This method must be invoked before a database transaction can be committed.\n@return the change in record count (+/-)\n@throws IOException if IO error occurs on database",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the change in record count (+/-)"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs on database"
+        }
+      ]
+    },
+    {
+      "name": "releaseReadOnlyNode",
+      "comment": "Release a specific read-only buffer node.\n WARNING! This method may only be used to release read-only buffers,\n if a release buffer has been modified an IOException will be thrown.",
+      "javadoc": "Release a specific read-only buffer node.\n WARNING! This method may only be used to release read-only buffers,\n if a release buffer has been modified an IOException will be thrown.\n@param bufferId buffer ID\n@throws IOException if IO error occurs on database",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs on database"
+        }
+      ]
+    },
+    {
+      "name": "addNode",
+      "comment": "Add a newly created node to the node list.\n This method must be invoked when new nodes are instantiated.",
+      "javadoc": "Add a newly created node to the node list.\n This method must be invoked when new nodes are instantiated.\n@param node a new node.",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.BTreeNode",
+          "type_short": "BTreeNode",
+          "comment": "a new node."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteNode",
+      "comment": "Delete a node.",
+      "javadoc": "Delete a node.\n@param node node to be deleted.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "db.BTreeNode",
+          "type_short": "BTreeNode",
+          "comment": "node to be deleted."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "isVarKeyNode",
+      "comment": "Perform a test of the specified buffer to determine if it is\n a VarKeyNode type.  It is important that the specified buffer\n not be in use.",
+      "javadoc": "Perform a test of the specified buffer to determine if it is\n a VarKeyNode type.  It is important that the specified buffer\n not be in use.\n@param bufferMgr buffer manager\n@param bufferId buffer ID\n@return true if node found and is a VarKeyNode type\n@throws IOException thrown if an IO error occurs",
+      "static": true,
+      "params": [
+        {
+          "name": "bufferMgr",
+          "type_long": "db.buffers.BufferMgr",
+          "type_short": "BufferMgr",
+          "comment": "buffer manager"
+        },
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if node found and is a VarKeyNode type"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getLongKeyNode",
+      "comment": "Get a LongKeyNode object for a specified buffer",
+      "javadoc": "Get a LongKeyNode object for a specified buffer\n@param bufferId buffer ID\n@return LongKeyNode instance\n@throws ClassCastException if node type is incorrect.\n@throws IOException if IO error occurs on database",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "db.LongKeyNode",
+        "type_short": "LongKeyNode",
+        "comment": "LongKeyNode instance"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs on database"
+        }
+      ]
+    },
+    {
+      "name": "getFixedKeyNode",
+      "comment": "Get a FixedKeyNode object for a specified buffer",
+      "javadoc": "Get a FixedKeyNode object for a specified buffer\n@param bufferId buffer ID\n@return LongKeyNode instance\n@throws ClassCastException if node type is incorrect.\n@throws IOException if IO error occurs on database",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": "LongKeyNode instance"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs on database"
+        }
+      ]
+    },
+    {
+      "name": "getVarKeyNode",
+      "comment": "Get a VarKeyNode object for a specified buffer",
+      "javadoc": "Get a VarKeyNode object for a specified buffer\n@param bufferId buffer ID\n@return VarKeyNode instance\n@throws ClassCastException if node type is incorrect.\n@throws IOException if IO error occurs on database",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "db.VarKeyNode",
+        "type_short": "VarKeyNode",
+        "comment": "VarKeyNode instance"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs on database"
+        }
+      ]
+    },
+    {
+      "name": "getNodeType",
+      "comment": "Get the node type associated with the specified data buffer.",
+      "javadoc": "Get the node type associated with the specified data buffer.\n@param buffer data buffer.\n@return node type",
+      "static": true,
+      "params": [
+        {
+          "name": "buffer",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "data buffer."
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "node type"
+      },
+      "throws": []
+    },
+    {
+      "name": "setNodeType",
+      "comment": "Set the node type associated with the specified data buffer.",
+      "javadoc": "Set the node type associated with the specified data buffer.\n@param buffer data buffer\n@param nodeType node type value.",
+      "static": true,
+      "params": [
+        {
+          "name": "buffer",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "data buffer"
+        },
+        {
+          "name": "nodeType",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "node type value."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

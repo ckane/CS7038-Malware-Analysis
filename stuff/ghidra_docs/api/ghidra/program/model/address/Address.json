@@ -1,0 +1,858 @@
+{
+  "name": "Address",
+  "comment": "An address represents a location in a program.  Conceptually, addresses consist\n of an \"address space\" and an offset within that space.  Many processors have only\n one \"real\" address space, but some have several spaces. Also, there are\n \"artificial\" address spaces used for analysis and representing other non-memory locations\n such as a register or an offset on the stack relative to a functions frame pointer.",
+  "javadoc": "An address represents a location in a program.  Conceptually, addresses consist\n of an \"address space\" and an offset within that space.  Many processors have only\n one \"real\" address space, but some have several spaces. Also, there are\n \"artificial\" address spaces used for analysis and representing other non-memory locations\n such as a register or an offset on the stack relative to a functions frame pointer.",
+  "static": false,
+  "implements": [
+    "java.lang.Comparable"
+  ],
+  "fields": [
+    {
+      "name": "NO_ADDRESS",
+      "comment": "Address object representing an invalid address.",
+      "javadoc": "Address object representing an invalid address.",
+      "static": true,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "EXT_FROM_ADDRESS",
+      "comment": "Address object representing an extenal entry address.",
+      "javadoc": "Address object representing an extenal entry address.",
+      "static": true,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "SEPARATOR_CHAR",
+      "comment": "Character used to separate space names from offsets.",
+      "javadoc": "Character used to separate space names from offsets.",
+      "static": true,
+      "type_long": "char",
+      "type_short": "char",
+      "constant_value": ":"
+    }
+  ],
+  "methods": [
+    {
+      "name": "getAddress",
+      "comment": "Creates a new Address by parsing a String representation of an address. The\n string may be either a simple number (just the offset part of an address) or take\n the form \"addressSpaceName:offset\".  If the latter form is used, the \n \"addressSpaceName\" must match the name of the space for this address.",
+      "javadoc": "Creates a new Address by parsing a String representation of an address. The\n string may be either a simple number (just the offset part of an address) or take\n the form \"addressSpaceName:offset\".  If the latter form is used, the \n \"addressSpaceName\" must match the name of the space for this address.\n@param addrString the String to parse.\n@return the new Address if the string is a legally formed address or null\n if the string contains an address space name that does not match this address\u0027s space.\n@throws AddressFormatException if the string cannot be parsed or the\n parsed offset is larger than the size for this address\u0027 space.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrString",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the String to parse."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the new Address if the string is a legally formed address or null\n if the string contains an address space name that does not match this address\u0027s space."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressFormatException",
+          "type_short": "AddressFormatException",
+          "comment": "if the string cannot be parsed or the\n parsed offset is larger than the size for this address\u0027 space."
+        }
+      ]
+    },
+    {
+      "name": "getNewAddress",
+      "comment": "Creates a new Address in this address\u0027s space with the given byte offset.",
+      "javadoc": "Creates a new Address in this address\u0027s space with the given byte offset.\n@param byteOffset the byte offset for the new address.\n@return the new Address.\n@throws AddressOutOfBoundsException if the offset is less than the minimum offset or \n greater than the max offset allowed for this space.",
+      "static": false,
+      "params": [
+        {
+          "name": "byteOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the byte offset for the new address."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the new Address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewAddress",
+      "comment": "Returns a new address in this address\u0027s space with the given offset.  \n NOTE: for those spaces with an addressable unit size other than 1, the address\n returned may not correspond to an addressable unit/word boundary if a byte-offset \n is specified.",
+      "javadoc": "Returns a new address in this address\u0027s space with the given offset.  \n NOTE: for those spaces with an addressable unit size other than 1, the address\n returned may not correspond to an addressable unit/word boundary if a byte-offset \n is specified.\n@param offset the offset for the new address.\n@param isAddressableWordOffset if true the specified offset is an addressable unit/word offset,\n otherwise offset is a byte offset.  See {@link ghidra.program.model.address.AddressSpace#getAddressableUnitSize() AddressSpace#getAddressableUnitSize()} to understand the distinction\n (i.e., wordOffset \u003d byteOffset * addressableUnitSize).\n@return address with given offset\n@throws AddressOutOfBoundsException if the offset is less than 0 or greater\n than the max offset allowed for this space.",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the offset for the new address."
+        },
+        {
+          "name": "isAddressableWordOffset",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the specified offset is an addressable unit/word offset,\n otherwise offset is a byte offset.  See ghidra.program.model.address.AddressSpace#getAddressableUnitSize() to understand the distinction\n (i.e., wordOffset \u003d byteOffset * addressableUnitSize)."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "address with given offset"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOutOfBoundsException",
+          "type_short": "AddressOutOfBoundsException",
+          "comment": "if the offset is less than 0 or greater\n than the max offset allowed for this space."
+        }
+      ]
+    },
+    {
+      "name": "getNewTruncatedAddress",
+      "comment": "Returns a new address in this address\u0027s space with the given offset.  The specified \n offset will be truncated within the space and will not throw an exception.\n NOTE: for those spaces with an addressable unit size other than 1, the address\n returned may not correspond to a word boundary (addressable unit) if a byte-offset \n is specified.",
+      "javadoc": "Returns a new address in this address\u0027s space with the given offset.  The specified \n offset will be truncated within the space and will not throw an exception.\n NOTE: for those spaces with an addressable unit size other than 1, the address\n returned may not correspond to a word boundary (addressable unit) if a byte-offset \n is specified.\n@param offset the offset for the new address.\n@param isAddressableWordOffset if true the specified offset is an addressable unit/word offset,\n otherwise offset is a byte offset.  See {@link ghidra.program.model.address.AddressSpace#getAddressableUnitSize() AddressSpace#getAddressableUnitSize()} to understand the distinction\n (i.e., wordOffset \u003d byteOffset * addressableUnitSize).\n@return address with given byte offset truncated to the physical space size",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the offset for the new address."
+        },
+        {
+          "name": "isAddressableWordOffset",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the specified offset is an addressable unit/word offset,\n otherwise offset is a byte offset.  See ghidra.program.model.address.AddressSpace#getAddressableUnitSize() to understand the distinction\n (i.e., wordOffset \u003d byteOffset * addressableUnitSize)."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "address with given byte offset truncated to the physical space size"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPointerSize",
+      "comment": "Returns the number of bytes needed to form a pointer to this address.  The\n result will be one of {1,2,4,8}.",
+      "javadoc": "Returns the number of bytes needed to form a pointer to this address.  The\n result will be one of {1,2,4,8}.\n@see DataOrganization#getPointerSize() for compiler-specific size of pointers stored in memory.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "next",
+      "comment": "Returns the address\u0027s successor.  In most cases, this is equivalent\n to addr.add(1), but segmented addresses could span segments.  The result\n of calling this on the highest address will result in a null return value.",
+      "javadoc": "Returns the address\u0027s successor.  In most cases, this is equivalent\n to addr.add(1), but segmented addresses could span segments.  The result\n of calling this on the highest address will result in a null return value.\n@return the next higher address, or null if already at the\n highest address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the next higher address, or null if already at the\n highest address."
+      },
+      "throws": []
+    },
+    {
+      "name": "previous",
+      "comment": "Returns the address\u0027s predecessor.  In most cases, this is equivalent to\n addr.subtract(1), but segmented addresses could span segments.  The\n result of calling this on the lowest address will result in a null return value.",
+      "javadoc": "Returns the address\u0027s predecessor.  In most cases, this is equivalent to\n addr.subtract(1), but segmented addresses could span segments.  The\n result of calling this on the lowest address will result in a null return value.\n@return the next lower address, or null if already at the\n  lowest address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the next lower address, or null if already at the\n  lowest address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffset",
+      "comment": "Get the offset of this Address.",
+      "javadoc": "Get the offset of this Address.\n@return the offset of this Address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the offset of this Address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffsetAsBigInteger",
+      "comment": "Get the offset of this Address as a BigInteger",
+      "javadoc": "Get the offset of this Address as a BigInteger\n@return the offset of this Address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the offset of this Address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnsignedOffset",
+      "comment": "Get the address offset as an unsigned number.\n This may be useful when dealing with signed spaces (e.g. stack)",
+      "javadoc": "Get the address offset as an unsigned number.\n This may be useful when dealing with signed spaces (e.g. stack)\n@return unsigned address offset",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "unsigned address offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressableWordOffset",
+      "comment": "Get the addressable memory word offset which corresponds to this address.",
+      "javadoc": "Get the addressable memory word offset which corresponds to this address.\n@return addressable memory word offset",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "addressable memory word offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressSpace",
+      "comment": "Returns the address space associated with this address.",
+      "javadoc": "Returns the address space associated with this address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSpace",
+        "type_short": "AddressSpace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasSameAddressSpace",
+      "comment": "Return true if this address\u0027 address space is equal to the\n address space for addr.",
+      "javadoc": "Return true if this address\u0027 address space is equal to the\n address space for addr.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSize",
+      "comment": "Returns the number of bits that are used to form the address.  Thus\n the maximum offset for this address space will be 2^size-1.",
+      "javadoc": "Returns the number of bits that are used to form the address.  Thus\n the maximum offset for this address space will be 2^size-1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "subtract",
+      "comment": "Calculates the displacement between two addresses (this - addr)",
+      "javadoc": "Calculates the displacement between two addresses (\u003ccode\u003ethis - addr\u003c/code\u003e)\n@param addr the Address to subtract from \u003ccode\u003ethis\u003c/code\u003e address\n@return the difference (thisAddress.offset - thatAddress.offset)\n@throws IllegalArgumentException if the two addresses are not in the same address space",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the Address to subtract from this address"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the difference (thisAddress.offset - thatAddress.offset)"
+      },
+      "throws": []
+    },
+    {
+      "name": "subtractWrap",
+      "comment": "Creates a new address by subtracting the displacement from the current \n address. The new address will wrap in a manner that depends on the \n address space. For a generic address space this will wrap at the \n extents of the address space. For a segmented address space it will \n wrap at the extents of the segment.",
+      "javadoc": "Creates a new address by subtracting the displacement from the current \n address. The new address will wrap in a manner that depends on the \n address space. For a generic address space this will wrap at the \n extents of the address space. For a segmented address space it will \n wrap at the extents of the segment.\n@param displacement the displacement to subtract.\n@return The new Address formed by subtracting the displacement for the offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the displacement to subtract."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The new Address formed by subtracting the displacement for the offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "subtractWrapSpace",
+      "comment": "Creates a new address by subtracting the displacement from the current \n address. If the offset is greater than the max offset of the address space, the high\n order bits are masked off, making the address wrap.  For non-segmented addresses this\n will be the same as subtractWrap().  For segmented addresses, the address will wrap when\n the 20 bit (oxfffff) offset is exceeded, as opposed to when the segment offset is exceeded.",
+      "javadoc": "Creates a new address by subtracting the displacement from the current \n address. If the offset is greater than the max offset of the address space, the high\n order bits are masked off, making the address wrap.  For non-segmented addresses this\n will be the same as subtractWrap().  For segmented addresses, the address will wrap when\n the 20 bit (oxfffff) offset is exceeded, as opposed to when the segment offset is exceeded.\n@param displacement the displacement to add.\n@return The new Address formed by subtracting the displacement from this address\u0027s offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the displacement to add."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The new Address formed by subtracting the displacement from this address\u0027s offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "subtractNoWrap",
+      "comment": "Creates a new Address by subtracting displacement from the\n Address.  The Address will not wrap within the space and in fact will throw\n an exception if the result is less than the min address in this space or\n greater than the max address in this space.",
+      "javadoc": "Creates a new Address by subtracting displacement from the\n Address.  The Address will not wrap within the space and in fact will throw\n an exception if the result is less than the min address in this space or\n greater than the max address in this space.\n@param displacement the displacement to subtract.\n@return The new Address\n@throws AddressOverflowException if the offset in this Address would\n  overflow due to this operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the displacement to subtract."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The new Address"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": "if the offset in this Address would\n  overflow due to this operation."
+        }
+      ]
+    },
+    {
+      "name": "subtract",
+      "comment": "Creates a new address (possibly in a new space) by subtracting the displacement to \n this address.",
+      "javadoc": "Creates a new address (possibly in a new space) by subtracting the displacement to \n this address.\n@param displacement the amount to subtract from this offset.\n@return The address using the subtracted offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the amount to subtract from this offset."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The address using the subtracted offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "addWrap",
+      "comment": "Creates a new address by adding the displacement to the current \n address. The new address will wrap in a manner that depends on the \n address space. For a generic address space this will wrap at the \n extents of the address space. For a segmented address space it will \n wrap at the extents of the segment.",
+      "javadoc": "Creates a new address by adding the displacement to the current \n address. The new address will wrap in a manner that depends on the \n address space. For a generic address space this will wrap at the \n extents of the address space. For a segmented address space it will \n wrap at the extents of the segment.\n@param displacement the displacement to add.\n@return The new Address formed by adding the displacement to this address\u0027s offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the displacement to add."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The new Address formed by adding the displacement to this address\u0027s offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "addWrapSpace",
+      "comment": "Creates a new address by adding the displacement to the current \n address. If the offset is greater than the max offset of the address space, the high\n order bits are masked off, making the address wrap.  For non-segmented addresses this\n will be the same as addWrap().  For segmented addresses, the address will wrap when\n the 20 bit (oxfffff) offset is exceeded, as opposed to when the segment offset is exceeded.",
+      "javadoc": "Creates a new address by adding the displacement to the current \n address. If the offset is greater than the max offset of the address space, the high\n order bits are masked off, making the address wrap.  For non-segmented addresses this\n will be the same as addWrap().  For segmented addresses, the address will wrap when\n the 20 bit (oxfffff) offset is exceeded, as opposed to when the segment offset is exceeded.\n@param displacement the displacement to add.\n@return The new Address formed by adding the displacement to this address\u0027s offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the displacement to add."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The new Address formed by adding the displacement to this address\u0027s offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "addNoWrap",
+      "comment": "Creates a new Address with a displacement relative to this\n  Address.  The Address will not wrap around!  An exception will be\n throw if the result is not within this address space.",
+      "javadoc": "Creates a new Address with a displacement relative to this\n  Address.  The Address will not wrap around!  An exception will be\n throw if the result is not within this address space.\n@param displacement the displacement to add.\n@return The new Address\n@throws AddressOverflowException if the offset in this Address would\n  overflow (wrap around) due to this operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the displacement to add."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The new Address"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": "if the offset in this Address would\n  overflow (wrap around) due to this operation."
+        }
+      ]
+    },
+    {
+      "name": "addNoWrap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "add",
+      "comment": "Creates a new address (possibly in a new space) by adding the displacement to \n this address.",
+      "javadoc": "Creates a new address (possibly in a new space) by adding the displacement to \n this address.\n@param displacement the amount to add to this offset.\n@return The new address.\n@throws AddressOutOfBoundsException if wrapping is not supported by the \n corresponding address space and the addition causes an out-of-bounds\n error",
+      "static": false,
+      "params": [
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the amount to add to this offset."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "The new address."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOutOfBoundsException",
+          "type_short": "AddressOutOfBoundsException",
+          "comment": "if wrapping is not supported by the \n corresponding address space and the addition causes an out-of-bounds\n error"
+        }
+      ]
+    },
+    {
+      "name": "isSuccessor",
+      "comment": "Tests whether the given address immediately follows this address.",
+      "javadoc": "Tests whether the given address immediately follows this address.\n@param addr the address to test.",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to test."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "Returns a String representation of the address in hex and padded\n to the appropriate size.",
+      "javadoc": "Returns a String representation of the address in hex and padded\n to the appropriate size.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "Returns a String representation of the address using the\n given string as a prefix.  Equivalent of prefix + \":\" + toString(false)",
+      "javadoc": "Returns a String representation of the address using the\n given string as a prefix.  Equivalent of prefix + \":\" + toString(false)\n@param prefix the string to prepend to the address string.",
+      "static": false,
+      "params": [
+        {
+          "name": "prefix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string to prepend to the address string."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "Returns a String representation that may include the address space name",
+      "javadoc": "Returns a String representation that may include the address space name\n@param showAddressSpace true if the address space should be included in \n resulting string.\n@return String the string representation of the address",
+      "static": false,
+      "params": [
+        {
+          "name": "showAddressSpace",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the address space should be included in \n resulting string."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "String the string representation of the address"
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "Returns a String representation that may include the address space name and may or may\n not pad the address with leading zeros.",
+      "javadoc": "Returns a String representation that may include the address space name and may or may\n not pad the address with leading zeros.\n@param showAddressSpace if true, the addressSpace name will be prepended to the address string.\n@param pad if true, the address will be prepended with leading zeros to completely fill out\n the max digits the address could contain.  If false, the address will be prepended only to make\n the number of hex digits at least 4.\n@return the address as a String.",
+      "static": false,
+      "params": [
+        {
+          "name": "showAddressSpace",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the addressSpace name will be prepended to the address string."
+        },
+        {
+          "name": "pad",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the address will be prepended with leading zeros to completely fill out\n the max digits the address could contain.  If false, the address will be prepended only to make\n the number of hex digits at least 4."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the address as a String."
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "Returns a String representation that may include the address space name and may or may\n not pad the address with leading zeros.",
+      "javadoc": "Returns a String representation that may include the address space name and may or may\n not pad the address with leading zeros.\n@param showAddressSpace if true, the addressSpace name will be prepended to the address string.\n@param minNumDigits specifies the minimum number of digits to use.  If the address space size\n is less that minNumDigits, the address will be padded to the address space size.  If the address\n space size is larger that minNumDigits, the address will be displayed with as many digits as\n necessary, but will contain leading zeros to make the address string have at least minNumDigits.\n@return the address as a String.",
+      "static": false,
+      "params": [
+        {
+          "name": "showAddressSpace",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the addressSpace name will be prepended to the address string."
+        },
+        {
+          "name": "minNumDigits",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "specifies the minimum number of digits to use.  If the address space size\n is less that minNumDigits, the address will be padded to the address space size.  If the address\n space size is larger that minNumDigits, the address will be displayed with as many digits as\n necessary, but will contain leading zeros to make the address string have at least minNumDigits."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the address as a String."
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "Compares this Address to the specified object.\n The result is true if and only if the argument is not \n null and is a Address object that represents \n the same address as this object.",
+      "javadoc": "Compares this Address to the specified object.\n The result is \u003ccode\u003etrue\u003c/code\u003e if and only if the argument is not \n \u003ccode\u003enull\u003c/code\u003e and is a \u003ccode\u003eAddress\u003c/code\u003e object that represents \n the same address as this object.\n@param o the object to compare this \u003ccode\u003eString\u003c/code\u003e\n              against.\n@return \u003ccode\u003etrue\u003c/code\u003e if the \u003ccode\u003eAddresses\u003c/code\u003eare equal;\n          \u003ccode\u003efalse\u003c/code\u003e otherwise.",
+      "static": false,
+      "params": [
+        {
+          "name": "o",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the object to compare this String\n              against."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the Addressesare equal;\n          false otherwise."
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "Returns a hashcode for this Address. The hashcode for an \n Address should be a value such that two Address\n objects which are equal will return the same hashcode.\n This method should generally return the same value as getLong().",
+      "javadoc": "Returns a hashcode for this Address. The hashcode for an \n \u003ccode\u003eAddress\u003c/code\u003e should be a value such that two Address\n objects which are equal will return the same hashcode.\n This method should generally return the same value as getLong().\n@return a hash code value for this object.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "a hash code value for this object."
+      },
+      "throws": []
+    },
+    {
+      "name": "getPhysicalAddress",
+      "comment": "Returns the physical Address that corresponds to this Address.",
+      "javadoc": "Returns the physical Address that corresponds to this Address.\n@return address in a physical space corresponding to this\n address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "address in a physical space corresponding to this\n address."
+      },
+      "throws": []
+    },
+    {
+      "name": "isMemoryAddress",
+      "comment": "Returns true if this address represents a location in memory",
+      "javadoc": "Returns true if this address represents a location in memory",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLoadedMemoryAddress",
+      "comment": "Returns true if this address represents an address in a loaded memory block",
+      "javadoc": "Returns true if this address represents an address in a loaded memory block",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isNonLoadedMemoryAddress",
+      "comment": "Returns true if this address represents an address not loaded in real memory (i.e. OTHER)",
+      "javadoc": "Returns true if this address represents an address not loaded in real memory (i.e. OTHER)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isStackAddress",
+      "comment": "Returns true if this address represents a location in stack space",
+      "javadoc": "Returns true if this address represents a location in stack space",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUniqueAddress",
+      "comment": "Returns true if this address represents a location in unique space",
+      "javadoc": "Returns true if this address represents a location in unique space",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isConstantAddress",
+      "comment": "Returns true if this address represents a location in constant space",
+      "javadoc": "Returns true if this address represents a location in constant space",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isHashAddress",
+      "comment": "Returns true if this address represents a location in the HASH space",
+      "javadoc": "Returns true if this address represents a location in the HASH space",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isRegisterAddress",
+      "comment": "Returns true if this address represents a location in the register space.\n NOTE: It is important to note that a Register could reside within\n a memory space and not the register space in which case this method would return\n false for its address.",
+      "javadoc": "Returns true if this address represents a location in the register space.\n \u003cP\u003eNOTE: It is important to note that a {@link Register} could reside within\n a memory space and not the register space in which case this method would return\n false for its address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isVariableAddress",
+      "comment": "Returns true if this address represents a location in variable space",
+      "javadoc": "Returns true if this address represents a location in variable space",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isExternalAddress",
+      "comment": "Returns true if this address represents an external location in the external address space",
+      "javadoc": "Returns true if this address represents an external location in the external address space",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "min",
+      "comment": "Return the minimum of two addresses using Address.compareTo",
+      "javadoc": "Return the minimum of two addresses using Address.compareTo\n@param a first address\n@param b second address\n@return minimum of two addresses",
+      "static": true,
+      "params": [
+        {
+          "name": "a",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "first address"
+        },
+        {
+          "name": "b",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "second address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "minimum of two addresses"
+      },
+      "throws": []
+    },
+    {
+      "name": "max",
+      "comment": "Return the maximum of two addresses using Address.compareTo",
+      "javadoc": "Return the maximum of two addresses using Address.compareTo\n@param a first address\n@param b second address\n@return maximum of two addresses",
+      "static": true,
+      "params": [
+        {
+          "name": "a",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "first address"
+        },
+        {
+          "name": "b",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "second address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "maximum of two addresses"
+      },
+      "throws": []
+    }
+  ]
+}

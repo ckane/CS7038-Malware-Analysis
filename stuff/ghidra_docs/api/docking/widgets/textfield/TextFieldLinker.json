@@ -1,0 +1,531 @@
+{
+  "name": "TextFieldLinker",
+  "comment": "A class that links text fields into a \"formatted text field\", separated by expressions.\n \n This fulfills a similar purpose to formatted text fields, except the individual parts may be\n placed independent of the other components. Granted, they ought to appear in an intuitive order.\n The input string is split among a collection of JTextFields each according to a given\n pattern -- excluding the final field. Cursor navigation, insertion, deletion, etc. are all\n applied as if the linked text fields were part of a single composite text field.\n \n The individual text fields must be constructed and added by the user, as in the example:\n \n \n \n ",
+  "javadoc": "A class that links text fields into a \"formatted text field\", separated by expressions.\n \n This fulfills a similar purpose to formatted text fields, except the individual parts may be\n placed independent of the other components. Granted, they ought to appear in an intuitive order.\n The input string is split among a collection of {@link JTextField}s each according to a given\n pattern -- excluding the final field. Cursor navigation, insertion, deletion, etc. are all\n applied as if the linked text fields were part of a single composite text field.\n \n The individual text fields must be constructed and added by the user, as in the example:\n \n \u003cpre\u003e\n {@code\n Box hbox \u003d Box.createHorizontalBox();\n TextFieldLinker linker \u003d new TextFieldLinker();\n \n JTextField first \u003d new JTextField();\n hbox.add(first);\n hbox.add(Box.createHorizontalStrut(10));\n linker.linkField(first, \"\\\\s+\", \" \");\n \n JTextField second \u003d new JTextField();\n hbox.add(second);\n hbox.add(new GLabel(\"-\"));\n linker.linkField(second, \"-\", \"-\");\n \n JTextField third \u003d new JTextField();\n hbox.add(third);\n linker.linkLastField(third);\n \n linker.setVisible(true);\n }\n \u003c/pre\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "linkedFields",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.textfield.TextFieldLinker.LinkedField\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "lastField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JTextField",
+      "type_short": "JTextField",
+      "constant_value": null
+    },
+    {
+      "name": "state",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.textfield.TextFieldLinker.LinkerState",
+      "type_short": "LinkerState",
+      "constant_value": null
+    },
+    {
+      "name": "haveFocus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "mute",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.atomic.AtomicInteger",
+      "type_short": "AtomicInteger",
+      "constant_value": null
+    },
+    {
+      "name": "focusListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cjava.awt.event.FocusListener\u003e",
+      "type_short": "List",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clamp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "min",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "val",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "max",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "instrument",
+      "comment": "Once all fields are added, register all the listeners",
+      "javadoc": "Once all fields are added, register all the listeners",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Unregister all the listeners, effectively unlinking the fields",
+      "javadoc": "Unregister all the listeners, effectively unlinking the fields",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "linkField",
+      "comment": "Add a new text field to this linker\n \n Links the given field with the others present in this linker, if any.  is a\n regular expression that dictates where the given field ends, and the next field begins.\n When  matches a part of the text in , the text is split and\n re-flowed so that the second part is removed into the next linked field. The separator is\n omitted from both fields. The packing of the fields -- and surrounding labels -- ought to\n imply that the separator is still present, because #getText() or and\n #getTextBeforeCursor(JTextField) insert  between the fields.\n \n Any number of fields may be added in this fashion, but the last field -- having no\n associated pattern or separator -- must be added using\n #linkLastField(JTextField). Thus, before linking is actually activated, at least one\n field must be present. To be meaningful, at least two fields should be linked.\n \n NOTE:  must match .",
+      "javadoc": "Add a new text field to this linker\n \n Links the given field with the others present in this linker, if any. {@code exp} is a\n regular expression that dictates where the given field ends, and the next field begins.\n When {@code exp} matches a part of the text in {@code field}, the text is split and\n re-flowed so that the second part is removed into the next linked field. The separator is\n omitted from both fields. The packing of the fields -- and surrounding labels -- ought to\n imply that the separator is still present, because {@link #getText()} or and\n {@link #getTextBeforeCursor(JTextField)} insert {@code sep} between the fields.\n \n Any number of fields may be added in this fashion, but the last field -- having no\n associated pattern or separator -- must be added using\n {@link #linkLastField(JTextField)}. Thus, before linking is actually activated, at least one\n field must be present. To be meaningful, at least two fields should be linked.\n \n NOTE: {@code exp} must match {@code sep}.\n@param field the field to link\n@param exp the separator following the field\n@param sep the separator that replaces {@code exp} when matched",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "the field to link"
+        },
+        {
+          "name": "exp",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the separator following the field"
+        },
+        {
+          "name": "sep",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the separator that replaces  when matched"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "linkField",
+      "comment": "",
+      "javadoc": "@see #linkField(JTextField, String, String)",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": ""
+        },
+        {
+          "name": "pat",
+          "type_long": "java.util.regex.Pattern",
+          "type_short": "Pattern",
+          "comment": ""
+        },
+        {
+          "name": "sep",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "linkLastField",
+      "comment": "Add the final field, and actually link the fields\n \n The fields are not effectively linked until this method is called. Additionally, once this\n method is called, the linker cannot take any additional fields.",
+      "javadoc": "Add the final field, and actually link the fields\n \n The fields are not effectively linked until this method is called. Additionally, once this\n method is called, the linker cannot take any additional fields.\n@param field the final field",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "the final field"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkLast",
+      "comment": "Check if this linker is mutable",
+      "javadoc": "Check if this linker is mutable",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findField",
+      "comment": "Get the index of a field.",
+      "javadoc": "Get the index of a field.\n@param field the field\n@return the index, or -1 if the field does not belong to this composite field",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the field"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the index, or -1 if the field does not belong to this composite field"
+      },
+      "throws": []
+    },
+    {
+      "name": "buildField",
+      "comment": "Provides an opportunity to compose the field from an extension of JTextField",
+      "javadoc": "Provides an opportunity to compose the field from an extension of {@link JTextField}\n@param i the index of the field to construct\n@return a newly-constructed text field",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the field to construct"
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.JTextField",
+        "type_short": "JTextField",
+        "comment": "a newly-constructed text field"
+      },
+      "throws": []
+    },
+    {
+      "name": "syncStateLater",
+      "comment": "Schedule a state synchronization.",
+      "javadoc": "Schedule a state synchronization.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Clear the composite field, i.e., clear all the linked fields",
+      "javadoc": "Clear the composite field, i.e., clear all the linked fields",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSyncState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getText",
+      "comment": "Get the full composite text",
+      "javadoc": "Get the full composite text\n@return the text, including separators",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the text, including separators"
+      },
+      "throws": []
+    },
+    {
+      "name": "setText",
+      "comment": "Set the full composite text",
+      "javadoc": "Set the full composite text\n@param text the text, including separators",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the text, including separators"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCaretPosition",
+      "comment": "Set the location of the caret among the composite text",
+      "javadoc": "Set the location of the caret among the composite text\n@param pos the position, including separators\n@throws BadLocationException if the position is larger than the composite text",
+      "static": false,
+      "params": [
+        {
+          "name": "pos",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the position, including separators"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "javax.swing.text.BadLocationException",
+          "type_short": "BadLocationException",
+          "comment": "if the position is larger than the composite text"
+        }
+      ]
+    },
+    {
+      "name": "getTextBeforeCursor",
+      "comment": "Get the text preceding the caret in the given field",
+      "javadoc": "Get the text preceding the caret in the given field\n@param where the field whose caret to consider\n@return the text",
+      "static": false,
+      "params": [
+        {
+          "name": "where",
+          "type_long": "javax.swing.JTextField",
+          "type_short": "JTextField",
+          "comment": "the field whose caret to consider"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the text"
+      },
+      "throws": []
+    },
+    {
+      "name": "getField",
+      "comment": "Get an individual field in the composite",
+      "javadoc": "Get an individual field in the composite\n@param i\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.JTextField",
+        "type_short": "JTextField",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFocusedField",
+      "comment": "Get the individual field last having focus\n \n Effectively, this gives the field containing the composite caret",
+      "javadoc": "Get the individual field last having focus\n \n Effectively, this gives the field containing the composite caret\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JTextField",
+        "type_short": "JTextField",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumFields",
+      "comment": "Get the number of fields in this composite",
+      "javadoc": "Get the number of fields in this composite\n@return the field count",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the field count"
+      },
+      "throws": []
+    },
+    {
+      "name": "setVisible",
+      "comment": "Set the visibility of all the component fields",
+      "javadoc": "Set the visibility of all the component fields\n@param visible true to show, false to hide",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to show, false to hide"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFocusListener",
+      "comment": "Add a focus listener\n \n The focus listener will receive a callback only when focus is passed completely outside the\n composite text field. No events are generated when focus passes from one field in the\n composite to another.",
+      "javadoc": "Add a focus listener\n \n The focus listener will receive a callback only when focus is passed completely outside the\n composite text field. No events are generated when focus passes from one field in the\n composite to another.\n@param listener the focus listener to add",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.FocusListener",
+          "type_short": "FocusListener",
+          "comment": "the focus listener to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeFocusListener",
+      "comment": "Remove a focus listener",
+      "javadoc": "Remove a focus listener\n@param listener the focus listener to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.FocusListener",
+          "type_short": "FocusListener",
+          "comment": "the focus listener to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireFocusListeners",
+      "comment": "Fire the given event on all registered focus listeners",
+      "javadoc": "Fire the given event on all registered focus listeners\n@param ev",
+      "static": false,
+      "params": [
+        {
+          "name": "ev",
+          "type_long": "java.awt.event.FocusEvent",
+          "type_short": "FocusEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "twoSpacedFields",
+      "comment": "A convenient factory to build two fields separated by spaces",
+      "javadoc": "A convenient factory to build two fields separated by spaces\n@return the linker containing two new linked {@link JTextField}s",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.textfield.TextFieldLinker",
+        "type_short": "TextFieldLinker",
+        "comment": "the linker containing two new linked JTextFields"
+      },
+      "throws": []
+    }
+  ]
+}

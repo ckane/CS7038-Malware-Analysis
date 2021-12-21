@@ -1,0 +1,747 @@
+{
+  "name": "DecompilerController",
+  "comment": "Coordinates the interactions between the DecompilerProvider, DecompilerPanel, and the DecompilerManager",
+  "javadoc": "Coordinates the interactions between the DecompilerProvider, DecompilerPanel, and the DecompilerManager",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "decompilerPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.DecompilerPanel",
+      "type_short": "DecompilerPanel",
+      "constant_value": null
+    },
+    {
+      "name": "decompilerMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.DecompilerManager",
+      "type_short": "DecompilerManager",
+      "constant_value": null
+    },
+    {
+      "name": "callbackHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.DecompilerCallbackHandler",
+      "type_short": "DecompilerCallbackHandler",
+      "constant_value": null
+    },
+    {
+      "name": "currentDecompileData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.decompiler.component.DecompileData",
+      "type_short": "DecompileData",
+      "constant_value": null
+    },
+    {
+      "name": "currentSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramSelection",
+      "type_short": "ProgramSelection",
+      "constant_value": null
+    },
+    {
+      "name": "decompilerCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "com.google.common.cache.Cache\u003cghidra.program.model.listing.Function,ghidra.app.decompiler.DecompileResults\u003e",
+      "type_short": "Cache",
+      "constant_value": null
+    },
+    {
+      "name": "cacheSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handler",
+          "type_long": "ghidra.app.decompiler.component.DecompilerCallbackHandler",
+          "type_short": "DecompilerCallbackHandler",
+          "comment": ""
+        },
+        {
+          "name": "options",
+          "type_long": "ghidra.app.decompiler.DecompileOptions",
+          "type_short": "DecompileOptions",
+          "comment": ""
+        },
+        {
+          "name": "clipboard",
+          "type_long": "ghidra.app.plugin.core.decompile.DecompilerClipboardProvider",
+          "type_short": "DecompilerClipboardProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDecompilerPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.decompiler.component.DecompilerPanel",
+        "type_short": "DecompilerPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Called by the provider when the provider is disposed.  Once dispose is called, it should\n never be used again.",
+      "javadoc": "Called by the provider when the provider is disposed.  Once dispose is called, it should\n never be used again.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "clears all internal state and releases all resources.  Called when the provider is no\n longer visible or the currently displayed program is closed.",
+      "javadoc": "clears all internal state and releases all resources.  Called when the provider is no\n longer visible or the currently displayed program is closed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "display",
+      "comment": "Shows the function containing the given location in the decompilerPanel.  Also, positions the\n decompilerPanel\u0027s cursor to the closest equivalent position. If the decompilerPanel is\n already displaying the function, then only the cursor is repositioned.  To force a\n re-decompile use #refreshDisplay(Program, ProgramLocation, File).",
+      "javadoc": "Shows the function containing the given location in the decompilerPanel.  Also, positions the\n decompilerPanel\u0027s cursor to the closest equivalent position. If the decompilerPanel is\n already displaying the function, then only the cursor is repositioned.  To force a\n re-decompile use {@link #refreshDisplay(Program, ProgramLocation, File)}.\n@param program the program for the given location\n@param location the location containing the function to be displayed and the location in\n that function to position the cursor.\n@param viewerPosition the viewer position",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program for the given location"
+        },
+        {
+          "name": "location",
+          "type_long": "ghidra.program.util.ProgramLocation",
+          "type_short": "ProgramLocation",
+          "comment": "the location containing the function to be displayed and the location in\n that function to position the cursor."
+        },
+        {
+          "name": "viewerPosition",
+          "type_long": "docking.widgets.fieldpanel.support.ViewerPosition",
+          "type_short": "ViewerPosition",
+          "comment": "the viewer position"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadFromCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "location",
+          "type_long": "ghidra.program.util.ProgramLocation",
+          "type_short": "ProgramLocation",
+          "comment": ""
+        },
+        {
+          "name": "viewerPosition",
+          "type_long": "docking.widgets.fieldpanel.support.ViewerPosition",
+          "type_short": "ViewerPosition",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelection",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "selection",
+          "type_long": "ghidra.program.util.ProgramSelection",
+          "type_short": "ProgramSelection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setOptions",
+      "comment": "Sets new decompiler options and triggers a new decompile.",
+      "javadoc": "Sets new decompiler options and triggers a new decompile.\n@param decompilerOptions the options",
+      "static": false,
+      "params": [
+        {
+          "name": "decompilerOptions",
+          "type_long": "ghidra.app.decompiler.DecompileOptions",
+          "type_short": "DecompileOptions",
+          "comment": "the options"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDecompiling",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMouseNavigationEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "enabled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resetDecompiler",
+      "comment": "Resets the native decompiler process.  Call this method when the decompiler\u0027s view\n of a program has been invalidated, such as when a new overlay space has been added.",
+      "javadoc": "Resets the native decompiler process.  Call this method when the decompiler\u0027s view\n of a program has been invalidated, such as when a new overlay space has been added.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDecompileData",
+      "comment": "Called by the DecompilerManager to update the currently displayed DecompileData",
+      "javadoc": "Called by the DecompilerManager to update the currently displayed DecompileData\n@param decompileData the new data",
+      "static": false,
+      "params": [
+        {
+          "name": "decompileData",
+          "type_long": "ghidra.app.decompiler.component.DecompileData",
+          "type_short": "DecompileData",
+          "comment": "the new data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "decompileData",
+          "type_long": "ghidra.app.decompiler.component.DecompileData",
+          "type_short": "DecompileData",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decompilerStatusChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doWhenNotBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "utility.function.Callback",
+          "type_short": "Callback",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refreshDisplay",
+      "comment": "Always decompiles the function containing the given location before positioning the\n decompilerPanel\u0027s cursor to the closest equivalent position.",
+      "javadoc": "Always decompiles the function containing the given location before positioning the\n decompilerPanel\u0027s cursor to the closest equivalent position.\n@param program the program for the given location\n@param location the location containing the function to be displayed and the location in\n that function to position the cursor.\n@param debugFile the debug file",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program for the given location"
+        },
+        {
+          "name": "location",
+          "type_long": "ghidra.program.util.ProgramLocation",
+          "type_short": "ProgramLocation",
+          "comment": "the location containing the function to be displayed and the location in\n that function to position the cursor."
+        },
+        {
+          "name": "debugFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "the debug file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasDecompileResults",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCCodeModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.decompiler.ClangTokenGroup",
+        "type_short": "ClangTokenGroup",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setStatusMessage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHighFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighFunction",
+        "type_short": "HighFunction",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.util.ProgramLocation",
+        "type_short": "ProgramLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "locationChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "programLocation",
+          "type_long": "ghidra.program.util.ProgramLocation",
+          "type_short": "ProgramLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "selectionChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "programSelection",
+          "type_long": "ghidra.program.util.ProgramSelection",
+          "type_short": "ProgramSelection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "annotationClicked",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "annotation",
+          "type_long": "ghidra.util.bean.field.AnnotatedTextFieldElement",
+          "type_short": "AnnotatedTextFieldElement",
+          "comment": ""
+        },
+        {
+          "name": "event",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        },
+        {
+          "name": "newWindow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goToFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "newWindow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goToLabel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "labelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newWindow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goToAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "newWindow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goToScalar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "newWindow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDecompileData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.decompiler.component.DecompileData",
+        "type_short": "DecompileData",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "exportLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "com.google.common.cache.Cache\u003cghidra.program.model.listing.Function,ghidra.app.decompiler.DecompileResults\u003e",
+        "type_short": "Cache",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "programClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "closedProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,407 @@
+{
+  "name": "SleighAssemblerBuilder",
+  "comment": "An AssemblerBuilder capable of supporting almost any SleighLanguage\n \n To build an assembler, please use a static method of the Assemblers class.\n \n SLEIGH-based assembly is a bit of an experimental feature at this time. Nevertheless, it seems to\n have come along quite nicely. It\u0027s not quite as fast as disassembly, since after all, that\u0027s what\n SLEIGH was designed to do.\n \n Overall, the method is fairly simple, though its implementation is a bit more complex. First, we\n gather every pair of pattern and constructor by traversing the decision tree used by disassembly.\n We then use the \"print pieces\" to construct a context-free grammar. Each production is associated\n with the one-or-more constructors with the same sequence of print pieces. We then build a LALR(1)\n parser for the generated grammar. This now constitutes a generic parser for the given language.\n Note that this step takes some time, and may be better suited as a build-time step. Because\n SLEIGH specifications are not generally concerned with eliminating ambiguity of printed\n instructions (rather, it only does so for instruction bytes), we must consider that the grammar\n could be ambiguous. To handle this, the action/goto table is permitted multiple entries per cell,\n and we allow backtracking. There are also cases where tokens are not actually separated by\n spaces. For example, in the  file, there is JMP ... and J^cc, meaning, the lexer\n must consider J as a token as well as JMP, introducing another source of possible backtracking.\n Despite that, parsing is completed fairly quickly.\n \n To assemble, we first parse the textual instruction, yielding zero or more parse trees. No parse\n trees implies an error. For each parse tree, we attempt to resolve the instruction bytes,\n starting at the leaves and working upwards while tracking and solving context changes. The\n context changes must be considered in reverse. We read the context register of the\n children (a disassembler would write). We then assume there is at most one variable in the\n expression, solve for it, and write the solution to the appropriate field (a\n disassembler would read). If no solution exists, a semantic error is logged. Since it\u0027s possible\n a production in the parse tree is associated with multiple constructors, different combinations\n of constructors are explored as we move upward in the tree. If all possible combinations yield\n semantic errors, then the overall result is an error.\n \n Some productions are \"purely recursive,\" e.g.,  lines in the SLEIGH. These\n are ignored during parser construction. Let such a production be given as I \u003d I. When resolving\n the parse tree to bytes, and we encounter a production with I on the left hand side, we then\n consider the possible application of the production I \u003d I and its consequential constructors.\n Ideally, we could repeat this indefinitely, stopping when all further applications result in\n semantic errors; however, there is no guarantee in the SLEIGH specification that such an\n algorithm will actually halt, so a maximum number (default of 1) of applications are attempted.\n \n After all the context changes and operands are resolved, we apply the constructor patterns and\n proceed up the tree. Thus, each branch yields zero or more \"resolved constructors,\" which each\n specify two masked blocks of data: one for the instruction, and one for the context. These are\n passed up to the parent production, which, having obtained results from all its children,\n attempts to apply the corresponding constructors.\n \n Once we\u0027ve resolved the root node, any resolved constructors returned are taken as successfully\n assembled instruction bytes. If applicable, the corresponding context registers are compared to\n the context at the target address in the program and filtered for compatibility.",
+  "javadoc": "An {@link AssemblerBuilder} capable of supporting almost any {@link SleighLanguage}\n \n To build an assembler, please use a static method of the {@link Assemblers} class.\n \n SLEIGH-based assembly is a bit of an experimental feature at this time. Nevertheless, it seems to\n have come along quite nicely. It\u0027s not quite as fast as disassembly, since after all, that\u0027s what\n SLEIGH was designed to do.\n \n Overall, the method is fairly simple, though its implementation is a bit more complex. First, we\n gather every pair of pattern and constructor by traversing the decision tree used by disassembly.\n We then use the \"print pieces\" to construct a context-free grammar. Each production is associated\n with the one-or-more constructors with the same sequence of print pieces. We then build a LALR(1)\n parser for the generated grammar. This now constitutes a generic parser for the given language.\n Note that this step takes some time, and may be better suited as a build-time step. Because\n SLEIGH specifications are not generally concerned with eliminating ambiguity of printed\n instructions (rather, it only does so for instruction bytes), we must consider that the grammar\n could be ambiguous. To handle this, the action/goto table is permitted multiple entries per cell,\n and we allow backtracking. There are also cases where tokens are not actually separated by\n spaces. For example, in the {@code ia.sinc} file, there is JMP ... and J^cc, meaning, the lexer\n must consider J as a token as well as JMP, introducing another source of possible backtracking.\n Despite that, parsing is completed fairly quickly.\n \n To assemble, we first parse the textual instruction, yielding zero or more parse trees. No parse\n trees implies an error. For each parse tree, we attempt to resolve the instruction bytes,\n starting at the leaves and working upwards while tracking and solving context changes. The\n context changes must be considered in reverse. We \u003cem\u003eread\u003c/em\u003e the context register of the\n children (a disassembler would write). We then assume there is at most one variable in the\n expression, solve for it, and \u003cem\u003ewrite\u003c/em\u003e the solution to the appropriate field (a\n disassembler would read). If no solution exists, a semantic error is logged. Since it\u0027s possible\n a production in the parse tree is associated with multiple constructors, different combinations\n of constructors are explored as we move upward in the tree. If all possible combinations yield\n semantic errors, then the overall result is an error.\n \n Some productions are \"purely recursive,\" e.g., {@code :^instruction} lines in the SLEIGH. These\n are ignored during parser construction. Let such a production be given as I \u003d\u0026gt; I. When resolving\n the parse tree to bytes, and we encounter a production with I on the left hand side, we then\n consider the possible application of the production I \u003d\u0026gt; I and its consequential constructors.\n Ideally, we could repeat this indefinitely, stopping when all further applications result in\n semantic errors; however, there is no guarantee in the SLEIGH specification that such an\n algorithm will actually halt, so a maximum number (default of 1) of applications are attempted.\n \n After all the context changes and operands are resolved, we apply the constructor patterns and\n proceed up the tree. Thus, each branch yields zero or more \"resolved constructors,\" which each\n specify two masked blocks of data: one for the instruction, and one for the context. These are\n passed up to the parent production, which, having obtained results from all its children,\n attempts to apply the corresponding constructors.\n \n Once we\u0027ve resolved the root node, any resolved constructors returned are taken as successfully\n assembled instruction bytes. If applicable, the corresponding context registers are compared to\n the context at the target address in the program and filtered for compatibility.",
+  "static": false,
+  "implements": [
+    "ghidra.app.plugin.assembler.AssemblerBuilder"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "dbg",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.util.DbgTimer",
+      "type_short": "DbgTimer",
+      "constant_value": null
+    },
+    {
+      "name": "lang",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguage",
+      "type_short": "SleighLanguage",
+      "constant_value": null
+    },
+    {
+      "name": "grammar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+      "type_short": "AssemblyGrammar",
+      "constant_value": null
+    },
+    {
+      "name": "defaultContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyDefaultContext",
+      "type_short": "AssemblyDefaultContext",
+      "constant_value": null
+    },
+    {
+      "name": "ctxGraph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph",
+      "type_short": "AssemblyContextGraph",
+      "constant_value": null
+    },
+    {
+      "name": "parser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParser",
+      "type_short": "AssemblyParser",
+      "constant_value": null
+    },
+    {
+      "name": "generated",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "builtSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.app.plugin.assembler.sleigh.symbol.AssemblySymbol\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an assembler builder for the given SLEIGH language",
+      "javadoc": "Construct an assembler builder for the given SLEIGH language\n@param lang the language",
+      "static": false,
+      "params": [
+        {
+          "name": "lang",
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguage",
+          "type_short": "SleighLanguage",
+          "comment": "the language"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "generateAssembler",
+      "comment": "Do the actual work to construct an assembler from a SLEIGH language",
+      "javadoc": "Do the actual work to construct an assembler from a SLEIGH language\n@throws SleighException if there\u0027s an issue accessing the language",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighException",
+          "type_short": "SleighException",
+          "comment": "if there\u0027s an issue accessing the language"
+        }
+      ]
+    },
+    {
+      "name": "getLanguageID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.LanguageID",
+        "type_short": "LanguageID",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLanguage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguage",
+        "type_short": "SleighLanguage",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAssembler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "selector",
+          "type_long": "ghidra.app.plugin.assembler.AssemblySelector",
+          "type_short": "AssemblySelector",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.SleighAssembler",
+        "type_short": "SleighAssembler",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAssembler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "selector",
+          "type_long": "ghidra.app.plugin.assembler.AssemblySelector",
+          "type_short": "AssemblySelector",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.SleighAssembler",
+        "type_short": "SleighAssembler",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invVarnodeList",
+      "comment": "Invert a varnode list to a map suitable for use with AssemblyStringMapTerminal",
+      "javadoc": "Invert a varnode list to a map suitable for use with {@link AssemblyStringMapTerminal}\n@param vnlist the varnode list symbol\n@return the inverted string map",
+      "static": false,
+      "params": [
+        {
+          "name": "vnlist",
+          "type_long": "ghidra.app.plugin.processors.sleigh.symbol.VarnodeListSymbol",
+          "type_short": "VarnodeListSymbol",
+          "comment": "the varnode list symbol"
+        }
+      ],
+      "return": {
+        "type_long": "org.apache.commons.collections4.MultiValuedMap\u003cjava.lang.String,java.lang.Integer\u003e",
+        "type_short": "MultiValuedMap",
+        "comment": "the inverted string map"
+      },
+      "throws": []
+    },
+    {
+      "name": "invValueMap",
+      "comment": "Invert a value map to a map suitable for use with AssemblyNumericMapTerminal",
+      "javadoc": "Invert a value map to a map suitable for use with {@link AssemblyNumericMapTerminal}\n@param vm the value map symbol\n@return the inverted numeric map",
+      "static": false,
+      "params": [
+        {
+          "name": "vm",
+          "type_long": "ghidra.app.plugin.processors.sleigh.symbol.ValueMapSymbol",
+          "type_short": "ValueMapSymbol",
+          "comment": "the value map symbol"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.Long,java.lang.Integer\u003e",
+        "type_short": "Map",
+        "comment": "the inverted numeric map"
+      },
+      "throws": []
+    },
+    {
+      "name": "invNameSymbol",
+      "comment": "Invert a name table to a map suitable for use with AssemblyStringMapTerminal",
+      "javadoc": "Invert a name table to a map suitable for use with {@link AssemblyStringMapTerminal}\n@param ns the name symbol\n@return the inverted string map",
+      "static": false,
+      "params": [
+        {
+          "name": "ns",
+          "type_long": "ghidra.app.plugin.processors.sleigh.symbol.NameSymbol",
+          "type_short": "NameSymbol",
+          "comment": "the name symbol"
+        }
+      ],
+      "return": {
+        "type_long": "org.apache.commons.collections4.MultiValuedMap\u003cjava.lang.String,java.lang.Integer\u003e",
+        "type_short": "MultiValuedMap",
+        "comment": "the inverted string map"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolFor",
+      "comment": "Convert the given operand symbol to an AssemblySymbol\n \n For subtables, this results in a non-terminal, for all others, the result in a terminal.",
+      "javadoc": "Convert the given operand symbol to an {@link AssemblySymbol}\n \n For subtables, this results in a non-terminal, for all others, the result in a terminal.\n@param cons the constructor to which the operand belongs\n@param opsym the operand symbol to convert\n@return the converted assembly grammar symbol",
+      "static": false,
+      "params": [
+        {
+          "name": "cons",
+          "type_long": "ghidra.app.plugin.processors.sleigh.Constructor",
+          "type_short": "Constructor",
+          "comment": "the constructor to which the operand belongs"
+        },
+        {
+          "name": "opsym",
+          "type_long": "ghidra.app.plugin.processors.sleigh.symbol.OperandSymbol",
+          "type_short": "OperandSymbol",
+          "comment": "the operand symbol to convert"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.symbol.AssemblySymbol",
+        "type_short": "AssemblySymbol",
+        "comment": "the converted assembly grammar symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBitSize",
+      "comment": "Obtain the size in bits of a textual operand.\n \n This is a little odd, since the variables in pattern expressions do not have an explicit\n size. However, the value exported by a constructor\u0027s pCode may have an explicit size given\n (in bytes). Thus, there is a special case, where a constructor prints just one operand and\n exports that same operand with an explicit size. In that case, the size of the operand is\n printed according to that exported size.\n \n For disassembly, this information is used simply to truncate the bits before they are\n displayed. For assembly, we must do two things: 1) Ensure that the provided value fits in the\n given size, and 2) Mask the goal when solving the pattern expression for the operand.",
+      "javadoc": "Obtain the size in bits of a textual operand.\n \n This is a little odd, since the variables in pattern expressions do not have an explicit\n size. However, the value exported by a constructor\u0027s pCode may have an explicit size given\n (in bytes). Thus, there is a special case, where a constructor prints just one operand and\n exports that same operand with an explicit size. In that case, the size of the operand is\n printed according to that exported size.\n \n For disassembly, this information is used simply to truncate the bits before they are\n displayed. For assembly, we must do two things: 1) Ensure that the provided value fits in the\n given size, and 2) Mask the goal when solving the pattern expression for the operand.\n@param cons the constructor from which the production is being derived\n@param opsym the operand symbol corresponding to the grammatical symbol, whose size we wish\n            to determine.\n@return the size of the operand in bits",
+      "static": false,
+      "params": [
+        {
+          "name": "cons",
+          "type_long": "ghidra.app.plugin.processors.sleigh.Constructor",
+          "type_short": "Constructor",
+          "comment": "the constructor from which the production is being derived"
+        },
+        {
+          "name": "opsym",
+          "type_long": "ghidra.app.plugin.processors.sleigh.symbol.OperandSymbol",
+          "type_short": "OperandSymbol",
+          "comment": "the operand symbol corresponding to the grammatical symbol, whose size we wish\n            to determine."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the size of the operand in bits"
+      },
+      "throws": []
+    },
+    {
+      "name": "buildSubGrammar",
+      "comment": "Build a portion of the grammar representing a table of constructors",
+      "javadoc": "Build a portion of the grammar representing a table of constructors\n@param subtable the table\n@return the partial grammar",
+      "static": false,
+      "params": [
+        {
+          "name": "subtable",
+          "type_long": "ghidra.app.plugin.processors.sleigh.symbol.SubtableSymbol",
+          "type_short": "SubtableSymbol",
+          "comment": "the table"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+        "type_short": "AssemblyGrammar",
+        "comment": "the partial grammar"
+      },
+      "throws": []
+    },
+    {
+      "name": "buildGrammar",
+      "comment": "Build the full grammar for the language",
+      "javadoc": "Build the full grammar for the language",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildContext",
+      "comment": "Build the default context for the language",
+      "javadoc": "Build the default context for the language",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildContextGraph",
+      "comment": "Build the context transition graph for the language",
+      "javadoc": "Build the context transition graph for the language",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildParser",
+      "comment": "Build the parser for the language",
+      "javadoc": "Build the parser for the language",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGrammar",
+      "comment": "Get the built grammar for the language",
+      "javadoc": "Get the built grammar for the language\n@return the grammar",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+        "type_short": "AssemblyGrammar",
+        "comment": "the grammar"
+      },
+      "throws": []
+    },
+    {
+      "name": "getParser",
+      "comment": "Get the built parser for the language",
+      "javadoc": "Get the built parser for the language\n@return the parser",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParser",
+        "type_short": "AssemblyParser",
+        "comment": "the parser"
+      },
+      "throws": []
+    }
+  ]
+}

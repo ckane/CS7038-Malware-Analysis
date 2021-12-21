@@ -1,0 +1,870 @@
+{
+  "name": "DWARFDataTypeManager",
+  "comment": "Manages mappings between DWARF DIEs and Ghidra DataTypes.",
+  "javadoc": "Manages mappings between DWARF DIEs and Ghidra DataTypes.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "dataTypeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataTypeManager",
+      "type_short": "DataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "builtInDTM",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataTypeManager",
+      "type_short": "DataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "prog",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+      "type_short": "DWARFProgram",
+      "constant_value": null
+    },
+    {
+      "name": "importSummary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFImportSummary",
+      "type_short": "DWARFImportSummary",
+      "constant_value": null
+    },
+    {
+      "name": "offsetToDTP",
+      "comment": "Maps DWARF DIE offsets to Ghidra DataType, using the\n path/name of the datatype instead of live object (to avoid issues with\n stale objects)",
+      "javadoc": "Maps DWARF DIE offsets to Ghidra {@link DataType datatypes}, using the\n path/name of the datatype instead of live object (to avoid issues with\n stale objects)",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.Long,ghidra.program.model.data.DataTypePath\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "dtpToSourceInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.model.data.DataTypePath,ghidra.app.util.bin.format.dwarf4.next.DWARFSourceInfo\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypes",
+      "comment": "Mapping of base type names to their Ghidra datatype.\n \n Non-standard base-type names (created on the fly) will have a\n #BASETYPE_MANGLE_PREFIX applied to them to keep them\n unique.",
+      "javadoc": "Mapping of base type names to their Ghidra datatype.\n \u003cp\u003e\n Non-standard base-type names (created on the fly) will have a\n {@link #BASETYPE_MANGLE_PREFIX mangling} applied to them to keep them\n unique.",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.program.model.data.DataType\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "BASETYPE_MANGLE_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"__MANGLE__\""
+    },
+    {
+      "name": "baseDataTypeVoid",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeNullPtr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeBool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeChar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeUchar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeFloats",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType[]",
+      "type_short": "ghidra.program.model.data.DataType[]",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeSignedInts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType[]",
+      "type_short": "ghidra.program.model.data.DataType[]",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeUnsignedInts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType[]",
+      "type_short": "ghidra.program.model.data.DataType[]",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeUntyped",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType[]",
+      "type_short": "ghidra.program.model.data.DataType[]",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeChars",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType[]",
+      "type_short": "ghidra.program.model.data.DataType[]",
+      "constant_value": null
+    },
+    {
+      "name": "baseDataTypeUndefined1",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new DWARFDataTypeManager instance.",
+      "javadoc": "Creates a new {@link DWARFDataTypeManager} instance.\n@param prog {@link DWARFProgram} that holds the Ghidra {@link Program} being imported.\n@param dataTypeManager {@link DataTypeManager} of the Ghidra Program.\n@param builtInDTM {@link DataTypeManager} with built-in data types.\n@param importSummary {@link DWARFImportSummary} where summary information will be stored\n during the import session.",
+      "static": false,
+      "params": [
+        {
+          "name": "prog",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+          "type_short": "DWARFProgram",
+          "comment": "DWARFProgram that holds the Ghidra Program being imported."
+        },
+        {
+          "name": "dataTypeManager",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "DataTypeManager of the Ghidra Program."
+        },
+        {
+          "name": "builtInDTM",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "DataTypeManager with built-in data types."
+        },
+        {
+          "name": "importSummary",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFImportSummary",
+          "type_short": "DWARFImportSummary",
+          "comment": "DWARFImportSummary where summary information will be stored\n during the import session."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doGetDataType",
+      "comment": "Creates a DataType from the DWARF DIEAggregate, or returns a\n pre-existing DataType created by the specified DIEA previously.\n \n Creating a new DataType happens in two stages, where the DataType is created as\n an \u0027impl\u0027 DataType first (possibly representing a large graph of referred-to datatypes),\n and then it is submitted to the DataTypeManager to be added to the database and\n converted to a \u0027db\u0027 object.\n \n Mapping from the DIEA\u0027s offset to the resultant \u0027db\u0027 DataType object is a two step\n process.\n \n A DataTypeGraphComparator is used to walk the \u0027impl\u0027 DataType object graph\n in lock-step with the resultant \u0027db\u0027 DataType object graph, and the mapping between\n the \u0027impl\u0027 object and its creator DIEA (held in DWARFDataType)\n is used to create a mapping to the resultant \u0027db\u0027 DataType\u0027s path.",
+      "javadoc": "Creates a {@link DataType} from the DWARF {@link DIEAggregate DIEA}, or returns a\n pre-existing {@link DataType} created by the specified DIEA previously.\n \u003cp\u003e\n Creating a new DataType happens in two stages, where the DataType is created as\n an \u0027impl\u0027 DataType first (possibly representing a large graph of referred-to datatypes),\n and then it is submitted to the {@link DataTypeManager} to be added to the database and\n converted to a \u0027db\u0027 object.\n \u003cp\u003e\n Mapping from the DIEA\u0027s offset to the resultant \u0027db\u0027 DataType object is a two step\n process.\n \u003cp\u003e\n A {@link DataTypeGraphComparator} is used to walk the \u0027impl\u0027 DataType object graph\n in lock-step with the resultant \u0027db\u0027 DataType object graph, and the mapping between\n the \u0027impl\u0027 object and its creator DIEA (held in {@link DWARFDataType})\n is used to create a mapping to the resultant \u0027db\u0027 DataType\u0027s path.\n@param diea DWARF {@link DIEAggregate} with datatype information that needs to be converted\n to a Ghidra DataType.\n@return {@link DataType} that is ready to use.\n@throws IOException if problem\n@throws DWARFExpressionException if problem",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": "DWARF DIEAggregate with datatype information that needs to be converted\n to a Ghidra DataType."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "DataType that is ready to use."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if problem"
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": "if problem"
+        }
+      ]
+    },
+    {
+      "name": "addDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dsi",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFSourceInfo",
+          "type_short": "DWARFSourceInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveDWARFSourceInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dsi",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFSourceInfo",
+          "type_short": "DWARFSourceInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getImportedTypes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.data.DataTypePath\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSourceInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFSourceInfo",
+        "type_short": "DWARFSourceInfo",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isGoodDWARFSourceInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dsi",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFSourceInfo",
+          "type_short": "DWARFSourceInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cacheOffsetToDataTypeMapping",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dieOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataType",
+      "comment": "Returns a Ghidra DataType corresponding to the specified DIEAggregate,\n or the specified defaultValue if the DIEA param is null or does not map to an already\n defined datatype (registered with #addDataType(long, DataType, DWARFSourceInfo)).\n ",
+      "javadoc": "Returns a Ghidra {@link DataType} corresponding to the specified {@link DIEAggregate},\n or the specified defaultValue if the DIEA param is null or does not map to an already\n defined datatype (registered with {@link #addDataType(long, DataType, DWARFSourceInfo)}).\n \u003cp\u003e\n@param diea {@link DIEAggregate} that defines a data type\n@param defaultValue Ghidra {@link DataType} to return if the specified DIEA is null\n or not already defined.\n@return Ghidra {@link DataType}",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": "DIEAggregate that defines a data type"
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "Ghidra DataType to return if the specified DIEA is null\n or not already defined."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "Ghidra DataType"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataType",
+      "comment": "Returns a Ghidra DataType corresponding to the specified DIE (based on its\n offset), or the specified defaultValue if the DIE does not map to a defined\n datatype (registered with #addDataType(long, DataType, DWARFSourceInfo)).\n ",
+      "javadoc": "Returns a Ghidra {@link DataType} corresponding to the specified DIE (based on its\n offset), or the specified defaultValue if the DIE does not map to a defined\n datatype (registered with {@link #addDataType(long, DataType, DWARFSourceInfo)}).\n \u003cp\u003e\n@param dieOffset offset of a DIE record that defines a data type\n@param defaultValue Ghidra {@link DataType} to return if the specified DIE not already defined.\n@return Ghidra {@link DataType}",
+      "static": false,
+      "params": [
+        {
+          "name": "dieOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "offset of a DIE record that defines a data type"
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "Ghidra DataType to return if the specified DIE not already defined."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "Ghidra DataType"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSpecificDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        },
+        {
+          "name": "dataTypeClazz",
+          "type_long": "java.lang.Class\u003cT\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPtrTo",
+      "comment": "Returns a pointer to the specified data type.",
+      "javadoc": "Returns a pointer to the specified data type.\n@param dt Ghidra {@link DataType}\n@return a {@link Pointer} that points to the specified datatype.",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "Ghidra DataType"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "a Pointer that points to the specified datatype."
+      },
+      "throws": []
+    },
+    {
+      "name": "forAllConflicts",
+      "comment": "Iterate all DataTypes that match the CategoryPath / name given\n in the DataTypePath parameter, including \"conflict\" datatypes\n that have a \".CONFLICTxx\" suffix.",
+      "javadoc": "Iterate all {@link DataType}s that match the CategoryPath / name given\n in the {@link DataTypePath} parameter, including \"conflict\" datatypes\n that have a \".CONFLICTxx\" suffix.\n@param dtp\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "dtp",
+          "type_long": "ghidra.program.model.data.DataTypePath",
+          "type_short": "DataTypePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Iterable\u003cghidra.program.model.data.DataType\u003e",
+        "type_short": "Iterable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findGhidraType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findMatchingDataTypeBySize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dtList",
+          "type_long": "ghidra.program.model.data.DataType[]",
+          "type_short": "ghidra.program.model.data.DataType[]",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffsetType",
+      "comment": "Returns a Ghidra DataType that corresponds to a type\n that can be used to represent an offset.\n ",
+      "javadoc": "Returns a Ghidra {@link DataType datatype} that corresponds to a type\n that can be used to represent an offset.\n \u003cp\u003e\n@param size\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVoidType",
+      "comment": "Returns the void type.",
+      "javadoc": "Returns the void type.\n@return void {@link DataType}",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "void DataType"
+      },
+      "throws": []
+    },
+    {
+      "name": "getUndefined1Type",
+      "comment": "Returns datatype to hold a 1 byte undefined value.",
+      "javadoc": "Returns datatype to hold a 1 byte undefined value.\n@return undefined 1 byte {@link DataType}.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "undefined 1 byte DataType."
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseType",
+      "comment": "Returns a DWARF base data type based on its name, or null if it does not exist.",
+      "javadoc": "Returns a DWARF base data type based on its name, or null if it does not exist.\n@param name base type name\n@return {@link DataType} or null if base type does not exist",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "base type name"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "DataType or null if base type does not exist"
+      },
+      "throws": []
+    },
+    {
+      "name": "isEncodingCompatible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "requestedDwarfEncoding",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseType",
+      "comment": "Returns a Ghidra DataType that corresponds to the DWARF named type.\n \n If there is no direct matching named Ghidra type, generic types of matching\n size will be returned for integer and floating numeric dwarf encoding types, boolean,\n and character types.  Failing that, generic storage types of matching size\n (word, dword, etc) will be returned, and failing that, an array of the correct size\n will be returned.\n \n If the returned data type is not a direct named match, the returned data type\n will be wrapped in a Ghdira typedef using the dwarf type\u0027s name.\n \n Any newly created Ghidra data types will be cached and the same instance will be returned\n if the same DWARF named base type is requested again.\n ",
+      "javadoc": "Returns a Ghidra {@link DataType datatype} that corresponds to the DWARF named type.\n \u003cp\u003e\n If there is no direct matching named Ghidra type, generic types of matching\n size will be returned for integer and floating numeric dwarf encoding types, boolean,\n and character types.  Failing that, generic storage types of matching size\n (word, dword, etc) will be returned, and failing that, an array of the correct size\n will be returned.\n \u003cp\u003e\n If the returned data type is not a direct named match, the returned data type\n will be wrapped in a Ghdira typedef using the dwarf type\u0027s name.\n \u003cp\u003e\n Any newly created Ghidra data types will be cached and the same instance will be returned\n if the same DWARF named base type is requested again.\n \u003cp\u003e\n@param name\n@param dwarfSize\n@param dwarfEncoding\n@param isBigEndian\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "dwarfSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dwarfEncoding",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isBigEndian",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mangleDataTypeInfo",
+      "comment": "Create a string with the data type\u0027s size and type info so that\n the data type can be stored in the same map as the regular named base types without\n conflicting.\n ",
+      "javadoc": "Create a string with the data type\u0027s size and type info so that\n the data type can be stored in the same map as the regular named base types without\n conflicting.\n \u003cp\u003e\n@param dwarfLength\n@param dwarfEncoding\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "dwarfLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dwarfEncoding",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initBaseDataTypes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "importAllDataTypes",
+      "comment": "Does the actual import work.  Updates the #importSummary object\n with information about the types imported and errors encountered.",
+      "javadoc": "Does the actual import work.  Updates the {@link #importSummary summary} object\n with information about the types imported and errors encountered.\n@param monitor to watch for cancel\n@throws IOException if errors are encountered reading data\n@throws DWARFException if errors are encountered processing\n@throws CancelledException if the {@link TaskMonitor} is canceled by the user.",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "to watch for cancel"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if errors are encountered reading data"
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFException",
+          "type_short": "DWARFException",
+          "comment": "if errors are encountered processing"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the TaskMonitor is canceled by the user."
+        }
+      ]
+    },
+    {
+      "name": "getFuncDIEA",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionSignature",
+      "comment": "Construct a temporary \u0027impl\u0027 FunctionDefinition DataType using the information\n found in the specified DIEAggregate.",
+      "javadoc": "Construct a temporary \u0027impl\u0027 {@link FunctionDefinition} DataType using the information\n found in the specified {@link DIEAggregate}.\n@param diea {@link DIEAggregate} of a subprogram, callsite, etc.\n@return {@link FunctionDefinition} impl (not saved to the DB) or null if not a valid\n DIEA.",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": "DIEAggregate of a subprogram, callsite, etc."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.FunctionDefinition",
+        "type_short": "FunctionDefinition",
+        "comment": "FunctionDefinition impl (not saved to the DB) or null if not a valid\n DIEA."
+      },
+      "throws": []
+    },
+    {
+      "name": "importFuncSignatures",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createFunctionDefinitionDataType",
+      "comment": "Creates a new FunctionDefinitionDataType from the specified DIEAggregate\n using already known datatypes.\n \n The logic of this impl is the same as DWARFDataTypeImporter#makeDataTypeForFunctionDefinition(DIEAggregate, boolean)\n but the impls can\u0027t be shared without excessive over-engineering.\n \n This impl uses DataType\u0027s that have already been resolved and committed to the DTM, and\n a cache mapping entry of the DWARF die - DataType has been registered via #addDataType(long, DataType, DWARFSourceInfo).\n \n This approach is necessary because of speed issues that arise if the referred datatypes\n are created from scratch from the DWARF information and then have to go through a\n resolve() before being used in the FunctionDefinition.",
+      "javadoc": "Creates a new {@link FunctionDefinitionDataType} from the specified {@link DIEAggregate}\n using already known datatypes.\n \u003cp\u003e\n The logic of this impl is the same as {@link DWARFDataTypeImporter#makeDataTypeForFunctionDefinition(DIEAggregate, boolean)}\n but the impls can\u0027t be shared without excessive over-engineering.\n \u003cp\u003e\n This impl uses DataType\u0027s that have already been resolved and committed to the DTM, and\n a cache mapping entry of the DWARF die -\u0026gt; DataType has been registered via {@link #addDataType(long, DataType, DWARFSourceInfo)}.\n \u003cp\u003e\n This approach is necessary because of speed issues that arise if the referred datatypes\n are created from scratch from the DWARF information and then have to go through a\n resolve() before being used in the FunctionDefinition.\n@param diea DWARF {@link DIEAggregate} that points to a subprogram or subroutine_type.\n@param dni DWARF name info for the new function def\n@return new {@link FunctionDefinitionDataType}.",
+      "static": false,
+      "params": [
+        {
+          "name": "diea",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": "DWARF DIEAggregate that points to a subprogram or subroutine_type."
+        },
+        {
+          "name": "dni",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFNameInfo",
+          "type_short": "DWARFNameInfo",
+          "comment": "DWARF name info for the new function def"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.FunctionDefinitionDataType",
+        "type_short": "FunctionDefinitionDataType",
+        "comment": "new FunctionDefinitionDataType."
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,506 @@
+{
+  "name": "HistoryList",
+  "comment": "An object meant to track items with the ability to go back and forth within the list of\n items.\n \n By default, duplicate entries are not allowed.  This allows for a simplified history of\n unique items.  If the client prefers to have an accurate history, then call\n #setAllowDuplicates(boolean) in order to keep all history entries.\n \n By default, null values are not allowed.  If the client allows null/empty values, then\n they should call #setAllowNulls(boolean) with a value of true.  This allows the\n backward navigation to work correctly when the client\u0027s active item is cleared.  When that \n item is cleared, then client is expected to call #add(Object) with value of \n null.  (This is safe to do, regardless of whether null are allowed).  When nulls are allowed\n and a null value is received, then current item is placed onto the history stack as the \n previous item.  This way, when the user presses the back button, the last visible item \n will be activated.  \n \n Note: when nulls are allowed, only a single null value will be stored.  Further, \n if new, non-null items are added, then the null value is dropped.",
+  "javadoc": "An object meant to track items with the ability to go back and forth within the list of\n items.\n \n \u003cp\u003eBy default, duplicate entries are not allowed.  This allows for a simplified history of\n unique items.  If the client prefers to have an accurate history, then call\n {@link #setAllowDuplicates(boolean)} in order to keep all history entries.\n \n \u003cp\u003eBy default, null values are not allowed.  If the client allows null/empty values, then\n they should call {@link #setAllowNulls(boolean)} with a value of true.  This allows the\n backward navigation to work correctly when the client\u0027s active item is cleared.  When that \n item is cleared, then client is expected to call {@link #add(Object)} with value of \n null.  (This is safe to do, regardless of whether null are allowed).  When nulls are allowed\n and a null value is received, then current item is placed onto the history stack as the \n previous item.  This way, when the user presses the back button, the last visible item \n will be activated.  \n \n \u003cp\u003eNote: when nulls are allowed, only a single null value will be stored.  Further, \n if new, non-null items are added, then the null value is dropped.\n@param \u003cT\u003e the type of items in the list",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "historyStack",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.FixedSizeStack\u003cT\u003e",
+      "type_short": "FixedSizeStack",
+      "constant_value": null
+    },
+    {
+      "name": "itemSelectedCallback",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.function.BiConsumer\u003cT,T\u003e",
+      "type_short": "BiConsumer",
+      "constant_value": null
+    },
+    {
+      "name": "historyIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "isBroadcasting",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "allowDuplicates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "allowsNulls",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "The sized passed here limits the size of the list, with the oldest items being dropped\n as the list grows.  The given callback will be called when #goBack() or \n #goForward() are called.",
+      "javadoc": "The sized passed here limits the size of the list, with the oldest items being dropped\n as the list grows.  The given callback will be called when {@link #goBack()} or \n {@link #goForward()} are called.\n@param size the max number of items to keep in the list\n@param itemSelectedCallback the function to call when the client selects an item by \n        going back or forward",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the max number of items to keep in the list"
+        },
+        {
+          "name": "itemSelectedCallback",
+          "type_long": "java.util.function.Consumer\u003cT\u003e",
+          "type_short": "Consumer",
+          "comment": "the function to call when the client selects an item by \n        going back or forward"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "The sized passed here limits the size of the list, with the oldest items being dropped\n as the list grows.  The given callback will be called when #goBack() or \n #goForward() are called.",
+      "javadoc": "The sized passed here limits the size of the list, with the oldest items being dropped\n as the list grows.  The given callback will be called when {@link #goBack()} or \n {@link #goForward()} are called.\n@param size the max number of items to keep in the list\n@param itemSelectedCallback the function to call when the client selects an item by \n        going back or forward.  This callback will be passed the newly selected item as \n        the first argument and the previously selected item as the second argument.",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the max number of items to keep in the list"
+        },
+        {
+          "name": "itemSelectedCallback",
+          "type_long": "java.util.function.BiConsumer\u003cT,T\u003e",
+          "type_short": "BiConsumer",
+          "comment": "the function to call when the client selects an item by \n        going back or forward.  This callback will be passed the newly selected item as \n        the first argument and the previously selected item as the second argument."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "asBiConsumer",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "consumer",
+          "type_long": "java.util.function.Consumer\u003cT\u003e",
+          "type_short": "Consumer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.function.BiConsumer\u003cT,T\u003e",
+        "type_short": "BiConsumer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setAllowDuplicates",
+      "comment": "True signals that this list will allow duplicate entries.  False signals to not only not\n allow duplicates, but to also move the position of an item if it is re-added to the \n list.\n   \n For correct behavior when not allowing duplicates, ensure you have defined an \n equals method to work as you expect.  If two different items are considered\n equal, then this class will only remove the duplicate if the equals method returns true.\n \n The default is false",
+      "javadoc": "True signals that this list will allow duplicate entries.  False signals to not only not\n allow duplicates, but to also move the position of an item if it is re-added to the \n list.\n   \n \u003cp\u003eFor correct behavior when not allowing duplicates, ensure you have defined an \n \u003ccode\u003eequals\u003c/code\u003e method to work as you expect.  If two different items are considered\n equal, then this class will only remove the duplicate if the equals method returns true.\n \n \u003cp\u003eThe default is false\n@param allowDuplicates true to allow duplicates",
+      "static": false,
+      "params": [
+        {
+          "name": "allowDuplicates",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to allow duplicates"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setAllowNulls",
+      "comment": "True signals that the client allows null items to be used.  When this is true, a null\n value will be stored in this list only as the last item.  See the javadoc for \n more info.",
+      "javadoc": "True signals that the client allows null items to be used.  When this is true, a null\n value will be stored in this list \u003cb\u003eonly as the last item\u003c/b\u003e.  See the javadoc for \n more info.\n@param allowNulls true to allow nulls; the default is false",
+      "static": false,
+      "params": [
+        {
+          "name": "allowNulls",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to allow nulls; the default is false"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Adds an item to this history list.  null values are ignored.\n \n Calls to this method during selection notification will have no effect.  If you need\n to update the history during a notification, then you must do so at a later time, perhaps\n by using  SystemUtilities#runSwingLater(Runnable).",
+      "javadoc": "Adds an item to this history list.  \u003ccode\u003enull\u003c/code\u003e values are ignored.\n \n \u003cp\u003eCalls to this method during selection notification will have no effect.  If you need\n to update the history during a notification, then you must do so at a later time, perhaps\n by using  {@link SystemUtilities#runSwingLater(Runnable)}.\n@param t the item to add.",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the item to add."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasNext",
+      "comment": "Returns true if this history list\u0027s current item pointer is not at the end of the list.",
+      "javadoc": "Returns true if this history list\u0027s current item pointer is not at the end of the list.\n@return true if this history list\u0027s current item pointer is not at the end of the list.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this history list\u0027s current item pointer is not at the end of the list."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasPrevious",
+      "comment": "Returns true if this history list\u0027s current item pointer is not at the beginning of the list.",
+      "javadoc": "Returns true if this history list\u0027s current item pointer is not at the beginning of the list.\n@return true if this history list\u0027s current item pointer is not at the beginning of the list.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this history list\u0027s current item pointer is not at the beginning of the list."
+      },
+      "throws": []
+    },
+    {
+      "name": "goBack",
+      "comment": "Moves this history list\u0027s current item pointer back one and then calls the user-provided\n callback to signal the newly selected item.\n \n No action is taken if the current pointer is already at the beginning of the list.",
+      "javadoc": "Moves this history list\u0027s current item pointer back one and then calls the user-provided\n callback to signal the newly selected item.\n \n \u003cp\u003eNo action is taken if the current pointer is already at the beginning of the list.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goBackTo",
+      "comment": "Performs a #goBack() until the given item becomes the current item.  This is \n useful if you wish to go backward to a specific item in the list.",
+      "javadoc": "Performs a {@link #goBack()} until the given item becomes the current item.  This is \n useful if you wish to go backward to a specific item in the list.\n@param t the item",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the item"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goForward",
+      "comment": "Moves this history list\u0027s current item pointer forward one and then calls the user-provided\n callback to signal the newly selected item.\n \n No action is taken if the current pointer is already at the end of the list.",
+      "javadoc": "Moves this history list\u0027s current item pointer forward one and then calls the user-provided\n callback to signal the newly selected item.\n \n \u003cp\u003eNo action is taken if the current pointer is already at the end of the list.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "goForwardTo",
+      "comment": "Performs a #goForward() until the given item becomes the current item.  This is \n useful if you wish to go forward to a specific item in the list.",
+      "javadoc": "Performs a {@link #goForward()} until the given item becomes the current item.  This is \n useful if you wish to go forward to a specific item in the list.\n@param t the item",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the item"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentHistoryItem",
+      "comment": "Returns the item currently pointed to within the list of items.  When an item is \n added, this will be that item.  Otherwise, it will be the last item navigated.",
+      "javadoc": "Returns the item currently pointed to within the list of items.  When an item is \n added, this will be that item.  Otherwise, it will be the last item navigated.\n@return the item currently pointed to within the list of items.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": "the item currently pointed to within the list of items."
+      },
+      "throws": []
+    },
+    {
+      "name": "getPreviousHistoryItems",
+      "comment": "Get all items in the history that come before the current history item.  They are \n returned in navigation order, as traversed if #goBack() is called.",
+      "javadoc": "Get all items in the history that come before the current history item.  They are \n returned in navigation order, as traversed if {@link #goBack()} is called.\n@return the items",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cT\u003e",
+        "type_short": "List",
+        "comment": "the items"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextHistoryItems",
+      "comment": "Get all items in the history that come after the current history item.  They are \n returned in navigation order, as traversed if #goForward() is called.",
+      "javadoc": "Get all items in the history that come after the current history item.  They are \n returned in navigation order, as traversed if {@link #goForward()} is called.\n@return the items",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cT\u003e",
+        "type_short": "List",
+        "comment": "the items"
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Clears all history entries and resets the current item pointer.",
+      "javadoc": "Clears all history entries and resets the current item pointer.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "size",
+      "comment": "Returns the number of items in this history list",
+      "javadoc": "Returns the number of items in this history list\n@return the number of items in this history list",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of items in this history list"
+      },
+      "throws": []
+    },
+    {
+      "name": "ignoreItem",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "ignoreNull",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dropNull",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isAtEnd",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHistoryStack",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.datastruct.FixedSizeStack\u003cT\u003e",
+        "type_short": "FixedSizeStack",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleDuplicate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "broadcast",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        },
+        {
+          "name": "leaving",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "trimHistoryToCurrentIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

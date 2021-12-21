@@ -1,0 +1,956 @@
+{
+  "name": "ElfSymbol",
+  "comment": "A class to represent the ELF 32bit and 64bit Symbol data structures.\n \n \n typedef struct {\n     Elf32_Word      st_name;     //Symbol name (string tbl index)\n     Elf32_Addr      st_value;    //Symbol value\n     Elf32_Word      st_size;     //Symbol size\n     unsigned char   st_info;     //Symbol type and binding\n     unsigned char   st_other;    //Symbol visibility\n     Elf32_Section   st_shndx;    //Section index\n } Elf32_Sym;\n \n typedef struct {\n     Elf64_Word       st_name;    //Symbol name (string tbl index)\n     unsigned char    st_info;    //Symbol type and binding\n     unsigned char    st_other;   //Symbol visibility\n     Elf64_Section    st_shndx;   //Section index\n     Elf64_Addr       st_value;   //Symbol value\n     Elf64_Xword      st_size;    //Symbol size\n } Elf64_Sym;\n \n ",
+  "javadoc": "A class to represent the ELF 32bit and 64bit Symbol data structures.\n \u003cbr\u003e\n \u003cpre\u003e\n typedef struct {\n     Elf32_Word      st_name;     //Symbol name (string tbl index)\n     Elf32_Addr      st_value;    //Symbol value\n     Elf32_Word      st_size;     //Symbol size\n     unsigned char   st_info;     //Symbol type and binding\n     unsigned char   st_other;    //Symbol visibility\n     Elf32_Section   st_shndx;    //Section index\n } Elf32_Sym;\n \n typedef struct {\n     Elf64_Word       st_name;    //Symbol name (string tbl index)\n     unsigned char    st_info;    //Symbol type and binding\n     unsigned char    st_other;   //Symbol visibility\n     Elf64_Section    st_shndx;   //Section index\n     Elf64_Addr       st_value;   //Symbol value\n     Elf64_Xword      st_size;    //Symbol size\n } Elf64_Sym;\n \n \u003c/pre\u003e",
+  "static": false,
+  "implements": [
+    "ghidra.app.util.bin.ByteArrayConverter"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "STB_LOCAL",
+      "comment": "Local symbols are not visible outside the object file containing their definition.",
+      "javadoc": "Local symbols are not visible outside the object file containing their definition.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "0"
+    },
+    {
+      "name": "STB_GLOBAL",
+      "comment": "Global symbols are visible to all object files being combined.",
+      "javadoc": "Global symbols are visible to all object files being combined.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "1"
+    },
+    {
+      "name": "STB_WEAK",
+      "comment": "Weak symbols resemble global symbols, but their definitions have lower precedence.",
+      "javadoc": "Weak symbols resemble global symbols, but their definitions have lower precedence.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "2"
+    },
+    {
+      "name": "STB_GNU_UNIQUE",
+      "comment": "Symbol is unique in namespace.",
+      "javadoc": "Symbol is unique in namespace.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "10"
+    },
+    {
+      "name": "STT_NOTYPE",
+      "comment": "The symbol\u0027s type is not specified.",
+      "javadoc": "The symbol\u0027s type is not specified.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "0"
+    },
+    {
+      "name": "STT_OBJECT",
+      "comment": "The symbol is associated with a data object, such as a variable, an array, etc.",
+      "javadoc": "The symbol is associated with a data object, such as a variable, an array, etc.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "1"
+    },
+    {
+      "name": "STT_FUNC",
+      "comment": "The symbol is associated with a function or other executable code.",
+      "javadoc": "The symbol is associated with a function or other executable code.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "2"
+    },
+    {
+      "name": "STT_SECTION",
+      "comment": "The symbol is associated with a section. (Used for relocation and normally have STB_LOCAL binding.)",
+      "javadoc": "The symbol is associated with a section. (Used for relocation and normally have STB_LOCAL binding.)",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "3"
+    },
+    {
+      "name": "STT_FILE",
+      "comment": "The symbol\u0027s name gives the name of the source file associated with the object file.",
+      "javadoc": "The symbol\u0027s name gives the name of the source file associated with the object file.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "4"
+    },
+    {
+      "name": "STT_COMMON",
+      "comment": "An uninitialized common block",
+      "javadoc": "An uninitialized common block",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "5"
+    },
+    {
+      "name": "STT_TLS",
+      "comment": "In object files: st_value contains offset from the beginning of the section\n In DSOs:         st_value contains offset in the TLS initialization image (inside of .tdata)",
+      "javadoc": "In object files: st_value contains offset from the beginning of the section\n In DSOs:         st_value contains offset in the TLS initialization image (inside of .tdata)",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "6"
+    },
+    {
+      "name": "STT_RELC",
+      "comment": "Symbol is in support of complex relocation.",
+      "javadoc": "Symbol is in support of complex relocation.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "8"
+    },
+    {
+      "name": "STT_SRELC",
+      "comment": "Symbol is in support of complex relocation (signed value).",
+      "javadoc": "Symbol is in support of complex relocation (signed value).",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "9"
+    },
+    {
+      "name": "STV_DEFAULT",
+      "comment": "Default symbol visibility rules",
+      "javadoc": "Default symbol visibility rules",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "0"
+    },
+    {
+      "name": "STV_INTERNAL",
+      "comment": "Processor specific hidden class",
+      "javadoc": "Processor specific hidden class",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "1"
+    },
+    {
+      "name": "STV_HIDDEN",
+      "comment": "Sym unavailable in other modules",
+      "javadoc": "Sym unavailable in other modules",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "2"
+    },
+    {
+      "name": "STV_PROTECTED",
+      "comment": "Not preemptible, not exported",
+      "javadoc": "Not preemptible, not exported",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "3"
+    },
+    {
+      "name": "header",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+      "type_short": "ElfHeader",
+      "constant_value": null
+    },
+    {
+      "name": "symbolTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.elf.ElfSymbolTable",
+      "type_short": "ElfSymbolTable",
+      "constant_value": null
+    },
+    {
+      "name": "symbolTableIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "st_name",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "st_value",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "st_size",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "st_info",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": null
+    },
+    {
+      "name": "st_other",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": null
+    },
+    {
+      "name": "st_shndx",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "short",
+      "type_short": "short",
+      "constant_value": null
+    },
+    {
+      "name": "nameAsString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "createElfSymbol",
+      "comment": "create an ElfSymbol()\n Warning! the routine initSymbolName() must be called on the symbol later\n to initialize the string name.  This is a performance enhancement.",
+      "javadoc": "create an ElfSymbol()\n Warning! the routine initSymbolName() must be called on the symbol later\n to initialize the string name.  This is a performance enhancement.\n@param reader to read symbol from\n@param symbolIndex index of the symbol to read\n@param symbolTable symbol table to associate the symbol to\n@param header else header\n@return newly created ElfSymbol\n@throws IOException if an issue with reading occurs",
+      "static": true,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.format.FactoryBundledWithBinaryReader",
+          "type_short": "FactoryBundledWithBinaryReader",
+          "comment": "to read symbol from"
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of the symbol to read"
+        },
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfSymbolTable",
+          "type_short": "ElfSymbolTable",
+          "comment": "symbol table to associate the symbol to"
+        },
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": "else header"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.elf.ElfSymbol",
+        "type_short": "ElfSymbol",
+        "comment": "newly created ElfSymbol"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an issue with reading occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "DO NOT USE THIS CONSTRUCTOR, USE create*(GenericFactory ...) FACTORY METHODS INSTEAD.",
+      "javadoc": "DO NOT USE THIS CONSTRUCTOR, USE create*(GenericFactory ...) FACTORY METHODS INSTEAD.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSectionSymbol32",
+      "comment": "Creates a new section symbol.",
+      "javadoc": "Creates a new section symbol.\n@param header the corresponding ELF header\n@param sectionAddress the start address of the section\n@param sectionHeaderIndex the index of the section in the section header table\n@param name the string name of the section\n@param symbolIndex index of symbol within corresponding symbol table\n@param symbolTable symbol table\n@return the new section symbol",
+      "static": true,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": "the corresponding ELF header"
+        },
+        {
+          "name": "sectionAddress",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the start address of the section"
+        },
+        {
+          "name": "sectionHeaderIndex",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": "the index of the section in the section header table"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string name of the section"
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of symbol within corresponding symbol table"
+        },
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfSymbolTable",
+          "type_short": "ElfSymbolTable",
+          "comment": "symbol table"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.elf.ElfSymbol",
+        "type_short": "ElfSymbol",
+        "comment": "the new section symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "createGlobalFunctionSymbol",
+      "comment": "Creates a new global function symbol.",
+      "javadoc": "Creates a new global function symbol.\n@param header the corresponding ELF header\n@param name the byte index of the name\n@param nameAsString the string name of the section\n@param addr the address of the function\n@param symbolIndex index of symbol within corresponding symbol table\n@param symbolTable symbol table\n@return the new global function symbol",
+      "static": true,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": "the corresponding ELF header"
+        },
+        {
+          "name": "name",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the byte index of the name"
+        },
+        {
+          "name": "nameAsString",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string name of the section"
+        },
+        {
+          "name": "addr",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the address of the function"
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of symbol within corresponding symbol table"
+        },
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfSymbolTable",
+          "type_short": "ElfSymbolTable",
+          "comment": "symbol table"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.elf.ElfSymbol",
+        "type_short": "ElfSymbol",
+        "comment": "the new global function symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": ""
+        },
+        {
+          "name": "nameAsString",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "size",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "info",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        },
+        {
+          "name": "other",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": ""
+        },
+        {
+          "name": "sectionHeaderIndex",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": ""
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfSymbolTable",
+          "type_short": "ElfSymbolTable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initElfSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.format.FactoryBundledWithBinaryReader",
+          "type_short": "FactoryBundledWithBinaryReader",
+          "comment": ""
+        },
+        {
+          "name": "symbolIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfSymbolTable",
+          "type_short": "ElfSymbolTable",
+          "comment": ""
+        },
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initSymbolName",
+      "comment": "Initialize the string name of the symbol.\n \n NOTE: This routine MUST be called for each\n ELFSymbol after the elf symbols have been created.\n \n This is done separately from the initial symbol entry read because\n the string names are in a separate location.  If they are read\n at the same time the reading buffer will jump around and significantly\n degrade reading performance.",
+      "javadoc": "Initialize the string name of the symbol.\n \n NOTE: This routine MUST be called for each\n ELFSymbol after the elf symbols have been created.\n \n This is done separately from the initial symbol entry read because\n the string names are in a separate location.  If they are read\n at the same time the reading buffer will jump around and significantly\n degrade reading performance.\n@param reader to read from\n@param stringTable stringTable to initialize symbol name",
+      "static": false,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.format.FactoryBundledWithBinaryReader",
+          "type_short": "FactoryBundledWithBinaryReader",
+          "comment": "to read from"
+        },
+        {
+          "name": "stringTable",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfStringTable",
+          "type_short": "ElfStringTable",
+          "comment": "stringTable to initialize symbol name"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolTable",
+      "comment": "Get the symbol table containing this symbol",
+      "javadoc": "Get the symbol table containing this symbol\n@return symbol table",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.elf.ElfSymbolTable",
+        "type_short": "ElfSymbolTable",
+        "comment": "symbol table"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolTableIndex",
+      "comment": "Get the index of this symbol within the corresponding symbol table.",
+      "javadoc": "Get the index of this symbol within the corresponding symbol table.\n@return index of this symbol within the corresponding symbol table",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "index of this symbol within the corresponding symbol table"
+      },
+      "throws": []
+    },
+    {
+      "name": "isNoType",
+      "comment": "Returns true if this symbol\u0027s type is not specified.",
+      "javadoc": "Returns true if this symbol\u0027s type is not specified.\n@return true if this symbol\u0027s type is not specified",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol\u0027s type is not specified"
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isLocal",
+      "comment": "Returns true if this symbol is local.\n Local symbols are not visible outside the object file\n containing their definition. Local symbols of the same\n name may exist in multiple files without colliding.",
+      "javadoc": "Returns true if this symbol is local.\n Local symbols are not visible outside the object file\n containing their definition. Local symbols of the same\n name may exist in multiple files without colliding.\n@return true if this symbol is local",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol is local"
+      },
+      "throws": []
+    },
+    {
+      "name": "isGlobal",
+      "comment": "Returns true if this symbol is global.\n Global symbols are visible to all object files \n being combined. One object file\u0027s definition\n of a global symbol will satisfy another\n file\u0027s undefined reference to the same\n global symbol.",
+      "javadoc": "Returns true if this symbol is global.\n Global symbols are visible to all object files \n being combined. One object file\u0027s definition\n of a global symbol will satisfy another\n file\u0027s undefined reference to the same\n global symbol.\n@return true if this symbol is global",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol is global"
+      },
+      "throws": []
+    },
+    {
+      "name": "isWeak",
+      "comment": "Returns true if this symbol is weak.\n Weak symbols resemble global symbols,\n but their definitions have lower precedence.",
+      "javadoc": "Returns true if this symbol is weak.\n Weak symbols resemble global symbols,\n but their definitions have lower precedence.\n@return true if this symbol is weak",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol is weak"
+      },
+      "throws": []
+    },
+    {
+      "name": "isExternal",
+      "comment": "Returns true if this is an external symbol.\n A symbol is considered external if it\u0027s \n binding is global and it\u0027s size is zero.",
+      "javadoc": "Returns true if this is an external symbol.\n A symbol is considered external if it\u0027s \n binding is global and it\u0027s size is zero.\n@return true if this is an external symbol",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is an external symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "isSection",
+      "comment": "Returns true if this symbol defines a section.",
+      "javadoc": "Returns true if this symbol defines a section.\n@return true if this symbol defines a section",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol defines a section"
+      },
+      "throws": []
+    },
+    {
+      "name": "isFunction",
+      "comment": "Returns true if this symbol defines a function.",
+      "javadoc": "Returns true if this symbol defines a function.\n@return true if this symbol defines a function",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol defines a function"
+      },
+      "throws": []
+    },
+    {
+      "name": "isObject",
+      "comment": "Returns true if this symbol defines an object.",
+      "javadoc": "Returns true if this symbol defines an object.\n@return true if this symbol defines an object",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol defines an object"
+      },
+      "throws": []
+    },
+    {
+      "name": "isFile",
+      "comment": "Returns true if this symbol defines a file.",
+      "javadoc": "Returns true if this symbol defines a file.\n@return true if this symbol defines a file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol defines a file"
+      },
+      "throws": []
+    },
+    {
+      "name": "isTLS",
+      "comment": "Returns true if this symbol defines a thread-local symbol.",
+      "javadoc": "Returns true if this symbol defines a thread-local symbol.\n@return true if this symbol defines a thread-local symbol",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this symbol defines a thread-local symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "isAbsolute",
+      "comment": "Returns true if the symbol has an absolute \n value that will not change because of relocation.",
+      "javadoc": "Returns true if the symbol has an absolute \n value that will not change because of relocation.\n@return true if the symbol value will not change due to relocation",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the symbol value will not change due to relocation"
+      },
+      "throws": []
+    },
+    {
+      "name": "isCommon",
+      "comment": "The symbol labels a common block that has not yet been allocated. The symbol\u0027s value\n gives alignment constraints, similar to a section\u0027s sh_addralign member. That is, the\n link editor will allocate the storage for the symbol at an address that is a multiple of\n st_value. The symbol\u0027s size tells how many bytes are required.",
+      "javadoc": "The symbol labels a common block that has not yet been allocated. The symbol\u0027s value\n gives alignment constraints, similar to a section\u0027s sh_addralign member. That is, the\n link editor will allocate the storage for the symbol at an address that is a multiple of\n st_value. The symbol\u0027s size tells how many bytes are required.\n@return true if this is a common symbol",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is a common symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "getInfo",
+      "comment": "This member specifies the symbol\u0027s type and binding attributes.",
+      "javadoc": "This member specifies the symbol\u0027s type and binding attributes.\n@return the symbol\u0027s type and binding attributes",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "the symbol\u0027s type and binding attributes"
+      },
+      "throws": []
+    },
+    {
+      "name": "getVisibility",
+      "comment": "Returns the symbol\u0027s visibility. For example, default.",
+      "javadoc": "Returns the symbol\u0027s visibility. For example, default.\n@return the symbol\u0027s visibility",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "the symbol\u0027s visibility"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBind",
+      "comment": "Returns the symbol\u0027s binding. For example, global.",
+      "javadoc": "Returns the symbol\u0027s binding. For example, global.\n@return the symbol\u0027s binding",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "the symbol\u0027s binding"
+      },
+      "throws": []
+    },
+    {
+      "name": "getType",
+      "comment": "Returns the symbol\u0027s binding. For example, section.",
+      "javadoc": "Returns the symbol\u0027s binding. For example, section.\n@return the symbol\u0027s binding",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "the symbol\u0027s binding"
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "This member holds an index into the object file\u0027s symbol \n string table, which holds the character representations \n of the symbol names. If the value is non-zero, it represents a\n string table index that gives the symbol name.\n Otherwise, the symbol table entry has no name.",
+      "javadoc": "This member holds an index into the object file\u0027s symbol \n string table, which holds the character representations \n of the symbol names. If the value is non-zero, it represents a\n string table index that gives the symbol name.\n Otherwise, the symbol table entry has no name.\n@return the index to the symbol\u0027s name",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the index to the symbol\u0027s name"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNameAsString",
+      "comment": "Returns the actual string name for this symbol. The symbol only\n stores an byte index into the string table where\n the name string is located.",
+      "javadoc": "Returns the actual string name for this symbol. The symbol only\n stores an byte index into the string table where\n the name string is located.\n@return the actual string name for this symbol",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the actual string name for this symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "getOther",
+      "comment": "This member currently holds 0 and has no defined meaning.",
+      "javadoc": "This member currently holds 0 and has no defined meaning.\n@return no defined meaning",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "no defined meaning"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSectionHeaderIndex",
+      "comment": "Every symbol table entry is \"defined\" in relation to some section;\n this member holds the relevant section header table index.",
+      "javadoc": "Every symbol table entry is \"defined\" in relation to some section;\n this member holds the relevant section header table index.\n@return the relevant section header table index",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "short",
+        "type_short": "short",
+        "comment": "the relevant section header table index"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSize",
+      "comment": "Many symbols have associated sizes. For example, a data object\u0027s size is the number of\n bytes contained in the object. This member holds 0 if the symbol has no size or an\n unknown size.",
+      "javadoc": "Many symbols have associated sizes. For example, a data object\u0027s size is the number of\n bytes contained in the object. This member holds 0 if the symbol has no size or an\n unknown size.\n@return the symbol\u0027s size",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the symbol\u0027s size"
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "This member gives the value of the associated symbol.\n Depending on the context, this may be an absolute value, \n an address, etc.",
+      "javadoc": "This member gives the value of the associated symbol.\n Depending on the context, this may be an absolute value, \n an address, etc.\n@return the symbol\u0027s value",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the symbol\u0027s value"
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "@see java.lang.Object#toString()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toBytes",
+      "comment": "",
+      "javadoc": "@see ghidra.app.util.bin.ByteArrayConverter#toBytes(ghidra.util.DataConverter)",
+      "static": false,
+      "params": [
+        {
+          "name": "dc",
+          "type_long": "ghidra.util.DataConverter",
+          "type_short": "DataConverter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setValue",
+      "comment": "Sets the value of this symbol. The value is generally an address.",
+      "javadoc": "Sets the value of this symbol. The value is generally an address.\n@param value the new value of the symbol",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the new value of the symbol"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

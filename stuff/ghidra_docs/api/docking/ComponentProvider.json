@@ -1,0 +1,1336 @@
+{
+  "name": "ComponentProvider",
+  "comment": "Abstract base class for creating dockable GUI components within a tool.  \n \n The one method that must be implemented is #getComponent() which is where the top level\n Swing JComponent is returned to be docked into the tool.  Typically, the GUI components are\n created in the constructor along with any local actions for the provider.  The getComponent() \n method then simply returns the top level component previously created by this provider.\n \n There are many other methods for configuring how to dock the component, set title information,\n configure grouping, set the help, add actions, and receive show/hide notifications, some\n of which are highlighted below.  Typically, implementers will use these methods to configure\n how the GUI component behaves within the tool, and then add the business logic that uses and reacts\n to the GUI components created in this provider.\n \n To effectively use this class you merely need to create your component, add your actions to \n this class (#addLocalAction(DockingActionIf)) and then add this provider to the tool\n (#addToTool()).\n \n This also provides several useful convenience methods:\n \n  #addLocalAction(DockingActionIf)\n  #addToTool()\n  #setVisible(boolean)  \n  #setTitle(String)\n  #setIcon(Icon)\n \n \n There are a handful of stub methods that can be overridden as desired:\n \n  #componentActivated() and #componentDeactived()\n  #componentHidden() and #componentShown()\n \n \n \n Show Provider Action - Each provider has an action to show the provider.  For\n typical, non-transient providers (see #setTransient()) the action will appear in \n the tool\u0027s Window menu.   You can have your provider also appear in the tool\u0027s toolbar\n by calling #addToTool().\n \n Historical Note: This class was created so that implementors could add local actions within the constructor\n without having to understand that they must first add themselves to the WindowManager.",
+  "javadoc": "Abstract base class for creating dockable GUI components within a tool.  \n \u003cp\u003e\n The one method that must be implemented is {@link #getComponent()} which is where the top level\n Swing JComponent is returned to be docked into the tool.  Typically, the GUI components are\n created in the constructor along with any local actions for the provider.  The getComponent() \n method then simply returns the top level component previously created by this provider.\n \u003cp\u003e\n There are many other methods for configuring how to dock the component, set title information,\n configure grouping, set the help, add actions, and receive show/hide notifications, some\n of which are highlighted below.  Typically, implementers will use these methods to configure\n how the GUI component behaves within the tool, and then add the business logic that uses and reacts\n to the GUI components created in this provider.\n \u003cp\u003e\n To effectively use this class you merely need to create your component, add your actions to \n this class ({@link #addLocalAction(DockingActionIf)}) and then add this provider to the tool\n ({@link #addToTool()}).\n \u003cp\u003e\n This also provides several useful convenience methods:\n \u003cul\u003e\n  \u003cli\u003e{@link #addLocalAction(DockingActionIf)}\n  \u003cli\u003e{@link #addToTool()}\n  \u003cli\u003e{@link #setVisible(boolean)}  \n  \u003cli\u003e{@link #setTitle(String)}\n  \u003cli\u003e{@link #setIcon(Icon)}\n \u003c/ul\u003e\n \u003cp\u003e\n There are a handful of stub methods that can be overridden as desired:\n \u003cul\u003e\n  \u003cli\u003e{@link #componentActivated()} and {@link #componentDeactived()}\n  \u003cli\u003e{@link #componentHidden()} and {@link #componentShown()}\n \u003c/ul\u003e\n \n \u003cp\u003e\n \u003cb\u003e\u003cu\u003eShow Provider Action\u003c/u\u003e\u003c/b\u003e - Each provider has an action to show the provider.  For\n typical, non-transient providers (see {@link #setTransient()}) the action will appear in \n the tool\u0027s \u003cb\u003eWindow\u003c/b\u003e menu.   You can have your provider also appear in the tool\u0027s toolbar\n by calling {@link #addToTool()}.\n \u003cp\u003e\n Historical Note: This class was created so that implementors could add local actions within the constructor\n without having to understand that they must first add themselves to the WindowManager.",
+  "static": false,
+  "implements": [
+    "docking.help.HelpDescriptor",
+    "docking.action.ActionContextProvider"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "TRANSIENT_PROVIDER_TOOLBAR_WARNING_MESSAGE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Transient providers are not added to the toolbar\""
+    },
+    {
+      "name": "TRANSIENT_PROVIDER_KEY_BINDING_WARNING_MESSAGE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Transient providers cannot have key bindings\""
+    },
+    {
+      "name": "DEFAULT_WINDOW_GROUP",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Default\""
+    },
+    {
+      "name": "TOOLBAR_GROUP",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"View\""
+    },
+    {
+      "name": "oldOwnerMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "oldNameMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "dockingTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.Tool",
+      "type_short": "Tool",
+      "constant_value": null
+    },
+    {
+      "name": "name",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "owner",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "title",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "subTitle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "tabText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "actionSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cdocking.action.DockingActionIf\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "addToolbarAction",
+      "comment": "True if this provider\u0027s action should appear in the toolbar",
+      "javadoc": "True if this provider\u0027s action should appear in the toolbar",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "isTransient",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "defaultKeyBindingData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.action.KeyBindingData",
+      "type_short": "KeyBindingData",
+      "constant_value": null
+    },
+    {
+      "name": "icon",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.Icon",
+      "type_short": "Icon",
+      "constant_value": null
+    },
+    {
+      "name": "windowMenuGroup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "group",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "defaultWindowPosition",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.WindowPosition",
+      "type_short": "WindowPosition",
+      "constant_value": null
+    },
+    {
+      "name": "defaultIntraGroupPosition",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.WindowPosition",
+      "type_short": "WindowPosition",
+      "constant_value": null
+    },
+    {
+      "name": "showProviderAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.action.DockingAction",
+      "type_short": "DockingAction",
+      "constant_value": null
+    },
+    {
+      "name": "helpLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.HelpLocation",
+      "type_short": "HelpLocation",
+      "constant_value": null
+    },
+    {
+      "name": "contextType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Class\u003c?\u003e",
+      "type_short": "Class",
+      "constant_value": null
+    },
+    {
+      "name": "instanceID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "instanceIDHasBeenInitialized",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "inceptionInformation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new component provider with a default location of WindowPosition#WINDOW.",
+      "javadoc": "Creates a new component provider with a default location of {@link WindowPosition#WINDOW}.\n@param tool The tool will manage and show this provider\n@param name The providers name.  This is used to group similar providers into a tab within\n        the same window.\n@param owner The owner of this provider, usually a plugin name.",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "docking.Tool",
+          "type_short": "Tool",
+          "comment": "The tool will manage and show this provider"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The providers name.  This is used to group similar providers into a tab within\n        the same window."
+        },
+        {
+          "name": "owner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The owner of this provider, usually a plugin name."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new component provider with a default location of WindowPosition#WINDOW.",
+      "javadoc": "Creates a new component provider with a default location of {@link WindowPosition#WINDOW}.\n@param tool The tool that will manage and show this provider.\n@param name The providers name.  This is used to group similar providers into a tab within\n        the same window.\n@param owner The owner of this provider, usually a plugin name.\n@param contextType the type of context supported by this provider; may be null (see\n        {@link #getContextType()}",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "docking.Tool",
+          "type_short": "Tool",
+          "comment": "The tool that will manage and show this provider."
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The providers name.  This is used to group similar providers into a tab within\n        the same window."
+        },
+        {
+          "name": "owner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The owner of this provider, usually a plugin name."
+        },
+        {
+          "name": "contextType",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "the type of context supported by this provider; may be null (see\n        #getContextType()"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getShowProviderAction",
+      "comment": "Returns the action used to show this provider",
+      "javadoc": "Returns the action used to show this provider\n@return the action",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.action.DockingActionIf",
+        "type_short": "DockingActionIf",
+        "comment": "the action"
+      },
+      "throws": []
+    },
+    {
+      "name": "createShowProviderAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponent",
+      "comment": "Returns the component to be displayed",
+      "javadoc": "Returns the component to be displayed\n@return the component to be displayed",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": "the component to be displayed"
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeInstanceID",
+      "comment": "A method that allows children to set the instanceID to a desired value (useful for\n restoring saved IDs).\n \n Note: this can be called only once during the lifetime of the calling instance; otherwise, an \n AssertException will be thrown.",
+      "javadoc": "A method that allows children to set the \u003ccode\u003einstanceID\u003c/code\u003e to a desired value (useful for\n restoring saved IDs).\n \u003cp\u003e\n Note: this can be called only once during the lifetime of the calling instance; otherwise, an \n {@link AssertException} will be thrown.\n@param newID the new ID of this provider",
+      "static": false,
+      "params": [
+        {
+          "name": "newID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the new ID of this provider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInstanceID",
+      "comment": "A unique ID for this provider",
+      "javadoc": "A unique ID for this provider\n@return unique ID for this provider",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "unique ID for this provider"
+      },
+      "throws": []
+    },
+    {
+      "name": "requestFocus",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFocusedProvider",
+      "comment": "Returns true if this provider has focus",
+      "javadoc": "Returns true if this provider has focus\n@return true if this provider has focus",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this provider has focus"
+      },
+      "throws": []
+    },
+    {
+      "name": "addToTool",
+      "comment": "Adds this provider to the tool in a new window that is not initially visible.  The provider\n will then show up in the \"Windows\" menu of the tool",
+      "javadoc": "Adds this provider to the tool in a new window that is not initially visible.  The provider\n will then show up in the \"Windows\" menu of the tool",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeFromTool",
+      "comment": "Removes this provider from the tool.",
+      "javadoc": "Removes this provider from the tool.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addLocalAction",
+      "comment": "Adds the given action to the system and associates it with this provider.",
+      "javadoc": "Adds the given action to the system and associates it with this provider.\n@param action The action to add.",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": "The action to add."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeLocalAction",
+      "comment": "Removes the given action from this component provider.",
+      "javadoc": "Removes the given action from this component provider.\n@param action The action to remove.",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingAction",
+          "type_short": "DockingAction",
+          "comment": "The action to remove."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeAllLocalActions",
+      "comment": "Removes all local actions from this component provider",
+      "javadoc": "Removes all local actions from this component provider",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVisible",
+      "comment": "Convenience method to show or hide this provider.",
+      "javadoc": "Convenience method to show or hide this provider.\n@param visible True shows the provider; false hides the provider",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True shows the provider; false hides the provider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toFront",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getContextType",
+      "comment": "A signal used when installing actions.  Some actions are only added to a given window \n if there is a provider in that window that can work with that action.  Providers can return\n a context class from this method to control whether dependent actions get added.  Most\n providers return null for this method, which means they will not have any dependent \n actions added to windows other than the primary application window.",
+      "javadoc": "A signal used when installing actions.  Some actions are only added to a given window \n if there is a provider in that window that can work with that action.  Providers can return\n a context class from this method to control whether dependent actions get added.  Most\n providers return null for this method, which means they will not have any dependent \n actions added to windows other than the primary application window.\n@return a class representing the desired context type or null;",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Class\u003c?\u003e",
+        "type_short": "Class",
+        "comment": "a class representing the desired context type or null;"
+      },
+      "throws": []
+    },
+    {
+      "name": "isVisible",
+      "comment": "Convenience method to indicate if this provider is showing.",
+      "javadoc": "Convenience method to indicate if this provider is showing.\n@return true if this provider is showing.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this provider is showing."
+      },
+      "throws": []
+    },
+    {
+      "name": "isActive",
+      "comment": "Convenience method to indicate if this provider is the active provider (has focus)",
+      "javadoc": "Convenience method to indicate if this provider is the active provider (has focus)\n@return true if this provider is active.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this provider is active."
+      },
+      "throws": []
+    },
+    {
+      "name": "closeComponent",
+      "comment": "This is the callback that will happen when the user presses the \u0027X\u0027 button of a provider.\n Transient providers will be removed from the tool completely.   Non-transient providers\n will merely be hidden.\n \n Subclasses may override this method to prevent a provider from being closed; for \n example, if an editor has unsaved changes, then this method could prevent the close from\n happening.",
+      "javadoc": "This is the callback that will happen when the user presses the \u0027X\u0027 button of a provider.\n Transient providers will be removed from the tool completely.   Non-transient providers\n will merely be hidden.\n \n \u003cP\u003eSubclasses may override this method to prevent a provider from being closed; for \n example, if an editor has unsaved changes, then this method could prevent the close from\n happening.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "componentActivated",
+      "comment": "Notifies the component provider that it is now the active provider",
+      "javadoc": "Notifies the component provider that it is now the active provider",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "componentDeactived",
+      "comment": "Notifies the component provider that it is no longer the active provider",
+      "javadoc": "Notifies the component provider that it is no longer the active provider",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "componentHidden",
+      "comment": "Notifies the provider that the component is being hidden.  This happens when the \n provider is being closed.",
+      "javadoc": "Notifies the provider that the component is being hidden.  This happens when the \n provider is being closed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "componentShown",
+      "comment": "Notifies the provider that the component is being shown.",
+      "javadoc": "Notifies the provider that the component is being shown.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getActionContext",
+      "comment": "Returns the context object which corresponds to the\n area of focus within this provider\u0027s component.  Null\n is returned when there is no context.",
+      "javadoc": "Returns the context object which corresponds to the\n area of focus within this provider\u0027s component.  Null\n is returned when there is no context.\n@param event popup event which corresponds to this request.\n May be null for key-stroke or other non-mouse event.",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": "popup event which corresponds to this request.\n May be null for key-stroke or other non-mouse event."
+        }
+      ],
+      "return": {
+        "type_long": "docking.ActionContext",
+        "type_short": "ActionContext",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createContext",
+      "comment": "A default method for creating an action context for this provider",
+      "javadoc": "A default method for creating an action context for this provider\n@return the new context",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.ActionContext",
+        "type_short": "ActionContext",
+        "comment": "the new context"
+      },
+      "throws": []
+    },
+    {
+      "name": "createContext",
+      "comment": "A default method for creating an action context for this provider, using the given\n ActionContext#getContextObject()",
+      "javadoc": "A default method for creating an action context for this provider, using the given\n {@link ActionContext#getContextObject() context object}\n@param contextObject the provider-specific context object\n@return the new context",
+      "static": false,
+      "params": [
+        {
+          "name": "contextObject",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the provider-specific context object"
+        }
+      ],
+      "return": {
+        "type_long": "docking.ActionContext",
+        "type_short": "ActionContext",
+        "comment": "the new context"
+      },
+      "throws": []
+    },
+    {
+      "name": "createContext",
+      "comment": "A default method for creating an action context for this provider, using the given\n ActionContext#getContextObject() and component",
+      "javadoc": "A default method for creating an action context for this provider, using the given\n {@link ActionContext#getContextObject() context object} and component\n@param sourceComponent the component that is the target of the context being created\n@param contextObject the provider-specific context object\n@return the new context",
+      "static": false,
+      "params": [
+        {
+          "name": "sourceComponent",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": "the component that is the target of the context being created"
+        },
+        {
+          "name": "contextObject",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the provider-specific context object"
+        }
+      ],
+      "return": {
+        "type_long": "docking.ActionContext",
+        "type_short": "ActionContext",
+        "comment": "the new context"
+      },
+      "throws": []
+    },
+    {
+      "name": "contextChanged",
+      "comment": "Kicks the tool to let it know the context for this provider has changed.",
+      "javadoc": "Kicks the tool to let it know the context for this provider has changed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHelpLocation",
+      "comment": "Returns the general HelpLocation for this provider.  Should return null only if no \n help documentation exists.",
+      "javadoc": "Returns the general HelpLocation for this provider.  Should return null only if no \n help documentation exists.\n@return the help location",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.HelpLocation",
+        "type_short": "HelpLocation",
+        "comment": "the help location"
+      },
+      "throws": []
+    },
+    {
+      "name": "setHelpLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "helpLocation",
+          "type_long": "ghidra.util.HelpLocation",
+          "type_short": "HelpLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIcon",
+      "comment": "Returns the Icon associated with the component view",
+      "javadoc": "Returns the Icon associated with the component view\n@return the Icon associated with the component view",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.Icon",
+        "type_short": "Icon",
+        "comment": "the Icon associated with the component view"
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Returns the name of this provider",
+      "javadoc": "Returns the name of this provider\n@return the name of this provider",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the name of this provider"
+      },
+      "throws": []
+    },
+    {
+      "name": "getOwner",
+      "comment": "Returns the owner of this provider (usually a plugin)",
+      "javadoc": "Returns the owner of this provider (usually a plugin)\n@return the owner of this provider",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the owner of this provider"
+      },
+      "throws": []
+    },
+    {
+      "name": "setTitle",
+      "comment": "Sets the provider\u0027s title.",
+      "javadoc": "Sets the provider\u0027s title.\n@param title the title string to use.",
+      "static": false,
+      "params": [
+        {
+          "name": "title",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the title string to use."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSubTitle",
+      "comment": "Sets the provider\u0027s sub-title (Sub-titles don\u0027t show up\n in the window menu).",
+      "javadoc": "Sets the provider\u0027s sub-title (Sub-titles don\u0027t show up\n in the window menu).\n@param subTitle the sub-title string to use.",
+      "static": false,
+      "params": [
+        {
+          "name": "subTitle",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the sub-title string to use."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTabText",
+      "comment": "Sets the text to be displayed on tabs when provider is stacked with other providers.",
+      "javadoc": "Sets the text to be displayed on tabs when provider is stacked with other providers.\n@param tabText the tab text.",
+      "static": false,
+      "params": [
+        {
+          "name": "tabText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the tab text."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTitle",
+      "comment": "Returns the provider\u0027s current title.",
+      "javadoc": "Returns the provider\u0027s current title.\n@return the provider\u0027s current title.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the provider\u0027s current title."
+      },
+      "throws": []
+    },
+    {
+      "name": "getSubTitle",
+      "comment": "Returns the provider\u0027s current sub-title (Sub-titles don\u0027t show up\n in the window menu).",
+      "javadoc": "Returns the provider\u0027s current sub-title (Sub-titles don\u0027t show up\n in the window menu).\n@return the provider\u0027s current sub-title.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the provider\u0027s current sub-title."
+      },
+      "throws": []
+    },
+    {
+      "name": "getTabText",
+      "comment": "Returns the optionally set text to display in the tab for a component provider.   The\n text returned from #getTitle() will be used by default.",
+      "javadoc": "Returns the optionally set text to display in the tab for a component provider.   The\n text returned from {@link #getTitle()} will be used by default.\n@return the optionally set text to display in the tab for a component provider.\n@see #setTabText(String)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the optionally set text to display in the tab for a component provider."
+      },
+      "throws": []
+    },
+    {
+      "name": "setKeyBinding",
+      "comment": "Sets the default key binding that will show this provider when pressed.   This value can\n be changed by the user and saved as part of the Tool options.",
+      "javadoc": "Sets the default key binding that will show this provider when pressed.   This value can\n be changed by the user and saved as part of the Tool options.\n@param kbData the key binding",
+      "static": false,
+      "params": [
+        {
+          "name": "kbData",
+          "type_long": "docking.action.KeyBindingData",
+          "type_short": "KeyBindingData",
+          "comment": "the key binding"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setIcon",
+      "comment": "Convenience method for setting the provider\u0027s icon",
+      "javadoc": "Convenience method for setting the provider\u0027s icon\n@param icon the icon to use for this provider",
+      "static": false,
+      "params": [
+        {
+          "name": "icon",
+          "type_long": "javax.swing.Icon",
+          "type_short": "Icon",
+          "comment": "the icon to use for this provider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addToToolbar",
+      "comment": "Signals that this provider\u0027s action for showing the provider should appear in the main \n toolbar",
+      "javadoc": "Signals that this provider\u0027s action for showing the provider should appear in the main \n toolbar",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getWindowSubMenuName",
+      "comment": "Returns the name of a cascading sub-menu name to use when when showing this provider in the\n \"Window\" menu. If the group name is null, the item will appear in the top-level menu.",
+      "javadoc": "Returns the name of a cascading sub-menu name to use when when showing this provider in the\n \"Window\" menu. If the group name is null, the item will appear in the top-level menu.\n@return the menu group for this provider or null if this provider should appear in the\n top-level menu.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the menu group for this provider or null if this provider should appear in the\n top-level menu."
+      },
+      "throws": []
+    },
+    {
+      "name": "isTransient",
+      "comment": "Returns true if this component goes away during a user session (most providers remain in\n the tool all session long, visible or not)",
+      "javadoc": "Returns true if this component goes away during a user session (most providers remain in\n the tool all session long, visible or not)\n@return true if transient",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if transient"
+      },
+      "throws": []
+    },
+    {
+      "name": "isSnapshot",
+      "comment": "A special marker that indicates this provider is a snapshot of a primary provider, \n somewhat like a picture of the primary provider.",
+      "javadoc": "A special marker that indicates this provider is a snapshot of a primary provider, \n somewhat like a picture of the primary provider.\n@return true if a snapshot",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a snapshot"
+      },
+      "throws": []
+    },
+    {
+      "name": "setTransient",
+      "comment": "Sets this class to be transient.  Setting this provider to be transient will cause\n this provider to be removed from the tool when the corresponding window is closed.",
+      "javadoc": "Sets this class to be transient.  Setting this provider to be transient will cause\n this provider to be removed from the tool when the corresponding window is closed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setWindowMenuGroup",
+      "comment": "Sets the window menu group.  If the window menu group is null, the corresponding window menu\n item will appear in the root menu, otherwise it will appear in a \n sub-menu named group.",
+      "javadoc": "Sets the window menu group.  If the window menu group is null, the corresponding window menu\n item will appear in the root menu, otherwise it will appear in a \n sub-menu named \u003ccode\u003egroup\u003c/code\u003e.\n@param group the name of the window\u0027s sub-menu for this provider",
+      "static": false,
+      "params": [
+        {
+          "name": "group",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the window\u0027s sub-menu for this provider"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultWindowPosition",
+      "comment": "The initial WindowPosition of this provider.  If a #getWindowGroup() is provided, then this position is relative to that provider.  Otherwise, this \n position is relative to the tool window.",
+      "javadoc": "The initial {@link WindowPosition} of this provider.  If a {@link #getWindowGroup() window\n group} is provided, then this position is relative to that provider.  Otherwise, this \n position is relative to the tool window.\n@return The initial {@link WindowPosition} of this provider.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.WindowPosition",
+        "type_short": "WindowPosition",
+        "comment": "The initial WindowPosition of this provider."
+      },
+      "throws": []
+    },
+    {
+      "name": "setDefaultWindowPosition",
+      "comment": "Sets the default position of this provider when being shown for the first time.  If the\n providers position in the tool has been saved before, then this value is ignored.",
+      "javadoc": "Sets the default position of this provider when being shown for the first time.  If the\n providers position in the tool has been saved before, then this value is ignored.\n@param windowPosition the position\n@see #getDefaultWindowPosition()",
+      "static": false,
+      "params": [
+        {
+          "name": "windowPosition",
+          "type_long": "docking.WindowPosition",
+          "type_short": "WindowPosition",
+          "comment": "the position"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIntraGroupPosition",
+      "comment": "The position of this provider when being placed with other members of the same group.  As\n an example, assume this provider is being shown for the first time while there is another\n member of its #getWindowGroup() already visible.  Further, assume \n that this method will return WindowPosition#STACK.  This provider will then be\n stacked upon the already showing provider.\n \n To determine where this provider should be initially shown, \n see #getDefaultWindowPosition().",
+      "javadoc": "The position of this provider when being placed with other members of the same group.  As\n an example, assume this provider is being shown for the first time while there is another\n member of its {@link #getWindowGroup() window group} already visible.  Further, assume \n that this method will return {@link WindowPosition#STACK}.  This provider will then be\n stacked upon the already showing provider.\n \u003cp\u003e\n To determine where this provider should be initially shown, \n see {@link #getDefaultWindowPosition()}.\n@return The position of this provider when being placed with other members of the same group.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.WindowPosition",
+        "type_short": "WindowPosition",
+        "comment": "The position of this provider when being placed with other members of the same group."
+      },
+      "throws": []
+    },
+    {
+      "name": "setIntraGroupPosition",
+      "comment": "See #getIntraGroupPosition().",
+      "javadoc": "See {@link #getIntraGroupPosition()}.\n@param position the new position",
+      "static": false,
+      "params": [
+        {
+          "name": "position",
+          "type_long": "docking.WindowPosition",
+          "type_short": "WindowPosition",
+          "comment": "the new position"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getWindowGroup",
+      "comment": "Returns an optional group designator that, if non-null, the docking window manager uses to \n determine the initial location of the new component relative to any existing instances\n of this component Provider.  \n \n The docking window manager will use #getIntraGroupPosition()  \n to decide where to place this provider inside of the already open instances of the \n same group.  The default position is \u0027stack\u0027, which results in the new instance being\n stacked with other instances of this provider that have the same group unless that instance is\n the active provider or is currently stacked with the active provider. (This is to prevent\n new windows from covering the active window).",
+      "javadoc": "Returns an optional group designator that, if non-null, the docking window manager uses to \n determine the initial location of the new component relative to any existing instances\n of this component Provider.  \n \u003cp\u003e\n The docking window manager will use {@link #getIntraGroupPosition() Intra-group Position}  \n to decide where to place this provider inside of the already open instances of the \n same group.  The default position is \u0027stack\u0027, which results in the new instance being\n stacked with other instances of this provider that have the same group unless that instance is\n the active provider or is currently stacked with the active provider. (This is to prevent\n new windows from covering the active window).\n@return the window group",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the window group"
+      },
+      "throws": []
+    },
+    {
+      "name": "setWindowGroup",
+      "comment": "Sets the window group.  See #getWindowGroup().",
+      "javadoc": "Sets the window group.  See {@link #getWindowGroup()}.\n@param group the group for this provider.",
+      "static": false,
+      "params": [
+        {
+          "name": "group",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the group for this provider."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHelpInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHelpObject",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTool",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.Tool",
+        "type_short": "Tool",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "recordInception",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInceptionFromTheFirstClassThatIsNotUs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMappedOwner",
+      "comment": "Returns any registered new provider name for the oldName/oldOwner pair.",
+      "javadoc": "Returns any registered new provider name for the oldName/oldOwner pair.\n@param oldOwner the old owner name\n@param oldName the old provider name\n@return the new provider name for that oldOwner/oldName",
+      "static": true,
+      "params": [
+        {
+          "name": "oldOwner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the old owner name"
+        },
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the old provider name"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the new provider name for that oldOwner/oldName"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMappedName",
+      "comment": "Returns any registered new provider owner for the oldName/oldOwner pair.",
+      "javadoc": "Returns any registered new provider owner for the oldName/oldOwner pair.\n@param oldOwner the old owner name\n@param oldName the old provider name\n@return the new provider owner for that oldOwner/oldName",
+      "static": true,
+      "params": [
+        {
+          "name": "oldOwner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the old owner name"
+        },
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the old provider name"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the new provider owner for that oldOwner/oldName"
+      },
+      "throws": []
+    },
+    {
+      "name": "registerProviderNameOwnerChange",
+      "comment": "Register a name and/or owner change to a provider so that old tools can restore those \n provider windows to their old position and size. Note you must supply all four \n arguments. If the name or owner did not change, use the name or owner that did not change \n for both the old and new values.\n \n Note: when you make use of this method, please signal when it is safe to remove \n its usage.",
+      "javadoc": "Register a name and/or owner change to a provider so that old tools can restore those \n provider windows to their old position and size. Note you must supply all four \n arguments. If the name or owner did not change, use the name or owner that did not change \n for both the old and new values.\n \n \u003cp\u003eNote: when you make use of this method, please signal when it is safe to remove \n its usage.\n@param oldName the old name of the provider.\n@param oldOwner the old owner of the provider.\n@param newName the new name of the provider. If the name did not change, use the old name here.\n@param newOwner the new owner of the provider. If the owner did not change, use the old owner here.",
+      "static": true,
+      "params": [
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the old name of the provider."
+        },
+        {
+          "name": "oldOwner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the old owner of the provider."
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the new name of the provider. If the name did not change, use the old name here."
+        },
+        {
+          "name": "newOwner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the new owner of the provider. If the owner did not change, use the old owner here."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKey",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "oldOwner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,604 @@
+{
+  "name": "ElfRelocation",
+  "comment": "A class to represent the Elf32_Rel and Elf64_Rel data structure.\n \n \n typedef uint32_t Elf32_Addr;\n typedef uint64_t Elf64_Addr;\n typedef uint32_t Elf32_Word;\n typedef uint64_t Elf64_Xword;\n \n REL entry:\n \n    typedef struct {\n        Elf32_Addr   r_offset;\n        Elf32_Word   r_info;\n    } Elf32_Rel;\n \n    typedef struct {\n        Elf64_Addr   r_offset;\n        Elf64_Xword  r_info;\n    } Elf64_Rel;\n \n RELA entry with addend:\n \n    typedef struct {\n        Elf32_Addr    r_offset;\n        Elf32_Word    r_info;\n        Elf32_Sword   r_addend;\n    } Elf32_Rela;\n \n    typedef struct {\n        Elf64_Addr    r_offset;   //Address\n        Elf64_Xword   r_info;     //Relocation type and symbol index\n        Elf64_Sxword  r_addend;   //Addend \n    } Elf64_Rela;\n \n RELR entry (see SHT_RELR, DT_RELR):\n    NOTE: Relocation type is data relative and must be specified by appropriate relocation handler\n    (see ElfRelocationHandler#getRelrRelocationType()) since it is not contained within the \n    relocation table which only specifies r_offset for each entry.\n \n ",
+  "javadoc": "A class to represent the Elf32_Rel and Elf64_Rel data structure.\n \u003cbr\u003e\n \u003cpre\u003e\n typedef uint32_t Elf32_Addr;\n typedef uint64_t Elf64_Addr;\n typedef uint32_t Elf32_Word;\n typedef uint64_t Elf64_Xword;\n \n REL entry:\n \n    typedef struct {\n        Elf32_Addr   r_offset;\n        Elf32_Word   r_info;\n    } Elf32_Rel;\n \n    typedef struct {\n        Elf64_Addr   r_offset;\n        Elf64_Xword  r_info;\n    } Elf64_Rel;\n \n RELA entry with addend:\n \n    typedef struct {\n        Elf32_Addr    r_offset;\n        Elf32_Word    r_info;\n        Elf32_Sword   r_addend;\n    } Elf32_Rela;\n \n    typedef struct {\n        Elf64_Addr    r_offset;   //Address\n        Elf64_Xword   r_info;     //Relocation type and symbol index\n        Elf64_Sxword  r_addend;   //Addend \n    } Elf64_Rela;\n \n RELR entry (see SHT_RELR, DT_RELR):\n    NOTE: Relocation type is data \u003ci\u003erelative\u003c/i\u003e and must be specified by appropriate relocation handler\n    (see {@link ElfRelocationHandler#getRelrRelocationType()}) since it is not contained within the \n    relocation table which only specifies \u003ci\u003er_offset\u003c/i\u003e for each entry.\n \n \u003c/pre\u003e",
+  "static": false,
+  "implements": [
+    "ghidra.app.util.bin.ByteArrayConverter",
+    "ghidra.app.util.bin.StructConverter"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "R_OFFSET_COMMENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"location to apply the relocation action\""
+    },
+    {
+      "name": "R_INFO_COMMENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"the symbol table index and the type of relocation\""
+    },
+    {
+      "name": "R_ADDEND_COMMENT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"a constant addend used to compute the relocatable field value\""
+    },
+    {
+      "name": "r_offset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "r_info",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "r_addend",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "hasAddend",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "is32bit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "relocationIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "createElfRelocation",
+      "comment": "GenericFactory construction and initialization method for a ELF relocation entry",
+      "javadoc": "GenericFactory construction and initialization method for a ELF relocation entry\n@param reader binary reader positioned at start of relocation entry.\n@param elfHeader ELF header\n@param relocationIndex index of entry in relocation table\n@param withAddend true if if RELA entry with addend, else false\n@return ELF relocation object\n@throws IOException",
+      "static": true,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.format.FactoryBundledWithBinaryReader",
+          "type_short": "FactoryBundledWithBinaryReader",
+          "comment": "binary reader positioned at start of relocation entry."
+        },
+        {
+          "name": "elfHeader",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": "ELF header"
+        },
+        {
+          "name": "relocationIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of entry in relocation table"
+        },
+        {
+          "name": "withAddend",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if if RELA entry with addend, else false"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.elf.ElfRelocation",
+        "type_short": "ElfRelocation",
+        "comment": "ELF relocation object"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createElfRelocation",
+      "comment": "GenericFactory construction and initialization method for a ELF representative \n relocation entry",
+      "javadoc": "GenericFactory construction and initialization method for a ELF representative \n relocation entry\n@param reader binary reader positioned at start of relocation entry.\n@param elfHeader ELF header\n@param relocationIndex index of entry in relocation table\n@param withAddend true if if RELA entry with addend, else false\n@param r_offset The offset for the entry\n@param r_info The info value for the entry\n@param r_addend The addend for the entry\n@return ELF relocation object",
+      "static": true,
+      "params": [
+        {
+          "name": "factory",
+          "type_long": "generic.continues.GenericFactory",
+          "type_short": "GenericFactory",
+          "comment": ""
+        },
+        {
+          "name": "elfHeader",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": "ELF header"
+        },
+        {
+          "name": "relocationIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of entry in relocation table"
+        },
+        {
+          "name": "withAddend",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if if RELA entry with addend, else false"
+        },
+        {
+          "name": "r_offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The offset for the entry"
+        },
+        {
+          "name": "r_info",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The info value for the entry"
+        },
+        {
+          "name": "r_addend",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The addend for the entry"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.elf.ElfRelocation",
+        "type_short": "ElfRelocation",
+        "comment": "ELF relocation object"
+      },
+      "throws": []
+    },
+    {
+      "name": "getElfRelocationClass",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "elfHeader",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Class\u003c? extends ghidra.app.util.bin.format.elf.ElfRelocation\u003e",
+        "type_short": "Class",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "DO NOT USE THIS CONSTRUCTOR, USE create*(GenericFactory ...) FACTORY METHODS INSTEAD.",
+      "javadoc": "DO NOT USE THIS CONSTRUCTOR, USE create*(GenericFactory ...) FACTORY METHODS INSTEAD.\n@see ElfRelocation#createElfRelocation",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initElfRelocation",
+      "comment": "Initialize ELF relocation entry using data from the binary reader\u0027s current position.",
+      "javadoc": "Initialize ELF relocation entry using data from the binary reader\u0027s current position.\n@param reader binary reader positioned to the relocation entry data.  If null, \n a representative instance will be generated with all fields set to 0.\n@param elfHeader ELF header\n@param relocationTableIndex index of relocation within relocation table\n@param withAddend true if if RELA entry with addend, else false\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.format.FactoryBundledWithBinaryReader",
+          "type_short": "FactoryBundledWithBinaryReader",
+          "comment": "binary reader positioned to the relocation entry data.  If null, \n a representative instance will be generated with all fields set to 0."
+        },
+        {
+          "name": "elfHeader",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": "ELF header"
+        },
+        {
+          "name": "relocationTableIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of relocation within relocation table"
+        },
+        {
+          "name": "withAddend",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if if RELA entry with addend, else false"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initElfRelocation",
+      "comment": "Initialize ELF relocation entry using data provided via the parameters.",
+      "javadoc": "Initialize ELF relocation entry using data provided via the parameters.\n@param elfHeader ELF header\n@param relocationTableIndex index of relocation within relocation table\n@param withAddend true if if RELA entry with addend, else false\n@param r_offset The offset for the entry\n@param r_info The info value for the entry\n@param r_addend The addend for the entry\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "elfHeader",
+          "type_long": "ghidra.app.util.bin.format.elf.ElfHeader",
+          "type_short": "ElfHeader",
+          "comment": "ELF header"
+        },
+        {
+          "name": "relocationTableIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index of relocation within relocation table"
+        },
+        {
+          "name": "withAddend",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if if RELA entry with addend, else false"
+        },
+        {
+          "name": "r_offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The offset for the entry"
+        },
+        {
+          "name": "r_info",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The info value for the entry"
+        },
+        {
+          "name": "r_addend",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "The addend for the entry"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readEntryData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.format.FactoryBundledWithBinaryReader",
+          "type_short": "FactoryBundledWithBinaryReader",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRelocationIndex",
+      "comment": "",
+      "javadoc": "@return index of relocation within its corresponding relocation table",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "index of relocation within its corresponding relocation table"
+      },
+      "throws": []
+    },
+    {
+      "name": "is32Bit",
+      "comment": "",
+      "javadoc": "@return true if processing a 32-bit header, else 64-bit",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if processing a 32-bit header, else 64-bit"
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffset",
+      "comment": "This member gives the location at which to apply the relocation action. \n \n For a relocatable file, the value is the byte offset from the \n beginning of the section to the storage unit affected by the relocation. \n \n For an executable file or a shared object, the value is the virtual address of\n the storage unit affected by the relocation.",
+      "javadoc": "This member gives the location at which to apply the relocation action. \n \n For a relocatable file, the value is the byte offset from the \n beginning of the section to the storage unit affected by the relocation. \n \n For an executable file or a shared object, the value is the virtual address of\n the storage unit affected by the relocation.\n@return the location at which to apply the relocation",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the location at which to apply the relocation"
+      },
+      "throws": []
+    },
+    {
+      "name": "setOffset",
+      "comment": "Sets the relocation offset to the new specified value.",
+      "javadoc": "Sets the relocation offset to the new specified value.\n@param offset the new offset value",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the new offset value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setOffset",
+      "comment": "Sets the relocation offset to the new specified value.",
+      "javadoc": "Sets the relocation offset to the new specified value.\n@param offset the new offset value",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the new offset value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbolIndex",
+      "comment": "Returns the symbol index where the relocation must be made.\n A value of 0 is generally returned when no symbol is relavent\n to the relocation.",
+      "javadoc": "Returns the symbol index where the relocation must be made.\n A value of 0 is generally returned when no symbol is relavent\n to the relocation.\n@return the symbol index",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the symbol index"
+      },
+      "throws": []
+    },
+    {
+      "name": "getType",
+      "comment": "The type of relocation to apply.\n NOTE 1: Relocation types are processor-specific (see ElfRelocationHandler).\n NOTE 2: A type of 0 is returned by default for RELR relocations and must be updated \n during relocation processing (see #setType(long)).  The appropriate RELR \n relocation type can be obtained from the appropriate \n ElfRelocationHandler#getRelrRelocationType() or \n ElfRelocationContext#getRelrRelocationType() if available.",
+      "javadoc": "The type of relocation to apply.\n NOTE 1: Relocation types are processor-specific (see {@link ElfRelocationHandler}).\n NOTE 2: A type of 0 is returned by default for RELR relocations and must be updated \n during relocation processing (see {@link #setType(long)}).  The appropriate RELR \n relocation type can be obtained from the appropriate \n {@link ElfRelocationHandler#getRelrRelocationType()} or \n {@link ElfRelocationContext#getRelrRelocationType()} if available.\n@return type of relocation to apply",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "type of relocation to apply"
+      },
+      "throws": []
+    },
+    {
+      "name": "setType",
+      "comment": "Set the relocation type associated with this relocation.\n Updating the relocation type is required for RELR relocations.",
+      "javadoc": "Set the relocation type associated with this relocation.\n Updating the relocation type is required for RELR relocations.\n@param type relocation type to be applied",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "relocation type to be applied"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRelocationInfo",
+      "comment": "Returns the r_info relocation entry field value",
+      "javadoc": "Returns the r_info relocation entry field value\n@return r_info value",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "r_info value"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddend",
+      "comment": "This member specifies a constant addend used to compute \n the value to be stored into the relocatable field.  This\n value will be 0 for REL entries which do not supply an addend.",
+      "javadoc": "This member specifies a constant addend used to compute \n the value to be stored into the relocatable field.  This\n value will be 0 for REL entries which do not supply an addend.\n@return a constant addend",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "a constant addend"
+      },
+      "throws": []
+    },
+    {
+      "name": "hasAddend",
+      "comment": "Returns true if this is a RELA entry with addend",
+      "javadoc": "Returns true if this is a RELA entry with addend\n@return true if this is a RELA entry with addend",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is a RELA entry with addend"
+      },
+      "throws": []
+    },
+    {
+      "name": "toDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStandardRelocationEntrySize",
+      "comment": "Get the standard relocation size when one has notbeen specified",
+      "javadoc": "Get the standard relocation size when one has notbeen specified\n@param is64bit true if ELF 64-bit\n@param hasAddend true if relocation has addend\n@return size of relocation entry",
+      "static": true,
+      "params": [
+        {
+          "name": "is64bit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if ELF 64-bit"
+        },
+        {
+          "name": "hasAddend",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if relocation has addend"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "size of relocation entry"
+      },
+      "throws": []
+    },
+    {
+      "name": "toBytes",
+      "comment": "",
+      "javadoc": "@see ghidra.app.util.bin.ByteArrayConverter#toBytes(ghidra.util.DataConverter)",
+      "static": false,
+      "params": [
+        {
+          "name": "dc",
+          "type_long": "ghidra.util.DataConverter",
+          "type_short": "DataConverter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sizeof",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

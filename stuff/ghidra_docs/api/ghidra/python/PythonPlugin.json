@@ -1,0 +1,378 @@
+{
+  "name": "PythonPlugin",
+  "comment": "This plugin provides the interactive Python interpreter.",
+  "javadoc": "This plugin provides the interactive Python interpreter.",
+  "static": false,
+  "implements": [
+    "ghidra.app.plugin.core.interpreter.InterpreterConnection",
+    "ghidra.framework.options.OptionsChangeListener"
+  ],
+  "extends": "ghidra.app.plugin.ProgramPlugin",
+  "fields": [
+    {
+      "name": "INPUT_THREAD_SHUTDOWN_TIMEOUT_MS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1000"
+    },
+    {
+      "name": "console",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.core.interpreter.InterpreterConsole",
+      "type_short": "InterpreterConsole",
+      "constant_value": null
+    },
+    {
+      "name": "interpreter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.python.GhidraPythonInterpreter",
+      "type_short": "GhidraPythonInterpreter",
+      "constant_value": null
+    },
+    {
+      "name": "interactiveScript",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.python.PythonScript",
+      "type_short": "PythonScript",
+      "constant_value": null
+    },
+    {
+      "name": "interactiveTaskMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "inputThread",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.python.PythonPluginInputThread",
+      "type_short": "PythonPluginInputThread",
+      "constant_value": null
+    },
+    {
+      "name": "INCLUDE_BUILTINS_LABEL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Include \"builtins\" in code completion?\""
+    },
+    {
+      "name": "INCLUDE_BUILTINS_DESCRIPTION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Whether or not to include Python\u0027s built-in functions and properties in the pop-up code completion window.\""
+    },
+    {
+      "name": "INCLUDE_BUILTINS_DEFAULT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": "true"
+    },
+    {
+      "name": "includeBuiltins",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new PythonPlugin object.",
+      "javadoc": "Creates a new PythonPlugin object.\n@param tool The tool associated with this plugin.",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "The tool associated with this plugin."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getConsole",
+      "comment": "Gets the plugin\u0027s interpreter console.",
+      "javadoc": "Gets the plugin\u0027s interpreter console.\n@return The plugin\u0027s interpreter console.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.core.interpreter.InterpreterConsole",
+        "type_short": "InterpreterConsole",
+        "comment": "The plugin\u0027s interpreter console."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInterpreter",
+      "comment": "Gets the plugin\u0027s Python interpreter.",
+      "javadoc": "Gets the plugin\u0027s Python interpreter.\n@return The plugin\u0027s Python interpreter.  May be null.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.python.GhidraPythonInterpreter",
+        "type_short": "GhidraPythonInterpreter",
+        "comment": "The plugin\u0027s Python interpreter.  May be null."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInteractiveScript",
+      "comment": "Gets the plugin\u0027s interactive script",
+      "javadoc": "Gets the plugin\u0027s interactive script\n@return The plugin\u0027s interactive script.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.python.PythonScript",
+        "type_short": "PythonScript",
+        "comment": "The plugin\u0027s interactive script."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInteractiveTaskMonitor",
+      "comment": "Gets the plugin\u0027s interactive task monitor.",
+      "javadoc": "Gets the plugin\u0027s interactive task monitor.\n@return The plugin\u0027s interactive task monitor.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.task.TaskMonitor",
+        "type_short": "TaskMonitor",
+        "comment": "The plugin\u0027s interactive task monitor."
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createActions",
+      "comment": "Creates various actions for the plugin.",
+      "javadoc": "Creates various actions for the plugin.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resetInterpreter",
+      "comment": "Resets the interpreter to a new starting state.  This is used when the plugin is first\n initialized, as well as when an existing interpreter receives a Python exit command.\n We used to try to reset the same interpreter, but it was really hard to do that correctly\n so we now just create a brand new one.\n \n NOTE: Loading Jython for the first time can be quite slow the first time, so we do this\n when the user wants to first interact with the interpreter (rather than when the plugin loads).",
+      "javadoc": "Resets the interpreter to a new starting state.  This is used when the plugin is first\n initialized, as well as when an existing interpreter receives a Python exit command.\n We used to try to reset the same interpreter, but it was really hard to do that correctly\n so we now just create a brand new one.\n \u003cp\u003e\n NOTE: Loading Jython for the first time can be quite slow the first time, so we do this\n when the user wants to first interact with the interpreter (rather than when the plugin loads).",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resetInterpreterInBackground",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "optionsChanged",
+      "comment": "Handle a change in one of our options.",
+      "javadoc": "Handle a change in one of our options.\n@param options the options handle\n@param optionName name of the option changed\n@param oldValue the old value\n@param newValue the new value",
+      "static": false,
+      "params": [
+        {
+          "name": "options",
+          "type_long": "ghidra.framework.options.ToolOptions",
+          "type_short": "ToolOptions",
+          "comment": "the options handle"
+        },
+        {
+          "name": "optionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the option changed"
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the old value"
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the new value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompletions",
+      "comment": "Returns a list of possible command completion values.",
+      "javadoc": "Returns a list of possible command completion values.\n@param cmd current command line (without prompt)\n@return A list of possible command completion values.  Could be empty if there aren\u0027t any.",
+      "static": false,
+      "params": [
+        {
+          "name": "cmd",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "current command line (without prompt)"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.plugin.core.console.CodeCompletion\u003e",
+        "type_short": "List",
+        "comment": "A list of possible command completion values.  Could be empty if there aren\u0027t any."
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "interrupt",
+      "comment": "Interrupts what the interpreter is currently doing.",
+      "javadoc": "Interrupts what the interpreter is currently doing.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reset",
+      "comment": "Resets the interpreter\u0027s state.",
+      "javadoc": "Resets the interpreter\u0027s state.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTitle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIcon",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.ImageIcon",
+        "type_short": "ImageIcon",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "welcome",
+      "comment": "Prints a welcome message to the console.",
+      "javadoc": "Prints a welcome message to the console.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

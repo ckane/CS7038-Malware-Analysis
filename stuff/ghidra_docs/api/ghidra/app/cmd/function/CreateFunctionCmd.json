@@ -1,0 +1,1019 @@
+{
+  "name": "CreateFunctionCmd",
+  "comment": "Command for Creating a function at an address.  It will copy off the\n parameters used to create the function (Selection or just an address) and\n create the function on redo and clear on undo.",
+  "javadoc": "Command for Creating a function at an address.  It will copy off the\n parameters used to create the function (Selection or just an address) and\n create the function on redo and clear on undo.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.framework.cmd.BackgroundCommand",
+  "fields": [
+    {
+      "name": "origEntries",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "origBody",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "name",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "newFunc",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Function",
+      "type_short": "Function",
+      "constant_value": null
+    },
+    {
+      "name": "source",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.SourceType",
+      "type_short": "SourceType",
+      "constant_value": null
+    },
+    {
+      "name": "findEntryPoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "recreateFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "referringThunkAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.model.address.Address\u003e",
+      "type_short": "List",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a function.  The default name\n for a function is the name associated with the current primary symbol which\n will be removed.",
+      "javadoc": "Constructs a new command for creating a function.  The default name\n for a function is the name associated with the current primary symbol which\n will be removed.\n@param name function name or null for default name.\n@param entries the entry points at which to create functions.\n@param body set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n@param source the source of this function\n@param findEntryPoint true if the entry point should be computed (entry could be in the middle of a function)\n@param recreateFunction true if the function body should be recreated even if the function exists.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "function name or null for default name."
+        },
+        {
+          "name": "entries",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the entry points at which to create functions."
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function."
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "the source of this function"
+        },
+        {
+          "name": "findEntryPoint",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the entry point should be computed (entry could be in the middle of a function)"
+        },
+        {
+          "name": "recreateFunction",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the function body should be recreated even if the function exists."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a function.  The default name\n for a function is the name associated with the current primary symbol which\n will be removed.",
+      "javadoc": "Constructs a new command for creating a function.  The default name\n for a function is the name associated with the current primary symbol which\n will be removed.\n@param name function name or null for default name.\n@param entry entry point address for the function to be created.\n@param body set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function.\n@param source the source of this function\n@param findEntryPoint true if the entry point should be computed (entry could be in the middle of a function)\n@param recreateFunction true if the function body should be recreated even if the function exists.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "function name or null for default name."
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point address for the function to be created."
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "set of addresses to associated with the function to be created.\n The addresses must not already be included in the body of any existing function."
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "the source of this function"
+        },
+        {
+          "name": "findEntryPoint",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the entry point should be computed (entry could be in the middle of a function)"
+        },
+        {
+          "name": "recreateFunction",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the function body should be recreated even if the function exists."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating functions that automatically computes\n the body of each function.",
+      "javadoc": "Constructs a new command for creating functions that automatically computes\n the body of each function.\n@param entries the entry points at which to create functions.",
+      "static": false,
+      "params": [
+        {
+          "name": "entries",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the entry points at which to create functions."
+        },
+        {
+          "name": "findEntryPoint",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating functions that automatically computes\n the body of each function.",
+      "javadoc": "Constructs a new command for creating functions that automatically computes\n the body of each function.\n@param entries the entry points at which to create functions.",
+      "static": false,
+      "params": [
+        {
+          "name": "entries",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the entry points at which to create functions."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating functions that automatically computes\n the body of each function.",
+      "javadoc": "Constructs a new command for creating functions that automatically computes\n the body of each function.\n@param entries the entry points at which to create functions.",
+      "static": false,
+      "params": [
+        {
+          "name": "entries",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the entry points at which to create functions."
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a function that automatically computes\n the body of the function.",
+      "javadoc": "Constructs a new command for creating a function that automatically computes\n the body of the function.\n@param entry the entry point at which to create a function.\n@param referringThunkAddresses provides a list of referring Thunk functions which lead to\n the creation of the function at entry.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point at which to create a function."
+        },
+        {
+          "name": "referringThunkAddresses",
+          "type_long": "java.util.List\u003cghidra.program.model.address.Address\u003e",
+          "type_short": "List",
+          "comment": "provides a list of referring Thunk functions which lead to\n the creation of the function at entry."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new command for creating a function that automatically computes\n the body of the function.",
+      "javadoc": "Constructs a new command for creating a function that automatically computes\n the body of the function.\n@param entry the entry point at which to create a function.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point at which to create a function."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "findEntryPoint",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyTo",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.cmd.BackgroundCommand#applyTo(ghidra.framework.model.DomainObject, ghidra.util.task.TaskMonitor)",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunction",
+      "comment": "Returns function if create command was successful",
+      "javadoc": "Returns function if create command was successful",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createFunction",
+      "comment": "Creates a function in the program.",
+      "javadoc": "Creates a function in the program.\n@param entry The address of the entry point for the new function\n@param body The address set containing all the addresses to be included in\n            the body of the new function.\n@param nameSource the source of this function\u0027s name\n@throws OverlappingFunctionException\n@throws InvalidInputException\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "funcName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "functionModel",
+          "type_long": "ghidra.program.model.block.CodeBlockModel",
+          "type_short": "CodeBlockModel",
+          "comment": ""
+        },
+        {
+          "name": "nameSpace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "The address of the entry point for the new function"
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "The address set containing all the addresses to be included in\n            the body of the new function."
+        },
+        {
+          "name": "nameSource",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "the source of this function\u0027s name"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.database.function.OverlappingFunctionException",
+          "type_short": "OverlappingFunctionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createFunction",
+      "comment": "create the function, undoing any changes to other functions bodies if the function creation fails",
+      "javadoc": "create the function, undoing any changes to other functions bodies if the function creation fails\n@param nameSpace - functions namespace\n@param funcName - functions name\n@param entry - entry point of function\n@param body - body of function\n@param nameSource - source of the name\n@param bodyChangeMap - change map to restore other affected functions bodies if this fails\n@param monitor\n@return \n@throws OverlappingFunctionException\n@throws DuplicateNameException\n@throws InvalidInputException",
+      "static": false,
+      "params": [
+        {
+          "name": "nameSpace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "- functions namespace"
+        },
+        {
+          "name": "funcName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "- functions name"
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "- entry point of function"
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "- body of function"
+        },
+        {
+          "name": "nameSource",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "- source of the name"
+        },
+        {
+          "name": "bodyChangeMap",
+          "type_long": "java.util.Map\u003cghidra.program.model.listing.Function,ghidra.program.model.address.AddressSetView\u003e",
+          "type_short": "Map",
+          "comment": "- change map to restore other affected functions bodies if this fails"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.database.function.OverlappingFunctionException",
+          "type_short": "OverlappingFunctionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "subtractBodyFromExisting",
+      "comment": "subtract this functions entire body from existing functions",
+      "javadoc": "subtract this functions entire body from existing functions\n@param entry - entry point of new function\n@param body - new functions body\n@param bodyChangeMap - map of functions that have their bodies changed by creating this function\n@param monitor\n@return \n@throws CancelledException\n@throws OverlappingFunctionException",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "- entry point of new function"
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "- new functions body"
+        },
+        {
+          "name": "bodyChangeMap",
+          "type_long": "java.util.Map\u003cghidra.program.model.listing.Function,ghidra.program.model.address.AddressSetView\u003e",
+          "type_short": "Map",
+          "comment": "- map of functions that have their bodies changed by creating this function"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.database.function.OverlappingFunctionException",
+          "type_short": "OverlappingFunctionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeExistingFunctionsFromBody",
+      "comment": "Remove any existing functions bodies from the new functions body at entry.",
+      "javadoc": "Remove any existing functions bodies from the new functions body at entry.\n@param entry\n@param body\n@param monitor\n@return the new body, or null if body could not be created and need to abort function creation.\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "the new body, or null if body could not be created and need to abort function creation."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "handleExistingFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "existingFunction",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.database.function.OverlappingFunctionException",
+          "type_short": "OverlappingFunctionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "resolveThunk",
+      "comment": "resolve thunks by checking for a thunk and creating the thunk if it is one",
+      "javadoc": "resolve thunks by checking for a thunk and creating the thunk if it is one\n@param entry function entry point to check for thunk\n@param body new function body\n@param monitor\n@return true if the entry resolved to a thunk\n@throws OverlappingFunctionException",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "function entry point to check for thunk"
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "new function body"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the entry resolved to a thunk"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.database.function.OverlappingFunctionException",
+          "type_short": "OverlappingFunctionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "restoreOriginalBodies",
+      "comment": "using the body map revert any changes made to function bodies",
+      "javadoc": "using the body map revert any changes made to function bodies\n@param bodyChangeMap",
+      "static": false,
+      "params": [
+        {
+          "name": "bodyChangeMap",
+          "type_long": "java.util.Map\u003cghidra.program.model.listing.Function,ghidra.program.model.address.AddressSetView\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findFunctionEntry",
+      "comment": "Follow flow back from the address trying to find an existing function this fragment belongs to",
+      "javadoc": "Follow flow back from the address trying to find an existing function this fragment belongs to\n@param bodyAddr address that should be in the body of a function\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "bodyAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address that should be in the body of a function"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionBody",
+      "comment": "Find the function body by following all flows other than a call from the\n entry point.",
+      "javadoc": "Find the function body by following all flows other than a call from the\n entry point.\n@param program the program where the function is being created.\n@param entry entry point to start tracing flow\n@return AddressSetView address set representing the body of the function",
+      "static": true,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program where the function is being created."
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point to start tracing flow"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "AddressSetView address set representing the body of the function"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFunctionBody",
+      "comment": "Find the function body by following all flows other than a call from the\n entry point.",
+      "javadoc": "Find the function body by following all flows other than a call from the\n entry point.\n@param program the program where the function is being created.\n@param entry entry point to start tracing flow\n@return AddressSetView address set representing the body of the function",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program where the function is being created."
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point to start tracing flow"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": "AddressSetView address set representing the body of the function"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionBody",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionBody",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "includeOtherFunctions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fixupFunctionBody",
+      "comment": "Recompute function body.  An open transaction must already exist.",
+      "javadoc": "Recompute function body.  An open transaction must already exist.\n@param program the program the function is in.\n@param start_inst instruction that is within the function to be fixed up.\n@param monitor task monitor\n@return true if successful, false if cancelled or unable to fixup function or\n no function found containing the start address of the indicated instruction",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program the function is in."
+        },
+        {
+          "name": "start_inst",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "instruction that is within the function to be fixed up."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if successful, false if cancelled or unable to fixup function or\n no function found containing the start address of the indicated instruction"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "fixupFunctionBody",
+      "comment": "Recompute function body.  An open transaction must already exist.",
+      "javadoc": "Recompute function body.  An open transaction must already exist.\n@param program the program the function is in.\n@param func the function to be fixed up.  A null function will return false.\n@param monitor task monitor\n@return true if successful, false if unable to fixup function or\n no function found containing the start address of the indicated instruction\n@throws CancelledException if the function fixup is cancelled.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program the function is in."
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the function to be fixed up.  A null function will return false."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if successful, false if unable to fixup function or\n no function found containing the start address of the indicated instruction"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the function fixup is cancelled."
+        }
+      ]
+    },
+    {
+      "name": "resolveThunk",
+      "comment": "Check and create a thunk function at entry.\n Called due to a function body change, or a reference having been created\n so there is no body",
+      "javadoc": "Check and create a thunk function at entry.\n Called due to a function body change, or a reference having been created\n so there is no body\n@param program function is in\n@param entry entry point of the function\n@param monitor to allow canceling\n@return true if a thunk was created.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "function is in"
+        },
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point of the function"
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "to allow canceling"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a thunk was created."
+      },
+      "throws": []
+    }
+  ]
+}

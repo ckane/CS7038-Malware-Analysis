@@ -1,0 +1,642 @@
+{
+  "name": "HighFunctionDBUtil",
+  "comment": "HighFunctionDBUtil provides various methods for updating the state of a\n function contained within a program database.  It is important to note that the decompiler\n result state (e.g., HighFunction, HighParam, HighLocal, etc.) is not altered by any of\n these methods.  A new decompiler result will need to be generated to reflect any\n changes made to the database.  Care must be taken when making incremental changes\n to multiple elements (e.g., Variables)",
+  "javadoc": "\u003ccode\u003eHighFunctionDBUtil\u003c/code\u003e provides various methods for updating the state of a\n function contained within a program database.  It is important to note that the decompiler\n result state (e.g., HighFunction, HighParam, HighLocal, etc.) is not altered by any of\n these methods.  A new decompiler result will need to be generated to reflect any\n changes made to the database.  Care must be taken when making incremental changes\n to multiple elements (e.g., Variables)",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "AUTO_CAT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"/auto_proto\""
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "commitReturnToDatabase",
+      "comment": "Commit the decompiler\u0027s version of the function return data-type to the database.\n The decompiler\u0027s version of the prototype model is committed as well",
+      "javadoc": "Commit the decompiler\u0027s version of the function return data-type to the database.\n The decompiler\u0027s version of the prototype model is committed as well\n@param highFunction is the decompiler\u0027s model of the function\n@param source is the desired SourceType for the commit",
+      "static": true,
+      "params": [
+        {
+          "name": "highFunction",
+          "type_long": "ghidra.program.model.pcode.HighFunction",
+          "type_short": "HighFunction",
+          "comment": "is the decompiler\u0027s model of the function"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "is the desired SourceType for the commit"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "commitParamsToDatabase",
+      "comment": "Commit all parameters associated with HighFunction to the underlying database.",
+      "javadoc": "Commit all parameters associated with HighFunction to the underlying database.\n@param highFunction is the associated HighFunction\n@param useDataTypes is true if the HighFunction\u0027s parameter data-types should be committed\n@param source is the signature source type to set\n@throws DuplicateNameException if commit of parameters caused conflict with other\n local variable/label.\n@throws InvalidInputException if specified storage is invalid",
+      "static": true,
+      "params": [
+        {
+          "name": "highFunction",
+          "type_long": "ghidra.program.model.pcode.HighFunction",
+          "type_short": "HighFunction",
+          "comment": "is the associated HighFunction"
+        },
+        {
+          "name": "useDataTypes",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "is true if the HighFunction\u0027s parameter data-types should be committed"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "is the signature source type to set"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if commit of parameters caused conflict with other\n local variable/label."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if specified storage is invalid"
+        }
+      ]
+    },
+    {
+      "name": "getParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "highFunction",
+          "type_long": "ghidra.program.model.pcode.HighFunction",
+          "type_short": "HighFunction",
+          "comment": ""
+        },
+        {
+          "name": "useDataTypes",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.listing.Parameter\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "commitParamsToDatabase",
+      "comment": "Commit a specified set of parameters for the given function to the database.\n The name, data-type, and storage is committed for each parameter.  The parameters are\n provided along with a formal PrototypeModel.  If the parameters fit the model, they are\n committed using \"dynamic\" storage. Otherwise, they are committed using \"custom\" storage.",
+      "javadoc": "Commit a specified set of parameters for the given function to the database.\n The name, data-type, and storage is committed for each parameter.  The parameters are\n provided along with a formal PrototypeModel.  If the parameters fit the model, they are\n committed using \"dynamic\" storage. Otherwise, they are committed using \"custom\" storage.\n@param function is the Function being modified\n@param modelName is the name of the underlying PrototypeModel\n@param params is the formal list of parameter objects\n@param hasVarArgs is true if the prototype can take variable arguments\n@param renameConflicts if true any name conflicts will be resolved\n by renaming the conflicting local variable/label\n@param source source type\n@throws DuplicateNameException if commit of parameters caused conflict with other\n local variable/label.  Should not occur if renameConflicts is true.\n@throws InvalidInputException for invalid variable names or for parameter data-types that aren\u0027t fixed length\n@throws DuplicateNameException is there are collisions between variable names in the function\u0027s scope",
+      "static": true,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "is the Function being modified"
+        },
+        {
+          "name": "modelName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the name of the underlying PrototypeModel"
+        },
+        {
+          "name": "params",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Parameter\u003e",
+          "type_short": "List",
+          "comment": "is the formal list of parameter objects"
+        },
+        {
+          "name": "hasVarArgs",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "is true if the prototype can take variable arguments"
+        },
+        {
+          "name": "renameConflicts",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true any name conflicts will be resolved\n by renaming the conflicting local variable/label"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "source type"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if commit of parameters caused conflict with other\n local variable/label.  Should not occur if renameConflicts is true."
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "for invalid variable names or for parameter data-types that aren\u0027t fixed length"
+        }
+      ]
+    },
+    {
+      "name": "changeConflictingSymbolNames",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "ignoreVariable",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "func",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "commitLocalNamesToDatabase",
+      "comment": "Commit local variables from the decompiler\u0027s model of the function to the database.\n This does NOT include formal function parameters.",
+      "javadoc": "Commit local variables from the decompiler\u0027s model of the function to the database.\n This does NOT include formal function parameters.\n@param highFunction is the decompiler\u0027s model of the function\n@param source is the desired SourceType for the commit",
+      "static": true,
+      "params": [
+        {
+          "name": "highFunction",
+          "type_long": "ghidra.program.model.pcode.HighFunction",
+          "type_short": "HighFunction",
+          "comment": "is the decompiler\u0027s model of the function"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "is the desired SourceType for the commit"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createLocalVariable",
+      "comment": "Create a local DB variable with a default name. Storage and data-type for the variable\n are provided explicitly.",
+      "javadoc": "Create a local DB variable with a default name. Storage and data-type for the variable\n are provided explicitly.\n@param function is the function owning the new variable\n@param dt is the given data-type\n@param storage is the given storage\n@param pcAddr is point where the variable is instantiated or null\n@param source is the source type of the new variable\n@return the new local variable\n@throws InvalidInputException is a valid variable can\u0027t be created",
+      "static": true,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "is the function owning the new variable"
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "is the given data-type"
+        },
+        {
+          "name": "storage",
+          "type_long": "ghidra.program.model.listing.VariableStorage",
+          "type_short": "VariableStorage",
+          "comment": "is the given storage"
+        },
+        {
+          "name": "pcAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is point where the variable is instantiated or null"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "is the source type of the new variable"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": "the new local variable"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "is a valid variable can\u0027t be created"
+        }
+      ]
+    },
+    {
+      "name": "clearObsoleteDynamicLocalsFromDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "highFunction",
+          "type_long": "ghidra.program.model.pcode.HighFunction",
+          "type_short": "HighFunction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidUniqueVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "highFunction",
+          "type_long": "ghidra.program.model.pcode.HighFunction",
+          "type_short": "HighFunction",
+          "comment": ""
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "gatherMergeSet",
+      "comment": "Given a particular seed Variable, find the set of local Variables that are intended to be\n merged containing that seed. The result will be an array with at least the seed variable in it.",
+      "javadoc": "Given a particular seed Variable, find the set of local Variables that are intended to be\n merged containing that seed. The result will be an array with at least the seed variable in it.\n@param function is the function containing the local variables\n@param seed is the seed local variable\n@return an array of all Variables intended to be merged.",
+      "static": true,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "is the function containing the local variables"
+        },
+        {
+          "name": "seed",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "is the seed local variable"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable[]",
+        "type_short": "ghidra.program.model.listing.Variable[]",
+        "comment": "an array of all Variables intended to be merged."
+      },
+      "throws": []
+    },
+    {
+      "name": "clearConflictingLocalVariables",
+      "comment": "Low-level routine for clearing any variables in the\n database which conflict with this variable and return\n one of them for re-use.  The returned variable still\n exists within the function at the same first-use-offset.",
+      "javadoc": "Low-level routine for clearing any variables in the\n database which conflict with this variable and return\n one of them for re-use.  The returned variable still\n exists within the function at the same first-use-offset.\n@param function is the function containing the local variables\n@param storage is the storage area to clear\n@param pcAddr is the point of use\n@return existing variable with identical storage and first-use offset or null",
+      "static": true,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "is the function containing the local variables"
+        },
+        {
+          "name": "storage",
+          "type_long": "ghidra.program.model.listing.VariableStorage",
+          "type_short": "VariableStorage",
+          "comment": "is the storage area to clear"
+        },
+        {
+          "name": "pcAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the point of use"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": "existing variable with identical storage and first-use offset or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDatabaseParameter",
+      "comment": "Get database parameter which corresponds to the given symbol, where we anticipate that\n the parameter will be modified to match the symbol. The entire prototype is\n committed to the database if necessary. An exception is thrown if a modifiable parameter\n can\u0027t be found/created.",
+      "javadoc": "Get database parameter which corresponds to the given symbol, where we anticipate that\n the parameter will be modified to match the symbol. The entire prototype is\n committed to the database if necessary. An exception is thrown if a modifiable parameter\n can\u0027t be found/created.\n@param param is the HighSymbol describing the desired function parameter\n@return the matching parameter that can be modified\n@throws InvalidInputException if the desired parameter cannot be modified",
+      "static": true,
+      "params": [
+        {
+          "name": "param",
+          "type_long": "ghidra.program.model.pcode.HighSymbol",
+          "type_short": "HighSymbol",
+          "comment": "is the HighSymbol describing the desired function parameter"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter",
+        "type_short": "Parameter",
+        "comment": "the matching parameter that can be modified"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if the desired parameter cannot be modified"
+        }
+      ]
+    },
+    {
+      "name": "updateDBVariable",
+      "comment": "Rename and/or retype the specified variable in the database.  All parameters may be flushed\n to the database if typed parameter inconsistency detected.",
+      "javadoc": "Rename and/or retype the specified variable in the database.  All parameters may be flushed\n to the database if typed parameter inconsistency detected.\n@param highSymbol is the symbol being updated\n@param name new variable name or null to use retain current variable name\n@param dataType newly assigned data type or null to retain current variable datatype.\n Only a fixed-length data type may be specified.  If size varies from the current size,\n an attempt will be made to grow/shrink the storage.\n@param source source type\n@throws InvalidInputException if suitable data type was not specified, or unable to\n resize storage, or invalid name specified\n@throws DuplicateNameException if name was specified and conflicts with another\n variable/label within the function\u0027s namespace\n@throws UnsupportedOperationException if unsupported variable type is specified",
+      "static": true,
+      "params": [
+        {
+          "name": "highSymbol",
+          "type_long": "ghidra.program.model.pcode.HighSymbol",
+          "type_short": "HighSymbol",
+          "comment": "is the symbol being updated"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new variable name or null to use retain current variable name"
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "newly assigned data type or null to retain current variable datatype.\n Only a fixed-length data type may be specified.  If size varies from the current size,\n an attempt will be made to grow/shrink the storage."
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "source type"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if suitable data type was not specified, or unable to\n resize storage, or invalid name specified"
+        },
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if name was specified and conflicts with another\n variable/label within the function\u0027s namespace"
+        }
+      ]
+    },
+    {
+      "name": "setGlobalName",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "global",
+          "type_long": "ghidra.program.model.pcode.HighSymbol",
+          "type_short": "HighSymbol",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setGlobalDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "global",
+          "type_long": "ghidra.program.model.pcode.HighSymbol",
+          "type_short": "HighSymbol",
+          "comment": ""
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Data",
+        "type_short": "Data",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "writeOverride",
+      "comment": "Commit an overriding prototype for a particular call site to the database. The override\n only applies to the function(s) containing the actual call site. Calls to the same function from\n other sites are unaffected.  This is used typically either for indirect calls are for calls to\n a function with a variable number of parameters.",
+      "javadoc": "Commit an overriding prototype for a particular call site to the database. The override\n only applies to the function(s) containing the actual call site. Calls to the same function from\n other sites are unaffected.  This is used typically either for indirect calls are for calls to\n a function with a variable number of parameters.\n@param function is the Function whose call site is being overridden\n@param callsite is the address of the calling instruction (the call site)\n@param sig is the overriding function signature\n@throws InvalidInputException if there are problems committing the override symbol",
+      "static": true,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "is the Function whose call site is being overridden"
+        },
+        {
+          "name": "callsite",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the address of the calling instruction (the call site)"
+        },
+        {
+          "name": "sig",
+          "type_long": "ghidra.program.model.listing.FunctionSignature",
+          "type_short": "FunctionSignature",
+          "comment": "is the overriding function signature"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if there are problems committing the override symbol"
+        }
+      ]
+    },
+    {
+      "name": "readOverride",
+      "comment": "Read a call prototype override which corresponds to the specified override code symbol",
+      "javadoc": "Read a call prototype override which corresponds to the specified override code symbol\n@param sym special call override code symbol whose address corresponds to a call site\n@return call prototype override DataTypeSymbol or null if associated function signature\n data-type could not be found",
+      "static": true,
+      "params": [
+        {
+          "name": "sym",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "special call override code symbol whose address corresponds to a call site"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.DataTypeSymbol",
+        "type_short": "DataTypeSymbol",
+        "comment": "call prototype override DataTypeSymbol or null if associated function signature\n data-type could not be found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSpacebaseReferenceAddress",
+      "comment": "Get the Address referred to by a spacebase reference. Address-of references are encoded in\n the p-code syntax tree as: .  This decodes the reference and\n returns the Address",
+      "javadoc": "Get the Address referred to by a spacebase reference. Address-of references are encoded in\n the p-code syntax tree as: {@code vn \u003d PTRSUB(\u003cspacebase\u003e, #const)}.  This decodes the reference and\n returns the Address\n@param program is the program containing the Address\n@param op is the PTRSUB op encoding the reference\n@return the recovered Address (or null if not correct form)",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the program containing the Address"
+        },
+        {
+          "name": "op",
+          "type_long": "ghidra.program.model.pcode.PcodeOp",
+          "type_short": "PcodeOp",
+          "comment": "is the PTRSUB op encoding the reference"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the recovered Address (or null if not correct form)"
+      },
+      "throws": []
+    }
+  ]
+}

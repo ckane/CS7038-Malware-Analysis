@@ -1,0 +1,407 @@
+{
+  "name": "RegisterValueStore",
+  "comment": "This is a generalized class for storing register values over ranges.  The values include mask bits\n to indicate which bits within the register are being set.  The mask is stored along with the\n value so the getValue method can indicate back which bits in the value are valid.  If existing\n values already exist at an address, the values are combined according to the masks.  Any new value\n bits that have their associated mask bits on will overwrite any existing bits and the new mask will\n be anded to the existing mask.  Other bits will not be affected.\n \n This class takes a RangeMapAdapter that will adapt to some lower level storage.  There are current\n two implementations - one that uses an ObjectRangeMap for storing register values in memory and\n the other that uses RangeMapDB for storing register values in the database.",
+  "javadoc": "This is a generalized class for storing register values over ranges.  The values include mask bits\n to indicate which bits within the register are being set.  The mask is stored along with the\n value so the getValue method can indicate back which bits in the value are valid.  If existing\n values already exist at an address, the values are combined according to the masks.  Any new value\n bits that have their associated mask bits on will overwrite any existing bits and the new mask will\n be anded to the existing mask.  Other bits will not be affected.\n \n This class takes a RangeMapAdapter that will adapt to some lower level storage.  There are current\n two implementations - one that uses an ObjectRangeMap for storing register values in memory and\n the other that uses RangeMapDB for storing register values in the database.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "baseRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register",
+      "type_short": "Register",
+      "constant_value": null
+    },
+    {
+      "name": "rangeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.RangeMapAdapter",
+      "type_short": "RangeMapAdapter",
+      "constant_value": null
+    },
+    {
+      "name": "rangeWriteCacheEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "rangeWriteCacheValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.RegisterValue",
+      "type_short": "RegisterValue",
+      "constant_value": null
+    },
+    {
+      "name": "rangeWriteCacheMin",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "rangeWriteCacheMax",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new RegisterValueStore.",
+      "javadoc": "Constructs a new RegisterValueStore.\n@param rangeMap the rangeMapAdapter that handles the low level storage of byte arrays",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "rangeMap",
+          "type_long": "ghidra.program.util.RangeMapAdapter",
+          "type_short": "RangeMapAdapter",
+          "comment": "the rangeMapAdapter that handles the low level storage of byte arrays"
+        },
+        {
+          "name": "enableRangeWriteCache",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flushWriteCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "invalidateWriteCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "Move all register values within an address range to a new range.",
+      "javadoc": "Move all register values within an address range to a new range.\n@param fromAddr the first address of the range to be moved.\n@param toAddr the address where to the range is to be moved.\n@param length the number of addresses to move.\n@param monitor the task monitor.\n@throws CancelledException if the user canceled the operation via the task monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the first address of the range to be moved."
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address where to the range is to be moved."
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the number of addresses to move."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user canceled the operation via the task monitor."
+        }
+      ]
+    },
+    {
+      "name": "setValue",
+      "comment": "Sets the given register value (contains value and mask) across the given address range.  Any\n existing values in the range that have values that are not part of the input mask are \n not changed.",
+      "javadoc": "Sets the given register value (contains value and mask) across the given address range.  Any\n existing values in the range that have values that are not part of the input mask are \n not changed.\n@param start the start of the range to set the register value.\n@param end the end of the range(inclusive) to set the register value.\n@param newValue the new register value to set.",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start of the range to set the register value."
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end of the range(inclusive) to set the register value."
+        },
+        {
+          "name": "newValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "the new register value to set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearAll",
+      "comment": "Delete all stored values and free/delete underlying storage.",
+      "javadoc": "Delete all stored values and free/delete underlying storage.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearValue",
+      "comment": "Clears the address range of any set bits using the mask from the given register value.\n existing values in the range that have values that are not part of the input mask are \n not changed. If register is null, just clear all the values in range",
+      "javadoc": "Clears the address range of any set bits using the mask from the given register value.\n existing values in the range that have values that are not part of the input mask are \n not changed. If register is null, just clear all the values in range\n@param start the start of the range to clear the register value bits.\n@param end the end of the range(inclusive) to clear the register value bits.\n@param register the register whos mask to use.  If null, clear all values in the given range.",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start of the range to clear the register value bits."
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end of the range(inclusive) to clear the register value bits."
+        },
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register whos mask to use.  If null, clear all values in the given range."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "Returns the RegisterValue (value and mask) associated with the given address.",
+      "javadoc": "Returns the RegisterValue (value and mask) associated with the given address.\n@param address the address at which to get the RegisterValue.\n@return the RegisterValue",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to get the RegisterValue."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "the RegisterValue"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRangeIterator",
+      "comment": "Returns an AddressRangeIterator that will return address ranges everywhere that register values\n have been set within the given range.",
+      "javadoc": "Returns an AddressRangeIterator that will return address ranges everywhere that register values\n have been set within the given range.\n@param startAddress the start address to get stored register values.\n@param endAddress the end address to get stored register values.\n@return an AddressRangeIterator that will return address ranges everywhere that register\n values have been set within the given range.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address to get stored register values."
+        },
+        {
+          "name": "endAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address to get stored register values."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": "an AddressRangeIterator that will return address ranges everywhere that register\n values have been set within the given range."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRangeIterator",
+      "comment": "Returns an AddressRangeIterator that will return address ranges everywhere that register\n values have been set.",
+      "javadoc": "Returns an AddressRangeIterator that will return address ranges everywhere that register\n values have been set.\n@return an AddressRangeIterator that will return address ranges everywhere that register\n values have been set.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": "an AddressRangeIterator that will return address ranges everywhere that register\n values have been set."
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmpty",
+      "comment": "Returns true if this store has no associated values for any address.",
+      "javadoc": "Returns true if this store has no associated values for any address.\n@return true if this store has no associated values for any address.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this store has no associated values for any address."
+      },
+      "throws": []
+    },
+    {
+      "name": "setLanguage",
+      "comment": "Preserve register values and handle register name/size change.",
+      "javadoc": "Preserve register values and handle register name/size change.\n@param translator\n@param monitor\n@return true if translated successfully, false if register not mapped \n value storage should be discarded.\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "translator",
+          "type_long": "ghidra.program.util.LanguageTranslator",
+          "type_short": "LanguageTranslator",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if translated successfully, false if register not mapped \n value storage should be discarded."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getValueRangeContaining",
+      "comment": "Returns the bounding address-range containing addr and the the same value throughout.\n This range will be limited by any value change associated with the base register.",
+      "javadoc": "Returns the bounding address-range containing addr and the the same value throughout.\n This range will be limited by any value change associated with the base register.\n@param addr the contained address\n@return single value address-range containing addr",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the contained address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": "single value address-range containing addr"
+      },
+      "throws": []
+    }
+  ]
+}

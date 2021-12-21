@@ -1,0 +1,526 @@
+{
+  "name": "SegmentedAddressSpace",
+  "comment": "Address Space for dealing with (intel) segmented address spaces.\n It understands the mapping between the segmented encoding (seg:offset) and\n the flat address encoding necessary to produce an Address object that can be\n used by other analyses.  This mapping is inherent in protected methods:\n   - getDefaultOffsetFromFlat\n   - getDefaultSegmentFromFlat\n   - getFlatOffset\n   - getOffsetFromFlat\n   - getAddressInSegment\n \n These 5 methods can be overridden to get a different mapping. This base class is\n set up to map as for x86 16-bit real-mode.",
+  "javadoc": "Address Space for dealing with (intel) segmented address spaces.\n It understands the mapping between the segmented encoding (seg:offset) and\n the flat address encoding necessary to produce an Address object that can be\n used by other analyses.  This mapping is inherent in protected methods:\n   - getDefaultOffsetFromFlat\n   - getDefaultSegmentFromFlat\n   - getFlatOffset\n   - getOffsetFromFlat\n   - getAddressInSegment\n \n These 5 methods can be overridden to get a different mapping. This base class is\n set up to map as for x86 16-bit real-mode.",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.program.model.address.GenericAddressSpace",
+  "fields": [
+    {
+      "name": "REALMODE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "21"
+    },
+    {
+      "name": "REALMODE_MAXOFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "1114095"
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for larger size address spaces (than the real-mode space)",
+      "javadoc": "Constructor for larger size address spaces (than the real-mode space)\n@param name is the name of the space\n@param size is the number of bits in a (flat) address\n@param unique is the unique id for the space",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the name of the space"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the number of bits in a (flat) address"
+        },
+        {
+          "name": "unique",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the unique id for the space"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new Segmented AddressSpace for x86 real-mode, with 21-bit addresses.",
+      "javadoc": "Constructs a new Segmented AddressSpace for x86 real-mode, with 21-bit addresses.\n@param name is the name of the space\n@param unique is the unique id for the space.",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the name of the space"
+        },
+        {
+          "name": "unique",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the unique id for the space."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlatOffset",
+      "comment": "Given a 16-bit segment and an offset, produce the flat address offset",
+      "javadoc": "Given a 16-bit segment and an offset, produce the flat address offset\n@param segment is the segment value\n@param offset is the 16-bit offset into the segment\n@return the encoded flat offset",
+      "static": false,
+      "params": [
+        {
+          "name": "segment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the segment value"
+        },
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the 16-bit offset into the segment"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the encoded flat offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultSegmentFromFlat",
+      "comment": "Given a flat address offset, extract the default 16-bit segment portion",
+      "javadoc": "Given a flat address offset, extract the default 16-bit segment portion\n@param flat is the flat offset\n@return the segment value",
+      "static": false,
+      "params": [
+        {
+          "name": "flat",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the flat offset"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the segment value"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultOffsetFromFlat",
+      "comment": "Given a flat address offset, extract the offset portion assuming the\n default segment.",
+      "javadoc": "Given a flat address offset, extract the offset portion assuming the\n default segment.\n@param flat is the flat offset\n@return the offset value",
+      "static": false,
+      "params": [
+        {
+          "name": "flat",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the flat offset"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the offset value"
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffsetFromFlat",
+      "comment": "Given a flat address offset, extract a segment offset assuming a\n specific segment value.",
+      "javadoc": "Given a flat address offset, extract a segment offset assuming a\n specific segment value.\n@param flat is the flat offset\n@param segment is the specific segment value\n@return the segment offset",
+      "static": false,
+      "params": [
+        {
+          "name": "flat",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the flat offset"
+        },
+        {
+          "name": "segment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the specific segment value"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the segment offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressInSegment",
+      "comment": "Given a flat address offset and a preferred segment, try\n to create an address that maps to the offset and is in the segment. For\n architectures like x86 real-mode, multiple address encodings can map to\n the same flat address offset.  This method tries to select between the different\n encodings.  If the flat offset cannot be encoded with the preferred segment,\n null is returned.",
+      "javadoc": "Given a flat address offset and a preferred segment, try\n to create an address that maps to the offset and is in the segment. For\n architectures like x86 real-mode, multiple address encodings can map to\n the same flat address offset.  This method tries to select between the different\n encodings.  If the flat offset cannot be encoded with the preferred segment,\n null is returned.\n@param flat is the flat offset\n@param preferredSegment is the 16-bit preferred segment value\n@return the segment encoded address or null",
+      "static": false,
+      "params": [
+        {
+          "name": "flat",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the flat offset"
+        },
+        {
+          "name": "preferredSegment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the 16-bit preferred segment value"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": "the segment encoded address or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddress",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AddressSpace#getAddress(java.lang.String)",
+      "static": false,
+      "params": [
+        {
+          "name": "addrString",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressFormatException",
+          "type_short": "AddressFormatException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrString",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "caseSensitive",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressFormatException",
+          "type_short": "AddressFormatException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "subtract",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AddressSpace#subtract(ghidra.program.model.address.Address,\n      long)",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AddressSpace#add(ghidra.program.model.address.Address,\n      long)",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "displacement",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseNonSegmented",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressFormatException",
+          "type_short": "AddressFormatException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "parseSegmented",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "segStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "offStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressFormatException",
+          "type_short": "AddressFormatException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getAddress",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AddressSpace#getAddress(long)",
+      "static": false,
+      "params": [
+        {
+          "name": "byteOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressInThisSpaceOnly",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AddressSpace#getAddressInThisSpaceOnly(long)",
+      "static": false,
+      "params": [
+        {
+          "name": "byteOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUncheckedAddress",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AbstractAddressSpace#getUncheckedAddress(long)",
+      "static": false,
+      "params": [
+        {
+          "name": "byteOffset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddress",
+      "comment": "Generates a segmented address with the given segment, offset, and overlay id.",
+      "javadoc": "Generates a segmented address with the given segment, offset, and overlay id.\n@param segment the segment\n@param segmentOffset the offset in the segment\n@return SegmentedAddress the newly created segmented address.",
+      "static": false,
+      "params": [
+        {
+          "name": "segment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the segment"
+        },
+        {
+          "name": "segmentOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the offset in the segment"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": "SegmentedAddress the newly created segmented address."
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextOpenSegment",
+      "comment": "Get the segment index for the first segment whose start address\n comes after the given address",
+      "javadoc": "Get the segment index for the first segment whose start address\n comes after the given address\n@param addr is the given address\n@return the segment index",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the given address"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the segment index"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPhysicalSpace",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AddressSpace#getPhysicalSpace()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddressSpace",
+        "type_short": "SegmentedAddressSpace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPointerSize",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.address.AddressSpace#getPointerSize()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,1240 @@
+{
+  "name": "AbstractVisualGraphLayout",
+  "comment": "A base layout that marries the Visual Graph and Jung layout interfaces.   This class allows\n you to create new layouts while stubbing the Jung layout methods.\n\n This class essentially takes in client-produced grid row and column indices and\n produces layout locations for those values.\n\n This an implementation the Jung Layout interface that handles most of the\n layout implementation for you.  Things to know:\n \n \tYou should call initialize() inside of your constructor\n  You must implement #performInitialGridLayout(VisualGraph) - this is where\n      you align your vertices (and optionally edge articulations) on a grid.  This grid\n      will be translated into layout space points for you.\n  If you wish to use articulation points in your edges, you must override\n      #usesEdgeArticulations() to return true.\n \n\n By default, this class will create x-position values that\n are aligned with the column\u0027s x-position.   You can override\n #getVertexLocation(VisualVertex, Column, Row, Rectangle) in order to center the\n vertex within its column\n #getCenteredVertexLocation(VisualVertex, Column, Row, Rectangle).  Also note though\n that if your layout returns true for #isCondensedLayout(),\n then the centering will be condensed and slightly off.",
+  "javadoc": "A base layout that marries the Visual Graph and Jung layout interfaces.   This class allows\n you to create new layouts while stubbing the Jung layout methods.\n\n \u003cP\u003eThis class essentially takes in client-produced grid row and column indices and\n produces layout locations for those values.\n\n \u003cP\u003eThis an implementation the Jung {@link Layout} interface that handles most of the\n layout implementation for you.  Things to know:\n \u003cUL\u003e\n \t\u003cLI\u003eYou should call initialize() inside of your constructor\u003c/LI\u003e\n  \u003cLI\u003eYou must implement {@link #performInitialGridLayout(VisualGraph)} - this is where\n      you align your vertices (and optionally edge articulations) on a grid.  This grid\n      will be translated into layout space points for you.\u003c/LI\u003e\n  \u003cLI\u003eIf you wish to use articulation points in your edges, you must override\n      {@link #usesEdgeArticulations()} to return true.\u003c/LI\u003e\n \u003c/UL\u003e\n\n \u003cp\u003e\u003ca id\u003d\"column_centering\"\u003e\u003c/A\u003eBy default, this class will create x-position values that\n are aligned with the column\u0027s x-position.   You can override\n {@link #getVertexLocation(VisualVertex, Column, Row, Rectangle)} in order to center the\n vertex within its column\n {@link #getCenteredVertexLocation(VisualVertex, Column, Row, Rectangle)}.  Also note though\n that if your layout returns true for {@link #isCondensedLayout()},\n then the centering will be condensed and slightly off.\n@param \u003cV\u003e the vertex type\n@param \u003cE\u003e the edge type\n@see GridLocationMap\n@see LayoutPositions",
+  "static": false,
+  "implements": [
+    "ghidra.graph.viewer.layout.VisualGraphLayout"
+  ],
+  "extends": "edu.uci.ics.jung.algorithms.layout.AbstractLayout",
+  "fields": [
+    {
+      "name": "listeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cghidra.graph.viewer.layout.LayoutListener\u003cV,E\u003e\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "edgeShapeTransformer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.shape.ArticulatedEdgeTransformer\u003cV,E\u003e",
+      "type_short": "ArticulatedEdgeTransformer",
+      "constant_value": null
+    },
+    {
+      "name": "edgeRenderer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.renderer.ArticulatedEdgeRenderer\u003cV,E\u003e",
+      "type_short": "ArticulatedEdgeRenderer",
+      "constant_value": null
+    },
+    {
+      "name": "layoutName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "layoutInitialized",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "graph",
+          "type_long": "edu.uci.ics.jung.graph.Graph\u003cV,E\u003e",
+          "type_short": "Graph",
+          "comment": ""
+        },
+        {
+          "name": "layoutName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLayoutName",
+      "comment": "Returns the name of this layout",
+      "javadoc": "Returns the name of this layout\n@return the name of this layout",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the name of this layout"
+      },
+      "throws": []
+    },
+    {
+      "name": "performInitialGridLayout",
+      "comment": "This is the method that is called to perform the actual layout.  While this method is\n running, the #monitor variable has been set so that you can call\n TaskMonitor#checkCanceled().",
+      "javadoc": "This is the method that is called to perform the actual layout.  While this method is\n running, the {@link #monitor} variable has been set so that you can call\n {@link TaskMonitor#checkCanceled()}.\n@param g the graph\n@return the new grid location\n@throws CancelledException if the operation was cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "g",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": "the graph"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.layout.GridLocationMap\u003cV,E\u003e",
+        "type_short": "GridLocationMap",
+        "comment": "the new grid location"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the operation was cancelled"
+        }
+      ]
+    },
+    {
+      "name": "setTaskMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEdgeRenderer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "edu.uci.ics.jung.visualization.renderers.BasicEdgeRenderer\u003cV,E\u003e",
+        "type_short": "BasicEdgeRenderer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEdgeShapeTransformer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "com.google.common.base.Function\u003cE,java.awt.Shape\u003e",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEdgeLabelRenderer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "edu.uci.ics.jung.visualization.renderers.Renderer.EdgeLabel\u003cV,E\u003e",
+        "type_short": "EdgeLabel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "usesEdgeArticulations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCondensedLayout",
+      "comment": "Returns true if this layout is in a condensed mode, which means to reduce space\n between vertices and edges.  This is useful to save space.  Subclasses may choose to\n have this setting controlled via an option that the user can toggle.",
+      "javadoc": "Returns true if this layout is in a condensed mode, which means to reduce space\n between vertices and edges.  This is useful to save space.  Subclasses may choose to\n have this setting controlled via an option that the user can toggle.\n@return true for a condensed layout",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true for a condensed layout"
+      },
+      "throws": []
+    },
+    {
+      "name": "initialize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "calculateLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "visualGraph",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": ""
+        },
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.layout.LayoutPositions\u003cV,E\u003e",
+        "type_short": "LayoutPositions",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doCalculateLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "g",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": ""
+        },
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.layout.LayoutPositions\u003cV,E\u003e",
+        "type_short": "LayoutPositions",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createClonedLayout",
+      "comment": "This class has implemented #cloneLayout(VisualGraph) in order to properly\n initialize location information in the layout so that subclasses do not have to.  Each\n subclass still needs to create the new instance of the layout that is being cloned, as\n this class does not know how to do so.",
+      "javadoc": "This class has implemented {@link #cloneLayout(VisualGraph)} in order to properly\n initialize location information in the layout so that subclasses do not have to.  Each\n subclass still needs to create the new instance of the layout that is being cloned, as\n this class does not know how to do so.\n@param newGraph the new graph for the new layout\n@return the new layout",
+      "static": false,
+      "params": [
+        {
+          "name": "newGraph",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": "the new graph for the new layout"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.layout.AbstractVisualGraphLayout\u003cV,E\u003e",
+        "type_short": "AbstractVisualGraphLayout",
+        "comment": "the new layout"
+      },
+      "throws": []
+    },
+    {
+      "name": "cloneLayout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newGraph",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.layout.VisualGraphLayout\u003cV,E\u003e",
+        "type_short": "VisualGraphLayout",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeClonedLayout",
+      "comment": "Takes the given layout and copies the layout information this layout into that layout",
+      "javadoc": "Takes the given layout and copies the layout information this layout into that layout\n@param newLayout the new layout to update",
+      "static": false,
+      "params": [
+        {
+          "name": "newLayout",
+          "type_long": "ghidra.graph.viewer.layout.AbstractVisualGraphLayout\u003cV,E\u003e",
+          "type_short": "AbstractVisualGraphLayout",
+          "comment": "the new layout to update"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyNewLocations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyNewArticulations",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "edgeArticulations",
+          "type_long": "java.util.Map\u003cE,java.util.List\u003cjava.awt.geom.Point2D\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "positionInLayoutSpaceFromGrid",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "visualGraph",
+          "type_long": "ghidra.graph.VisualGraph\u003cV,E\u003e",
+          "type_short": "VisualGraph",
+          "comment": ""
+        },
+        {
+          "name": "gridLocations",
+          "type_long": "ghidra.graph.viewer.layout.GridLocationMap\u003cV,E\u003e",
+          "type_short": "GridLocationMap",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.layout.LayoutPositions\u003cV,E\u003e",
+        "type_short": "LayoutPositions",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "positionVerticesInLayoutSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "transformer",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        },
+        {
+          "name": "vertices",
+          "type_long": "java.util.Collection\u003cV\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        },
+        {
+          "name": "layoutLocations",
+          "type_long": "ghidra.graph.viewer.layout.LayoutLocationMap\u003cV,E\u003e",
+          "type_short": "LayoutLocationMap",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getVertexLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "col",
+          "type_long": "ghidra.graph.viewer.layout.Column",
+          "type_short": "Column",
+          "comment": ""
+        },
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": ""
+        },
+        {
+          "name": "bounds",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.geom.Point2D",
+        "type_short": "Point2D",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCenteredVertexLocation",
+      "comment": "Returns a location for the given vertex that is centered within its cell",
+      "javadoc": "Returns a location for the given vertex that is centered within its cell\n@param v the vertex\n@param col the vertex\u0027s column in the grid\n@param row the vertex\u0027s row in the grid\n@param bounds the bounds of the vertex in the layout space\n@return the centered location",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": "the vertex"
+        },
+        {
+          "name": "col",
+          "type_long": "ghidra.graph.viewer.layout.Column",
+          "type_short": "Column",
+          "comment": "the vertex\u0027s column in the grid"
+        },
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": "the vertex\u0027s row in the grid"
+        },
+        {
+          "name": "bounds",
+          "type_long": "java.awt.Rectangle",
+          "type_short": "Rectangle",
+          "comment": "the bounds of the vertex in the layout space"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.geom.Point2D",
+        "type_short": "Point2D",
+        "comment": "the centered location"
+      },
+      "throws": []
+    },
+    {
+      "name": "positionEdgeArticulationsInLayoutSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "transformer",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        },
+        {
+          "name": "vertexLayoutLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "edges",
+          "type_long": "java.util.Collection\u003cE\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        },
+        {
+          "name": "layoutLocations",
+          "type_long": "ghidra.graph.viewer.layout.LayoutLocationMap\u003cV,E\u003e",
+          "type_short": "LayoutLocationMap",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cE,java.util.List\u003cjava.awt.geom.Point2D\u003e\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getEdgeLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "col",
+          "type_long": "ghidra.graph.viewer.layout.Column",
+          "type_short": "Column",
+          "comment": ""
+        },
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.geom.Point2D",
+        "type_short": "Point2D",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCenteredEdgeLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "col",
+          "type_long": "ghidra.graph.viewer.layout.Column",
+          "type_short": "Column",
+          "comment": ""
+        },
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.geom.Point2D",
+        "type_short": "Point2D",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTotalGraphSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertexLocationMap",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "vertexShapeTransformer",
+          "type_long": "com.google.common.base.Function\u003cV,java.awt.Shape\u003e",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Rectangle",
+        "type_short": "Rectangle",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "condenseVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rows",
+          "type_long": "java.util.List\u003cghidra.graph.viewer.layout.Row\u003cV\u003e\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "newLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "transformer",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        },
+        {
+          "name": "centerX",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        },
+        {
+          "name": "centerY",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "condenseEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rows",
+          "type_long": "java.util.List\u003cghidra.graph.viewer.layout.Row\u003cV\u003e\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "newEdgeArticulations",
+          "type_long": "java.util.Map\u003cE,java.util.List\u003cjava.awt.geom.Point2D\u003e\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "centerX",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        },
+        {
+          "name": "centerY",
+          "type_long": "double",
+          "type_short": "double",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCondenseFactor",
+      "comment": "The amount (from 0 to 1.0) by which to condense the vertices of the graph when that\n feature is enabled.  The default is .5 (50%).  A value of 1.0 would be fully-condensed\n such that all vertices are aligned on the x-axis on the center of the graph.",
+      "javadoc": "The amount (from 0 to 1.0) by which to condense the vertices of the graph when that\n feature is enabled.  The default is .5 (50%).  A value of 1.0 would be fully-condensed\n such that all vertices are aligned on the x-axis on the center of the graph.\n@return the condense factor",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "double",
+        "type_short": "double",
+        "comment": "the condense factor"
+      },
+      "throws": []
+    },
+    {
+      "name": "unclip",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rows",
+          "type_long": "java.util.List\u003cghidra.graph.viewer.layout.Row\u003cV\u003e\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "newLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "transformer",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveLeft",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": ""
+        },
+        {
+          "name": "moveLeftStartIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "vertexLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "transformer",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveRight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": ""
+        },
+        {
+          "name": "moveRightStartIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "vertexLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "transformer",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLeftVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "V",
+        "type_short": "V",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRightVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "ghidra.graph.viewer.layout.Row\u003cV\u003e",
+          "type_short": "Row",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "V",
+        "type_short": "V",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveLeftIfOverlaps",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertexLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "xform",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        },
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "rightVertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveRightIfOverlaps",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertexLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "xform",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        },
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "leftVertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveIfOverlaps",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertexLocations",
+          "type_long": "java.util.Map\u003cV,java.awt.geom.Point2D\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "xform",
+          "type_long": "ghidra.graph.viewer.vertex.VisualGraphVertexShapeTransformer\u003cV\u003e",
+          "type_short": "VisualGraphVertexShapeTransformer",
+          "comment": ""
+        },
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "otherVertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "moveRight",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasCrossed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "moveRight",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "p1",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        },
+        {
+          "name": "p2",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addLayoutListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.graph.viewer.layout.LayoutListener\u003cV,E\u003e",
+          "type_short": "LayoutListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeLayoutListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.graph.viewer.layout.LayoutListener\u003cV,E\u003e",
+          "type_short": "LayoutListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireVertexLocationChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "p",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireVertexLocationChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "p",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.graph.viewer.layout.LayoutListener.ChangeType",
+          "type_short": "ChangeType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "location",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "location",
+          "type_long": "java.awt.geom.Point2D",
+          "type_short": "Point2D",
+          "comment": ""
+        },
+        {
+          "name": "changeType",
+          "type_long": "ghidra.graph.viewer.layout.LayoutListener.ChangeType",
+          "type_short": "ChangeType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

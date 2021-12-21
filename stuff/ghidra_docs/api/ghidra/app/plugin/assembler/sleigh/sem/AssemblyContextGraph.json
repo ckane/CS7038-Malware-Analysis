@@ -1,0 +1,227 @@
+{
+  "name": "AssemblyContextGraph",
+  "comment": "A graph of possible context changes via the application of various constructors\n \n This is used primarily to find optimal paths for the application of recursive rules, i.e., those\n of the form I \u003d I. These cannot be resolved without some form of semantic analysis. The most\n notable disadvantage to all of this is that you no longer get all of the possible assemblies,\n but only those with the fewest rule applications.\n \n Conceivably, this may also be used to prune some possibilities during semantic resolution of a\n parse tree. Even better, it may be possible to derive a grammar which accounts for the context\n changes already; however, it\u0027s unclear how many rules this will generate, and consequently, how\n much larger its LALR(1) parser would become.",
+  "javadoc": "A graph of possible context changes via the application of various constructors\n \n This is used primarily to find optimal paths for the application of recursive rules, i.e., those\n of the form I \u003d\u0026gt; I. These cannot be resolved without some form of semantic analysis. The most\n notable disadvantage to all of this is that you no longer get all of the possible assemblies,\n but only those with the fewest rule applications.\n \n Conceivably, this may also be used to prune some possibilities during semantic resolution of a\n parse tree. Even better, it may be possible to derive a grammar which accounts for the context\n changes already; however, it\u0027s unclear how many rules this will generate, and consequently, how\n much larger its LALR(1) parser would become.",
+  "static": false,
+  "implements": [
+    "ghidra.graph.GImplicitDirectedGraph"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "semantics",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.util.Set\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyConstructorSemantic\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "grammar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+      "type_short": "AssemblyGrammar",
+      "constant_value": null
+    },
+    {
+      "name": "lang",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguage",
+      "type_short": "SleighLanguage",
+      "constant_value": null
+    },
+    {
+      "name": "dijkstra",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.algo.DijkstraShortestPathsAlgorithm\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Vertex,ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Edge\u003e",
+      "type_short": "DijkstraShortestPathsAlgorithm",
+      "constant_value": null
+    },
+    {
+      "name": "cachedVertices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Vertex\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "cachedEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Edge\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "cachedOutEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Vertex,java.util.Set\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Edge\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Build the context change graph for a given language and grammar\n \n The grammar must have been constructed from the given language. The language is used just to\n obtain the most common default context.\n \n At the moment, this graph only expands the recursive rules at the root constructor table,\n i.e., \"instruction\". Thus, the assembler will not be able to process any language that has\n purely-recursive rules at subconstructors.",
+      "javadoc": "Build the context change graph for a given language and grammar\n \n The grammar must have been constructed from the given language. The language is used just to\n obtain the most common default context.\n \n At the moment, this graph only expands the recursive rules at the root constructor table,\n i.e., \"instruction\". Thus, the assembler will not be able to process any language that has\n \u003ci\u003epurely\u003c/i\u003e-recursive rules at subconstructors.\n@param lang the language\n@param grammar the grammar derived from the given language",
+      "static": false,
+      "params": [
+        {
+          "name": "lang",
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguage",
+          "type_short": "SleighLanguage",
+          "comment": "the language"
+        },
+        {
+          "name": "grammar",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+          "type_short": "AssemblyGrammar",
+          "comment": "the grammar derived from the given language"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "computeOptimalApplications",
+      "comment": "Compute the optimal, i.e., fewest, sequences of applications to resolve a given context to\n the language\u0027s default context.",
+      "javadoc": "Compute the optimal, i.e., fewest, sequences of applications to resolve a given context to\n the language\u0027s default context.\n@param src presumably, the language\u0027s default context\n@param srcTable the name of the SLEIGH constructor table, presumably \"instruction\"\n@param dst the context block being resolved\n@param dstTable the name of the SLEIGH constructor table being resolved\n@return a collection of sequences of constructor applications from {@code src} to\n         {@code dst}\n \n NOTE: For assembly, the sequences will need to be applied right-to-left.",
+      "static": false,
+      "params": [
+        {
+          "name": "src",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": "presumably, the language\u0027s default context"
+        },
+        {
+          "name": "srcTable",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the SLEIGH constructor table, presumably \"instruction\""
+        },
+        {
+          "name": "dst",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": "the context block being resolved"
+        },
+        {
+          "name": "dstTable",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the SLEIGH constructor table being resolved"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cjava.util.Deque\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyConstructorSemantic\u003e\u003e",
+        "type_short": "Collection",
+        "comment": "a collection of sequences of constructor applications from  to\n         \n \n NOTE: For assembly, the sequences will need to be applied right-to-left."
+      },
+      "throws": []
+    },
+    {
+      "name": "gatherSemantics",
+      "comment": "Gather all the semantics that can be used as state transitions\n \n Currently, only semantics from  constructors are taken.",
+      "javadoc": "Gather all the semantics that can be used as state transitions\n \n Currently, only semantics from {@code :^instruction} constructors are taken.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "computeOutEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "from",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Edge\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInEdges",
+      "comment": "This operation is not supported.\n \n I could implement this using the cached edges, but that may not be semantically, what a path\n computation algorithm actually requires. Instead, I will assume the algorithm only explores\n the graph in the same direction as its edges. If not, I will hear about it quickly.",
+      "javadoc": "This operation is not supported.\n \n I could implement this using the cached edges, but that may not be semantically, what a path\n computation algorithm actually requires. Instead, I will assume the algorithm only explores\n the graph in the same direction as its edges. If not, I will hear about it quickly.",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Edge\u003e",
+        "type_short": "Collection",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOutEdges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Vertex",
+          "type_short": "Vertex",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Edge\u003e",
+        "type_short": "Collection",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "copy",
+      "comment": "Returns a copy of the graph explored so far",
+      "javadoc": "Returns a copy of the graph explored so far",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.GDirectedGraph\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Vertex,ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph.Edge\u003e",
+        "type_short": "GDirectedGraph",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

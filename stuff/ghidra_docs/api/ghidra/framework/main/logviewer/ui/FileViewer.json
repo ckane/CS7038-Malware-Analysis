@@ -1,0 +1,261 @@
+{
+  "name": "FileViewer",
+  "comment": "UI for viewing the contents of very large files efficiently. Pieces of a file are read in using\n the ChunkReader, which are then displayed line-by-line in FVTable.  As\n users scroll up/down, new sections of the file are swapped in as appropriate.\n\n Notes:\n 1. The viewer consists of a simple JTable and a custom JSlider. The table displays lines of\n    text described by Chunk objects. The number of chunks visible at any given time\n    is restricted by the ChunkModel#MAX_VISIBLE_CHUNKS property.\n\n 2. Because only part of the file is loaded into the viewable table at any given time, the\n    built-in scrollbar associated with the scrollpane cannot be used. We want the scroll bar\n    maximum size to reflect the total size of the file, not just what\u0027s in view at the time. So\n    we use our own slider implementation (FVSlider) and manage the\n    size/position ourselves. If you\u0027re asking why a JSlider is used instead of a JScrollPane,\n    it\u0027s because the former is more easily configuration for what we need.\n\n 3. Communication between modules (the table, the slider, the viewport utility, etc...) is done\n    almost exclusively via events, using the custom FVEvent framework.",
+  "javadoc": "UI for viewing the contents of very large files efficiently. Pieces of a file are read in using\n the {@link ChunkReader}, which are then displayed line-by-line in {@link FVTable}.  As\n users scroll up/down, new sections of the file are swapped in as appropriate.\n\n Notes:\n 1. The viewer consists of a simple JTable and a custom JSlider. The table displays lines of\n    text described by {@link Chunk} objects. The number of chunks visible at any given time\n    is restricted by the {@link ChunkModel#MAX_VISIBLE_CHUNKS} property.\n\n 2. Because only part of the file is loaded into the viewable table at any given time, the\n    built-in scrollbar associated with the scrollpane cannot be used. We want the scroll bar\n    maximum size to reflect the total size of the file, not just what\u0027s in view at the time. So\n    we use our own slider implementation ({@link FVSlider}) and manage the\n    size/position ourselves. If you\u0027re asking why a JSlider is used instead of a JScrollPane,\n    it\u0027s because the former is more easily configuration for what we need.\n\n 3. Communication between modules (the table, the slider, the viewport utility, etc...) is done\n    almost exclusively via events, using the custom {@link FVEvent} framework.",
+  "static": false,
+  "implements": [
+    "java.util.Observer"
+  ],
+  "extends": "javax.swing.JPanel",
+  "fields": [
+    {
+      "name": "table",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.logviewer.ui.FVTable",
+      "type_short": "FVTable",
+      "constant_value": null
+    },
+    {
+      "name": "scrollPane",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JScrollPane",
+      "type_short": "JScrollPane",
+      "constant_value": null
+    },
+    {
+      "name": "slider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.logviewer.ui.FVSlider",
+      "type_short": "FVSlider",
+      "constant_value": null
+    },
+    {
+      "name": "toolbar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.logviewer.ui.FVToolBar",
+      "type_short": "FVToolBar",
+      "constant_value": null
+    },
+    {
+      "name": "reader",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.logviewer.model.ChunkReader",
+      "type_short": "ChunkReader",
+      "constant_value": null
+    },
+    {
+      "name": "viewportUtility",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.logviewer.ui.ViewportUtility",
+      "type_short": "ViewportUtility",
+      "constant_value": null
+    },
+    {
+      "name": "model",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.logviewer.model.ChunkModel",
+      "type_short": "ChunkModel",
+      "constant_value": null
+    },
+    {
+      "name": "eventListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.logviewer.event.FVEventListener",
+      "type_short": "FVEventListener",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor. Sets up the UI elements and subscribes to events.",
+      "javadoc": "Constructor. Sets up the UI elements and subscribes to events.\n@param reader\n@param model\n@param eventListener\n@throws IOException\n@throws FileNotFoundException",
+      "static": false,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.framework.main.logviewer.model.ChunkReader",
+          "type_short": "ChunkReader",
+          "comment": ""
+        },
+        {
+          "name": "model",
+          "type_long": "ghidra.framework.main.logviewer.model.ChunkModel",
+          "type_short": "ChunkModel",
+          "comment": ""
+        },
+        {
+          "name": "eventListener",
+          "type_long": "ghidra.framework.main.logviewer.event.FVEventListener",
+          "type_short": "FVEventListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.FileNotFoundException",
+          "type_short": "FileNotFoundException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "update",
+      "comment": "Part of the Java Observer pattern. This class is a subscriber to all\n FVEventListener events, so when those are fired, they will be received here.\n\n Note: this method invokes the #handleFVEvent(FVEvent) method on the Swing\n thread to ensure that we will make all UI updates on the EDT.",
+      "javadoc": "Part of the Java {@link Observer} pattern. This class is a subscriber to all\n {@link FVEventListener} events, so when those are fired, they will be received here.\n\n Note: this method invokes the {@link #handleFVEvent(FVEvent)} method on the Swing\n thread to ensure that we will make all UI updates on the EDT.\n@param o\n@param arg",
+      "static": false,
+      "params": [
+        {
+          "name": "o",
+          "type_long": "java.util.Observable",
+          "type_short": "Observable",
+          "comment": ""
+        },
+        {
+          "name": "arg",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "handleFVEvent",
+      "comment": "Processes events received via the FVEvent mechanism.",
+      "javadoc": "Processes events received via the {@link FVEvent} mechanism.\n@param event the event type received",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.main.logviewer.event.FVEvent",
+          "type_short": "FVEvent",
+          "comment": "the event type received"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setScrollLock",
+      "comment": "Sets the scroll lock state.",
+      "javadoc": "Sets the scroll lock state.\n@param lock if true, scrolling will be locked",
+      "static": false,
+      "params": [
+        {
+          "name": "lock",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, scrolling will be locked"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "viewEndOfFile",
+      "comment": "Loads the last chunk and moves the viewport accordingly.",
+      "javadoc": "Loads the last chunk and moves the viewport accordingly.",
+      "static": false,
+      "params": [
+        {
+          "name": "updateSlider",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "viewTopOfFile",
+      "comment": "Loads the first chunk and moves the viewport accordingly.",
+      "javadoc": "Loads the first chunk and moves the viewport accordingly.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateViewToFilePos",
+      "comment": "Updates the view to show the correct portion of the file specified by the given\n file position.",
+      "javadoc": "Updates the view to show the correct portion of the file specified by the given\n file position.\n@param filePos\n@param model",
+      "static": false,
+      "params": [
+        {
+          "name": "filePos",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reloadFile",
+      "comment": "Reloads the file. When this happens we maintain the position of the slider, unless the\n scroll lock capability is turned OFF; in that case we will display new text that is\n appended to the file (if the user is also at the bottom of the file).",
+      "javadoc": "Reloads the file. When this happens we maintain the position of the slider, unless the\n scroll lock capability is turned OFF; in that case we will display new text that is\n appended to the file (if the user is also at the bottom of the file).",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

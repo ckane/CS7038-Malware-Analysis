@@ -1,0 +1,365 @@
+{
+  "name": "SharedStubKeyBindingAction",
+  "comment": "A stub action that allows key bindings to be edited through the key bindings options.  This \n allows plugins to create actions that share keybindings without having to manage those \n keybindings themselves.\n \n Some ways this class is used:\n \n \tAs a central action to manage key bindings for multiple actions from different clients \n      (plugins) that are conceptually the same.  When the plugins are loaded \n      these actions get registered and are wired to listen to key binding changes to this stub. \n \t\n  As a placeholder action to manage key bindings for actions that have not yet been \n      registered and may not get registered during the lifetime of a single tool session.\n      This can happen when a plugin has transient component providers that only get shown\n      upon a user request.  This stub allows the key binding for those actions to be managed,\n      even if they do not get registered when the tool is shown.\n  \n \n \n Clients should not be using this class directly.",
+  "javadoc": "A stub action that allows key bindings to be edited through the key bindings options.  This \n allows plugins to create actions that share keybindings without having to manage those \n keybindings themselves.\n \n \u003cp\u003eSome ways this class is used:\n \u003col\u003e\n \t\u003cli\u003eAs a central action to manage key bindings for multiple actions from different clients \n      (plugins) that are conceptually the same.  When the plugins are loaded \n      these actions get registered and are wired to listen to key binding changes to this stub. \n \t\u003c/li\u003e\n  \u003cli\u003eAs a placeholder action to manage key bindings for actions that have not yet been \n      registered and may not get registered during the lifetime of a single tool session.\n      This can happen when a plugin has transient component providers that only get shown\n      upon a user request.  This stub allows the key binding for those actions to be managed,\n      even if they do not get registered when the tool is shown.\n  \u003c/li\u003e\n \u003c/ol\u003e\n \n \u003cp\u003eClients should not be using this class directly.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.options.OptionsChangeListener"
+  ],
+  "extends": "docking.action.DockingAction",
+  "fields": [
+    {
+      "name": "SHARED_OWNER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Shared\""
+    },
+    {
+      "name": "clientActions",
+      "comment": "We save the client actions for later validate and options updating.  We also need the\n default key binding data, which is stored in the value of this map.\n \n Note: This collection is weak; the actions will stay as long as they are \n \t\t registered in the tool.",
+      "javadoc": "We save the client actions for later validate and options updating.  We also need the\n default key binding data, which is stored in the value of this map.\n \n Note: This collection is weak; the actions will stay as long as they are \n \t\t registered in the tool.",
+      "static": false,
+      "type_long": "java.util.WeakHashMap\u003cdocking.action.DockingActionIf,javax.swing.KeyStroke\u003e",
+      "type_short": "WeakHashMap",
+      "constant_value": null
+    },
+    {
+      "name": "keyBindingOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.options.ToolOptions",
+      "type_short": "ToolOptions",
+      "constant_value": null
+    },
+    {
+      "name": "actionOwners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "org.apache.commons.collections4.Bag\u003cjava.lang.String\u003e",
+      "type_short": "Bag",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new dummy action by the given name and default keystroke value",
+      "javadoc": "Creates a new dummy action by the given name and default keystroke value\n@param name The name of the action--this will be displayed in the options as the name of\n             key binding\u0027s action\n@param defaultKs the default key stroke for this stub.  The key stroke will be validated\n        each time an action is added to this stub to ensure that the defaults are in sync.\n@param options the tool\u0027s key binding options",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The name of the action--this will be displayed in the options as the name of\n             key binding\u0027s action"
+        },
+        {
+          "name": "defaultKs",
+          "type_long": "javax.swing.KeyStroke",
+          "type_short": "KeyStroke",
+          "comment": "the default key stroke for this stub.  The key stroke will be validated\n        each time an action is added to this stub to ensure that the defaults are in sync."
+        },
+        {
+          "name": "options",
+          "type_long": "ghidra.framework.options.ToolOptions",
+          "type_short": "ToolOptions",
+          "comment": "the tool\u0027s key binding options"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addActionOwner",
+      "comment": "Adds the given owner name to this stub.  This is used to display all known clients of\n the action represented by this stub.  Normally, when this class has actions, the names\n of each action\u0027s owner would be used directly.  However, this class can also be used as \n a placeholder, when no actions have yet been registered.  In that case, the owner has \n to be set directly on this stub.",
+      "javadoc": "Adds the given owner name to this stub.  This is used to display all known clients of\n the action represented by this stub.  Normally, when this class has actions, the names\n of each action\u0027s owner would be used directly.  However, this class can also be used as \n a placeholder, when no actions have yet been registered.  In that case, the owner has \n to be set directly on this stub.\n@param owner the name of the client that owns the actions that may get registered with\n        this stub",
+      "static": false,
+      "params": [
+        {
+          "name": "owner",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the client that owns the actions that may get registered with\n        this stub"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeClientAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addClientAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOwnerDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "validateActionsHaveTheSameDefaultKeyStroke",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newAction",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.KeyStroke",
+        "type_short": "KeyStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateActionKeyStrokeFromOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "action",
+          "type_long": "docking.action.DockingActionIf",
+          "type_short": "DockingActionIf",
+          "comment": ""
+        },
+        {
+          "name": "defaultKs",
+          "type_long": "javax.swing.KeyStroke",
+          "type_short": "KeyStroke",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyStrokeFromOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "validatedKeyStroke",
+          "type_long": "javax.swing.KeyStroke",
+          "type_short": "KeyStroke",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.KeyStroke",
+        "type_short": "KeyStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyStroke",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "docking.action.KeyBindingData",
+          "type_short": "KeyBindingData",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.KeyStroke",
+        "type_short": "KeyStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "optionsChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "options",
+          "type_long": "ghidra.framework.options.ToolOptions",
+          "type_short": "ToolOptions",
+          "comment": ""
+        },
+        {
+          "name": "optionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "oldValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "actionPerformed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "context",
+          "type_long": "docking.ActionContext",
+          "type_short": "ActionContext",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isAddToPopup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "context",
+          "type_long": "docking.ActionContext",
+          "type_short": "ActionContext",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEnabledForContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "context",
+          "type_long": "docking.ActionContext",
+          "type_short": "ActionContext",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,962 @@
+{
+  "name": "LocalManagedBufferFile",
+  "comment": "LocalManagedBufferFile implements a BufferFile as block-oriented\n random-access file which utilizes a BufferFileManager to \n identify and facilitate versioning of buffer files.  This type of\n buffer file supports both save-as and save operations.  The file\n format used is identical to a LocalBufferFile, although additional\n support is provided for associated files which facilitate versioning\n (e.g., ChangeMapFile, VersionFile, and changed data files).",
+  "javadoc": "\u003ccode\u003eLocalManagedBufferFile\u003c/code\u003e implements a BufferFile as block-oriented\n random-access file which utilizes a \u003ccode\u003eBufferFileManager\u003c/code\u003e to \n identify and facilitate versioning of buffer files.  This type of\n buffer file supports both save-as and save operations.  The file\n format used is identical to a LocalBufferFile, although additional\n support is provided for associated files which facilitate versioning\n (e.g., ChangeMapFile, VersionFile, and changed data files).",
+  "static": false,
+  "implements": [
+    "db.buffers.ManagedBufferFile"
+  ],
+  "extends": "db.buffers.LocalBufferFile",
+  "fields": [
+    {
+      "name": "versionFileHandler",
+      "comment": "versionFileHandler provides original buffer file data for \n older non-updatable versions.",
+      "javadoc": "\u003ccode\u003eversionFileHandler\u003c/code\u003e provides original buffer file data for \n older non-updatable versions.",
+      "static": false,
+      "type_long": "db.buffers.VersionFileHandler",
+      "type_short": "VersionFileHandler",
+      "constant_value": null
+    },
+    {
+      "name": "versionOutFile",
+      "comment": "versionOutFile tracks changes made to a pre-save file for \n reverse reconstruction.",
+      "javadoc": "\u003ccode\u003eversionOutFile\u003c/code\u003e tracks changes made to a pre-save file for \n reverse reconstruction.",
+      "static": false,
+      "type_long": "db.buffers.VersionFile",
+      "type_short": "VersionFile",
+      "constant_value": null
+    },
+    {
+      "name": "changeMap",
+      "comment": "changeMap tracks buffers which have been set.",
+      "javadoc": "\u003ccode\u003echangeMap\u003c/code\u003e tracks buffers which have been set.",
+      "static": false,
+      "type_long": "db.buffers.ChangeMapFile",
+      "type_short": "ChangeMapFile",
+      "constant_value": null
+    },
+    {
+      "name": "version",
+      "comment": "version indicates the version of this buffer file.  A value\n of 0 indicates that no version has been assigned.",
+      "javadoc": "\u003ccode\u003eversion\u003c/code\u003e indicates the version of this buffer file.  A value\n of 0 indicates that no version has been assigned.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "minChangeDataVer",
+      "comment": "minChangeDataVer indicates the minimum change-data version \n which should be associated with this buffer file.  A value of -1 indicates\n that no change-data is associated with this file.  If set, the maximum \n change-data version always equals this buffer file\u0027s version minus one.",
+      "javadoc": "\u003ccode\u003eminChangeDataVer\u003c/code\u003e indicates the minimum change-data version \n which should be associated with this buffer file.  A value of -1 indicates\n that no change-data is associated with this file.  If set, the maximum \n change-data version always equals this buffer file\u0027s version minus one.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "nextChangeDataVer",
+      "comment": "nextChangeDataVer is utilized by the getNextChangeDataFile \n method in iterating through the various change-data files.",
+      "javadoc": "\u003ccode\u003enextChangeDataVer\u003c/code\u003e is utilized by the getNextChangeDataFile \n method in iterating through the various change-data files.\n@see #getNextChangeDataFile",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "comment",
+      "comment": "comment stores the comment which will be passed to bfMgr when\n this new file version is stored.  This applies to writable (!readOnly) files\n which have bfMgr set.",
+      "javadoc": "\u003ccode\u003ecomment\u003c/code\u003e stores the comment which will be passed to bfMgr when\n this new file version is stored.  This applies to writable (!readOnly) files\n which have bfMgr set.",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "bfMgr",
+      "comment": "bfMgr manages the various files associated with this buffer \n file.  When working with versioned files or when Save support is \n required bfMgr must be set.  The bufMgr will be null for\n a read-only non-updateable file.",
+      "javadoc": "\u003ccode\u003ebfMgr\u003c/code\u003e manages the various files associated with this buffer \n file.  When working with versioned files or when Save support is \n required \u003ccode\u003ebfMgr\u003c/code\u003e must be set.  The bufMgr will be null for\n a read-only non-updateable file.",
+      "static": false,
+      "type_long": "db.buffers.BufferFileManager",
+      "type_short": "BufferFileManager",
+      "constant_value": null
+    },
+    {
+      "name": "checkinId",
+      "comment": "checkinId is the checkin ID needed by bfMgr when a new\n version is created.",
+      "javadoc": "\u003ccode\u003echeckinId\u003c/code\u003e is the checkin ID needed by bfMgr when a new\n version is created.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "preSaveFile",
+      "comment": "preSaveFile is a buffer file which contains a copy of\n this buffer file.  The preSaveFile object is intantiated at\n the start of the pre-save task (see startPreSave()).  If this object is\n not null and the preSaveThread is not running, the preSaveFile\n can be used as the basis of a Save operation.",
+      "javadoc": "\u003ccode\u003epreSaveFile\u003c/code\u003e is a buffer file which contains a copy of\n this buffer file.  The \u003ccode\u003epreSaveFile\u003c/code\u003e object is intantiated at\n the start of the pre-save task (see startPreSave()).  If this object is\n not null and the preSaveThread is not running, the \u003ccode\u003epreSaveFile\u003c/code\u003e\n can be used as the basis of a Save operation.\n@see #startPreSave\n@see #getSaveFile",
+      "static": false,
+      "type_long": "db.buffers.LocalManagedBufferFile",
+      "type_short": "LocalManagedBufferFile",
+      "constant_value": null
+    },
+    {
+      "name": "saveFile",
+      "comment": "saveFile is the preSaveFile which is handed-out\n by the getSaveFile method.  While not null, a Save is in-progress.\n The saveCompleted method must be invoked to terminate a Save operation on\n the saveFile.",
+      "javadoc": "\u003ccode\u003esaveFile\u003c/code\u003e is the \u003ccode\u003epreSaveFile\u003c/code\u003e which is handed-out\n by the getSaveFile method.  While not null, a Save is in-progress.\n The saveCompleted method must be invoked to terminate a Save operation on\n the saveFile.\n@see #getSaveFile\n@see #saveCompleted",
+      "static": false,
+      "type_long": "db.buffers.LocalManagedBufferFile",
+      "type_short": "LocalManagedBufferFile",
+      "constant_value": null
+    },
+    {
+      "name": "saveChangeFile",
+      "comment": "saveChangeFile is a buffer file which contains application\n specific change-data associated with a new version of this file.\n saveChangeFile is instantiated when the getSaveFile method\n is successfully invoked.  This file is committed when the saveCompleted\n method is invoked.",
+      "javadoc": "\u003ccode\u003esaveChangeFile\u003c/code\u003e is a buffer file which contains application\n specific change-data associated with a new version of this file.\n \u003ccode\u003esaveChangeFile\u003c/code\u003e is instantiated when the getSaveFile method\n is successfully invoked.  This file is committed when the saveCompleted\n method is invoked.",
+      "static": false,
+      "type_long": "db.buffers.LocalBufferFile",
+      "type_short": "LocalBufferFile",
+      "constant_value": null
+    },
+    {
+      "name": "preSaveFailed",
+      "comment": "preSaveFailed is set true when the pre-save is successfully\n terminated before completion.",
+      "javadoc": "\u003ccode\u003epreSaveFailed\u003c/code\u003e is set true when the pre-save is successfully\n terminated before completion.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "preSaveBackoff",
+      "comment": "preSaveBackoff is set true whenever an application read I/O\n operation is performed on this file.  If the pre-save process is running,\n setting true will cause the pre-save to backoff for a short period.",
+      "javadoc": "\u003ccode\u003epreSaveBackoff\u003c/code\u003e is set true whenever an application read I/O\n operation is performed on this file.  If the pre-save process is running,\n setting true will cause the pre-save to backoff for a short period.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "preSaveLock",
+      "comment": "preSaveLock is used to arbitrate access to the preSaveBackoff flag.",
+      "javadoc": "\u003ccode\u003epreSaveLock\u003c/code\u003e is used to arbitrate access to the preSaveBackoff flag.",
+      "static": false,
+      "type_long": "java.lang.Object",
+      "type_short": "Object",
+      "constant_value": null
+    },
+    {
+      "name": "preSaveTask",
+      "comment": "preSaveThread corresponds to the PreSaveTask which creates the \n preSaveFile when this buffer file is updateable.",
+      "javadoc": "\u003ccode\u003epreSaveThread\u003c/code\u003e corresponds to the PreSaveTask which creates the \n preSaveFile when this buffer file is updateable.",
+      "static": false,
+      "type_long": "db.buffers.LocalManagedBufferFile.PreSaveTask",
+      "type_short": "PreSaveTask",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Open the initial version of a block file for writing.",
+      "javadoc": "Open the initial version of a block file for writing.\n@param bufferSize user buffer size\n@param bfManager buffer file version manager\n@param checkinId the checkinId for creating a versioned buffer file.\n@throws IOException if an IO error occurs or the incorrect magicNumber\n was read from the file.",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "user buffer size"
+        },
+        {
+          "name": "bfManager",
+          "type_long": "db.buffers.BufferFileManager",
+          "type_short": "BufferFileManager",
+          "comment": "buffer file version manager"
+        },
+        {
+          "name": "checkinId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the checkinId for creating a versioned buffer file."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an IO error occurs or the incorrect magicNumber\n was read from the file."
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Open the current version of an existing block file as read-only.",
+      "javadoc": "Open the current version of an existing block file as read-only.\n@param bfManager buffer file version manager\n@param versionUpdateEnabled if true Save support is enabled (pre-save starts automatically).\n@param minChangeDataVer indicates the oldest change data buffer file to be\n included.  A -1 indicates only the last change data buffer file is applicable.\n@param checkinId the checkinId for versioned buffer files which are opened for update.\n@throws IOException if an IO error occurs or the incorrect magicNumber\n was read from the file.",
+      "static": false,
+      "params": [
+        {
+          "name": "bfManager",
+          "type_long": "db.buffers.BufferFileManager",
+          "type_short": "BufferFileManager",
+          "comment": "buffer file version manager"
+        },
+        {
+          "name": "versionUpdateEnabled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true Save support is enabled (pre-save starts automatically)."
+        },
+        {
+          "name": "minChangeDataVer",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "indicates the oldest change data buffer file to be\n included.  A -1 indicates only the last change data buffer file is applicable."
+        },
+        {
+          "name": "checkinId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the checkinId for versioned buffer files which are opened for update."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an IO error occurs or the incorrect magicNumber\n was read from the file."
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Open an older version of an existing buffer file as read-only and NOT UPDATEABLE (bfMgr remains null).\n Version files must exist for all versions starting with the requested version.\n These version files will be used in conjunction with the current buffer file\n to emulate an older version buffer file.",
+      "javadoc": "Open an older version of an existing buffer file as read-only and NOT UPDATEABLE (bfMgr remains null).\n Version files must exist for all versions starting with the requested version.\n These version files will be used in conjunction with the current buffer file\n to emulate an older version buffer file.\n@param bfManager buffer file version manager\n@param version version of file to be opened\n@param minChangeDataVer indicates the oldest change data buffer file to be\n included.  A -1 indicates only the last change data buffer file is applicable.\n@throws IOException if an IO error occurs or a problem with the version\n reconstruction.",
+      "static": false,
+      "params": [
+        {
+          "name": "bfManager",
+          "type_long": "db.buffers.BufferFileManager",
+          "type_short": "BufferFileManager",
+          "comment": "buffer file version manager"
+        },
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "version of file to be opened"
+        },
+        {
+          "name": "minChangeDataVer",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "indicates the oldest change data buffer file to be\n included.  A -1 indicates only the last change data buffer file is applicable."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an IO error occurs or a problem with the version\n reconstruction."
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new empty file for pre-save use.",
+      "javadoc": "Create a new empty file for pre-save use.\n@param presaveFile pre-save file\n@param bufferSize buffer size\n@throws IOException if an I/O error occurs during file creation",
+      "static": false,
+      "params": [
+        {
+          "name": "presaveFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "pre-save file"
+        },
+        {
+          "name": "bufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer size"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs during file creation"
+        }
+      ]
+    },
+    {
+      "name": "getNextChangeDataFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "getFirst",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.BufferFile",
+        "type_short": "BufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "putFreeBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nextFreeIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getVersion",
+      "comment": "",
+      "javadoc": "@return version associated with this buffer file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "version associated with this buffer file"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCheckinID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVersionComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "put",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "versionBufferIfNeeded",
+      "comment": "Output old data for a specified buffer if required for version file.",
+      "javadoc": "Output old data for a specified buffer if required for version file.\n@param index buffer index\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer index"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setReadOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getForwardModMapData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getForwardModMapData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getSaveChangeDataFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.BufferFile",
+        "type_short": "BufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "comitSaveChangeDataFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createNewVersion",
+      "comment": "Create a new buffer file version (used for check-in)",
+      "javadoc": "Create a new buffer file version (used for check-in)\n@param destFile must be an versioned file representing an earlier version\n of srcFile.\n@param fileComment a comment for the new version.\n@param monitor the current monitor.\n@throws CancelledException if the operation is canceled.\n@throws IOException if the file is in an unexpected state.",
+      "static": false,
+      "params": [
+        {
+          "name": "destFile",
+          "type_long": "db.buffers.ManagedBufferFile",
+          "type_short": "ManagedBufferFile",
+          "comment": "must be an versioned file representing an earlier version\n of srcFile."
+        },
+        {
+          "name": "fileComment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a comment for the new version."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the current monitor."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the operation is canceled."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if the file is in an unexpected state."
+        }
+      ]
+    },
+    {
+      "name": "getSaveFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.ManagedBufferFile",
+        "type_short": "ManagedBufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getSaveFile",
+      "comment": "Returns a Save file if available.  Returns null if\n a save can not be performed.  This method may block for an extended\n period of time if the pre-save process has not already completed.\n This method does not accept a monitor since a remote TaskMonitor does\n not yet exist.",
+      "javadoc": "Returns a Save file if available.  Returns null if\n a save can not be performed.  This method may block for an extended\n period of time if the pre-save process has not already completed.\n This method does not accept a monitor since a remote TaskMonitor does\n not yet exist.\n@param monitor optional monitor for canceling pre-save (may be null)\n@throws IOException if an I/O error occurs\n@throws CancelledException if monitor specified and pre-save cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "optional monitor for canceling pre-save (may be null)"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.LocalManagedBufferFile",
+        "type_short": "LocalManagedBufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor specified and pre-save cancelled"
+        }
+      ]
+    },
+    {
+      "name": "disposeSaveFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveCompleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "commit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "canSave",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "startPreSave",
+      "comment": "Initiate a background pre-save if possible.\n This is intended to save time for the final Save.\n when only a small number of changes will be made.  If an I/O error\n or other exception occurs during the process, the preSave will\n be aborted silently.",
+      "javadoc": "Initiate a background pre-save if possible.\n This is intended to save time for the final Save.\n when only a small number of changes will be made.  If an I/O error\n or other exception occurs during the process, the preSave will\n be aborted silently.\n@param filename name of preSave file.  The preSave file will\n be created within the same directory as the source file.  If this file\n already exists, this method will have no affect.\n@throws IllegalStateException if this method is invoked more than\n once for a given instance or a source file was not used.  This method \n may be re-invoked after saveAs is invoked.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopPreSave",
+      "comment": "Terminate background save if it is running.\n This may be unsuccessful if this thread is interupted.",
+      "javadoc": "Terminate background save if it is running.\n This may be unsuccessful if this thread is interupted.\n@param endUpdate if true and pre-save successfully terminated, \n notify buffer file manager that update has ended.",
+      "static": false,
+      "params": [
+        {
+          "name": "endUpdate",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true and pre-save successfully terminated, \n notify buffer file manager that update has ended."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "waitForPreSave",
+      "comment": "Block until pre-save thread completes",
+      "javadoc": "Block until pre-save thread completes\n@param monitor optional monitor allowing the pre-save wait to be interrupted/canceled - the actual pre-save will \n continue since it may be required for a future save operation.\n@throws CancelledException",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "optional monitor allowing the pre-save wait to be interrupted/canceled - the actual pre-save will \n continue since it may be required for a future save operation."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getOutputBlockStream",
+      "comment": "Obtain a direct stream to write blocks to this buffer file",
+      "javadoc": "Obtain a direct stream to write blocks to this buffer file\n@param blockCount number of blocks to be transferred\n@return output block stream\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "blockCount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of blocks to be transferred"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.OutputBlockStream",
+        "type_short": "OutputBlockStream",
+        "comment": "output block stream"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInputBlockStream",
+      "comment": "Obtain a direct stream to read all blocks of this buffer file",
+      "javadoc": "Obtain a direct stream to read all blocks of this buffer file\n@return input block stream\n@throws IOException",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.InputBlockStream",
+        "type_short": "InputBlockStream",
+        "comment": "input block stream"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInputBlockStream",
+      "comment": "Obtain a direct stream to read modified blocks of this buffer file \n based upon the specified changeMap",
+      "javadoc": "Obtain a direct stream to read modified blocks of this buffer file \n based upon the specified changeMap\n@return input block stream\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "changeMapData",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.InputBlockStream",
+        "type_short": "InputBlockStream",
+        "comment": "input block stream"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateFrom",
+      "comment": "Create a new version of this file by updating it from a versionedBufferFile.  \n This file must be open as read-only with versionUpdateEnabled and have been derived \n from an oldVersion of the versionedBufferFile (i.e., was based on a check-out of oldVersion).\n The save-file corresponding to this file is updated using those buffers\n which have been modified or added in the specified versionedBufferFile \n since olderVersion.  When complete, this file should be closed\n as soon as possible.",
+      "javadoc": "Create a new version of this file by updating it from a versionedBufferFile.  \n This file must be open as read-only with versionUpdateEnabled and have been derived \n from an oldVersion of the versionedBufferFile (i.e., was based on a check-out of oldVersion).\n The save-file corresponding to this file is updated using those buffers\n which have been modified or added in the specified versionedBufferFile \n since olderVersion.  When complete, this file should be closed\n as soon as possible.\n@param versionedBufferFile versioned buffer file\n@param oldVersion older version of versionedBufferFile from which this buffer file originated.\n@param monitor progress monitor\n@throws IOException if an I/O error occurs\n@throws CancelledException if monitor cancels operation",
+      "static": false,
+      "params": [
+        {
+          "name": "versionedBufferFile",
+          "type_long": "db.buffers.ManagedBufferFile",
+          "type_short": "ManagedBufferFile",
+          "comment": "versioned buffer file"
+        },
+        {
+          "name": "oldVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "older version of versionedBufferFile from which this buffer file originated."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor cancels operation"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1088 @@
+{
+  "name": "FileSystemService",
+  "comment": "Provides methods for dealing with GFilesystem files and GFileSystem.\n \n Most methods take FSRL references to files as a way to decouple dependencies and\n reduce forced filesystem instantiation.\n \n (ie. a GFile instance is only valid if its GFileSystem is open, which\n means that its parent probably also has to be open, recursively, etc, whereas a FSRL\n is always valid and does not force the instantiation of parent objects)\n \n GFileSystem should be used via FileSystemRef\n handles that ensure the filesystem is pinned in memory and won\u0027t be closed while\n you are using it.\n \n If you are working with GFile instances, you should have a\n FileSystemRef that you are using to pin the filesystem.\n \n Files written to the  directory are obfuscated to prevent interference from\n virus scanners.  See ObfuscatedInputStream or ObfuscatedOutputStream or \n ObfuscatedFileByteProvider.\n  \n Thread-safe.\n ",
+  "javadoc": "Provides methods for dealing with GFilesystem files and {@link GFileSystem filesystems}.\n \u003cp\u003e\n Most methods take {@link FSRL} references to files as a way to decouple dependencies and\n reduce forced filesystem instantiation.\n \u003cp\u003e\n (ie. a {@link GFile} instance is only valid if its {@link GFileSystem} is open, which\n means that its parent probably also has to be open, recursively, etc, whereas a FSRL\n is always valid and does not force the instantiation of parent objects)\n \u003cp\u003e\n {@link GFileSystem Filesystems} should be used via {@link FileSystemRef filesystem ref}\n handles that ensure the filesystem is pinned in memory and won\u0027t be closed while\n you are using it.\n \u003cp\u003e\n If you are working with {@link GFile} instances, you should have a\n {@link FileSystemRef fs ref} that you are using to pin the filesystem.\n \u003cp\u003e\n Files written to the {@code fscache} directory are obfuscated to prevent interference from\n virus scanners.  See {@link ObfuscatedInputStream} or {@link ObfuscatedOutputStream} or \n {@link ObfuscatedFileByteProvider}.\n \u003cp\u003e \n Thread-safe.\n \u003cp\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "instance",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.formats.gfilesystem.FileSystemService",
+      "type_short": "FileSystemService",
+      "constant_value": null
+    },
+    {
+      "name": "localFS",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.LocalFileSystem",
+      "type_short": "LocalFileSystem",
+      "constant_value": null
+    },
+    {
+      "name": "fsFactoryMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.factory.FileSystemFactoryMgr",
+      "type_short": "FileSystemFactoryMgr",
+      "constant_value": null
+    },
+    {
+      "name": "cacheFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+      "type_short": "FSRLRoot",
+      "constant_value": null
+    },
+    {
+      "name": "fileCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FileCache",
+      "type_short": "FileCache",
+      "constant_value": null
+    },
+    {
+      "name": "fsInstanceManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FileSystemInstanceManager",
+      "type_short": "FileSystemInstanceManager",
+      "constant_value": null
+    },
+    {
+      "name": "fileCacheNameIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FileCacheNameIndex",
+      "type_short": "FileCacheNameIndex",
+      "constant_value": null
+    },
+    {
+      "name": "fsCacheMaintIntervalMS",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "currentCryptoSession",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.crypto.CryptoSession",
+      "type_short": "CryptoSession",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "getInstance",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemService",
+        "type_short": "FileSystemService",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInitialized",
+      "comment": "Returns true if this service has been loaded",
+      "javadoc": "Returns true if this service has been loaded\n@return true if this service has been loaded",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this service has been loaded"
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a FilesystemService instance, using the Application\u0027s default value\n for Application#getUserCacheDirectory() as the\n cache directory.",
+      "javadoc": "Creates a FilesystemService instance, using the {@link Application}\u0027s default value\n for {@link Application#getUserCacheDirectory() user cache directory} as the\n cache directory.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a FilesystemService instance, using the supplied directory as its file caching\n root directory.",
+      "javadoc": "Creates a FilesystemService instance, using the supplied directory as its file caching\n root directory.\n@param fscacheDir {@link File Root dir} to use to store files placed into cache.",
+      "static": false,
+      "params": [
+        {
+          "name": "fscacheDir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "File to use to store files placed into cache."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Forcefully closes all open filesystems and clears caches.",
+      "javadoc": "Forcefully closes all open filesystems and clears caches.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "closeUnusedFileSystems",
+      "comment": "Close unused filesystems.",
+      "javadoc": "Close unused filesystems.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "releaseFileSystemImmediate",
+      "comment": "Releases the specified FileSystemRef, and if no other references remain, removes \n it from the shared cache of file system instances.",
+      "javadoc": "Releases the specified {@link FileSystemRef}, and if no other references remain, removes \n it from the shared cache of file system instances.\n@param fsRef the ref to release",
+      "static": false,
+      "params": [
+        {
+          "name": "fsRef",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+          "type_short": "FileSystemRef",
+          "comment": "the ref to release"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocalFS",
+      "comment": "Returns a direct reference to a filesystem that represents the local filesystem.",
+      "javadoc": "Returns a direct reference to a filesystem that represents the local filesystem.\n@return {@link GFileSystem} that represents the local filesystem.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+        "type_short": "GFileSystem",
+        "comment": "GFileSystem that represents the local filesystem."
+      },
+      "throws": []
+    },
+    {
+      "name": "isLocal",
+      "comment": "Returns true if the specified location is a path on the local computer\u0027s\n filesystem.",
+      "javadoc": "Returns true if the specified location is a path on the local computer\u0027s\n filesystem.\n@param fsrl {@link FSRL} path to query\n@return true if local, false if the path points to an embedded file in a container.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL path to query"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if local, false if the path points to an embedded file in a container."
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocalFSRL",
+      "comment": "Builds a FSRL of a File located on the local filesystem.",
+      "javadoc": "Builds a {@link FSRL} of a {@link File file} located on the local filesystem.\n@param f {@link File} on the local filesystem\n@return {@link FSRL} pointing to the same file, never null",
+      "static": false,
+      "params": [
+        {
+          "name": "f",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "File on the local filesystem"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "FSRL pointing to the same file, never null"
+      },
+      "throws": []
+    },
+    {
+      "name": "isFilesystemMountedAt",
+      "comment": "Returns true of there is a GFileSystem mounted at the requested\n FSRL location.",
+      "javadoc": "Returns true of there is a {@link GFileSystem filesystem} mounted at the requested\n {@link FSRL} location.\n@param fsrl {@link FSRL} container to query for mounted filesystem\n@return boolean true if filesystem mounted at location.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL container to query for mounted filesystem"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if filesystem mounted at location."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRefdFile",
+      "comment": "Returns the GFile pointed to by the FSRL, along with a FileSystemRef\n that the caller is responsible for releasing (either explicitly via\n  or via the RefdFile#close()).",
+      "javadoc": "Returns the {@link GFile} pointed to by the FSRL, along with a {@link FileSystemRef}\n that the caller is responsible for releasing (either explicitly via\n {@code result.fsRef.close()} or via the {@link RefdFile#close()}).\n@param fsrl {@link FSRL} of the desired file\n@param monitor {@link TaskMonitor} so the user can cancel\n@return a {@link RefdFile} which contains the resultant {@link GFile} and a\n {@link FileSystemRef} that needs to be closed, or {@code null} if the filesystem\n does not have the requested file.\n@throws CancelledException if the user cancels\n@throws IOException if there was a file io problem",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the desired file"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor so the user can cancel"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.RefdFile",
+        "type_short": "RefdFile",
+        "comment": "a RefdFile which contains the resultant GFile and a\n FileSystemRef that needs to be closed, or  if the filesystem\n does not have the requested file."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was a file io problem"
+        }
+      ]
+    },
+    {
+      "name": "getFilesystem",
+      "comment": "Returns a filesystem instance for the requested FSRLRoot, either from an already\n loaded instance in the global fscache, or by instantiating the requested filesystem\n from its container file (in a possibly recursive manner, depending on the depth\n of the FSLR)\n \n Never returns NULL, instead throws IOException if there is a problem.\n \n The caller is responsible for releasing the FileSystemRef.\n ",
+      "javadoc": "Returns a filesystem instance for the requested {@link FSRLRoot}, either from an already\n loaded instance in the global fscache, or by instantiating the requested filesystem\n from its container file (in a possibly recursive manner, depending on the depth\n of the FSLR)\n \u003cp\u003e\n Never returns NULL, instead throws IOException if there is a problem.\n \u003cp\u003e\n The caller is responsible for releasing the {@link FileSystemRef}.\n \u003cp\u003e\n@param fsFSRL {@link FSRLRoot} of file system you want a reference to.\n@param monitor {@link TaskMonitor} to allow the user to cancel.\n@return a new {@link FileSystemRef} that the caller is responsible for closing when\n no longer needed, never {@code null}.\n@throws IOException if there was an io problem.\n@throws CancelledException if the user cancels.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+          "type_short": "FSRLRoot",
+          "comment": "FSRLRoot of file system you want a reference to."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to allow the user to cancel."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+        "type_short": "FileSystemRef",
+        "comment": "a new FileSystemRef that the caller is responsible for closing when\n no longer needed, never ."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an io problem."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels."
+        }
+      ]
+    },
+    {
+      "name": "getByteProvider",
+      "comment": "Returns a ByteProvider with the contents of the requested GFile.\n \n Never returns null, throws IOException if there was a problem.\n \n Caller is responsible for ByteProvider#close() the ByteProvider\n when finished.",
+      "javadoc": "Returns a {@link ByteProvider} with the contents of the requested {@link GFile file}.\n \u003cp\u003e\n Never returns null, throws IOException if there was a problem.\n \u003cp\u003e\n Caller is responsible for {@link ByteProvider#close() closing()} the ByteProvider\n when finished.\n@param fsrl {@link FSRL} file to wrap\n@param fullyQualifiedFSRL if true, the returned ByteProvider\u0027s FSRL will always have a MD5\n hash\n@param monitor {@link TaskMonitor} to watch and update\n@return new {@link ByteProvider}\n@throws CancelledException if user cancels\n@throws IOException if IO problem",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL file to wrap"
+        },
+        {
+          "name": "fullyQualifiedFSRL",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the returned ByteProvider\u0027s FSRL will always have a MD5\n hash"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.ByteProvider",
+        "type_short": "ByteProvider",
+        "comment": "new ByteProvider"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO problem"
+        }
+      ]
+    },
+    {
+      "name": "getDerivedByteProvider",
+      "comment": "Returns a ByteProvider that contains the\n derived (ie. decompressed or decrypted) contents of the requested file.\n \n The resulting ByteProvider will be a cached file, either written to a \n temporary file, or a in-memory buffer if small enough (see FileCache#MAX_INMEM_FILESIZE).\n  \n If the file was not present in the cache, the DerivedStreamProducer\n will be called and it will be responsible for returning an InputStream\n which has the derived contents, which will be added to the file cache for next time.\n ",
+      "javadoc": "Returns a {@link ByteProvider} that contains the\n derived (ie. decompressed or decrypted) contents of the requested file.\n \u003cp\u003e\n The resulting ByteProvider will be a cached file, either written to a \n temporary file, or a in-memory buffer if small enough (see {@link FileCache#MAX_INMEM_FILESIZE}).\n \u003cp\u003e \n If the file was not present in the cache, the {@link DerivedStreamProducer producer}\n will be called and it will be responsible for returning an {@link InputStream}\n which has the derived contents, which will be added to the file cache for next time.\n \u003cp\u003e\n@param containerFSRL {@link FSRL} w/hash of the source (or container) file that this \n derived file is based on\n@param derivedFSRL (optional) {@link FSRL} to assign to the resulting ByteProvider\n@param derivedName a unique string identifying the derived file inside the source (or container) file\n@param sizeHint the expected size of the resulting ByteProvider, or -1 if unknown\n@param producer supplies an InputStream if needed.  See {@link DerivedStreamProducer}\n@param monitor {@link TaskMonitor} that will be monitor for cancel requests and updated\n with file io progress\n@return a {@link ByteProvider} containing the bytes of the requested file, that has the \n specified derivedFSRL, or a pseudo FSRL if not specified.  Never null\n@throws CancelledException if the user cancels\n@throws IOException if there was an io error",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL w/hash of the source (or container) file that this \n derived file is based on"
+        },
+        {
+          "name": "derivedFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "(optional) FSRL to assign to the resulting ByteProvider"
+        },
+        {
+          "name": "derivedName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a unique string identifying the derived file inside the source (or container) file"
+        },
+        {
+          "name": "sizeHint",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the expected size of the resulting ByteProvider, or -1 if unknown"
+        },
+        {
+          "name": "producer",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemService.DerivedStreamProducer",
+          "type_short": "DerivedStreamProducer",
+          "comment": "supplies an InputStream if needed.  See DerivedStreamProducer"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor that will be monitor for cancel requests and updated\n with file io progress"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.ByteProvider",
+        "type_short": "ByteProvider",
+        "comment": "a ByteProvider containing the bytes of the requested file, that has the \n specified derivedFSRL, or a pseudo FSRL if not specified.  Never null"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an io error"
+        }
+      ]
+    },
+    {
+      "name": "getDerivedByteProviderPush",
+      "comment": "Returns a ByteProvider that contains the\n derived (ie. decompressed or decrypted) contents of the requested file.\n \n The resulting ByteProvider will be a cached file, either written to a \n temporary file, or a in-memory buffer if small enough (see FileCache#MAX_INMEM_FILESIZE).\n  \n If the file was not present in the cache, the DerivedStreamPushProducer\n will be called and it will be responsible for producing and writing the derived\n file\u0027s bytes to a OutputStream, which will be added to the file cache for next time.\n ",
+      "javadoc": "Returns a {@link ByteProvider} that contains the\n derived (ie. decompressed or decrypted) contents of the requested file.\n \u003cp\u003e\n The resulting ByteProvider will be a cached file, either written to a \n temporary file, or a in-memory buffer if small enough (see {@link FileCache#MAX_INMEM_FILESIZE}).\n \u003cp\u003e \n If the file was not present in the cache, the {@link DerivedStreamPushProducer pusher}\n will be called and it will be responsible for producing and writing the derived\n file\u0027s bytes to a {@link OutputStream}, which will be added to the file cache for next time.\n \u003cp\u003e\n@param containerFSRL {@link FSRL} w/hash of the source (or container) file that this \n derived file is based on\n@param derivedFSRL (optional) {@link FSRL} to assign to the resulting ByteProvider\n@param derivedName a unique string identifying the derived file inside the source (or container) file\n@param sizeHint the expected size of the resulting ByteProvider, or -1 if unknown\n@param pusher writes bytes to the supplied OutputStream.  See {@link DerivedStreamPushProducer}\n@param monitor {@link TaskMonitor} that will be monitor for cancel requests and updated\n with file io progress\n@return a {@link ByteProvider} containing the bytes of the requested file, that has the \n specified derivedFSRL, or a pseudo FSRL if not specified.  Never null\n@throws CancelledException if the user cancels\n@throws IOException if there was an io error",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL w/hash of the source (or container) file that this \n derived file is based on"
+        },
+        {
+          "name": "derivedFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "(optional) FSRL to assign to the resulting ByteProvider"
+        },
+        {
+          "name": "derivedName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a unique string identifying the derived file inside the source (or container) file"
+        },
+        {
+          "name": "sizeHint",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the expected size of the resulting ByteProvider, or -1 if unknown"
+        },
+        {
+          "name": "pusher",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemService.DerivedStreamPushProducer",
+          "type_short": "DerivedStreamPushProducer",
+          "comment": "writes bytes to the supplied OutputStream.  See DerivedStreamPushProducer"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor that will be monitor for cancel requests and updated\n with file io progress"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.ByteProvider",
+        "type_short": "ByteProvider",
+        "comment": "a ByteProvider containing the bytes of the requested file, that has the \n specified derivedFSRL, or a pseudo FSRL if not specified.  Never null"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there was an io error"
+        }
+      ]
+    },
+    {
+      "name": "createCachedFileFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createTempFile",
+      "comment": "Returns a FileCacheEntryBuilder that will allow the caller to\n write bytes to it.\n \n After calling FileCacheEntryBuilder#finish(),\n the caller will have a FileCacheEntry that can provide access to a\n ByteProvider.\n \n Temporary files that are written to disk are obfuscated to avoid interference from\n overzealous virus scanners.  See ObfuscatedInputStream / \n ObfuscatedOutputStream.\n ",
+      "javadoc": "Returns a {@link FileCacheEntryBuilder} that will allow the caller to\n write bytes to it.\n \u003cp\u003e\n After calling {@link FileCacheEntryBuilder#finish() finish()},\n the caller will have a {@link FileCacheEntry} that can provide access to a\n {@link ByteProvider}.\n \u003cp\u003e\n Temporary files that are written to disk are obfuscated to avoid interference from\n overzealous virus scanners.  See {@link ObfuscatedInputStream} / \n {@link ObfuscatedOutputStream}.\n \u003cp\u003e\n@param sizeHint the expected size of the file, or -1 if unknown\n@return {@link FileCacheEntryBuilder} that must be finalized by calling \n {@link FileCacheEntryBuilder#finish() finish()}\n@throws IOException if error",
+      "static": false,
+      "params": [
+        {
+          "name": "sizeHint",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the expected size of the file, or -1 if unknown"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheEntryBuilder",
+        "type_short": "FileCacheEntryBuilder",
+        "comment": "FileCacheEntryBuilder that must be finalized by calling \n FileCacheEntryBuilder#finish()"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        }
+      ]
+    },
+    {
+      "name": "getNamedTempFile",
+      "comment": "Returns a ByteProvider for the specified FileCacheEntry, using the\n specified filename.\n \n The returned ByteProvider\u0027s FSRL will be decorative and does not allow returning to\n the same ByteProvider at a later time.",
+      "javadoc": "Returns a {@link ByteProvider} for the specified {@link FileCacheEntry}, using the\n specified filename.\n \u003cp\u003e\n The returned ByteProvider\u0027s FSRL will be decorative and does not allow returning to\n the same ByteProvider at a later time.\n@param tempFileCacheEntry {@link FileCacheEntry} (returned by {@link #createTempFile(long)})\n@param name desired name\n@return new {@link ByteProvider} with decorative {@link FSRL}\n@throws IOException if io error",
+      "static": false,
+      "params": [
+        {
+          "name": "tempFileCacheEntry",
+          "type_long": "ghidra.formats.gfilesystem.FileCache.FileCacheEntry",
+          "type_short": "FileCacheEntry",
+          "comment": "FileCacheEntry (returned by #createTempFile(long))"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "desired name"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.ByteProvider",
+        "type_short": "ByteProvider",
+        "comment": "new ByteProvider with decorative FSRL"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if io error"
+        }
+      ]
+    },
+    {
+      "name": "releaseFileCache",
+      "comment": "Allows the resources used by caching the specified file to be released.",
+      "javadoc": "Allows the resources used by caching the specified file to be released.\n@param fsrl {@link FSRL} file to release cache resources for",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL file to release cache resources for"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "pushFileToCache",
+      "comment": "Adds a plaintext (non-obfuscated) file to the cache, consuming it in the process, and returns\n a ByteProvider that contains the contents of the file.\n \n NOTE: only use this if you have no other choice and are forced to deal with already\n existing files in the local filesystem.",
+      "javadoc": "Adds a plaintext (non-obfuscated) file to the cache, consuming it in the process, and returns\n a {@link ByteProvider} that contains the contents of the file.\n \u003cp\u003e\n NOTE: only use this if you have no other choice and are forced to deal with already\n existing files in the local filesystem.\n@param file {@link File} to add\n@param fsrl {@link FSRL} of the file that is being added\n@param monitor {@link TaskMonitor}\n@return {@link ByteProvider} (hosted in the FileCache) that contains the bytes of the\n specified file\n@throws CancelledException if cancelled\n@throws IOException if error",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "File to add"
+        },
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file that is being added"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.ByteProvider",
+        "type_short": "ByteProvider",
+        "comment": "ByteProvider (hosted in the FileCache) that contains the bytes of the\n specified file"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if cancelled"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error"
+        }
+      ]
+    },
+    {
+      "name": "hasDerivedFile",
+      "comment": "Returns true if the specified derived file exists in the file cache.",
+      "javadoc": "Returns true if the specified derived file exists in the file cache.\n@param containerFSRL {@link FSRL} w/hash of the container\n@param derivedName name of the derived file inside of the container\n@param monitor {@link TaskMonitor}\n@return boolean true if file exists at time of query, false if file is not in cache\n@throws CancelledException if user cancels\n@throws IOException if other IO error",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL w/hash of the container"
+        },
+        {
+          "name": "derivedName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of the derived file inside of the container"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if file exists at time of query, false if file is not in cache"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if other IO error"
+        }
+      ]
+    },
+    {
+      "name": "isFileFilesystemContainer",
+      "comment": "Returns true if the container file probably holds one of the currently supported\n filesystem types.\n ",
+      "javadoc": "Returns true if the container file probably holds one of the currently supported\n filesystem types.\n \u003cp\u003e\n@param containerFSRL {@link FSRL} of the file being queried.\n@param monitor {@link TaskMonitor} to watch and update progress.\n@return boolean true if the file probably is a container, false otherwise.\n@throws CancelledException if user cancels.\n@throws IOException if IO problem.",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file being queried."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update progress."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if the file probably is a container, false otherwise."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO problem."
+        }
+      ]
+    },
+    {
+      "name": "probeFileForFilesystem",
+      "comment": "Auto-detects a filesystem in the container file pointed to by the FSRL.\n \n Returns a filesystem instance for the requested container file, either from an already\n loaded instance in the Global fs cache, or by probing for a filesystem in the container\n file using the FileSystemFactoryMgr.\n \n Returns null if no filesystem implementation was found that could handle the container\n file.",
+      "javadoc": "Auto-detects a filesystem in the container file pointed to by the FSRL.\n \u003cp\u003e\n Returns a filesystem instance for the requested container file, either from an already\n loaded instance in the Global fs cache, or by probing for a filesystem in the container\n file using the {@link FileSystemFactoryMgr}.\n \u003cp\u003e\n Returns null if no filesystem implementation was found that could handle the container\n file.\n@param containerFSRL {@link FSRL} of the file container\n@param monitor {@link TaskMonitor} to watch and update progress.\n@param conflictResolver {@link FileSystemProbeConflictResolver} to handle choosing\n the correct file system type among multiple results, or null if you want\n {@link FileSystemProbeConflictResolver#CHOOSEFIRST} .\n@return new {@link FileSystemRef} or null\n@throws CancelledException if user cancels.\n@throws IOException if IO problem.",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file container"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update progress."
+        },
+        {
+          "name": "conflictResolver",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemProbeConflictResolver",
+          "type_short": "FileSystemProbeConflictResolver",
+          "comment": "FileSystemProbeConflictResolver to handle choosing\n the correct file system type among multiple results, or null if you want\n FileSystemProbeConflictResolver#CHOOSEFIRST ."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+        "type_short": "FileSystemRef",
+        "comment": "new FileSystemRef or null"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO problem."
+        }
+      ]
+    },
+    {
+      "name": "probeFileForFilesystem",
+      "comment": "Auto-detects a filesystem in the container file pointed to by the FSRL.\n \n Returns a filesystem instance for the requested container file, either from an already\n loaded instance in the Global fs cache, or by probing for a filesystem in the container\n file using a FileSystemFactoryMgr.\n \n Returns null if no filesystem implementation was found that could handle the container\n file.",
+      "javadoc": "Auto-detects a filesystem in the container file pointed to by the FSRL.\n \u003cp\u003e\n Returns a filesystem instance for the requested container file, either from an already\n loaded instance in the Global fs cache, or by probing for a filesystem in the container\n file using a {@link FileSystemFactoryMgr}.\n \u003cp\u003e\n Returns null if no filesystem implementation was found that could handle the container\n file.\n@param containerFSRL {@link FSRL} of the file container\n@param monitor {@link TaskMonitor} to watch and update progress.\n@param conflictResolver {@link FileSystemProbeConflictResolver} to handle choosing\n the correct file system type among multiple results, or null if you want\n {@link FileSystemProbeConflictResolver#CHOOSEFIRST} .\n@param priorityFilter minimum filesystem {@link FileSystemInfo#priority()} to allow\n when using file system factories to probe the container.\n@return new {@link FileSystemRef} or null\n@throws CancelledException if user cancels.\n@throws IOException if IO problem.",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file container"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update progress."
+        },
+        {
+          "name": "conflictResolver",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemProbeConflictResolver",
+          "type_short": "FileSystemProbeConflictResolver",
+          "comment": "FileSystemProbeConflictResolver to handle choosing\n the correct file system type among multiple results, or null if you want\n FileSystemProbeConflictResolver#CHOOSEFIRST ."
+        },
+        {
+          "name": "priorityFilter",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "minimum filesystem FileSystemInfo#priority() to allow\n when using file system factories to probe the container."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+        "type_short": "FileSystemRef",
+        "comment": "new FileSystemRef or null"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO problem."
+        }
+      ]
+    },
+    {
+      "name": "probeForLocalSubDirFilesystem",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+        "type_short": "GFileSystem",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mountSpecificFileSystem",
+      "comment": "Mount a specific file system (by class) using a specified container file.\n \n The newly constructed / mounted file system is not managed by this FileSystemService\n or controlled with FileSystemRefs.\n \n The caller is responsible for closing the resultant file system instance when it is\n no longer needed.\n ",
+      "javadoc": "Mount a specific file system (by class) using a specified container file.\n \u003cp\u003e\n The newly constructed / mounted file system is not managed by this FileSystemService\n or controlled with {@link FileSystemRef}s.\n \u003cp\u003e\n The caller is responsible for closing the resultant file system instance when it is\n no longer needed.\n \u003cp\u003e\n@param containerFSRL a reference to the file that contains the file system image\n@param fsClass the GFileSystem derived class that implements the specific file system\n@param monitor {@link TaskMonitor} to allow the user to cancel\n@return new {@link GFileSystem} instance, caller is responsible for closing() when done.\n@throws CancelledException if user cancels\n@throws IOException if file io error or wrong file system type.",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "a reference to the file that contains the file system image"
+        },
+        {
+          "name": "fsClass",
+          "type_long": "java.lang.Class\u003cFSTYPE\u003e",
+          "type_short": "Class",
+          "comment": "the GFileSystem derived class that implements the specific file system"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to allow the user to cancel"
+        }
+      ],
+      "return": {
+        "type_long": "FSTYPE",
+        "type_short": "FSTYPE",
+        "comment": "new GFileSystem instance, caller is responsible for closing() when done."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if file io error or wrong file system type."
+        }
+      ]
+    },
+    {
+      "name": "openFileSystemContainer",
+      "comment": "Open the file system contained at the specified location.\n \n The newly constructed / mounted file system is not managed by this FileSystemService\n or controlled with FileSystemRefs.\n \n The caller is responsible for closing the resultant file system instance when it is\n no longer needed.\n ",
+      "javadoc": "Open the file system contained at the specified location.\n \u003cp\u003e\n The newly constructed / mounted file system is not managed by this FileSystemService\n or controlled with {@link FileSystemRef}s.\n \u003cp\u003e\n The caller is responsible for closing the resultant file system instance when it is\n no longer needed.\n \u003cp\u003e\n@param containerFSRL a reference to the file that contains the file system image\n@param monitor {@link TaskMonitor} to allow the user to cancel\n@return new {@link GFileSystem} instance, caller is responsible for closing() when done.\n@throws CancelledException if user cancels\n@throws IOException if file io error or wrong file system type.",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "a reference to the file that contains the file system image"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to allow the user to cancel"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+        "type_short": "GFileSystem",
+        "comment": "new GFileSystem instance, caller is responsible for closing() when done."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if file io error or wrong file system type."
+        }
+      ]
+    },
+    {
+      "name": "getFullyQualifiedFSRL",
+      "comment": "Returns a cloned copy of the  that should have MD5 values specified.\n (excluding GFile objects that don\u0027t have data streams)\n ",
+      "javadoc": "Returns a cloned copy of the {@code FSRL} that should have MD5 values specified.\n (excluding GFile objects that don\u0027t have data streams)\n \u003cp\u003e\n@param fsrl {@link FSRL} of the file that should be forced to have a MD5\n@param monitor {@link TaskMonitor} to watch and update with progress.\n@return possibly new {@link FSRL} instance with a MD5 value.\n@throws CancelledException if user cancels.\n@throws IOException if IO problem.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file that should be forced to have a MD5"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update with progress."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "possibly new FSRL instance with a MD5 value."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO problem."
+        }
+      ]
+    },
+    {
+      "name": "assertFullyQualifiedFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFullyQualifiedFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fs",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": ""
+        },
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getAllFilesystemNames",
+      "comment": "Returns a list of all detected GFilesystem filesystem names.\n \n See FileSystemFactoryMgr#getAllFilesystemNames().",
+      "javadoc": "Returns a list of all detected GFilesystem filesystem names.\n \u003cp\u003e\n See {@link FileSystemFactoryMgr#getAllFilesystemNames()}.\n@return {@link List} of strings.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.String\u003e",
+        "type_short": "List",
+        "comment": "List of strings."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMountedFilesystems",
+      "comment": "Returns a list of all currently mounted filesystems.\n \n As a FSRL is returned, there is no guarantee that the filesystem will still be\n mounted when you later use values from the list.\n ",
+      "javadoc": "Returns a list of all currently mounted filesystems.\n \u003cp\u003e\n As a FSRL is returned, there is no guarantee that the filesystem will still be\n mounted when you later use values from the list.\n \u003cp\u003e\n@return {@link List} of {@link FSRLRoot} of currently mounted filesystems.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRLRoot\u003e",
+        "type_short": "List",
+        "comment": "List of FSRLRoot of currently mounted filesystems."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMountedFilesystem",
+      "comment": "Returns a new FilesystemRef handle to an already mounted filesystem.\n \n The caller is responsible for releasing the ref.\n \n Returns null if there is no filesystem mounted at .",
+      "javadoc": "Returns a new FilesystemRef handle to an already mounted filesystem.\n \u003cp\u003e\n The caller is responsible for releasing the ref.\n \u003cp\u003e\n Returns null if there is no filesystem mounted at {@code fsFSRL}.\n@param fsFSRL {@link FSRLRoot} of file system to get a {@link FileSystemRef} to.\n@return new {@link FileSystemRef} or null if requested file system not mounted.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+          "type_short": "FSRLRoot",
+          "comment": "FSRLRoot of file system to get a FileSystemRef to."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+        "type_short": "FileSystemRef",
+        "comment": "new FileSystemRef or null if requested file system not mounted."
+      },
+      "throws": []
+    },
+    {
+      "name": "newCryptoSession",
+      "comment": "Returns a new CryptoSession that the caller can use to query for\n passwords and such.  Caller is responsible for closing the instance when done.\n \n Later callers to this method will receive a nested CryptoSession that shares it\u0027s\n state with the initial CryptoSession, until the initial CryptoSession is closed().",
+      "javadoc": "Returns a new {@link CryptoSession} that the caller can use to query for\n passwords and such.  Caller is responsible for closing the instance when done.\n \u003cp\u003e\n Later callers to this method will receive a nested CryptoSession that shares it\u0027s\n state with the initial CryptoSession, until the initial CryptoSession is closed().\n@return new {@link CryptoSession} instance, never null",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.crypto.CryptoSession",
+        "type_short": "CryptoSession",
+        "comment": "new CryptoSession instance, never null"
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,518 @@
+{
+  "name": "AssemblyTreeResolver",
+  "comment": "The workhorse of semantic resolution for the assembler\n \n This class takes a parse tree and some additional information (start address, context, etc.) and\n attempts to determine possible encodings using the semantics associated with each branch of the\n given parse tree. Details of this process are described in SleighAssemblerBuilder.",
+  "javadoc": "The workhorse of semantic resolution for the assembler\n \n This class takes a parse tree and some additional information (start address, context, etc.) and\n attempts to determine possible encodings using the semantics associated with each branch of the\n given parse tree. Details of this process are described in {@link SleighAssemblerBuilder}.\n@see SleighAssemblerBuilder",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "solver",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.expr.RecursiveDescentSolver",
+      "type_short": "RecursiveDescentSolver",
+      "constant_value": null
+    },
+    {
+      "name": "dbg",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.util.DbgTimer",
+      "type_short": "DbgTimer",
+      "constant_value": null
+    },
+    {
+      "name": "lang",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguage",
+      "type_short": "SleighLanguage",
+      "constant_value": null
+    },
+    {
+      "name": "instStart",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "vals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "tree",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseBranch",
+      "type_short": "AssemblyParseBranch",
+      "constant_value": null
+    },
+    {
+      "name": "grammar",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyGrammar",
+      "type_short": "AssemblyGrammar",
+      "constant_value": null
+    },
+    {
+      "name": "context",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+      "type_short": "AssemblyPatternBlock",
+      "constant_value": null
+    },
+    {
+      "name": "ctxGraph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph",
+      "type_short": "AssemblyContextGraph",
+      "constant_value": null
+    },
+    {
+      "name": "INST_START",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"inst_start\""
+    },
+    {
+      "name": "INST_NEXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"inst_next\""
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a resolver for the given parse tree",
+      "javadoc": "Construct a resolver for the given parse tree\n@param lang\n@param instStart the byte offset where the instruction will start\n@param tree the parse tree\n@param context the context expected at {@code instStart}\n@param ctxGraph the context transition graph used to resolve purely-recursive productions",
+      "static": false,
+      "params": [
+        {
+          "name": "lang",
+          "type_long": "ghidra.app.plugin.processors.sleigh.SleighLanguage",
+          "type_short": "SleighLanguage",
+          "comment": ""
+        },
+        {
+          "name": "instStart",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the byte offset where the instruction will start"
+        },
+        {
+          "name": "tree",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseBranch",
+          "type_short": "AssemblyParseBranch",
+          "comment": "the parse tree"
+        },
+        {
+          "name": "context",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyPatternBlock",
+          "type_short": "AssemblyPatternBlock",
+          "comment": "the context expected at "
+        },
+        {
+          "name": "ctxGraph",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyContextGraph",
+          "type_short": "AssemblyContextGraph",
+          "comment": "the context transition graph used to resolve purely-recursive productions"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolve",
+      "comment": "Resolve the tree for the given parameters",
+      "javadoc": "Resolve the tree for the given parameters\n@return a set of resolutions (encodings and errors)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "a set of resolutions (encodings and errors)"
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveBranch",
+      "comment": "Resolve a branch of the parse tree",
+      "javadoc": "Resolve a branch of the parse tree\n@param branch the branch\n@return the intermediate results",
+      "static": false,
+      "params": [
+        {
+          "name": "branch",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseBranch",
+          "type_short": "AssemblyParseBranch",
+          "comment": "the branch"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the intermediate results"
+      },
+      "throws": []
+    },
+    {
+      "name": "applyRecursionPath",
+      "comment": "Apply constructors as indicated by a path returned by the context resolution graph\n \n Please note: The path given will be emptied during processing.",
+      "javadoc": "Apply constructors as indicated by a path returned by the context resolution graph\n \n Please note: The path given will be emptied during processing.\n@param path the path to apply\n@param branch the branch corresponding to the production whose LHS has a purely-recursive\n            definition.\n@param rec the purely-recursive production\n@param child the intermediate result to apply the constructors to\n@return the results",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.util.Deque\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyConstructorSemantic\u003e",
+          "type_short": "Deque",
+          "comment": "the path to apply"
+        },
+        {
+          "name": "branch",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseBranch",
+          "type_short": "AssemblyParseBranch",
+          "comment": "the branch corresponding to the production whose LHS has a purely-recursive\n            definition."
+        },
+        {
+          "name": "rec",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyProduction",
+          "type_short": "AssemblyProduction",
+          "comment": "the purely-recursive production"
+        },
+        {
+          "name": "child",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": "the intermediate result to apply the constructors to"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the results"
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveBranchRecursive",
+      "comment": "Resolve a branch where the production\u0027s LHS has a purely-recursive definition",
+      "javadoc": "Resolve a branch where the production\u0027s LHS has a purely-recursive definition\n@param branch the branch\n@param rec the purely-recursive definition\n@return the results",
+      "static": false,
+      "params": [
+        {
+          "name": "branch",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseBranch",
+          "type_short": "AssemblyParseBranch",
+          "comment": "the branch"
+        },
+        {
+          "name": "rec",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyProduction",
+          "type_short": "AssemblyProduction",
+          "comment": "the purely-recursive definition"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the results"
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveSelectedChildren",
+      "comment": "Resolve the given branch, having selected a particular combination of subconstructor results",
+      "javadoc": "Resolve the given branch, having selected a particular combination of subconstructor results\n@param prod the production\n@param substs the braches and tokens corrresponding to the symbols of the production\u0027s RHS\n@param sel the selected subconstructor results\n@param semantics the collection of possible constructors for this production\n@return the results",
+      "static": false,
+      "params": [
+        {
+          "name": "prod",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.grammars.AssemblyProduction",
+          "type_short": "AssemblyProduction",
+          "comment": "the production"
+        },
+        {
+          "name": "substs",
+          "type_long": "java.util.List\u003cghidra.app.plugin.assembler.sleigh.tree.AssemblyParseTreeNode\u003e",
+          "type_short": "List",
+          "comment": "the braches and tokens corrresponding to the symbols of the production\u0027s RHS"
+        },
+        {
+          "name": "sel",
+          "type_long": "java.util.List\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor\u003e",
+          "type_short": "List",
+          "comment": "the selected subconstructor results"
+        },
+        {
+          "name": "semantics",
+          "type_long": "java.util.Collection\u003cghidra.app.plugin.assembler.sleigh.sem.AssemblyConstructorSemantic\u003e",
+          "type_short": "Collection",
+          "comment": "the collection of possible constructors for this production"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the results"
+      },
+      "throws": []
+    },
+    {
+      "name": "tryResolveBackfills",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "results",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+          "type_short": "AssemblyResolutionResults",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveBranchNonRecursive",
+      "comment": "Resolve a branch without considering any purely-recursive productions\n \n This method is used either when the LHS has no purely-recursive definition, or before\n considering the purely-recursive definition when it is present.",
+      "javadoc": "Resolve a branch without considering any purely-recursive productions\n \n This method is used either when the LHS has no purely-recursive definition, or before\n considering the purely-recursive definition when it is present.\n@param branch the branch\n@return the results",
+      "static": false,
+      "params": [
+        {
+          "name": "branch",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseBranch",
+          "type_short": "AssemblyParseBranch",
+          "comment": "the branch"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolutionResults",
+        "type_short": "AssemblyResolutionResults",
+        "comment": "the results"
+      },
+      "throws": []
+    },
+    {
+      "name": "computeOffset",
+      "comment": "Compute the offset of an operand encoded in the instruction block",
+      "javadoc": "Compute the offset of an operand encoded in the instruction block\n@param opsym the operand symbol\n@param cons the constructor containing the operand\n@param res the selected subconstructor encodings\n@return the offset (right shift) to apply to the encoded operand",
+      "static": true,
+      "params": [
+        {
+          "name": "opsym",
+          "type_long": "ghidra.app.plugin.processors.sleigh.symbol.OperandSymbol",
+          "type_short": "OperandSymbol",
+          "comment": "the operand symbol"
+        },
+        {
+          "name": "cons",
+          "type_long": "ghidra.app.plugin.processors.sleigh.Constructor",
+          "type_short": "Constructor",
+          "comment": "the constructor containing the operand"
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": "the selected subconstructor encodings"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the offset (right shift) to apply to the encoded operand"
+      },
+      "throws": []
+    },
+    {
+      "name": "solveOrBackfill",
+      "comment": "Attempt to solve an expression",
+      "javadoc": "Attempt to solve an expression\n@param exp the expression to solve\n@param goal the desired value of the expression\n@param vals any defined symbols\n@param res the selected subconstructor encodings\n@param cur the resolved constructor so far\n@param description a description of the result\n@return the encoded solution, or a backfill record",
+      "static": true,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.PatternExpression",
+          "type_short": "PatternExpression",
+          "comment": "the expression to solve"
+        },
+        {
+          "name": "goal",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.expr.MaskedLong",
+          "type_short": "MaskedLong",
+          "comment": "the desired value of the expression"
+        },
+        {
+          "name": "vals",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": "any defined symbols"
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": "the selected subconstructor encodings"
+        },
+        {
+          "name": "cur",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": "the resolved constructor so far"
+        },
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "a description of the result"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolution",
+        "type_short": "AssemblyResolution",
+        "comment": "the encoded solution, or a backfill record"
+      },
+      "throws": []
+    },
+    {
+      "name": "solveOrBackfill",
+      "comment": "Attempt to solve an expression\n \n Converts the given goal to a fully-defined MaskedLong and then solves as before.",
+      "javadoc": "Attempt to solve an expression\n \n Converts the given goal to a fully-defined {@link MaskedLong} and then solves as before.\n@see #solveOrBackfill(PatternExpression, MaskedLong, Map, Map, AssemblyResolvedConstructor,\n      String)",
+      "static": true,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.PatternExpression",
+          "type_short": "PatternExpression",
+          "comment": ""
+        },
+        {
+          "name": "goal",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "vals",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "cur",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": ""
+        },
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolution",
+        "type_short": "AssemblyResolution",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "solveOrBackfill",
+      "comment": "Attempt to solve an expression\n \n Converts the given goal and bits count to a MaskedLong and then solves as before. As\n a special case, if , the goal is considered fully-defined (as if\n ).",
+      "javadoc": "Attempt to solve an expression\n \n Converts the given goal and bits count to a {@link MaskedLong} and then solves as before. As\n a special case, if {@code bits \u003d\u003d 0}, the goal is considered fully-defined (as if\n {@code bits \u003d\u003d 64}).\n@see #solveOrBackfill(PatternExpression, MaskedLong, Map, Map, AssemblyResolvedConstructor,\n      String)",
+      "static": true,
+      "params": [
+        {
+          "name": "exp",
+          "type_long": "ghidra.app.plugin.processors.sleigh.expression.PatternExpression",
+          "type_short": "PatternExpression",
+          "comment": ""
+        },
+        {
+          "name": "goal",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "bits",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "vals",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "res",
+          "type_long": "java.util.Map\u003cjava.lang.Integer,java.lang.Object\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "cur",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedConstructor",
+          "type_short": "AssemblyResolvedConstructor",
+          "comment": ""
+        },
+        {
+          "name": "description",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolution",
+        "type_short": "AssemblyResolution",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

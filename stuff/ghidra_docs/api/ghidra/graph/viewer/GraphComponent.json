@@ -1,0 +1,1428 @@
+{
+  "name": "GraphComponent",
+  "comment": "A component that contains primary and satellite graph views.  This viewer provides\n methods for manipulating the graph using the mouse.\n\n To gain the full functionality offered by this class, clients will need to subclass\n this class and override #createPrimaryGraphViewer(VisualGraphLayout, Dimension)\n and #createSatelliteGraphViewer(GraphViewer, Dimension) as needed.   This allows\n them to customize renderers and other viewer attributes.  To use the subclass, see the\n VisualGraphView and its installGraphViewer() method.",
+  "javadoc": "A component that contains primary and satellite graph views.  This viewer provides\n methods for manipulating the graph using the mouse.\n\n \u003cp\u003eTo gain the full functionality offered by this class, clients will need to subclass\n this class and override {@link #createPrimaryGraphViewer(VisualGraphLayout, Dimension)}\n and {@link #createSatelliteGraphViewer(GraphViewer, Dimension)} as needed.   This allows\n them to customize renderers and other viewer attributes.  To use the subclass, see the\n {@link VisualGraphView} and its \u003ccode\u003einstallGraphViewer()\u003c/code\u003e method.\n@param \u003cV\u003e the vertex type\n@param \u003cE\u003e the edge type\n@param \u003cG\u003e the graph type\n@see GraphViewer",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "PARENT_TO_SATELLITE_RATIO",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "double",
+      "type_short": "double",
+      "constant_value": "4.0"
+    },
+    {
+      "name": "MINIMUM_SATELLITE_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "150"
+    },
+    {
+      "name": "REALLY_BIG_GRAPH_VERTEX_COUNT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "500"
+    },
+    {
+      "name": "PRIMARY_VIEWER_LAYER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Integer",
+      "type_short": "Integer",
+      "constant_value": null
+    },
+    {
+      "name": "SATELLITE_PROVIDER_BUTTON_LAYER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Integer",
+      "type_short": "Integer",
+      "constant_value": null
+    },
+    {
+      "name": "SATELLITE_VIEWER_LAYER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Integer",
+      "type_short": "Integer",
+      "constant_value": null
+    },
+    {
+      "name": "STALE_GRAPH_VIEW_LAYER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.Integer",
+      "type_short": "Integer",
+      "constant_value": null
+    },
+    {
+      "name": "staleGraphViewPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "messagePaintable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.GraphComponent\u003cV,E,G\u003e.MessagePaintable",
+      "type_short": "MessagePaintable",
+      "constant_value": null
+    },
+    {
+      "name": "gPickedState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.event.picking.GPickedState\u003cV\u003e",
+      "type_short": "GPickedState",
+      "constant_value": null
+    },
+    {
+      "name": "vertexFocusListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Optional\u003cghidra.graph.viewer.vertex.VertexFocusListener\u003cV\u003e\u003e",
+      "type_short": "Optional",
+      "constant_value": null
+    },
+    {
+      "name": "vertexClickListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Optional\u003cghidra.graph.viewer.vertex.VertexClickListener\u003cV,E\u003e\u003e",
+      "type_short": "Optional",
+      "constant_value": null
+    },
+    {
+      "name": "mainPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "layeredPane",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JLayeredPane",
+      "type_short": "JLayeredPane",
+      "constant_value": null
+    },
+    {
+      "name": "graph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "G",
+      "type_short": "G",
+      "constant_value": null
+    },
+    {
+      "name": "graphChangeListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.GraphComponent\u003cV,E,G\u003e.GraphChangeListener",
+      "type_short": "GraphChangeListener",
+      "constant_value": null
+    },
+    {
+      "name": "vertexPickingListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.GraphComponent\u003cV,E,G\u003e.VertexPickingListener",
+      "type_short": "VertexPickingListener",
+      "constant_value": null
+    },
+    {
+      "name": "primaryViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+      "type_short": "GraphViewer",
+      "constant_value": null
+    },
+    {
+      "name": "satelliteViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+      "type_short": "SatelliteGraphViewer",
+      "constant_value": null
+    },
+    {
+      "name": "satelliteListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Optional\u003cghidra.graph.viewer.GraphSatelliteListener\u003e",
+      "type_short": "Optional",
+      "constant_value": null
+    },
+    {
+      "name": "undockedSatellitePanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "showUndockedSatelliteButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JButton",
+      "type_short": "JButton",
+      "constant_value": null
+    },
+    {
+      "name": "layoutListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.layout.LayoutListener\u003cV,E\u003e",
+      "type_short": "LayoutListener",
+      "constant_value": null
+    },
+    {
+      "name": "isUninitialized",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "graphPerspectiveInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.GraphPerspectiveInfo\u003cV,E\u003e",
+      "type_short": "GraphPerspectiveInfo",
+      "constant_value": null
+    },
+    {
+      "name": "primaryGraphMouse",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.event.mouse.VisualGraphPluggableGraphMouse\u003cV,E\u003e",
+      "type_short": "VisualGraphPluggableGraphMouse",
+      "constant_value": null
+    },
+    {
+      "name": "satelliteGraphMouse",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.event.mouse.VisualGraphPluggableGraphMouse\u003cV,E\u003e",
+      "type_short": "VisualGraphPluggableGraphMouse",
+      "constant_value": null
+    },
+    {
+      "name": "lastSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.Dimension",
+      "type_short": "Dimension",
+      "constant_value": null
+    },
+    {
+      "name": "vgOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.options.VisualGraphOptions",
+      "type_short": "VisualGraphOptions",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "graph",
+          "type_long": "G",
+          "type_short": "G",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setGraph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "g",
+          "type_long": "G",
+          "type_short": "G",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "build",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createPrimaryGraphViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "layout",
+          "type_long": "ghidra.graph.viewer.layout.VisualGraphLayout\u003cV,E\u003e",
+          "type_short": "VisualGraphLayout",
+          "comment": ""
+        },
+        {
+          "name": "viewerSize",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+        "type_short": "GraphViewer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildPrimaryGraphViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "layout",
+          "type_long": "ghidra.graph.viewer.layout.VisualGraphLayout\u003cV,E\u003e",
+          "type_short": "VisualGraphLayout",
+          "comment": ""
+        },
+        {
+          "name": "viewerSize",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+        "type_short": "GraphViewer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decoratePrimaryViewer",
+      "comment": "This is called to configure the primary viewer\u0027s rendering settings.  Subclasses can\n override this method to change, as needed.",
+      "javadoc": "This is called to configure the primary viewer\u0027s rendering settings.  Subclasses can\n override this method to change, as needed.\n@param viewer the new satellite viewer\n@param layout the viewer\u0027s layout",
+      "static": false,
+      "params": [
+        {
+          "name": "viewer",
+          "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+          "type_short": "GraphViewer",
+          "comment": "the new satellite viewer"
+        },
+        {
+          "name": "layout",
+          "type_long": "ghidra.graph.viewer.layout.VisualGraphLayout\u003cV,E\u003e",
+          "type_short": "VisualGraphLayout",
+          "comment": "the viewer\u0027s layout"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSatelliteGraphViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "masterViewer",
+          "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+          "type_short": "GraphViewer",
+          "comment": ""
+        },
+        {
+          "name": "viewerSize",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+        "type_short": "SatelliteGraphViewer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildSatelliteViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "masterViewer",
+          "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+          "type_short": "GraphViewer",
+          "comment": ""
+        },
+        {
+          "name": "layout",
+          "type_long": "ghidra.graph.viewer.layout.VisualGraphLayout\u003cV,E\u003e",
+          "type_short": "VisualGraphLayout",
+          "comment": ""
+        },
+        {
+          "name": "viewerSize",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+        "type_short": "SatelliteGraphViewer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decorateSatelliteViewer",
+      "comment": "This is called to configure the satellite viewer\u0027s rendering settings.  Subclasses can\n override this method to change, as needed.",
+      "javadoc": "This is called to configure the satellite viewer\u0027s rendering settings.  Subclasses can\n override this method to change, as needed.\n@param viewer the new satellite viewer\n@param layout the viewer\u0027s layout",
+      "static": false,
+      "params": [
+        {
+          "name": "viewer",
+          "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+          "type_short": "SatelliteGraphViewer",
+          "comment": "the new satellite viewer"
+        },
+        {
+          "name": "layout",
+          "type_long": "ghidra.graph.viewer.layout.VisualGraphLayout\u003cV,E\u003e",
+          "type_short": "VisualGraphLayout",
+          "comment": "the viewer\u0027s layout"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createGUIComponents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "viewer",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationViewer\u003cV,E\u003e",
+          "type_short": "VisualizationViewer",
+          "comment": ""
+        },
+        {
+          "name": "satellite",
+          "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+          "type_short": "SatelliteGraphViewer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "installCommonListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "viewer",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationViewer\u003cV,E\u003e",
+          "type_short": "VisualizationViewer",
+          "comment": ""
+        },
+        {
+          "name": "satellite",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationViewer\u003cV,E\u003e",
+          "type_short": "VisualizationViewer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildShowUndockedProviderButton",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.EmptyBorderButton",
+        "type_short": "EmptyBorderButton",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildStaleLayoutPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JPanel",
+        "type_short": "JPanel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildLayout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.layout.VisualGraphLayout\u003cV,E\u003e",
+        "type_short": "VisualGraphLayout",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "adjustPickSupport",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "viewer",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationViewer\u003cV,E\u003e",
+          "type_short": "VisualizationViewer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isReallyBigData",
+      "comment": "This method is used to determine caching strategy.  For example, large graph will\n trigger the us of a cached satellite view, for performance reasons.",
+      "javadoc": "This method is used to determine caching strategy.  For example, large graph will\n trigger the us of a cached satellite view, for performance reasons.\n@return true if the data is considered \u0027really big\u0027",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the data is considered \u0027really big\u0027"
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexFocusListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.graph.viewer.vertex.VertexFocusListener\u003cV\u003e",
+          "type_short": "VertexFocusListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexClickListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.graph.viewer.vertex.VertexClickListener\u003cV,E\u003e",
+          "type_short": "VertexClickListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setGraphOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "options",
+          "type_long": "ghidra.graph.viewer.options.VisualGraphOptions",
+          "type_short": "VisualGraphOptions",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGraphOptions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.options.VisualGraphOptions",
+        "type_short": "VisualGraphOptions",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUninitialized",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setGraphViewStale",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "isStale",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isGraphViewStale",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setStatusMessage",
+      "comment": "Sets a message to be painted on the viewer.  This is useful to show a text message to the\n user.  Passing null will clear the message.",
+      "javadoc": "Sets a message to be painted on the viewer.  This is useful to show a text message to the\n user.  Passing null will clear the message.\n@param message the message",
+      "static": false,
+      "params": [
+        {
+          "name": "message",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the message"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "optionsChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "repaint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrimaryViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.GraphViewer\u003cV,E\u003e",
+        "type_short": "GraphViewer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSatelliteViewer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.SatelliteGraphViewer\u003cV,E\u003e",
+        "type_short": "SatelliteGraphViewer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewUpdater",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.VisualGraphViewUpdater\u003cV,E\u003e",
+        "type_short": "VisualGraphViewUpdater",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSatelliteBounds",
+      "comment": "Returns an empty rectangle if the satellite is not visible",
+      "javadoc": "Returns an empty rectangle if the satellite is not visible\n@return the bounds",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Rectangle",
+        "type_short": "Rectangle",
+        "comment": "the bounds"
+      },
+      "throws": []
+    },
+    {
+      "name": "viewerInitialized",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "viewer",
+          "type_long": "edu.uci.ics.jung.visualization.VisualizationViewer\u003cV,E\u003e",
+          "type_short": "VisualizationViewer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInitialVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "V",
+        "type_short": "V",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "zoomInCompletely",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setGraphPerspective",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "info",
+          "type_long": "ghidra.graph.viewer.GraphPerspectiveInfo\u003cV,E\u003e",
+          "type_short": "GraphPerspectiveInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyGraphPerspective",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "graphInfo",
+          "type_long": "ghidra.graph.viewer.GraphPerspectiveInfo\u003cV,E\u003e",
+          "type_short": "GraphPerspectiveInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexFocused",
+      "comment": "Sets the given vertex to be the focused vertex.  This will be the only focused vertex.",
+      "javadoc": "Sets the given vertex to be the focused vertex.  This will be the only focused vertex.\n@param vertex the vertex",
+      "static": false,
+      "params": [
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": "the vertex"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVerticesSelected",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vertices",
+          "type_long": "java.util.Collection\u003cV\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "twinkleVertex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "twinkleVertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSatelliteComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "java.awt.Component",
+          "type_short": "Component",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSatelliteContentComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JComponent",
+        "type_short": "JComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateSatellite",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "docked",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSatelliteLisetener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "ghidra.graph.viewer.GraphSatelliteListener",
+          "type_short": "GraphSatelliteListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInitialSatelliteState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "docked",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSatelliteDocked",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "docked",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSatelliteVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSatelliteShowing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateLayeredPaneComponentsForSizeChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateLayeredPaneComponentsSizes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateSatelliteBounds",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentSize",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        },
+        {
+          "name": "forceUpdate",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNewBoundsSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentBounds",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        },
+        {
+          "name": "satelliteBounds",
+          "type_long": "java.awt.Dimension",
+          "type_short": "Dimension",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSatelliteDocked",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSatelliteUnDocked",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPopupsVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVertexHoverPathHighlightMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.PathHighlightMode",
+        "type_short": "PathHighlightMode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexHoverPathHighlightMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mode",
+          "type_long": "ghidra.graph.viewer.PathHighlightMode",
+          "type_short": "PathHighlightMode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVertexFocusPathHighlightMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.PathHighlightMode",
+        "type_short": "PathHighlightMode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVertexFocusPathHighlightMode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mode",
+          "type_long": "ghidra.graph.viewer.PathHighlightMode",
+          "type_short": "PathHighlightMode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRenderContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+        "type_short": "RenderContext",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGraph",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "G",
+        "type_short": "G",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPathHighlighter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.graph.viewer.edge.VisualGraphPathHighlighter\u003cV,E\u003e",
+        "type_short": "VisualGraphPathHighlighter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refreshCurrentLayout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

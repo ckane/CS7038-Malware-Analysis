@@ -1,0 +1,1752 @@
+{
+  "name": "Disassembler",
+  "comment": "Class to perform disassembly.  Contains the logic to follow instruction\n flows to continue the disassembly.\n 17-Nov-2008: moved to ghidra.program.disassemble package since this is now used during \n \t\t\t\t\t      language upgrades which may occur during construction of ProgramDB.\n 12-Dec-2012: major refactor of disassembly to perform bulk add of instructions to \n program to avoid context related conflicts",
+  "javadoc": "Class to perform disassembly.  Contains the logic to follow instruction\n flows to continue the disassembly.\n 17-Nov-2008: moved to ghidra.program.disassemble package since this is now used during \n \t\t\t\t\t      language upgrades which may occur during construction of ProgramDB.\n 12-Dec-2012: major refactor of disassembly to perform bulk add of instructions to \n program to avoid context related conflicts",
+  "static": false,
+  "implements": [
+    "ghidra.program.disassemble.DisassemblerConflictHandler"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "DISASSEMBLE_MEMORY_CACHE_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "MARK_BAD_INSTRUCTION_PROPERTY",
+      "comment": "MARK_BAD_INSTRUCTION_PROPERTY Program Disassembler property \n enables marking of instruction disassembly errors.  Boolean property is defined\n within the Disassembler property list, see Program#DISASSEMBLER_PROPERTIES.",
+      "javadoc": "\u003ccode\u003eMARK_BAD_INSTRUCTION_PROPERTY\u003c/code\u003e Program Disassembler property \n enables marking of instruction disassembly errors.  Boolean property is defined\n within the Disassembler property list, see {@link Program#DISASSEMBLER_PROPERTIES}.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Mark Bad Disassembly\""
+    },
+    {
+      "name": "MARK_UNIMPL_PCODE_PROPERTY",
+      "comment": "MARK_UNIMPL_PCODE_PROPERTY Program Disassembler property \n enables marking of instructions which are missing their pcode implementation.  \n Boolean property is defined within the Disassembler property list, see \n Program#DISASSEMBLER_PROPERTIES.",
+      "javadoc": "\u003ccode\u003eMARK_UNIMPL_PCODE_PROPERTY\u003c/code\u003e Program Disassembler property \n enables marking of instructions which are missing their pcode implementation.  \n Boolean property is defined within the Disassembler property list, see \n {@link Program#DISASSEMBLER_PROPERTIES}.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Mark Unimplemented Pcode\""
+    },
+    {
+      "name": "RESTRICT_DISASSEMBLY_TO_EXECUTE_MEMORY_PROPERTY",
+      "comment": "RESTRICT_DISASSEMBLY_TO_EXECUTE_MEMORY_PROPERTY Program Disassembler property \n restricts disassembly to executable memory only.  \n Boolean property is defined within the Disassembler property list, see \n Program#DISASSEMBLER_PROPERTIES.",
+      "javadoc": "\u003ccode\u003eRESTRICT_DISASSEMBLY_TO_EXECUTE_MEMORY_PROPERTY\u003c/code\u003e Program Disassembler property \n restricts disassembly to executable memory only.  \n Boolean property is defined within the Disassembler property list, see \n {@link Program#DISASSEMBLER_PROPERTIES}.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Restrict Disassembly to Executable Memory\""
+    },
+    {
+      "name": "ERROR_BOOKMARK_CATEGORY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Bad Instruction\""
+    },
+    {
+      "name": "UNIMPL_BOOKMARK_CATEGORY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Unimplemented Pcode\""
+    },
+    {
+      "name": "MAX_REPEAT_PATTERN_LENGTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16"
+    },
+    {
+      "name": "NUM_ADDRS_FOR_NOTIFICATION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1024"
+    },
+    {
+      "name": "INSTRUCTION_SET_SIZE_LIMIT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2048"
+    },
+    {
+      "name": "language",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Language",
+      "type_short": "Language",
+      "constant_value": null
+    },
+    {
+      "name": "addrFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressFactory",
+      "type_short": "AddressFactory",
+      "constant_value": null
+    },
+    {
+      "name": "baseContextRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register",
+      "type_short": "Register",
+      "constant_value": null
+    },
+    {
+      "name": "parallelHelper",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.ParallelInstructionLanguageHelper",
+      "type_short": "ParallelInstructionLanguageHelper",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "seedContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.disassemble.DisassemblerContextImpl",
+      "type_short": "DisassemblerContextImpl",
+      "constant_value": null
+    },
+    {
+      "name": "listener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+      "type_short": "DisassemblerMessageListener",
+      "constant_value": null
+    },
+    {
+      "name": "restrictedAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "initializedAddressSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSetView",
+      "type_short": "AddressSetView",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "realProgramContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramContext",
+      "type_short": "ProgramContext",
+      "constant_value": null
+    },
+    {
+      "name": "defaultLanguageContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.ProgramContextImpl",
+      "type_short": "ProgramContextImpl",
+      "constant_value": null
+    },
+    {
+      "name": "disassemblerProgramContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.disassemble.Disassembler.DisassemblerProgramContext",
+      "type_short": "DisassemblerProgramContext",
+      "constant_value": null
+    },
+    {
+      "name": "disassemblerContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.disassemble.DisassemblerContextImpl",
+      "type_short": "DisassemblerContextImpl",
+      "constant_value": null
+    },
+    {
+      "name": "instAlignment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "disassemblerQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.disassemble.DisassemblerQueue",
+      "type_short": "DisassemblerQueue",
+      "constant_value": null
+    },
+    {
+      "name": "listing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "disassembleCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "totalCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "repeatInstructionByteTracker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.RepeatInstructionByteTracker",
+      "type_short": "RepeatInstructionByteTracker",
+      "constant_value": null
+    },
+    {
+      "name": "bmMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.BookmarkManager",
+      "type_short": "BookmarkManager",
+      "constant_value": null
+    },
+    {
+      "name": "doMarkBadInstructions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "doMarkUnimplPcode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "instructionSetSizeLimit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "followFlow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "getDisassembler",
+      "comment": "Get a suitable disassembler instance. \n Marking of bad instructions honors \"Mark Bad Disassembly\" \n program Disassembler option.",
+      "javadoc": "Get a suitable disassembler instance. \n Marking of bad instructions honors \"Mark Bad Disassembly\" \n program Disassembler option.\n@param program the program to be disassembled.\n@param monitor progress monitor\n@param listener object to notify of disassembly messages.\n@return a disassembler ready to disassemble",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be disassembled."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+          "type_short": "DisassemblerMessageListener",
+          "comment": "object to notify of disassembly messages."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.disassemble.Disassembler",
+        "type_short": "Disassembler",
+        "comment": "a disassembler ready to disassemble"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDisassembler",
+      "comment": "Get a suitable disassembler instance.\n Intended for block pseudo-disassembly use only when the method \n Disassembler#pseudoDisassembleBlock(MemBuffer, RegisterValue, int)\n is used.",
+      "javadoc": "Get a suitable disassembler instance.\n Intended for block pseudo-disassembly use only when the method \n {@link Disassembler#pseudoDisassembleBlock(MemBuffer, RegisterValue, int)}\n is used.\n@param language processor language\n@param addrFactory address factory\n@param monitor progress monitor\n@param listener object to notify of disassembly messages.\n@return a disassembler ready to disassemble",
+      "static": true,
+      "params": [
+        {
+          "name": "language",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": "processor language"
+        },
+        {
+          "name": "addrFactory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "address factory"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+          "type_short": "DisassemblerMessageListener",
+          "comment": "object to notify of disassembly messages."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.disassemble.Disassembler",
+        "type_short": "Disassembler",
+        "comment": "a disassembler ready to disassemble"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDisassembler",
+      "comment": "Get a suitable disassembler instance.",
+      "javadoc": "Get a suitable disassembler instance.\n@param program the program to be disassembled.\n@param markBadInstructions if true bad instructions will be marked\n@param markUnimplementedPcode if true instructions with unimplemented pcode will be marked\n@param restrictToExecuteMemory if true disassembly will only be permitted with executable memory blocks\n@param monitor progress monitor\n@param listener object to notify of disassembly messages.\n@return a disassembler ready to disassemble",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be disassembled."
+        },
+        {
+          "name": "markBadInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true bad instructions will be marked"
+        },
+        {
+          "name": "markUnimplementedPcode",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true instructions with unimplemented pcode will be marked"
+        },
+        {
+          "name": "restrictToExecuteMemory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true disassembly will only be permitted with executable memory blocks"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+          "type_short": "DisassemblerMessageListener",
+          "comment": "object to notify of disassembly messages."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.disassemble.Disassembler",
+        "type_short": "Disassembler",
+        "comment": "a disassembler ready to disassemble"
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Disassembler constructor.  Marking of bad instructions honors \"Mark Bad Disassembly\" \n program Disassembler option.",
+      "javadoc": "Disassembler constructor.  Marking of bad instructions honors \"Mark Bad Disassembly\" \n program Disassembler option.\n@param program the program to be disassembled.\n@param monitor progress monitor\n@param listener object to notify of disassembly messages.",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be disassembled."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+          "type_short": "DisassemblerMessageListener",
+          "comment": "object to notify of disassembly messages."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Disassembler constructor.  Intended for block pseudo-disassembly use only.",
+      "javadoc": "Disassembler constructor.  Intended for block pseudo-disassembly use only.\n@param language processor language\n@param addrFactory address factory\n@param monitor progress monitor\n@param listener object to notify of disassembly messages.",
+      "static": false,
+      "params": [
+        {
+          "name": "language",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": "processor language"
+        },
+        {
+          "name": "addrFactory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": "address factory"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+          "type_short": "DisassemblerMessageListener",
+          "comment": "object to notify of disassembly messages."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Disassembler constructor",
+      "javadoc": "Disassembler constructor\n@param program the program to be disassembled.\n@param markBadInstructions if true bad instructions will be marked\n@param markUnimplementedPcode if true instructions with unimplemented pcode will be marked\n@param restrictToExecuteMemory if true disassembly will only be permitted with executable memory blocks\n@param monitor progress monitor\n@param listener object to notify of disassembly messages.",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to be disassembled."
+        },
+        {
+          "name": "markBadInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true bad instructions will be marked"
+        },
+        {
+          "name": "markUnimplementedPcode",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true instructions with unimplemented pcode will be marked"
+        },
+        {
+          "name": "restrictToExecuteMemory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true disassembly will only be permitted with executable memory blocks"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+          "type_short": "DisassemblerMessageListener",
+          "comment": "object to notify of disassembly messages."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "language",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        },
+        {
+          "name": "addrFactory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": ""
+        },
+        {
+          "name": "markBadInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "markUnimplementedPcode",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "restrictToExecuteMemory",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "listener",
+          "type_long": "ghidra.program.disassemble.DisassemblerMessageListener",
+          "type_short": "DisassemblerMessageListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSeedContext",
+      "comment": "Set seed context which will be used to establish initial context at starting points\n which are not arrived at via a natural disassembly flow.  A null value will disable\n use of any previously set seed context",
+      "javadoc": "Set seed context which will be used to establish initial context at starting points\n which are not arrived at via a natural disassembly flow.  A null value will disable\n use of any previously set seed context\n@param seedContext initial context for disassembly",
+      "static": false,
+      "params": [
+        {
+          "name": "seedContext",
+          "type_long": "ghidra.program.disassemble.DisassemblerContextImpl",
+          "type_short": "DisassemblerContextImpl",
+          "comment": "initial context for disassembly"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInstructionSetSizeLimit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "limit",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRepeatPatternLimit",
+      "comment": "Set the maximum number of instructions in a single run which contain the same byte values.\n Disassembly flow will stop and be flagged when this threshold is encountered.\n This check is set to MAX_REPEAT_PATTERN_LENGTH by default, and can be disabled by setting a value of -1\n NOTE: This restriction will only work for those cases where a given repeated byte \n results in an instruction which has a fall-through.",
+      "javadoc": "Set the maximum number of instructions in a single run which contain the same byte values.\n Disassembly flow will stop and be flagged when this threshold is encountered.\n This check is set to MAX_REPEAT_PATTERN_LENGTH by default, and can be disabled by setting a value of -1\n NOTE: This restriction will only work for those cases where a given repeated byte \n results in an instruction which has a fall-through.\n@param maxInstructions limit on the number of consecutive instructions with the same \n byte values",
+      "static": false,
+      "params": [
+        {
+          "name": "maxInstructions",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "limit on the number of consecutive instructions with the same \n byte values"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRepeatPatternLimitIgnored",
+      "comment": "Set the region over which the repeat pattern limit will be ignored.\n This allows areas which have been explicitly disassembled to be \n free of bad bookmarks caused by the repeat pattern limit being exceeded.",
+      "javadoc": "Set the region over which the repeat pattern limit will be ignored.\n This allows areas which have been explicitly disassembled to be \n free of bad bookmarks caused by the repeat pattern limit being exceeded.\n@param set region over which the repeat pattern limit will be ignored",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "region over which the repeat pattern limit will be ignored"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isMarkBadDisassemblyOptionEnabled",
+      "comment": "",
+      "javadoc": "@param program the program to check\n@return true if program MARK_BAD_INSTRUCTION_PROPERTY has been enabled",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if program MARK_BAD_INSTRUCTION_PROPERTY has been enabled"
+      },
+      "throws": []
+    },
+    {
+      "name": "isMarkUnimplementedPcodeOptionEnabled",
+      "comment": "",
+      "javadoc": "@param program the program to check\n@return true if program MARK_UNIMPL_PCODE_PROPERTY has been enabled",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if program MARK_UNIMPL_PCODE_PROPERTY has been enabled"
+      },
+      "throws": []
+    },
+    {
+      "name": "isRestrictToExecuteMemory",
+      "comment": "",
+      "javadoc": "@param program the program to check\n@return true if program RESTRICT_DISASSEMBLY_TO_EXECUTE_MEMORY_PROPERTY has been enabled",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if program RESTRICT_DISASSEMBLY_TO_EXECUTE_MEMORY_PROPERTY has been enabled"
+      },
+      "throws": []
+    },
+    {
+      "name": "getInitializedMemory",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "exectuableMemoryOnly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disassemble",
+      "comment": "Attempt disassembly of all undefined code units within the specified set of addresses.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.\n Disassembler must be instantiated with a Program object.",
+      "javadoc": "Attempt disassembly of all undefined code units within the specified set of addresses.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.\n Disassembler must be instantiated with a Program object.\n@param startSet the minimum set of addresses to disassemble\n@param restrictedSet the set of addresses that disassembling is restricted to (may be null)\n@param doFollowFlow flag to follow references while disassembling.\n@return the set of addresses that were disassembled.",
+      "static": false,
+      "params": [
+        {
+          "name": "startSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the minimum set of addresses to disassemble"
+        },
+        {
+          "name": "restrictedSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses that disassembling is restricted to (may be null)"
+        },
+        {
+          "name": "doFollowFlow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "flag to follow references while disassembling."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the set of addresses that were disassembled."
+      },
+      "throws": []
+    },
+    {
+      "name": "disassemble",
+      "comment": "Attempt disassembly of all undefined code units within the specified set of addresses.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.\n Disassembler must be instantiated with a Program object.",
+      "javadoc": "Attempt disassembly of all undefined code units within the specified set of addresses.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.\n Disassembler must be instantiated with a Program object.\n@param startSet the minimum set of addresses to disassemble\n@param restrictedSet the set of addresses that disassembling is restricted to (may be null)\n@param initialContextValue initial context value to be applied at the\n startAddr.  If not null this value will take precedence when combined with\n any seed value or program context.\n@param doFollowFlow flag to follow references while disassembling.\n@return the set of addresses that were disassembled.",
+      "static": false,
+      "params": [
+        {
+          "name": "startSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the minimum set of addresses to disassemble"
+        },
+        {
+          "name": "restrictedSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses that disassembling is restricted to (may be null)"
+        },
+        {
+          "name": "initialContextValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "initial context value to be applied at the\n startAddr.  If not null this value will take precedence when combined with\n any seed value or program context."
+        },
+        {
+          "name": "doFollowFlow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "flag to follow references while disassembling."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the set of addresses that were disassembled."
+      },
+      "throws": []
+    },
+    {
+      "name": "disassemble",
+      "comment": "Disassembles code starting at startAddr and restricted to addrSet.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.\n Disassembler must be instantiated with a Program object.",
+      "javadoc": "Disassembles code starting at startAddr and restricted to addrSet.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.\n Disassembler must be instantiated with a Program object.\n@param startAddr the address to begin disassembling.\n@param restrictedSet the set of addresses that disassembling is restricted to.\n@return AddressSet the set of addresses that were disassembled.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to begin disassembling."
+        },
+        {
+          "name": "restrictedSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses that disassembling is restricted to."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "AddressSet the set of addresses that were disassembled."
+      },
+      "throws": []
+    },
+    {
+      "name": "disassemble",
+      "comment": "Disassembles code starting at startAddr and restricted to addrSet.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods. \n Disassembler must be instantiated with a Program object.",
+      "javadoc": "Disassembles code starting at startAddr and restricted to addrSet.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods. \n Disassembler must be instantiated with a Program object.\n@param startAddr the address to begin disassembling.\n@param restrictedSet the set of addresses that disassembling is restricted to.\n@param doFollowFlow flag to follow references while disassembling.\n@return AddressSet the set of addresses that were disassembled.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to begin disassembling."
+        },
+        {
+          "name": "restrictedSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses that disassembling is restricted to."
+        },
+        {
+          "name": "doFollowFlow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "flag to follow references while disassembling."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "AddressSet the set of addresses that were disassembled."
+      },
+      "throws": []
+    },
+    {
+      "name": "disassemble",
+      "comment": "Disassembles code starting at startAddr and restricted to addrSet.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.  \n Disassembler must be instantiated with a Program object.",
+      "javadoc": "Disassembles code starting at startAddr and restricted to addrSet.\n NOTE: A single instance of this Disassembler does not support concurrent\n invocations of the various disassemble methods.  \n Disassembler must be instantiated with a Program object.\n@param startAddr the address to begin disassembling.\n@param restrictedSet the set of addresses that disassembling is restricted to.\n@param initialContextValue initial context value to be applied at the\n startAddr.  If not null this value will take precedence when combined with\n any seed value or program context.\n@param doFollowFlow flag to follow references while disassembling.\n@return AddressSet the set of addresses that were disassembled.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to begin disassembling."
+        },
+        {
+          "name": "restrictedSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of addresses that disassembling is restricted to."
+        },
+        {
+          "name": "initialContextValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "initial context value to be applied at the\n startAddr.  If not null this value will take precedence when combined with\n any seed value or program context."
+        },
+        {
+          "name": "doFollowFlow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "flag to follow references while disassembling."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "AddressSet the set of addresses that were disassembled."
+      },
+      "throws": []
+    },
+    {
+      "name": "disassembleNextInstructionSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "firstBlock",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        },
+        {
+          "name": "programMemBuffer",
+          "type_long": "ghidra.program.model.mem.DumbMemBufferImpl",
+          "type_short": "DumbMemBufferImpl",
+          "comment": ""
+        },
+        {
+          "name": "previouslyDisassembled",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.InstructionSet",
+        "type_short": "InstructionSet",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resetDisassemblerContext",
+      "comment": "Clear any retained context state which may have been accumulated.\n Use of this method is only needed when using the pseudoDisassembleBlock \n method over an extended code range to avoid excessive in-memory state accumulation.",
+      "javadoc": "Clear any retained context state which may have been accumulated.\n Use of this method is only needed when using the pseudoDisassembleBlock \n method over an extended code range to avoid excessive in-memory state accumulation.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "pseudoDisassembleBlock",
+      "comment": "Perform a psuedo-disassembly of an single instruction block only following fall-throughs.\n WARNING! This method should not be used in conjunction with other disassembly methods\n on the this Disassembler instance.  Disassembler must be instantiated with a Program object.",
+      "javadoc": "Perform a psuedo-disassembly of an single instruction block only following fall-throughs.\n WARNING! This method should not be used in conjunction with other disassembly methods\n on the this Disassembler instance.  Disassembler must be instantiated with a Program object.\n@param addr start of block\n@param defaultContextValue starting context to use if no context has previously been established\n for the specified startAddr\n@param limit maximum number of instructions to disassemble\n@return instruction block of pseudo-instructions",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start of block"
+        },
+        {
+          "name": "defaultContextValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "starting context to use if no context has previously been established\n for the specified startAddr"
+        },
+        {
+          "name": "limit",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of instructions to disassemble"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.InstructionBlock",
+        "type_short": "InstructionBlock",
+        "comment": "instruction block of pseudo-instructions"
+      },
+      "throws": []
+    },
+    {
+      "name": "pseudoDisassembleBlock",
+      "comment": "Perform a psuedo-disassembly of an single instruction block only following fall-throughs.\n WARNING! This method should not be used in conjunction with other disassembly methods\n on the this Disassembler instance.",
+      "javadoc": "Perform a psuedo-disassembly of an single instruction block only following fall-throughs.\n WARNING! This method should not be used in conjunction with other disassembly methods\n on the this Disassembler instance.\n@param blockMemBuffer block memory buffer\n@param defaultContextValue starting context to use if no context has previously been established\n for the specified startAddr\n@param limit maximum number of instructions to disassemble\n@return instruction block of pseudo-instructions or null if minimum address of blockMemBuffer \n is not properly aligned for instruction parsing.",
+      "static": false,
+      "params": [
+        {
+          "name": "blockMemBuffer",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": "block memory buffer"
+        },
+        {
+          "name": "defaultContextValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "starting context to use if no context has previously been established\n for the specified startAddr"
+        },
+        {
+          "name": "limit",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of instructions to disassemble"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.InstructionBlock",
+        "type_short": "InstructionBlock",
+        "comment": "instruction block of pseudo-instructions or null if minimum address of blockMemBuffer \n is not properly aligned for instruction parsing."
+      },
+      "throws": []
+    },
+    {
+      "name": "delaySlottedInstructionHasFallthrough",
+      "comment": "Examine delay-slotted instruction to determine if it has a fall-through",
+      "javadoc": "Examine delay-slotted instruction to determine if it has a fall-through\n@param dsInstr pseudo-instruction within existingBlock\n@param existingBlock InstructionBlock containing dsInstr\n@return true if fallthrough exists",
+      "static": false,
+      "params": [
+        {
+          "name": "dsInstr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "pseudo-instruction within existingBlock"
+        },
+        {
+          "name": "existingBlock",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": "InstructionBlock containing dsInstr"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if fallthrough exists"
+      },
+      "throws": []
+    },
+    {
+      "name": "setMemoryConstraintError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        },
+        {
+          "name": "flowFrom",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disassembleInstructionBlock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        },
+        {
+          "name": "blockMemBuffer",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "flowFrom",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "limit",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "instructionSet",
+          "type_long": "ghidra.program.model.lang.InstructionSet",
+          "type_short": "InstructionSet",
+          "comment": ""
+        },
+        {
+          "name": "skipIfBlockAlreadyDisassembled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "endBlockEarly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "inst",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "fallThruAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "limit",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "endBlockOnCall",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "inst",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "fallThruAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "adjustPreParseContext",
+      "comment": "Adjust disassembler context prior to disassembly of a new instruction.",
+      "javadoc": "Adjust disassembler context prior to disassembly of a new instruction.\n@param instrMemBuffer buffer for bytes from memory\n@throws UnknownInstructionException if instruction is invalid",
+      "static": false,
+      "params": [
+        {
+          "name": "instrMemBuffer",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": "buffer for bytes from memory"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.UnknownInstructionException",
+          "type_short": "UnknownInstructionException",
+          "comment": "if instruction is invalid"
+        }
+      ]
+    },
+    {
+      "name": "getPseudoInstruction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "prototype",
+          "type_long": "ghidra.program.model.lang.InstructionPrototype",
+          "type_short": "InstructionPrototype",
+          "comment": ""
+        },
+        {
+          "name": "memBuffer",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "contextValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.PseudoInstruction",
+        "type_short": "PseudoInstruction",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isBlockTerminationOK",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processInstruction",
+      "comment": "Process a new instruction which has just been parsed.  This method is responsible for\n adding the instruction to the current block as well as any delay-slotted instructions.\n This method may be overridden and the instruction re-parsed if necessary.",
+      "javadoc": "Process a new instruction which has just been parsed.  This method is responsible for\n adding the instruction to the current block as well as any delay-slotted instructions.\n This method may be overridden and the instruction re-parsed if necessary.\n@param inst instruction to process\n@param blockMemBuffer buffer to get bytes\n@param block current block of instructions\n@param instructionSet address set of current instructions in block\n@return instruction fallthrough address or null if no fallthrough\n@throws InsufficientBytesException if a memory error occurs during instruction processing\n@throws UnknownInstructionException if an error occurs during a modified re-parse of\n the instruction.\n@throws AddressOverflowException if address goes out of address space\n@throws NestedDelaySlotException if delay slot found in a delay slot",
+      "static": false,
+      "params": [
+        {
+          "name": "inst",
+          "type_long": "ghidra.app.util.PseudoInstruction",
+          "type_short": "PseudoInstruction",
+          "comment": "instruction to process"
+        },
+        {
+          "name": "blockMemBuffer",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": "buffer to get bytes"
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": "current block of instructions"
+        },
+        {
+          "name": "instructionSet",
+          "type_long": "ghidra.program.model.lang.InstructionSet",
+          "type_short": "InstructionSet",
+          "comment": "address set of current instructions in block"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "instruction fallthrough address or null if no fallthrough"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.InsufficientBytesException",
+          "type_short": "InsufficientBytesException",
+          "comment": "if a memory error occurs during instruction processing"
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownInstructionException",
+          "type_short": "UnknownInstructionException",
+          "comment": "if an error occurs during a modified re-parse of\n the instruction."
+        },
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": "if address goes out of address space"
+        },
+        {
+          "type_long": "ghidra.program.model.lang.NestedDelaySlotException",
+          "type_short": "NestedDelaySlotException",
+          "comment": "if delay slot found in a delay slot"
+        }
+      ]
+    },
+    {
+      "name": "processInstructionFlows",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "inst",
+          "type_long": "ghidra.app.util.PseudoInstruction",
+          "type_short": "PseudoInstruction",
+          "comment": ""
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkForIndirectCallFlow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "inst",
+          "type_long": "ghidra.app.util.PseudoInstruction",
+          "type_short": "PseudoInstruction",
+          "comment": ""
+        },
+        {
+          "name": "flowType",
+          "type_long": "ghidra.program.model.symbol.FlowType",
+          "type_short": "FlowType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseDelaySlots",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "inst",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "blockMemBuffer",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "block",
+          "type_long": "ghidra.program.model.lang.InstructionBlock",
+          "type_short": "InstructionBlock",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.PseudoInstruction\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.NestedDelaySlotException",
+          "type_short": "NestedDelaySlotException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isNoReturnCall",
+      "comment": "Check if the called function doesn\u0027t return",
+      "javadoc": "Check if the called function doesn\u0027t return\n@return true if the call also falls through to this instruction",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "target",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the call also falls through to this instruction"
+      },
+      "throws": []
+    },
+    {
+      "name": "markInstructionError",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "conflict",
+          "type_long": "ghidra.program.model.lang.InstructionError",
+          "type_short": "InstructionError",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBookmarkAllowed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markCallConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "flowFrom",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "conflictCodeUnit",
+          "type_long": "ghidra.program.model.listing.CodeUnit",
+          "type_short": "CodeUnit",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markUnimplementedPcode",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "markUnimplementedPcode",
+      "comment": "Mark all instructions with unimplemented pcode over the specified address set",
+      "javadoc": "Mark all instructions with unimplemented pcode over the specified address set\n@param program to mark unimplemented in\n@param addressSet restricted address set or null for entire program\n@param monitor allow canceling\n@throws CancelledException if monitor canceled",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "to mark unimplemented in"
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "restricted address set or null for entire program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "allow canceling"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor canceled"
+        }
+      ]
+    },
+    {
+      "name": "clearUnimplementedPcodeWarnings",
+      "comment": "Clear all bookmarks which indicate unimplemented pcode within the specified address set.",
+      "javadoc": "Clear all bookmarks which indicate unimplemented pcode within the specified address set.\n@param program program to clear bookmarks\n@param addressSet restricted address set or null for entire program\n@param monitor allow canceling\n@throws CancelledException if monitor canceled",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program to clear bookmarks"
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "restricted address set or null for entire program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "allow canceling"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor canceled"
+        }
+      ]
+    },
+    {
+      "name": "clearBadInstructionErrors",
+      "comment": "Clear all bookmarks which indicate Bad Instruction within the specified address set.",
+      "javadoc": "Clear all bookmarks which indicate Bad Instruction within the specified address set.\n@param program program to clear bookmarks\n@param addressSet restricted address set or null for entire program\n@param monitor allow canceling\n@throws CancelledException if monitor canceled",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "program to clear bookmarks"
+        },
+        {
+          "name": "addressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "restricted address set or null for entire program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "allow canceling"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor canceled"
+        }
+      ]
+    },
+    {
+      "name": "reportMessage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLanguageSpecificDisassembler",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.program.model.lang.Language",
+          "type_short": "Language",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Class\u003c? extends ghidra.program.disassemble.Disassembler\u003e",
+        "type_short": "Class",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

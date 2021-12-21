@@ -1,0 +1,496 @@
+{
+  "name": "ProgramMappingService",
+  "comment": "Provides a best-effort[1] mapping / association between Ghidra Program/DomainFile\n objects and GFilesystem files (identified by their FSRL).\n \n As there is no current feature that allows you to quickly query the metadata of\n Programs/DomainFile objects in the current project, finding a Program by its MD5 or by a\n original source location string is not easily possible.\n \n Threadsafe.\n \n The current implementation searches current open Ghidra Programs and maintains a\n short-lived, in-memory only mapping of FSRL-DomainFile paths\n (manually updated by users of the ProgramMappingService when\n they do an import or other operation that creates a Ghidra DomainFile by calling\n #createAssociation(FSRL, DomainFile) and friends.)\n \n [1] - best-effort (adverb): meaning a dirty hack.",
+  "javadoc": "Provides a best-effort\u003csup\u003e[1]\u003c/sup\u003e mapping / association between Ghidra Program/DomainFile\n objects and GFilesystem files (identified by their {@link FSRL}).\n \u003cp\u003e\n As there is no current feature that allows you to quickly query the metadata of\n Programs/DomainFile objects in the current project, finding a Program by its MD5 or by a\n original source location string is not easily possible.\n \u003cp\u003e\n Threadsafe.\n \u003cp\u003e\n The current implementation searches current open Ghidra Programs and maintains a\n short-lived, in-memory only mapping of FSRL-\u0026gt;DomainFile paths\n (manually updated by users of the ProgramMappingService when\n they do an import or other operation that creates a Ghidra DomainFile by calling\n {@link #createAssociation(FSRL, DomainFile)} and friends.)\n \u003cp\u003e\n [1] - best-effort (adverb): meaning a dirty hack.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "PROGRAM_METADATA_MD5",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Executable MD5\""
+    },
+    {
+      "name": "PROGRAM_SOURCE_FSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"FSRL\""
+    },
+    {
+      "name": "FSRL_TO_PATH_MAP_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1000"
+    },
+    {
+      "name": "fsrlToProjectPathMap",
+      "comment": "LRU mapping from FSRL to the project path string of a DomainFile object.\n \n Limited in size to .",
+      "javadoc": "LRU mapping from FSRL to the project path string of a DomainFile object.\n \u003cp\u003e\n Limited in size to {@value #FSRL_TO_PATH_MAP_SIZE}.",
+      "static": true,
+      "type_long": "java.util.Map\u003cghidra.formats.gfilesystem.FSRL,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Clears ProgramMappingService data.\n \n This should be done whenever the project is opened/closed.",
+      "javadoc": "Clears {@link ProgramMappingService} data.\n \u003cp\u003e\n This should be done whenever the project is opened/closed.",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFileOpen",
+      "comment": "Returns true if there is a current open Ghidra Program that has metadata\n that links it to the specified FSRL.\n \n (ie. an open program has a MD5 or FSRL metadata value that matches the fsrl param.)",
+      "javadoc": "Returns true if there is a current open Ghidra {@link Program} that has metadata\n that links it to the specified {@link FSRL}.\n \u003cp\u003e\n (ie. an open program has a MD5 or FSRL metadata value that matches the fsrl param.)\n@param fsrl {@link FSRL} to search for in open program info.\n@return boolean true if found.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL to search for in open program info."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if found."
+      },
+      "throws": []
+    },
+    {
+      "name": "isFileImportedIntoProject",
+      "comment": "Returns true if the specified FSRL has a matched Ghidra DomainFile\n in the current project.\n ",
+      "javadoc": "Returns true if the specified {@link FSRL} has a matched Ghidra {@link DomainFile}\n in the current project.\n \u003cp\u003e\n@param fsrl {@link FSRL} to search for\n@return boolean true if file exists in project.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL to search for"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if file exists in project."
+      },
+      "throws": []
+    },
+    {
+      "name": "getCachedDomainFileFor",
+      "comment": "Returns a reference to a DomainFile in the current Project that matches\n the specified FSRL.\n \n This method only consults an internal fsrl-to-DomainFile mapping that is short-lived\n and not persisted.\n ",
+      "javadoc": "Returns a reference to a {@link DomainFile} in the current {@link Project} that matches\n the specified {@link FSRL}.\n \u003cp\u003e\n This method only consults an internal fsrl-to-DomainFile mapping that is short-lived\n and not persisted.\n \u003cp\u003e\n@param fsrl {@link FSRL} to search for\n@return {@link DomainFile} that was previously associated via\n \t\t\t{@link #createAssociation(FSRL, DomainFile)} and friends.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL to search for"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFile",
+        "type_short": "DomainFile",
+        "comment": "DomainFile that was previously associated via\n \t\t\t#createAssociation(FSRL, DomainFile) and friends."
+      },
+      "throws": []
+    },
+    {
+      "name": "createAssociation",
+      "comment": "Creates a short-lived association between a FSRL and an open Program.\n ",
+      "javadoc": "Creates a short-lived association between a {@link FSRL} and an open {@link Program}.\n \u003cp\u003e\n@param fsrl {@link FSRL} of where the {@link Program} was imported from.\n@param program {@link Program} to associate to.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of where the Program was imported from."
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "Program to associate to."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createAssociation",
+      "comment": "Creates a short-lived association between a FSRL and a DomainFile.",
+      "javadoc": "Creates a short-lived association between a {@link FSRL} and a {@link DomainFile}.\n@param fsrl {@link FSRL} of where the DomainFile was imported from.\n@param domainFile {@link DomainFile} to associate with",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of where the DomainFile was imported from."
+        },
+        {
+          "name": "domainFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": "DomainFile to associate with"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createAssociation",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        },
+        {
+          "name": "domainFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        },
+        {
+          "name": "onlyAddIfEnoughRoomInCache",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createAutoAssocation",
+      "comment": "Attempts to create an association between the specified open  and\n any FSRL metadata found in the Programs properties.\n \n Used by event handlers that get notified about a Program being opened to\n opportunistically link that program to its source FSRL if the metadata is present.\n ",
+      "javadoc": "Attempts to create an association between the specified open {@code program} and\n any {@link FSRL} metadata found in the {@link Program}s properties.\n \u003cp\u003e\n Used by event handlers that get notified about a {@link Program} being opened to\n opportunistically link that program to its source FSRL if the metadata is present.\n \u003cp\u003e\n@param program {@link Program} to rummage around in its metadata looking for FSRL info.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "Program to rummage around in its metadata looking for FSRL info."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findMatchingProgramOpenIfNeeded",
+      "comment": "Returns an open Program instance that matches the specified\n FSRL, either from the set of currently open programs, or by\n requesting the specified ProgramManager to\n open a DomainFile that was found to match this GFile.\n ",
+      "javadoc": "Returns an open {@link Program} instance that matches the specified\n {@link FSRL}, either from the set of currently open programs, or by\n requesting the specified {@link ProgramManager} to\n open a {@link DomainFile} that was found to match this GFile.\n \u003cp\u003e\n@param fsrl {@link FSRL} of program original location.\n@param consumer Object that will be used to pin the matching Program open.  Caller\n must release the consumer when done.\n@param programManager {@link ProgramManager} that will be used to open DomainFiles\n if necessary.\n@param openState one of {@link ProgramManager#OPEN_VISIBLE},\n \t\t\t{@link ProgramManager#OPEN_HIDDEN}, {@link ProgramManager#OPEN_VISIBLE}\n@return {@link Program} which was imported from the specified FSRL, or null if not found.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of program original location."
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "Object that will be used to pin the matching Program open.  Caller\n must release the consumer when done."
+        },
+        {
+          "name": "programManager",
+          "type_long": "ghidra.app.services.ProgramManager",
+          "type_short": "ProgramManager",
+          "comment": "ProgramManager that will be used to open DomainFiles\n if necessary."
+        },
+        {
+          "name": "openState",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of ProgramManager#OPEN_VISIBLE,\n \t\t\tProgramManager#OPEN_HIDDEN, ProgramManager#OPEN_VISIBLE"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "Program which was imported from the specified FSRL, or null if not found."
+      },
+      "throws": []
+    },
+    {
+      "name": "findMatchingProgramOpenIfNeeded",
+      "comment": "Returns an open Program instance that matches the specified\n FSRL, either from the set of currently open programs, or by\n requesting the specified ProgramManager to\n open a DomainFile that was found to match this GFile.\n ",
+      "javadoc": "Returns an open {@link Program} instance that matches the specified\n {@link FSRL}, either from the set of currently open programs, or by\n requesting the specified {@link ProgramManager} to\n open a {@link DomainFile} that was found to match this GFile.\n \u003cp\u003e\n@param fsrl {@link FSRL} of program original location.\n@param domainFile optional {@link DomainFile} that corresponds to the FSRL param.\n@param consumer Object that will be used to pin the matching Program open.  Caller\n must release the consumer when done.\n@param programManager {@link ProgramManager} that will be used to open DomainFiles\n if necessary.\n@param openState one of {@link ProgramManager#OPEN_VISIBLE},\n \t\t\t{@link ProgramManager#OPEN_HIDDEN}, {@link ProgramManager#OPEN_VISIBLE}\n@return {@link Program} which was imported from the specified FSRL, or null if not found.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of program original location."
+        },
+        {
+          "name": "domainFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": "optional DomainFile that corresponds to the FSRL param."
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "Object that will be used to pin the matching Program open.  Caller\n must release the consumer when done."
+        },
+        {
+          "name": "programManager",
+          "type_long": "ghidra.app.services.ProgramManager",
+          "type_short": "ProgramManager",
+          "comment": "ProgramManager that will be used to open DomainFiles\n if necessary."
+        },
+        {
+          "name": "openState",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "one of ProgramManager#OPEN_VISIBLE,\n \t\t\tProgramManager#OPEN_HIDDEN, ProgramManager#OPEN_VISIBLE"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "Program which was imported from the specified FSRL, or null if not found."
+      },
+      "throws": []
+    },
+    {
+      "name": "findMatchingOpenProgram",
+      "comment": "Returns a currently open Ghidra Program that has metadata that links it\n to the specified  parameter.\n \n (ie. an open program has a MD5 or FSRL metadata value that matches the file)\n \n See also #isFileOpen(FSRL).\n ",
+      "javadoc": "Returns a currently open Ghidra {@link Program} that has metadata that links it\n to the specified {@code file} parameter.\n \u003cp\u003e\n (ie. an open program has a MD5 or FSRL metadata value that matches the file)\n \u003cp\u003e\n See also {@link #isFileOpen(FSRL)}.\n \u003cp\u003e\n@param fsrl {@link FSRL} to use when inspecting each open Program\u0027s metadata.\n@param consumer Object that will be used to pin the matching Program open.  Caller\n must release the consumer when done.\n@return Already open {@link Program} that has matching metadata, or null if not found.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL to use when inspecting each open Program\u0027s metadata."
+        },
+        {
+          "name": "consumer",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "Object that will be used to pin the matching Program open.  Caller\n must release the consumer when done."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "Already open Program that has matching metadata, or null if not found."
+      },
+      "throws": []
+    },
+    {
+      "name": "searchProjectForMatchingFiles",
+      "comment": "Recursively searches the current active Project for DomainFiles that\n have metadata that matches a FSRL in the specified list.\n \n Warning, this operation is expensive and should only be done in a Task thread.\n ",
+      "javadoc": "Recursively searches the current active {@link Project} for {@link DomainFile}s that\n have metadata that matches a {@link FSRL} in the specified list.\n \u003cp\u003e\n Warning, this operation is expensive and should only be done in a Task thread.\n \u003cp\u003e\n@param fsrls List of {@link FSRL} to match against the metadata of each DomainFile in Project.\n@param monitor {@link TaskMonitor} to watch for cancel and update with progress.\n@return Map of FSRLs to {@link DomainFile}s of the found files, never null.",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrls",
+          "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+          "type_short": "List",
+          "comment": "List of FSRL to match against the metadata of each DomainFile in Project."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch for cancel and update with progress."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cghidra.formats.gfilesystem.FSRL,ghidra.framework.model.DomainFile\u003e",
+        "type_short": "Map",
+        "comment": "Map of FSRLs to DomainFiles of the found files, never null."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMD5FromMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "metadata",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+          "type_short": "Map",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFSRLFromMetadata",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "metadata",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "domainFile",
+          "type_long": "ghidra.framework.model.DomainFile",
+          "type_short": "DomainFile",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProjectFile",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFile",
+        "type_short": "DomainFile",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOpenFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.framework.model.DomainFile\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findOpenFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.framework.model.DomainFile\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildFullyQualifiedFSRLMap",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrls",
+          "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,ghidra.formats.gfilesystem.FSRL\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

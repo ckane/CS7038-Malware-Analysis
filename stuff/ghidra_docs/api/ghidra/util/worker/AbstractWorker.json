@@ -1,0 +1,357 @@
+{
+  "name": "AbstractWorker",
+  "comment": "Class that uses a single thread to execute scheduled jobs.\n \n Subclasses provide the BlockingQueue implementation, which allows for controlling\n how jobs get scheduled (e.g., FIFO or priority-based).",
+  "javadoc": "Class that uses a single thread to execute scheduled jobs.\n \u003cp\u003e\n Subclasses provide the {@link BlockingQueue} implementation, which allows for controlling\n how jobs get scheduled (e.g., FIFO or priority-based).",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "concurrentQ",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.ConcurrentQ\u003cT,java.lang.Object\u003e",
+      "type_short": "ConcurrentQ",
+      "constant_value": null
+    },
+    {
+      "name": "busyListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.BusyListener",
+      "type_short": "BusyListener",
+      "constant_value": null
+    },
+    {
+      "name": "isDisposed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.concurrent.atomic.AtomicBoolean",
+      "type_short": "AtomicBoolean",
+      "constant_value": null
+    },
+    {
+      "name": "qProgressListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.concurrent.QProgressListener\u003cT\u003e",
+      "type_short": "QProgressListener",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a new Worker with the given name.",
+      "javadoc": "Constructs a new Worker with the given name.\n@param queue the queue into which jobs will be place.  e.g. PriorityBlockingQueue or \n              LinkedBlockingQueue\n@param isPersistentThread if true, the worker thread will stay around when idle;\n             false means that the thread will go away if not needed. Should be true for \n             high frequency usage.\n@param name the name of this worker. The thread that executes the jobs will have this\n             name.\n@param shareThreadPool true signals to use the given name to find/create a thread pool \n             that can be shared throughout the system.\n@param monitor the task monitor that allows for cancelling of jobs.",
+      "static": false,
+      "params": [
+        {
+          "name": "queue",
+          "type_long": "java.util.concurrent.BlockingQueue\u003cT\u003e",
+          "type_short": "BlockingQueue",
+          "comment": "the queue into which jobs will be place.  e.g. PriorityBlockingQueue or \n              LinkedBlockingQueue"
+        },
+        {
+          "name": "isPersistentThread",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, the worker thread will stay around when idle;\n             false means that the thread will go away if not needed. Should be true for \n             high frequency usage."
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of this worker. The thread that executes the jobs will have this\n             name."
+        },
+        {
+          "name": "shareThreadPool",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true signals to use the given name to find/create a thread pool \n             that can be shared throughout the system."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor that allows for cancelling of jobs."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTaskMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reportException",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        },
+        {
+          "name": "job",
+          "type_long": "K",
+          "type_short": "K",
+          "comment": ""
+        },
+        {
+          "name": "isCancelled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canSquashException",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        },
+        {
+          "name": "isCancelled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "schedule",
+      "comment": "Schedules the job for execution.  Jobs will be processed in priority order.  The\n highest priority jobs are those with the lowest value return by the job\u0027s getPriority()\n method. (i.e. the job with priority 0 will be processed before the job with priority 1)",
+      "javadoc": "Schedules the job for execution.  Jobs will be processed in priority order.  The\n highest priority jobs are those with the lowest value return by the job\u0027s getPriority()\n method. (i.e. the job with priority 0 will be processed before the job with priority 1)\n@param job the job to be executed.",
+      "static": false,
+      "params": [
+        {
+          "name": "job",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the job to be executed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearAllJobs",
+      "comment": "Clears any pending jobs and cancels any currently executing job.",
+      "javadoc": "Clears any pending jobs and cancels any currently executing job.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearAllJobsWithInterrupt_IKnowTheRisks",
+      "comment": "Clears any pending jobs and cancels any currently executing job.\n  \n  Warning: Calling this method may leave the program in a bad\n  state.  Thus, it is recommended that you only do so when you known that any job that\n  could possibly be scheduled does not manipulate sensitive parts of the program; for \n  example, opening file handles that should be closed before finishing.  \n  \n  If you are unsure \n  about whether your jobs handle interrupt correctly, then don\u0027t use this method.\n  ",
+      "javadoc": "Clears any pending jobs and cancels any currently executing job.\n  \u003cp\u003e\n  \u003cb\u003eWarning: Calling this method may leave the program in a bad\n  state.  Thus, it is recommended that you only do so when you known that any job that\n  could possibly be scheduled does not manipulate sensitive parts of the program; for \n  example, opening file handles that should be closed before finishing.\u003c/b\u003e  \n  \u003cp\u003e\u003cb\u003e\n  If you are unsure \n  about whether your jobs handle interrupt correctly, then don\u0027t use this method.\n  \u003c/b\u003e",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearAllJobs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "interruptRuningJob",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearPendingJobs",
+      "comment": "Clears any jobs from the queue that have not yet been run.  This does not cancel \n the currently running job.",
+      "javadoc": "Clears any jobs from the queue \u003cb\u003ethat have not yet been run\u003c/b\u003e.  This does not cancel \n the currently running job.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Disposes this worker and terminates its thread.",
+      "javadoc": "Disposes this worker and terminates its thread.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDisposed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setBusyListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.util.task.BusyListener",
+          "type_short": "BusyListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "waitUntilNoJobsScheduled",
+      "comment": "This method will block until there are no scheduled jobs in this worker. This\n method assumes that all jobs have a priority less than Long.MAX_VALUE.   \n \n For a non-priority\n queue, this call will not wait for jobs that are scheduled after this call was made.",
+      "javadoc": "This method will block until there are no scheduled jobs in this worker. This\n method assumes that all jobs have a priority less than Long.MAX_VALUE.   \n \u003cp\u003e\n For a non-priority\n queue, this call will not wait for jobs that are scheduled after this call was made.",
+      "static": false,
+      "params": [
+        {
+          "name": "maxWait",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

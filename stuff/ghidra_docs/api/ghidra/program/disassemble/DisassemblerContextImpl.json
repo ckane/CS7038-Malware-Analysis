@@ -1,0 +1,1165 @@
+{
+  "name": "DisassemblerContextImpl",
+  "comment": "Maintains processor state information during disassembly and analysis.  Tracks register state \n associated with instruction flows.  Within this context, a flow is defined as a contiguous\n range of instructions.  Also, this context provides storage for context states at future flow\n addresses, which will be used when subsequent flowTo(Address) or flowStart(Address) calls \n are made with those addresses.",
+  "javadoc": "Maintains processor state information during disassembly and analysis.  Tracks register state \n associated with instruction flows.  Within this context, a flow is defined as a contiguous\n range of instructions.  Also, this context provides storage for context states at future flow\n addresses, which will be used when subsequent flowTo(Address) or flowStart(Address) calls \n are made with those addresses.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.lang.DisassemblerContext"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "programContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramContext",
+      "type_short": "ProgramContext",
+      "constant_value": null
+    },
+    {
+      "name": "startAddr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "contextChangePoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "currentAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "contextRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Register",
+      "type_short": "Register",
+      "constant_value": null
+    },
+    {
+      "name": "contextRegisterValue",
+      "comment": "Active context register state for the current flow location.",
+      "javadoc": "Active context register state for the current flow location.",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.RegisterValue",
+      "type_short": "RegisterValue",
+      "constant_value": null
+    },
+    {
+      "name": "delayedContextRegisterValue",
+      "comment": "Delayed context register state for the current flow location.\n Set only if context value changed for current flow location",
+      "javadoc": "Delayed context register state for the current flow location.\n Set only if context value changed for current flow location",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.RegisterValue",
+      "type_short": "RegisterValue",
+      "constant_value": null
+    },
+    {
+      "name": "repeatedNoflowValue",
+      "comment": "Noflow context-register value which repeats until the next contextChangePoint",
+      "javadoc": "Noflow context-register value which repeats until the next contextChangePoint",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.RegisterValue",
+      "type_short": "RegisterValue",
+      "constant_value": null
+    },
+    {
+      "name": "registerStateMap",
+      "comment": "Active Register context values for the current flow location.\n NOTE: default register values are never included within this state.\n This map is not used for storing the context register",
+      "javadoc": "Active Register context values for the current flow location.\n NOTE: default register values are never included within this state.\n This map is not used for storing the context register\n@see #contextRegisterValue",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.model.lang.Register,ghidra.program.model.lang.RegisterValue\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "noAddressFutureRegisterStateMap",
+      "comment": "Future Register context values for specific flow starting locations when\n the flowFrom address is NO_ADDRESS.\n \n A flow from address of NO_ADDRESS is used when it doesn\u0027t matter from where\n the flow originates.\n \n NOTE: default register values are never included within this future state",
+      "javadoc": "Future Register context values for specific flow starting locations when\n the flowFrom address is NO_ADDRESS.\n \n A flow from address of NO_ADDRESS is used when it doesn\u0027t matter from where\n the flow originates.\n \n NOTE: default register values are never included within this future state",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.model.address.Address,java.util.Map\u003cghidra.program.model.lang.Register,ghidra.program.model.lang.RegisterValue\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "futureFlowRegisterStateMaps",
+      "comment": "Future RegisterStateMaps from a given flow with a given flowing address.\n    Address.NO_ADDRESS is used as the flow from if there is no flow from.\n NOTE: default register values are never included within this future state",
+      "javadoc": "Future RegisterStateMaps from a given flow with a given flowing address.\n    Address.NO_ADDRESS is used as the flow from if there is no flow from.\n NOTE: default register values are never included within this future state",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.model.address.Address,java.util.Map\u003cghidra.program.model.address.Address,java.util.Map\u003cghidra.program.model.lang.Register,ghidra.program.model.lang.RegisterValue\u003e\u003e\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for DisassemblerContext.",
+      "javadoc": "Constructor for DisassemblerContext.\n@param programContext contains the values for registers at specific addresses store in the program.",
+      "static": false,
+      "params": [
+        {
+          "name": "programContext",
+          "type_long": "ghidra.program.model.listing.ProgramContext",
+          "type_short": "ProgramContext",
+          "comment": "contains the values for registers at specific addresses store in the program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgramContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.ProgramContext",
+        "type_short": "ProgramContext",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseContextRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "copyToFutureFlowState",
+      "comment": "Saves the current processor state for when this context flows to the given address.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Saves the current processor state for when this context flows to the given address.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param address the address at which to save the current processor state.\n@return context register value which was copied",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to save the current processor state."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "context register value which was copied"
+      },
+      "throws": []
+    },
+    {
+      "name": "copyToFutureFlowState",
+      "comment": "Saves the current processor state flowing from the fromAddr, for when this context flows to the given address.",
+      "javadoc": "Saves the current processor state flowing from the fromAddr, for when this context flows to the given address.\n@param fromAddr the address from which this flow originates.\n@param destAddr the address at which to save the current processor state.\n@return context register value which was copied",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address from which this flow originates."
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to save the current processor state."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "context register value which was copied"
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeToFutureFlowState",
+      "comment": "Saves the current processor state for when this context is later used at the given address.\n If the address already has a value, return the value on a collision list!\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Saves the current processor state for when this context is later used at the given address.\n If the address already has a value, return the value on a collision list!\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param address the address at which to save the current processor state.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to save the current processor state."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.ArrayList\u003cghidra.program.model.lang.RegisterValue\u003e",
+        "type_short": "ArrayList",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeToFutureFlowState",
+      "comment": "Saves the current processor state flowing from the fromAddr to the destAddr for when this context is later used.\n If the address already has a value, return the value on a collision list!",
+      "javadoc": "Saves the current processor state flowing from the fromAddr to the destAddr for when this context is later used.\n If the address already has a value, return the value on a collision list!\n@param fromAddr the address from which this flow originated\n@param destAddr the address at which to save the current processor state.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address from which this flow originated"
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to save the current processor state."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.ArrayList\u003cghidra.program.model.lang.RegisterValue\u003e",
+        "type_short": "ArrayList",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flowAbort",
+      "comment": "Terminate active flow while preserving any accumulated future context.\n Any context commits resulting from a flowToAddress or flowEnd will be \n unaffected.",
+      "javadoc": "Terminate active flow while preserving any accumulated future context.\n Any context commits resulting from a flowToAddress or flowEnd will be \n unaffected.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flowStart",
+      "comment": "Starts a new flow. Initializes the current state for all registers using any future flow state\n that has been set.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Starts a new flow. Initializes the current state for all registers using any future flow state\n that has been set.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param address the starting address of a new instruction flow.\n@throws IllegalStateException if a previous flow was not ended.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the starting address of a new instruction flow."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flowStart",
+      "comment": "Starts a new flow from an address to the new start.\n Initializes the current state for all registers using any future flow state\n that has been set flowing from the fromAddr.",
+      "javadoc": "Starts a new flow from an address to the new start.\n Initializes the current state for all registers using any future flow state\n that has been set flowing from the fromAddr.\n@param fromAddr address that this flow is flowing from.\n@param toAddr the starting address of a new instruction flow.\n@throws IllegalStateException if a previous flow was not ended.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address that this flow is flowing from."
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the starting address of a new instruction flow."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowContextValue",
+      "comment": "Get flowed context value at arbitrary destination address without affecting state.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Get flowed context value at arbitrary destination address without affecting state.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param destAddr\n@param isFallThrough\n@return the flowed context value",
+      "static": false,
+      "params": [
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "isFallThrough",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "the flowed context value"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFlowContextValue",
+      "comment": "Get flowed context value at a destination address, that has been flowed from the fromAddr, without affecting state.",
+      "javadoc": "Get flowed context value at a destination address, that has been flowed from the fromAddr, without affecting state.\n@param fromAddr address that this flow is flowing from.\n@param destAddr the starting address of a new instruction flow.\n@throws IllegalStateException if a previous flow was not ended.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address that this flow is flowing from."
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the starting address of a new instruction flow."
+        },
+        {
+          "name": "isFallThrough",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flowToAddress",
+      "comment": "Continues the current flow at the given address.  Checks for register values that have been\n stored in the future flow state.  If any registers have saved future state, the current state\n for all registers is written to the program context upto the specified address(exclusive).\n The future flow state values are then loaded into the current context.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Continues the current flow at the given address.  Checks for register values that have been\n stored in the future flow state.  If any registers have saved future state, the current state\n for all registers is written to the program context upto the specified address(exclusive).\n The future flow state values are then loaded into the current context.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param address the address to flow to.\n@throws IllegalStateException if no flow was started.",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to flow to."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flowToAddress",
+      "comment": "Continues the current flow from an address to the given address.  Checks for register values that have been\n stored in the future flow state.  If any registers have saved future state, the current state\n for all registers is written to the program context upto the specified address(exclusive).\n The future flow state values are then loaded into the current context.",
+      "javadoc": "Continues the current flow from an address to the given address.  Checks for register values that have been\n stored in the future flow state.  If any registers have saved future state, the current state\n for all registers is written to the program context upto the specified address(exclusive).\n The future flow state values are then loaded into the current context.\n@param fromAddr address that this flow is flowing from.\n@param destAddr the starting address of a new instruction flow.\n@throws IllegalStateException if a previous flow was not ended.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address that this flow is flowing from."
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the starting address of a new instruction flow."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFutureRegisterStateMap",
+      "comment": "Get the future Register state map and conditionally remove the map",
+      "javadoc": "Get the future Register state map and conditionally remove the map\n@param fromAddr Address flowing from\n@param destAddr Address flowing to\n@param remove true to remove the entry\n@return State Map or null if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "Address flowing from"
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "Address flowing to"
+        },
+        {
+          "name": "remove",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to remove the entry"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cghidra.program.model.lang.Register,ghidra.program.model.lang.RegisterValue\u003e",
+        "type_short": "Map",
+        "comment": "State Map or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "findFutureFlowStateMap",
+      "comment": "Lookup and if not found create a future Register flow state",
+      "javadoc": "Lookup and if not found create a future Register flow state\n@param fromAddr can be NO_ADDRESS if flow from is unknown\n@param destAddr future flow state destination.\n@return future flow state at the destination",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "can be NO_ADDRESS if flow from is unknown"
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "future flow state destination."
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cghidra.program.model.lang.Register,ghidra.program.model.lang.RegisterValue\u003e",
+        "type_short": "Map",
+        "comment": "future flow state at the destination"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextContextInFlow",
+      "comment": "Get next (i.e., fall-through) context register value in active flow.\n Internal state may be updated to track next future context change point.",
+      "javadoc": "Get next (i.e., fall-through) context register value in active flow.\n Internal state may be updated to track next future context change point.\n@param address\n@param futureStateMap\n@param startOfFlow\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "futureStateMap",
+          "type_long": "java.util.Map\u003cghidra.program.model.lang.Register,ghidra.program.model.lang.RegisterValue\u003e",
+          "type_short": "Map",
+          "comment": ""
+        },
+        {
+          "name": "startOfFlow",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setNextContextChangePoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "currentAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flowEnd",
+      "comment": "Ends the current flow.  Unsaved register values will be saved up to and including max address.",
+      "javadoc": "Ends the current flow.  Unsaved register values will be saved up to and including max address.\n@param maxAddress the maximum address of an instruction flow.  If maxAddress is null,\n or the current flow address has already advanced beyond maxAddress, then no save is performed.\n@throws IllegalStateException if a flow has not been started.",
+      "static": false,
+      "params": [
+        {
+          "name": "maxAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the maximum address of an instruction flow.  If maxAddress is null,\n or the current flow address has already advanced beyond maxAddress, then no save is performed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegisters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.lang.Register\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.Register",
+        "type_short": "Register",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegisterValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "signed",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setValue",
+      "comment": "Sets the value for the given register to be used when the flow advances to the given address\n using either the flowTo() or flowStart() methods.  The new value has precedence over any\n existing value.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Sets the value for the given register to be used when the flow advances to the given address\n using either the flowTo() or flowStart() methods.  The new value has precedence over any\n existing value.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param register the register for which the value is to be saved.\n@param address the future flow address to save the value.\n@param newValue the value to save for future flow.",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register for which the value is to be saved."
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the future flow address to save the value."
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": "the value to save for future flow."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setValue",
+      "comment": "Sets the value for the given register to be used when the flow advances to the given address\n using either the flowTo() or flowStart() methods.  The new value has precedence over any\n existing value.",
+      "javadoc": "Sets the value for the given register to be used when the flow advances to the given address\n using either the flowTo() or flowStart() methods.  The new value has precedence over any\n existing value.\n@param register the register for which the value is to be saved.\n@param fromAddr the address from which this flow originated\n@param toAddr the future flow address to save the value.\n@param newValue the value to save for future flow.",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register for which the value is to be saved."
+        },
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address from which this flow originated"
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the future flow address to save the value."
+        },
+        {
+          "name": "newValue",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": "the value to save for future flow."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFutureRegisterValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFutureRegisterValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRegisterValue",
+      "comment": "Stores register value in map.\n If newValuePrecedence is true, then the given newValue\n overrides the currentValue.",
+      "javadoc": "Stores register value in map.\n If \u003ccode\u003enewValuePrecedence\u003c/code\u003e is true, then the given \u003ccode\u003enewValue\u003c/code\u003e\n overrides the \u003ccode\u003ecurrentValue\u003c/code\u003e.\n@param fromAddr the address from which the Register value flows.\n@param destAddr the address to store the new value\n@param newValue new value to store\n@param newValuePrecedence true if the new value has precedence over any old value",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address from which the Register value flows."
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to store the new value"
+        },
+        {
+          "name": "newValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "new value to store"
+        },
+        {
+          "name": "newValuePrecedence",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the new value has precedence over any old value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "combineRegisterValues",
+      "comment": "Combines two Register values.",
+      "javadoc": "Combines two Register values.\n@param currentValue the current value\n@param newValue the new value\n@param newValuePrecedence if true, new value has precedence for active bits, else currentValue\n has precedence for active bits.\n@return the combined register value or null if both values are null",
+      "static": false,
+      "params": [
+        {
+          "name": "currentValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "the current value"
+        },
+        {
+          "name": "newValue",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "the new value"
+        },
+        {
+          "name": "newValuePrecedence",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, new value has precedence for active bits, else currentValue\n has precedence for active bits."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "the combined register value or null if both values are null"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddress",
+      "comment": "Returns the current flow address for this context.",
+      "javadoc": "Returns the current flow address for this context.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveProgramContext",
+      "comment": "Saves the context from the startAddr (inclusive) to the end address (inclusive)\n back to the program\u0027s stored context.",
+      "javadoc": "Saves the context from the startAddr (inclusive) to the end address (inclusive)\n back to the program\u0027s stored context.\n@param startAddress\n@param endAddress",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "java.math.BigInteger",
+          "type_short": "BigInteger",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearRegister",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setContextRegisterValue",
+      "comment": "Modify the current context register value at the specified address.  If current \n disassembly flow address equals specified address the current disassembly context \n will be changed, otherwise the future flow state will be changed. This differs from \n #setValue(Register, Address, BigInteger) in that is can affect the current \n context state at the current address in a non-delayed fashion.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Modify the current context register value at the specified address.  If current \n disassembly flow address equals specified address the current disassembly context \n will be changed, otherwise the future flow state will be changed. This differs from \n {@link #setValue(Register, Address, BigInteger)} in that is can affect the current \n context state at the current address in a non-delayed fashion.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param value register value\n@param address disassembly address",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "register value"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "disassembly address"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setContextRegisterValue",
+      "comment": "Modify the current context register value at the specified address.  If current \n disassembly toAddr address equals specified address the current disassembly context \n will be changed, otherwise the future flow state flowing from the fromAddr will be changed.\n This differs from #setValue(Register, Address, BigInteger) in that is can\n affect the current context state at the current address in a non-delayed fashion.",
+      "javadoc": "Modify the current context register value at the specified address.  If current \n disassembly toAddr address equals specified address the current disassembly context \n will be changed, otherwise the future flow state flowing from the fromAddr will be changed.\n This differs from {@link #setValue(Register, Address, BigInteger)} in that is can\n affect the current context state at the current address in a non-delayed fashion.\n@param value register value\n@param fromAddr the address from which this flow originated\n@param toAddr the future flow address to save the value.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": "register value"
+        },
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address from which this flow originated"
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the future flow address to save the value."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRegisterValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "ghidra.program.model.lang.RegisterValue",
+          "type_short": "RegisterValue",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "Returns the future register value at the specified address.  If no future value is stored,\n it will return the value stored in the program.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Returns the future register value at the specified address.  If no future value is stored,\n it will return the value stored in the program.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param register the register to get a value for.\n@param address the address at which to get a value.\n@param signed if true, interpret the value as signed.\n@return the value of the register at the location, or null if a full value is not established.",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register to get a value for."
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to get a value."
+        },
+        {
+          "name": "signed",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, interpret the value as signed."
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the value of the register at the location, or null if a full value is not established."
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "Returns the future register value at the specified address that occurred because of a flow\n from the fromAddr.  If no future value is stored, it will return the value stored in the program.",
+      "javadoc": "Returns the future register value at the specified address that occurred because of a flow\n from the fromAddr.  If no future value is stored, it will return the value stored in the program.\n@param register the register to get a value for.\n@param fromAddr the address from which this flow originated.\n@param toAddr the future flow address to save the value.\n@param signed if true, interpret the value as signed.\n@return the value of the register at the location, or null if a full value is not established.",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register to get a value for."
+        },
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address from which this flow originated."
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the future flow address to save the value."
+        },
+        {
+          "name": "signed",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, interpret the value as signed."
+        }
+      ],
+      "return": {
+        "type_long": "java.math.BigInteger",
+        "type_short": "BigInteger",
+        "comment": "the value of the register at the location, or null if a full value is not established."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegisterValue",
+      "comment": "Returns the future RegisterValue at the specified address.  If no future value is stored,\n it will return the value stored in the program. The value returned may not have a complete\n value for the requested register.\n \n Use this method if keeping separate flows from different flow from addresses is not important.",
+      "javadoc": "Returns the future RegisterValue at the specified address.  If no future value is stored,\n it will return the value stored in the program. The value returned may not have a complete\n value for the requested register.\n \n Use this method if keeping separate flows from different flow from addresses is not important.\n@param register the register to get a value for.\n@param address the address at which to get a value.\n@return a RegisterValue object if one has been stored in the future flow or the program.\n The RegisterValue object may have a \"no value\" state for the bits specified by the given register.\n Also, null may be returned if no value have been stored.",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register to get a value for."
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to get a value."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "a RegisterValue object if one has been stored in the future flow or the program.\n The RegisterValue object may have a \"no value\" state for the bits specified by the given register.\n Also, null may be returned if no value have been stored."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRegisterValue",
+      "comment": "Returns the future RegisterValue at the specified address that occurred because of a flow from\n the fromAddr.  If no future value is stored, it will return the value stored in the program.\n The value returned may not have a complete value for the requested register.",
+      "javadoc": "Returns the future RegisterValue at the specified address that occurred because of a flow from\n the fromAddr.  If no future value is stored, it will return the value stored in the program.\n The value returned may not have a complete value for the requested register.\n@param register the register to get a value for.\n@param fromAddr the address from which the flow originated\n@param destAddr the address at which to get a value.\n@return a RegisterValue object if one has been stored in the future flow or the program.\n The RegisterValue object may have a \"no value\" state for the bits specified by the given register.\n Also, null may be returned if no value have been stored.",
+      "static": false,
+      "params": [
+        {
+          "name": "register",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": "the register to get a value for."
+        },
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address from which the flow originated"
+        },
+        {
+          "name": "destAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address at which to get a value."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "a RegisterValue object if one has been stored in the future flow or the program.\n The RegisterValue object may have a \"no value\" state for the bits specified by the given register.\n Also, null may be returned if no value have been stored."
+      },
+      "throws": []
+    },
+    {
+      "name": "getKnownFlowToAddresses",
+      "comment": "Returns an array of locations that have values that will flow to this location",
+      "javadoc": "Returns an array of locations that have values that will flow to this location\n@param toAddr address that is the target of a flow to\n@return and array of known address flows to this location",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address that is the target of a flow to"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address[]",
+        "type_short": "ghidra.program.model.address.Address[]",
+        "comment": "and array of known address flows to this location"
+      },
+      "throws": []
+    },
+    {
+      "name": "isFlowActive",
+      "comment": "Returns true if a flow has been started and not yet ended.",
+      "javadoc": "Returns true if a flow has been started and not yet ended.\n@return true if a flow has been started and not yet ended.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a flow has been started and not yet ended."
+      },
+      "throws": []
+    }
+  ]
+}

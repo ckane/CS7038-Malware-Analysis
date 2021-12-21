@@ -1,0 +1,1263 @@
+{
+  "name": "LocalFolderItem",
+  "comment": "LocalFolderItem provides an abstract implementation of a folder\n item which resides on a local file-system.  An item is defined by a property file\n and generally has a hidden data directory which contains the actual data file(s).\n\n An item may be either private or shared (i.e., versioned) as defined by the\n associated file-system.  A shared item utilizes a CheckoutManager and HistoryManager\n for tracking version control data related to this item.",
+  "javadoc": "\u003ccode\u003eLocalFolderItem\u003c/code\u003e provides an abstract implementation of a folder\n item which resides on a local file-system.  An item is defined by a property file\n and generally has a hidden data directory which contains the actual data file(s).\n\u003cp\u003e\n An item may be either private or shared (i.e., versioned) as defined by the\n associated file-system.  A shared item utilizes a CheckoutManager and HistoryManager\n for tracking version control data related to this item.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.store.FolderItem"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "org.apache.logging.log4j.Logger",
+      "type_short": "Logger",
+      "constant_value": null
+    },
+    {
+      "name": "FILE_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"FILE_TYPE\""
+    },
+    {
+      "name": "READ_ONLY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"READ_ONLY\""
+    },
+    {
+      "name": "CONTENT_TYPE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"CONTENT_TYPE\""
+    },
+    {
+      "name": "CHECKOUT_ID",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"CHECKOUT_ID\""
+    },
+    {
+      "name": "EXCLUSIVE_CHECKOUT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"EXCLUSIVE\""
+    },
+    {
+      "name": "CHECKOUT_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"CHECKOUT_VERSION\""
+    },
+    {
+      "name": "LOCAL_CHECKOUT_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"LOCAL_CHECKOUT_VERSION\""
+    },
+    {
+      "name": "CONTENT_TYPE_VERSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"CONTENT_TYPE_VERSION\""
+    },
+    {
+      "name": "DATA_DIR_EXTENSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".db\""
+    },
+    {
+      "name": "propertyFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.PropertyFile",
+      "type_short": "PropertyFile",
+      "constant_value": null
+    },
+    {
+      "name": "checkoutMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.local.CheckoutManager",
+      "type_short": "CheckoutManager",
+      "constant_value": null
+    },
+    {
+      "name": "historyMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.local.HistoryManager",
+      "type_short": "HistoryManager",
+      "constant_value": null
+    },
+    {
+      "name": "fileSystem",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.local.LocalFileSystem",
+      "type_short": "LocalFileSystem",
+      "constant_value": null
+    },
+    {
+      "name": "isVersioned",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "useDataDir",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "repositoryName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "lastModified",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "checkinId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an existing item which corresponds to the specified \n property file.  If a data directory is found it will be \n associated with this item.",
+      "javadoc": "Construct an existing item which corresponds to the specified \n property file.  If a data directory is found it will be \n associated with this item.\n@param fileSystem file system\n@param propertyFile property file",
+      "static": false,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "file system"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "property file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for a new or existing item which corresponds to the specified \n property file.",
+      "javadoc": "Constructor for a new or existing item which corresponds to the specified \n property file.\n@param fileSystem file system\n@param propertyFile property file\n@param useDataDir if true the getDataDir() method must return an appropriate \n directory for data storage.\n@param create if true the data directory will be created\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "file system"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "property file"
+        },
+        {
+          "name": "useDataDir",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the getDataDir() method must return an appropriate \n directory for data storage."
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the data directory will be created"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refresh",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalFolderItem",
+        "type_short": "LocalFolderItem",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getDataDir",
+      "comment": "Returns hidden database directory",
+      "javadoc": "Returns hidden database directory",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinimumVersion",
+      "comment": "Return the oldest/minimum version.",
+      "javadoc": "Return the oldest/minimum version.\n@throws IOException thrown if an IO error occurs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "checkInUse",
+      "comment": "Verify that the specified version of this item is not in use.",
+      "javadoc": "Verify that the specified version of this item is not in use.\n@param version the specific version to check for versioned items.\n@throws FileInUseException",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the specific version to check for versioned items."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.FileInUseException",
+          "type_short": "FileInUseException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkInUse",
+      "comment": "Verify that this item is not in use.",
+      "javadoc": "Verify that this item is not in use.\n@throws FileInUseException",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.FileInUseException",
+          "type_short": "FileInUseException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "beginCheckin",
+      "comment": "Begin the check-in process for a versioned item.",
+      "javadoc": "Begin the check-in process for a versioned item.\n@param checkoutId assigned at time of checkout, becomes the check-in ID.\n@throws FileInUseException",
+      "static": false,
+      "params": [
+        {
+          "name": "checkoutId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "assigned at time of checkout, becomes the check-in ID."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.FileInUseException",
+          "type_short": "FileInUseException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "endCheckin",
+      "comment": "Terminates a check-in which is in progress or has been completed.",
+      "javadoc": "Terminates a check-in which is in progress or has been completed.\n@param itemCheckinId used to validate termination request.",
+      "static": false,
+      "params": [
+        {
+          "name": "itemCheckinId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "used to validate termination request."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireItemCreated",
+      "comment": "Send out notification this item has just been created.",
+      "javadoc": "Send out notification this item has just been created.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fireItemChanged",
+      "comment": "Send out notification that this item has changed in some way.",
+      "javadoc": "Send out notification that this item has changed in some way.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "abortCreate",
+      "comment": "Abort the creation of",
+      "javadoc": "Abort the creation of",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#delete(int, java.lang.String)",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteContent",
+      "comment": "Remove this item from the associated filesystem.\n The property file and the hidden data directory are removed.\n If in-use files prevent removal a FileInUseException will be thrown.",
+      "javadoc": "Remove this item from the associated filesystem.\n The property file and the hidden data directory are removed.\n If in-use files prevent removal a FileInUseException will be thrown.\n@param user user performing removal\n@throws IOException if an error occurs during the delete operation.\n Files are restored to there original state if unable to remove\n all files.",
+      "static": false,
+      "params": [
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "user performing removal"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an error occurs during the delete operation.\n Files are restored to there original state if unable to remove\n all files."
+        }
+      ]
+    },
+    {
+      "name": "deleteMinimumVersion",
+      "comment": "Delete the item content associated with the minimum version.\n This method will only be invoked for versioned items and will\n never be the only version (i.e., minVersion will always be less\n than the currentVersion).",
+      "javadoc": "Delete the item content associated with the minimum version.\n This method will only be invoked for versioned items and will\n never be the only version (i.e., minVersion will always be less\n than the currentVersion).\n@param user user name\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "user name"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "deleteCurrentVersion",
+      "comment": "Delete the item content associated with the current version.\n This method will only be invoked for versioned items and will\n never be the only version (i.e., minVersion will always be less\n than the currentVersion).",
+      "javadoc": "Delete the item content associated with the current version.\n This method will only be invoked for versioned items and will\n never be the only version (i.e., minVersion will always be less\n than the currentVersion).\n@param user user name\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "user name"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "moveTo",
+      "comment": "Move this item into a newFolder which has a path of newPath.",
+      "javadoc": "Move this item into a newFolder which has a path of newPath.\n@param newFolder new parent directory/folder\n@param newStorageName new storage name\n@param newPath new parent path\n@throws DuplicateFileException\n@throws FileInUseException\n@throws IOException\n@see ghidra.framework.store.FileSystem#moveItem",
+      "static": false,
+      "params": [
+        {
+          "name": "newFolder",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "new parent directory/folder"
+        },
+        {
+          "name": "newStorageName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "new storage name"
+        },
+        {
+          "name": "newFolderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getContentType",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#getContentType()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFileID",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#getFileID()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resetFileID",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#resetFileID()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#getName()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParentPath",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#getParentPath()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPathName",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#getPathName()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCheckedOut",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#isCheckedOut()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCheckedOutExclusive",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isVersioned",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#isVersioned()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getVersions",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#getVersions()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.store.Version[]",
+        "type_short": "ghidra.framework.store.Version[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "lastModified",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#lastModified()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isReadOnly",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#isReadOnly()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setReadOnly",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FolderItem#setReadOnly(boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getContentTypeVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setContentTypeVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "version",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "checkoutType",
+          "type_long": "ghidra.framework.store.CheckoutType",
+          "type_short": "CheckoutType",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "projectPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.ItemCheckoutStatus",
+        "type_short": "ItemCheckoutStatus",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "terminateCheckout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "checkoutId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "notify",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getCheckout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "checkoutId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.ItemCheckoutStatus",
+        "type_short": "ItemCheckoutStatus",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getCheckouts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.store.ItemCheckoutStatus[]",
+        "type_short": "ghidra.framework.store.ItemCheckoutStatus[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getCheckoutId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCheckoutVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getLocalCheckoutVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCheckout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "checkoutId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "exclusive",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "checkoutVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "localVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "clearCheckout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFolderItem",
+      "comment": "Returns the appropriate instantiation of a LocalFolderItem \n based upon a specified property file which resides within a\n LocalFileSystem.",
+      "javadoc": "Returns the appropriate instantiation of a LocalFolderItem \n based upon a specified property file which resides within a\n LocalFileSystem.\n@param fileSystem local file system which contains property file\n@param propertyFile property file which identifies the folder item.\n@return folder item",
+      "static": true,
+      "params": [
+        {
+          "name": "fileSystem",
+          "type_long": "ghidra.framework.store.local.LocalFileSystem",
+          "type_short": "LocalFileSystem",
+          "comment": "local file system which contains property file"
+        },
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": "property file which identifies the folder item."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalFolderItem",
+        "type_short": "LocalFolderItem",
+        "comment": "folder item"
+      },
+      "throws": []
+    },
+    {
+      "name": "hasCheckouts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCheckinActive",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateCheckout",
+      "comment": "Update this non-versioned item with the latest version of the specified versioned item.",
+      "javadoc": "Update this non-versioned item with the latest version of the specified versioned item.\n@param versionedFolderItem versioned item which corresponds to this\n non-versioned item.\n@param updateItem if true this items content is updated using the versionedFolderItem\n@param monitor progress monitor for update\n@throws IOException if this file is not a checked-out non-versioned file \n or an IO error occurs.\n@throws CancelledException if monitor cancels operation",
+      "static": false,
+      "params": [
+        {
+          "name": "versionedFolderItem",
+          "type_long": "ghidra.framework.store.FolderItem",
+          "type_short": "FolderItem",
+          "comment": "versioned item which corresponds to this\n non-versioned item."
+        },
+        {
+          "name": "updateItem",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true this items content is updated using the versionedFolderItem"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor for update"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if this file is not a checked-out non-versioned file \n or an IO error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor cancels operation"
+        }
+      ]
+    },
+    {
+      "name": "updateCheckout",
+      "comment": "Update this non-versioned item with the contents of the specified item which must be \n within the same non-versioned fileSystem.  If successful, the specified item will be \n removed after its content has been moved into this item.",
+      "javadoc": "Update this non-versioned item with the contents of the specified item which must be \n within the same non-versioned fileSystem.  If successful, the specified item will be \n removed after its content has been moved into this item.\n@param item\n@param checkoutVersion\n@throws IOException if this file is not a checked-out non-versioned file \n or an IO error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "item",
+          "type_long": "ghidra.framework.store.FolderItem",
+          "type_short": "FolderItem",
+          "comment": ""
+        },
+        {
+          "name": "checkoutVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if this file is not a checked-out non-versioned file \n or an IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "updateCheckoutVersion",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "checkoutId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "checkoutVersion",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,321 @@
+{
+  "name": "FileSystemInstanceManager",
+  "comment": "A threadsafe cache of GFileSystem instances (organized by their FSRLRoot)\n \n Any filesystems that are not referenced by outside users (via a FileSystemRef) will\n be closed and removed from the cache when the next #cacheMaint() is performed.",
+  "javadoc": "A threadsafe cache of {@link GFileSystem} instances (organized by their {@link FSRLRoot})\n \u003cp\u003e\n Any filesystems that are not referenced by outside users (via a {@link FileSystemRef}) will\n be closed and removed from the cache when the next {@link #cacheMaint()} is performed.",
+  "static": false,
+  "implements": [
+    "ghidra.formats.gfilesystem.FileSystemEventListener"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "filesystemPurgeDelayMS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "60000"
+    },
+    {
+      "name": "filesystems",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.formats.gfilesystem.FSRLRoot,ghidra.formats.gfilesystem.FileSystemInstanceManager.FSCacheInfo\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "rootFS",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+      "type_short": "GFileSystem",
+      "constant_value": null
+    },
+    {
+      "name": "rootFSRL",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+      "type_short": "FSRLRoot",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new FileSystemCache object.",
+      "javadoc": "Creates a new FileSystemCache object.\n@param rootFS reference to the global root file system, which is a special case\n file system that is not subject to eviction.",
+      "static": false,
+      "params": [
+        {
+          "name": "rootFS",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": "reference to the global root file system, which is a special case\n file system that is not subject to eviction."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "Forcefully closes any filesystems in the cache, then clears the list of\n cached filesystems.",
+      "javadoc": "Forcefully closes any filesystems in the cache, then clears the list of\n cached filesystems.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "closeAllUnused",
+      "comment": "Removes any unused filesystems in the cache.",
+      "javadoc": "Removes any unused filesystems in the cache.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMountedFilesystems",
+      "comment": "Returns a list of mounted file systems.\n ",
+      "javadoc": "Returns a list of mounted file systems.\n \u003cp\u003e\n@return {@link List} of {@link FSRLRoot} of filesystems that are currently mounted.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRLRoot\u003e",
+        "type_short": "List",
+        "comment": "List of FSRLRoot of filesystems that are currently mounted."
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "Adds a new GFileSystem to the cache.",
+      "javadoc": "Adds a new {@link GFileSystem} to the cache.\n@param fs {@link GFileSystem} to add to this cache.",
+      "static": false,
+      "params": [
+        {
+          "name": "fs",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": "GFileSystem to add to this cache."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRef",
+      "comment": "Returns a new FileSystemRef to an existing, already open GFileSystem.\n Caller is responsible for FileSystemRef#close() it.\n \n Returns NULL if the requested filesystem isn\u0027t already open and mounted in the cache.",
+      "javadoc": "Returns a new {@link FileSystemRef} to an existing, already open {@link GFileSystem filesystem}.\n Caller is responsible for {@link FileSystemRef#close() closing} it.\n \u003cp\u003e\n Returns NULL if the requested filesystem isn\u0027t already open and mounted in the cache.\n@param fsrl {@link FSRLRoot} of the desired filesystem.\n@return a new {@link FileSystemRef} or null if the filesystem is not currently mounted.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+          "type_short": "FSRLRoot",
+          "comment": "FSRLRoot of the desired filesystem."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+        "type_short": "FileSystemRef",
+        "comment": "a new FileSystemRef or null if the filesystem is not currently mounted."
+      },
+      "throws": []
+    },
+    {
+      "name": "isFilesystemMountedAt",
+      "comment": "Returns true if there is a filesystem in the cache that has a containerFSRL that\n is FSRL#isEquivalent(FSRL) to the specified FSRL.\n ",
+      "javadoc": "Returns true if there is a filesystem in the cache that has a containerFSRL that\n is {@link FSRL#isEquivalent(FSRL) equiv} to the specified FSRL.\n \u003cp\u003e\n@param containerFSRL {@link FSRL} location to query for currently mounted filesystem.\n@return true if there is a filesystem mounted using that containerFSRL.",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL location to query for currently mounted filesystem."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is a filesystem mounted using that containerFSRL."
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilesystemRefMountedAt",
+      "comment": "Returns a new FileSystemRef to a already mounted GFileSystem\n (keeping the filesystem pinned in memory without the risk of it being closed during\n a race condition).\n \n The caller is responsible for FileSystemRef#close() it when done.\n \n Returns null if there is no filesystem mounted at the requested container fsrl.",
+      "javadoc": "Returns a new {@link FileSystemRef} to a already mounted {@link GFileSystem filesystem}\n (keeping the filesystem pinned in memory without the risk of it being closed during\n a race condition).\n \u003cp\u003e\n The caller is responsible for {@link FileSystemRef#close() closing} it when done.\n \u003cp\u003e\n Returns null if there is no filesystem mounted at the requested container fsrl.\n@param containerFSRL {@link FSRL} location where a filesystem is already mounted\n@return new {@link FileSystemRef} to the already mounted filesystem, or null",
+      "static": false,
+      "params": [
+        {
+          "name": "containerFSRL",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL location where a filesystem is already mounted"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+        "type_short": "FileSystemRef",
+        "comment": "new FileSystemRef to the already mounted filesystem, or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "onFilesystemClose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fs",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "onFilesystemRefChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fs",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": ""
+        },
+        {
+          "name": "refManager",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemRefManager",
+          "type_short": "FileSystemRefManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cacheMaint",
+      "comment": "Performs maintainence on the filesystem cache, closing() any filesystems\n that are not used anymore.",
+      "javadoc": "Performs maintainence on the filesystem cache, closing() any filesystems\n that are not used anymore.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExpired",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "recs",
+          "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FileSystemInstanceManager.FSCacheInfo\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FileSystemInstanceManager.FSCacheInfo\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnusedFSes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FileSystemInstanceManager.FSCacheInfo\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "release",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsci",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemInstanceManager.FSCacheInfo",
+          "type_short": "FSCacheInfo",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "releaseImmediate",
+      "comment": "Closes the specified ref, and if no other refs to the file system remain, closes the file system.",
+      "javadoc": "Closes the specified ref, and if no other refs to the file system remain, closes the file system.\n@param ref {@link FileSystemRef} to close",
+      "static": false,
+      "params": [
+        {
+          "name": "ref",
+          "type_long": "ghidra.formats.gfilesystem.FileSystemRef",
+          "type_short": "FileSystemRef",
+          "comment": "FileSystemRef to close"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

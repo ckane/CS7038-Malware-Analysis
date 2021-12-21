@@ -1,0 +1,857 @@
+{
+  "name": "Field",
+  "comment": "Field is an abstract data wrapper for use with Records.\n Note that when comparing two Field instances both must be of the same \n class.\n \n Fields may take on a null state.  In the case of FixedField\n and PrimitiveField this state is distinct from value and only\n applies when used for a sparse column within a SparseRecord.\n In this sparse column situation the SparseRecord#setField(int, Field) \n method may be passed a null Field argument.  Sparse columns with a \n null value/state will not be indexed within a Table.\n \n Stored Schema Field Type Encoding:\n \n 8-bit Legacy Field Type Encoding (I....FFF)\n Supported encodings: 0x00..0x06 and 0x80..0x86,\n where:\n \n     FFF  - indexed field type (0..6)\n     I    - index field indicator (only long primary keys were supported)\n \n   \n 8-bit Field Type Encoding (PPPPFFFF)\n (Reserved for future field extensions: 0x88 and 0xf0..0xff)\n \n     0xff - see Schema#FIELD_EXTENSION_INDICATOR\n \n where:\n \n     FFFF - normal/indexed field type\n     PPPP - indexed table primary key type (1000b: LegacyIndexField)  \n ",
+  "javadoc": "\u003cp\u003e\u003ccode\u003eField\u003c/code\u003e is an abstract data wrapper for use with Records.\n Note that when comparing two Field instances both must be of the same \n class.\u003c/p\u003e\n \n \u003cp\u003eFields may take on a null state.  In the case of {@link FixedField}\n and {@link PrimitiveField} this state is distinct from value and only\n applies when used for a sparse column within a {@link SparseRecord}.\n In this sparse column situation the {@link SparseRecord#setField(int, Field)} \n method may be passed a null Field argument.  Sparse columns with a \n null value/state will not be indexed within a {@link Table}.\n \n \u003cp\u003eStored Schema Field Type Encoding:\u003c/p\u003e\n \n \u003cp\u003e\u003cU\u003e8-bit Legacy Field Type Encoding (I....FFF)\u003c/U\u003e\u003c/p\u003e\n Supported encodings: 0x00..0x06 and 0x80..0x86,\n where:\n \u003cpre\u003e\n     FFF  - indexed field type (0..6)\n     I    - index field indicator (only long primary keys were supported)\n \u003c/pre\u003e\n   \n \u003cp\u003e\u003cU\u003e8-bit Field Type Encoding (PPPPFFFF)\u003c/U\u003e\u003c/p\u003e\n (Reserved for future field extensions: 0x88 and 0xf0..0xff)\n \u003cpre\u003e\n     0xff - see {@link Schema#FIELD_EXTENSION_INDICATOR}\n \u003c/pre\u003e\n where:\n \u003cpre\u003e\n     FFFF - normal/indexed field type\n     PPPP - indexed table primary key type (1000b: LegacyIndexField)  \n \u003c/pre\u003e",
+  "static": false,
+  "implements": [
+    "java.lang.Comparable"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "EMPTY_ARRAY",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "db.Field[]",
+      "type_short": "db.Field[]",
+      "constant_value": null
+    },
+    {
+      "name": "BYTE_TYPE",
+      "comment": "Field type for ByteField",
+      "javadoc": "Field type for ByteField\n@see db.ByteField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "0"
+    },
+    {
+      "name": "SHORT_TYPE",
+      "comment": "Field type for ShortField",
+      "javadoc": "Field type for ShortField\n@see db.ShortField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "1"
+    },
+    {
+      "name": "INT_TYPE",
+      "comment": "Field type for IntField",
+      "javadoc": "Field type for IntField\n@see db.IntField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "2"
+    },
+    {
+      "name": "LONG_TYPE",
+      "comment": "Field type for LongField",
+      "javadoc": "Field type for LongField\n@see db.LongField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "3"
+    },
+    {
+      "name": "STRING_TYPE",
+      "comment": "Field type for StringField",
+      "javadoc": "Field type for StringField\n@see db.StringField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "4"
+    },
+    {
+      "name": "BINARY_OBJ_TYPE",
+      "comment": "Field type for BinaryField",
+      "javadoc": "Field type for BinaryField\n@see db.BinaryField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "5"
+    },
+    {
+      "name": "BOOLEAN_TYPE",
+      "comment": "Field type for BooleanField",
+      "javadoc": "Field type for BooleanField\n@see db.BooleanField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "6"
+    },
+    {
+      "name": "FIXED_10_TYPE",
+      "comment": "Field type for 10-byte binary FixedField(10)",
+      "javadoc": "Field type for 10-byte binary FixedField(10)\n@see db.FixedField",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "7"
+    },
+    {
+      "name": "LEGACY_INDEX_LONG_TYPE",
+      "comment": "Legacy Index Primary Key Field type for LongField\n which was previously a boolean indicator for an index \n field with assumed long primary key.  Applies only \n to upper-nibble.  This value in the lower-nibble\n is reserved for use in the special-purpose byte value 0x88.\n (see LegacyIndexField)",
+      "javadoc": "Legacy Index Primary Key Field type for LongField\n which was previously a boolean indicator for an index \n field with assumed long primary key.  Applies only \n to upper-nibble.  This value in the lower-nibble\n is reserved for use in the special-purpose byte value 0x88.\n (see {@link LegacyIndexField})",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "8"
+    },
+    {
+      "name": "FIELD_RESERVED_15_TYPE",
+      "comment": "Reserved field encoding.  Intended for special purpose \n schema used (e.g.",
+      "javadoc": "Reserved field encoding.  Intended for special purpose \n schema used (e.g.",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "15"
+    },
+    {
+      "name": "FIELD_TYPE_MASK",
+      "comment": "Field base type mask",
+      "javadoc": "Field base type mask",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "15"
+    },
+    {
+      "name": "INDEX_PRIMARY_KEY_TYPE_MASK",
+      "comment": "Field index primary key type mask",
+      "javadoc": "Field index primary key type mask",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "-16"
+    },
+    {
+      "name": "INDEX_FIELD_TYPE_SHIFT",
+      "comment": "Index Primary Key Field Type Shift",
+      "javadoc": "Index Primary Key Field Type Shift",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "immutable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Abstract Field Constructor for a mutable instance",
+      "javadoc": "Abstract Field Constructor for a mutable instance",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Abstract Field Constructor",
+      "javadoc": "Abstract Field Constructor\n@param immutable true if field value is immutable",
+      "static": false,
+      "params": [
+        {
+          "name": "immutable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if field value is immutable"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkImmutable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLongValue",
+      "comment": "Get field as a long value.\n All fixed-length field objects must implement this method",
+      "javadoc": "Get field as a long value.\n All fixed-length field objects must implement this method\n@return long value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "long value"
+      },
+      "throws": []
+    },
+    {
+      "name": "setLongValue",
+      "comment": "Set field\u0027s long value.\n All fixed-length field objects must implement this method",
+      "javadoc": "Set field\u0027s long value.\n All fixed-length field objects must implement this method\n@param value long value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "long value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIntValue",
+      "comment": "Get field as an integer value.",
+      "javadoc": "Get field as an integer value.\n@return integer value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "integer value"
+      },
+      "throws": []
+    },
+    {
+      "name": "setIntValue",
+      "comment": "Set field\u0027s integer value.",
+      "javadoc": "Set field\u0027s integer value.\n@param value integer value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "integer value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getShortValue",
+      "comment": "Get field as a short value.",
+      "javadoc": "Get field as a short value.\n@return short value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "short",
+        "type_short": "short",
+        "comment": "short value"
+      },
+      "throws": []
+    },
+    {
+      "name": "setShortValue",
+      "comment": "Set field\u0027s short value.",
+      "javadoc": "Set field\u0027s short value.\n@param value short value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "short",
+          "type_short": "short",
+          "comment": "short value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getByteValue",
+      "comment": "Get field as a byte value.",
+      "javadoc": "Get field as a byte value.\n@return byte value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "byte value"
+      },
+      "throws": []
+    },
+    {
+      "name": "setByteValue",
+      "comment": "Set field\u0027s byte value.",
+      "javadoc": "Set field\u0027s byte value.\n@param value byte value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "byte value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBooleanValue",
+      "comment": "Get field as a boolean value.",
+      "javadoc": "Get field as a boolean value.\n@return boolean value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean value"
+      },
+      "throws": []
+    },
+    {
+      "name": "setBooleanValue",
+      "comment": "Set field\u0027s boolean value.",
+      "javadoc": "Set field\u0027s boolean value.\n@param value boolean value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "boolean value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBinaryData",
+      "comment": "Get data as a byte array.",
+      "javadoc": "Get data as a byte array.\n@return byte[]",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte[]",
+        "type_short": "byte[]",
+        "comment": "byte[]"
+      },
+      "throws": []
+    },
+    {
+      "name": "setBinaryData",
+      "comment": "Set data from binary byte array.\n All variable-length fields must implement this method.",
+      "javadoc": "Set data from binary byte array.\n All variable-length fields must implement this method.\n@param bytes field data\n@throws IllegalFieldAccessException if error occurs while reading bytes\n into field which will generally be caused by the incorrect number of \n bytes provided to a fixed-length field.",
+      "static": false,
+      "params": [
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "field data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getString",
+      "comment": "Get field as a String value.",
+      "javadoc": "Get field as a String value.\n@return String value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "String value"
+      },
+      "throws": []
+    },
+    {
+      "name": "setString",
+      "comment": "Set field\u0027s String value.",
+      "javadoc": "Set field\u0027s String value.\n@param str String value\n@throws IllegalFieldAccessException thrown if method is not supported by specific\n Field instance.",
+      "static": false,
+      "params": [
+        {
+          "name": "str",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "String value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "truncate",
+      "comment": "Truncate a variable length field to the specified length.\n If current length is shorterm, this method has no affect.",
+      "javadoc": "Truncate a variable length field to the specified length.\n If current length is shorterm, this method has no affect.\n@param length truncated length",
+      "static": false,
+      "params": [
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "truncated length"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isVariableLength",
+      "comment": "",
+      "javadoc": "@return true if a Field instance is variable length, else false.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a Field instance is variable length, else false."
+      },
+      "throws": []
+    },
+    {
+      "name": "isSameType",
+      "comment": "Determine if specified field is same type as this field",
+      "javadoc": "Determine if specified field is same type as this field\n@param field a Field instance\n@return true if field is same type as this field",
+      "static": false,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "a Field instance"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if field is same type as this field"
+      },
+      "throws": []
+    },
+    {
+      "name": "copyField",
+      "comment": "Create new instance of this field with the same value.",
+      "javadoc": "Create new instance of this field with the same value.\n@return new field instance with same value",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": "new field instance with same value"
+      },
+      "throws": []
+    },
+    {
+      "name": "newField",
+      "comment": "Create new instance of this field type.",
+      "javadoc": "Create new instance of this field type.\n@return new field instance with undefined initial value",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": "new field instance with undefined initial value"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFieldType",
+      "comment": "Return Field instance type as an integer value.",
+      "javadoc": "Return Field instance type as an integer value.\n@return encoded field type",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "encoded field type"
+      },
+      "throws": []
+    },
+    {
+      "name": "write",
+      "comment": "Write the field to buf at the specified offset.  When writing variable length \n fields, the length preceeds the actual data.",
+      "javadoc": "Write the field to buf at the specified offset.  When writing variable length \n fields, the length preceeds the actual data.\n@param buf data buffer\n@param offset data offset\n@return next available Field offset within buffer, or -1 if end of buffer reached.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.Buffer",
+          "type_short": "Buffer",
+          "comment": "data buffer"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data offset"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "next available Field offset within buffer, or -1 if end of buffer reached."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "read",
+      "comment": "Read the field value from buf at the specified offset. When reading variable length \n fields, the length preceeds the actual data.",
+      "javadoc": "Read the field value from buf at the specified offset. When reading variable length \n fields, the length preceeds the actual data.\n@param buf data buffer\n@param offset data offset\n@return next Field offset within buffer, or -1 if end of buffer reached.\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.Buffer",
+          "type_short": "Buffer",
+          "comment": "data buffer"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data offset"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "next Field offset within buffer, or -1 if end of buffer reached."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "readLength",
+      "comment": "Get the total number of bytes which will be read from the buffer\n for this field.  For variable-length fields, only the length \n portion of the data is examined within the buffer.  This method is intended\n to be used instead of the read method when only interested in the data \n length.",
+      "javadoc": "Get the total number of bytes which will be read from the buffer\n for this field.  For variable-length fields, only the length \n portion of the data is examined within the buffer.  This method is intended\n to be used instead of the read method when only interested in the data \n length.\n@param buf data buffer\n@param offset data offset\n@return total number of bytes for this field stored within buf\n@throws IOException thrown if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.Buffer",
+          "type_short": "Buffer",
+          "comment": "data buffer"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data offset"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "total number of bytes for this field stored within buf"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "length",
+      "comment": "Get the number of bytes required to store this field value.\n For a variable length fields, this value also accounts for a 4-byte\n length prefix.  Additionally, this method should not be invoked when \n working with stored data until after the read method has been invoked.",
+      "javadoc": "Get the number of bytes required to store this field value.\n For a variable length fields, this value also accounts for a 4-byte\n length prefix.  Additionally, this method should not be invoked when \n working with stored data until after the read method has been invoked.\n@return total storage length",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "total storage length"
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "Determine if the specified Object is another Field which has the same \n type and value as this Field.  When comparing a PrimitiveField,\n with a null state, a value of zero (0) is used.",
+      "javadoc": "Determine if the specified Object is another Field which has the same \n type and value as this Field.  When comparing a {@link PrimitiveField},\n with a null state, a value of zero (0) is used.\n@param obj another object\n@return true if this field equals obj",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "another object"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this field equals obj"
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValueAsString",
+      "comment": "Get field value as a formatted string",
+      "javadoc": "Get field value as a formatted string\n@return field value string",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "field value string"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMinValue",
+      "comment": "Get minimum field value.\n \n Supported for fixed-length fields only.",
+      "javadoc": "Get minimum field value.\n \n Supported for fixed-length fields only.\n@return minimum value\n@throws UnsupportedOperationException if field is not fixed-length",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": "minimum value"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxValue",
+      "comment": "Get maximum field value.\n \n Supported for fixed-length fields only.",
+      "javadoc": "Get maximum field value.\n \n Supported for fixed-length fields only.\n@return maximum value\n@throws UnsupportedOperationException if field is not fixed-length",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": "maximum value"
+      },
+      "throws": []
+    },
+    {
+      "name": "isNull",
+      "comment": "Determine if the field has been set to a null-state or value.",
+      "javadoc": "Determine if the field has been set to a null-state or value.\n@return true if field has been set to a null state or value, else false",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if field has been set to a null state or value, else false"
+      },
+      "throws": []
+    },
+    {
+      "name": "setNull",
+      "comment": "Set this field to its null-state.  For variable-length field this will \n generally correspond to a null value, while primitive and fixed-length\n fields will be set to a zero (0) value.  This method may only be invoked\n on a sparse column field.",
+      "javadoc": "Set this field to its null-state.  For variable-length field this will \n generally correspond to a null value, while primitive and fixed-length\n fields will be set to a zero (0) value.  This method may only be invoked\n on a sparse column field.\n@throws IllegalFieldAccessException thrown if this field is immutable or is an index field",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "compareTo",
+      "comment": "Performs a fast in-place comparison of this field value with another\n field value stored within the specified buffer at the the specified offset.\n NOTE: This method will treat all null primitives as 0 although is not intended\n to support such use.",
+      "javadoc": "Performs a fast in-place comparison of this field value with another\n field value stored within the specified buffer at the the specified offset.\n NOTE: This method will treat all null primitives as 0 although is not intended\n to support such use.\n@param buffer data buffer\n@param offset field value offset within buffer\n@return comparison value, zero if equal, -1 if this field has a value \n less than the stored field, or +1 if this field has a value greater than \n the stored field located at keyIndex.",
+      "static": false,
+      "params": [
+        {
+          "name": "buffer",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "data buffer"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "field value offset within buffer"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "comparison value, zero if equal, -1 if this field has a value \n less than the stored field, or +1 if this field has a value greater than \n the stored field located at keyIndex."
+      },
+      "throws": []
+    },
+    {
+      "name": "compareTo",
+      "comment": "Compares this Field with another Field for order.  Returns a\n negative integer, zero, or a positive integer as this object is less\n than, equal to, or greater than the specified Field.  \n \n NOTE: Field objects do not fully comply with the Comparable interface.\n Only the same Field implementations may be compared.  In addition, the \n null state is not considered when comparing PrimitiveFields which have a \n zero (0) value.",
+      "javadoc": "Compares this Field with another Field for order.  Returns a\n negative integer, zero, or a positive integer as this object is less\n than, equal to, or greater than the specified Field.  \n \u003cbr\u003e\n NOTE: Field objects do not fully comply with the Comparable interface.\n Only the same Field implementations may be compared.  In addition, the \n null state is not considered when comparing {@link PrimitiveField}s which have a \n zero (0) value.\n@param otherField another Field which is the same type as this Field\n@return field comparison result (see {@link Comparable#compareTo(Object)}).\n@throws ClassCastException if an attempt to compare dissimilar Fields (e.g., \n an IntField may not be compared with a ShortField).",
+      "static": false,
+      "params": [
+        {
+          "name": "otherField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "another Field which is the same type as this Field"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "field comparison result (see Comparable#compareTo(Object))."
+      },
+      "throws": []
+    },
+    {
+      "name": "getField",
+      "comment": "Get the field associated with the specified type value.",
+      "javadoc": "Get the field associated with the specified type value.\n@param fieldType field type index\n@return Field field instance which corresponds to the specified fieldType\n@throws UnsupportedFieldException if unsupported fieldType specified",
+      "static": true,
+      "params": [
+        {
+          "name": "fieldType",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "field type index"
+        }
+      ],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": "Field field instance which corresponds to the specified fieldType"
+      },
+      "throws": [
+        {
+          "type_long": "db.Field.UnsupportedFieldException",
+          "type_short": "UnsupportedFieldException",
+          "comment": "if unsupported fieldType specified"
+        }
+      ]
+    },
+    {
+      "name": "getFixedType",
+      "comment": "Get the type index value of the FixedField type which corresponds\n to the specified fixed-length;",
+      "javadoc": "Get the type index value of the FixedField type which corresponds\n to the specified fixed-length;\n@param fixedLength fixed length\n@return FixedLength field type index",
+      "static": true,
+      "params": [
+        {
+          "name": "fixedLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "fixed length"
+        }
+      ],
+      "return": {
+        "type_long": "byte",
+        "type_short": "byte",
+        "comment": "FixedLength field type index"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFixedField",
+      "comment": "Get a fixed-length field of the specified size",
+      "javadoc": "Get a fixed-length field of the specified size\n@param size fixed-field length (supported sizes: 1, 4, 8, 10)\n@return fixed field instance\n@throws IllegalArgumentException if unsupported fixed field length",
+      "static": true,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "fixed-field length (supported sizes: 1, 4, 8, 10)"
+        }
+      ],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": "fixed field instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "canIndex",
+      "comment": "Determine if a specified field instance may be indexed",
+      "javadoc": "Determine if a specified field instance may be indexed\n@param field field to be checked\n@return true if field can be indexed",
+      "static": true,
+      "params": [
+        {
+          "name": "field",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "field to be checked"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if field can be indexed"
+      },
+      "throws": []
+    }
+  ]
+}

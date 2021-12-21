@@ -1,0 +1,584 @@
+{
+  "name": "BatchInfo",
+  "comment": "This is the main state of a batch import task, containing the segregated groupings of\n applications.\n \n This class also handles populating the batch groups by recursively descending into files\n and the contents of those files.",
+  "javadoc": "This is the main state of a batch import task, containing the segregated groupings of\n applications.\n \u003cp\u003e\n This class also handles populating the batch groups by recursively descending into files\n and the contents of those files.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "MAXDEPTH_UNLIMITED",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "-1"
+    },
+    {
+      "name": "MAXDEPTH_DEFAULT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2"
+    },
+    {
+      "name": "fsService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FileSystemService",
+      "type_short": "FileSystemService",
+      "constant_value": null
+    },
+    {
+      "name": "groupsByCriteria",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.plugins.importer.batch.BatchSegregatingCriteria,ghidra.plugins.importer.batch.BatchGroup\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "userAddedFSRLs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.formats.gfilesystem.FSRL\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "userAddedSources",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.plugins.importer.batch.UserAddedSourceInfo\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "maxDepth",
+      "comment": "Maximum depth of containers (ie. filesystems) to recurse into when processing\n a file added by the user.\n \n maxDepth of less than or equal to 0 \u003d\u003d unlimited.\n \n maxDepth of 1 \u003d\u003d no recursing into containers found in added file, just try it\n with a loader.\n \n Default is #MAXDEPTH_DEFAULT.",
+      "javadoc": "Maximum depth of containers (ie. filesystems) to recurse into when processing\n a file added by the user.\n \u003cp\u003e\n maxDepth of less than or equal to 0 \u003d\u003d unlimited.\n \u003cp\u003e\n maxDepth of 1 \u003d\u003d no recursing into containers found in added file, just try it\n with a loader.\n \u003cp\u003e\n Default is {@link #MAXDEPTH_DEFAULT}.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "currentUASI",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.plugins.importer.batch.UserAddedSourceInfo",
+      "type_short": "UserAddedSourceInfo",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new BatchInfo object with a default #maxDepth.",
+      "javadoc": "Creates a new BatchInfo object with a default {@link #maxDepth}.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new BatchInfo object using the specified maxDepth.",
+      "javadoc": "Creates a new BatchInfo object using the specified maxDepth.\n@param maxDepth see {@link #maxDepth}.",
+      "static": false,
+      "params": [
+        {
+          "name": "maxDepth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "see #maxDepth."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGroups",
+      "comment": "Returns a list of the BatchGroups that have been found when processing\n the added files.",
+      "javadoc": "Returns a list of the {@link BatchGroup}s that have been found when processing\n the added files.\n@return {@link List} of {@link BatchGroup}s.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.plugins.importer.batch.BatchGroup\u003e",
+        "type_short": "List",
+        "comment": "List of BatchGroups."
+      },
+      "throws": []
+    },
+    {
+      "name": "getTotalCount",
+      "comment": "Returns the count of how many importable objects (ie. LoadSpecs) were found.",
+      "javadoc": "Returns the count of how many importable objects (ie. {@link LoadSpec}s) were found.\n@return count of importable objects.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "count of importable objects."
+      },
+      "throws": []
+    },
+    {
+      "name": "getTotalRawCount",
+      "comment": "Returns the count of how many files were found while processing the source files.",
+      "javadoc": "Returns the count of how many files were found while processing the source files.\n@return count of files found while processing source files.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "count of files found while processing source files."
+      },
+      "throws": []
+    },
+    {
+      "name": "getEnabledCount",
+      "comment": "Returns the count of applications in enabled BatchGroups... in other\n words, the number of objects that would be imported during this batch.",
+      "javadoc": "Returns the count of applications in enabled {@link BatchGroup}s... in other\n words, the number of objects that would be imported during this batch.\n@return count of enabled applications.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "count of enabled applications."
+      },
+      "throws": []
+    },
+    {
+      "name": "remove",
+      "comment": "Removes a user-added source file (and all the embedded files inside it) from this\n batch.",
+      "javadoc": "Removes a user-added source file (and all the embedded files inside it) from this\n batch.\n@param fsrl {@link FSRL} of the file to remove.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file to remove."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFile",
+      "comment": "Adds a file to this batch as the direct result of a user action.\n \n If the file is a container for other files, this method will iterate through those\n child files and recursively try to add them using this method.\n ",
+      "javadoc": "Adds a file to this batch as the direct result of a user action.\n \u003cp\u003e\n If the file is a container for other files, this method will iterate through those\n child files and recursively try to add them using this method.\n \u003cp\u003e\n@param fsrl {@link FSRL} of the file to add.\n@param taskMonitor {@link TaskMonitor} to watch and update with progress.\n@return boolean true if something in the the file produced something to import.\n@throws IOException if io error when reading files.\n@throws CancelledException if user cancels.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file to add."
+        },
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update with progress."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if something in the the file produced something to import."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if io error when reading files."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        }
+      ]
+    },
+    {
+      "name": "doAddFile",
+      "comment": "The main worker for adding a file to the batch session.\n \n The file is probed for high-priority filesystems first, then if no matches,\n Ghidra loaders, and then if no matches, all filesystems.\n ",
+      "javadoc": "The main worker for adding a file to the batch session.\n \u003cp\u003e\n The file is probed for high-priority filesystems first, then if no matches,\n Ghidra loaders, and then if no matches, all filesystems.\n \u003cp\u003e\n@param fsrl {@link FSRL} of the file to probe and process\n@param taskMonitor {@link TaskMonitor} to watch and update.\n@return boolean true if something in the the file produced something to import.\n@throws IOException if io error when reading files.\n@throws CancelledException if user cancels.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file to probe and process"
+        },
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if something in the the file produced something to import."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if io error when reading files."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        }
+      ]
+    },
+    {
+      "name": "shouldTerminateRecurse",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "wasRecurseTerminatedEarly",
+      "comment": "Returns true if any of the user source files had containers that were not\n recursed into because of the #maxDepth limit.",
+      "javadoc": "Returns true if any of the user source files had containers that were not\n recursed into because of the {@link #maxDepth} limit.\n@return true if any of the user source files had containers that were not\n recursed into because of the {@link #maxDepth} limit.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if any of the user source files had containers that were not\n recursed into because of the #maxDepth limit."
+      },
+      "throws": []
+    },
+    {
+      "name": "isSingleApp",
+      "comment": "Checks the found applications and returns true if only a single binary was found,\n even if multiple loaders claim it.",
+      "javadoc": "Checks the found applications and returns true if only a single binary was found,\n even if multiple loaders claim it.\n@return true if single binary and batch is probably not correct importer.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if single binary and batch is probably not correct importer."
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processAsFS",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        },
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "processFS",
+      "comment": "Recursively handles files in an already opened GFileSystem.",
+      "javadoc": "Recursively handles files in an already opened GFileSystem.\n@param fs {@link GFileSystem} containing the startDir\n@param startDir {@link GFile} ref to the directory to process, null if root of the filesystem.\n@param taskMonitor {@link TaskMonitor} to watch and update.\n@throws CancelledException if user cancels\n@throws IOException if io error while reading files.",
+      "static": false,
+      "params": [
+        {
+          "name": "fs",
+          "type_long": "ghidra.formats.gfilesystem.GFileSystem",
+          "type_short": "GFileSystem",
+          "comment": "GFileSystem containing the startDir"
+        },
+        {
+          "name": "startDir",
+          "type_long": "ghidra.formats.gfilesystem.GFile",
+          "type_short": "GFile",
+          "comment": "GFile ref to the directory to process, null if root of the filesystem."
+        },
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to watch and update."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if io error while reading files."
+        }
+      ]
+    },
+    {
+      "name": "processWithLoader",
+      "comment": "Tries to open a file using Ghidra Loaders.\n \n The BinaryLoader is unconditionally skipped.",
+      "javadoc": "Tries to open a file using Ghidra {@link Loader}s.\n \u003cp\u003e\n The {@link BinaryLoader} is unconditionally skipped.\n@param fsrl {@link FSRL} of the file to open\n@param monitor {@link TaskMonitor} to use\n@return boolean true if successfully processed with a loader, false if no loader claimed\n the file.\n@throws IOException if io error during processing\n@throws CancelledException if user cancels.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL of the file to open"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "TaskMonitor to use"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if successfully processed with a loader, false if no loader claimed\n the file."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if io error during processing"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels."
+        }
+      ]
+    },
+    {
+      "name": "pollLoadersForLoadSpecs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.opinion.LoaderMap",
+        "type_short": "LoaderMap",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUserAddedSources",
+      "comment": "Returns the List of files added via #addFile(FSRL, TaskMonitor).",
+      "javadoc": "Returns the {@link List} of files added via {@link #addFile(FSRL, TaskMonitor)}.\n@return {@link List} of files added via {@link #addFile(FSRL, TaskMonitor)}.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.plugins.importer.batch.UserAddedSourceInfo\u003e",
+        "type_short": "List",
+        "comment": "List of files added via #addFile(FSRL, TaskMonitor)."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxDepth",
+      "comment": "Maximum depth of containers (ie. filesystems) to recurse into when processing\n a file added by the user",
+      "javadoc": "Maximum depth of containers (ie. filesystems) to recurse into when processing\n a file added by the user\n@return the current maximum depth of containers (ie. filesystems) to recurse into when processing\n a file added by the user.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the current maximum depth of containers (ie. filesystems) to recurse into when processing\n a file added by the user."
+      },
+      "throws": []
+    },
+    {
+      "name": "setMaxDepth",
+      "comment": "Sets a new max container recursive depth limit for this batch import\n \n Doing this requires rescanning all original user-added source files and stopping\n at the new max depth.\n ",
+      "javadoc": "Sets a new max container recursive depth limit for this batch import\n \u003cp\u003e\n Doing this requires rescanning all original user-added source files and stopping\n at the new max depth.\n \u003cp\u003e\n@param newMaxDepth new value for the max depth",
+      "static": false,
+      "params": [
+        {
+          "name": "newMaxDepth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "new value for the max depth"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFiles",
+      "comment": "Adds the given files to this batch import",
+      "javadoc": "Adds the given files to this batch import\n@param filesToAdd the files to add\n@return any files that failed to load; exceptions will be logged",
+      "static": false,
+      "params": [
+        {
+          "name": "filesToAdd",
+          "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+          "type_short": "List",
+          "comment": "the files to add"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+        "type_short": "List",
+        "comment": "any files that failed to load; exceptions will be logged"
+      },
+      "throws": []
+    },
+    {
+      "name": "doSetMaxDepth",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newMaxDepth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doAddFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filesToAdd",
+          "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,2698 @@
+{
+  "name": "FunctionDB",
+  "comment": "Database implementation of a Function.",
+  "javadoc": "Database implementation of a Function.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.listing.Function"
+  ],
+  "extends": "ghidra.program.database.DatabaseObject",
+  "fields": [
+    {
+      "name": "manager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.function.FunctionManagerDB",
+      "type_short": "FunctionManagerDB",
+      "constant_value": null
+    },
+    {
+      "name": "thunkedFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.function.FunctionDB",
+      "type_short": "FunctionDB",
+      "constant_value": null
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.ProgramDB",
+      "type_short": "ProgramDB",
+      "constant_value": null
+    },
+    {
+      "name": "entryPoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "functionSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.symbol.Symbol",
+      "type_short": "Symbol",
+      "constant_value": null
+    },
+    {
+      "name": "rec",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.DBRecord",
+      "type_short": "DBRecord",
+      "constant_value": null
+    },
+    {
+      "name": "frame",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.function.FunctionStackFrame",
+      "type_short": "FunctionStackFrame",
+      "constant_value": null
+    },
+    {
+      "name": "symbolMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cghidra.program.database.symbol.SymbolDB,ghidra.program.database.function.VariableDB\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "returnParam",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.function.ReturnParameterDB",
+      "type_short": "ReturnParameterDB",
+      "constant_value": null
+    },
+    {
+      "name": "autoParams",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.model.listing.AutoParameterImpl\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "params",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.database.function.ParameterDB\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "locals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.database.function.VariableDB\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "tags",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+      "type_short": "Set",
+      "constant_value": null
+    },
+    {
+      "name": "foundBadVariables",
+      "comment": "foundBadVariables is set true when one or more variable symbols are found\n which no longer decode a valid storage address (indicated by Address.NO_ADDRESS).\n Any time a variable is added while this flag is set, such bad variables should be purged.",
+      "javadoc": "foundBadVariables is set true when one or more variable symbols are found\n which no longer decode a valid storage address (indicated by Address.NO_ADDRESS).\n Any time a variable is added while this flag is set, such bad variables should be purged.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "validateEnabled",
+      "comment": "Use of stack frame to compute parameter ordinals and validate stack offsets\n should not be done while validateEnabled is false.  This may be\n necessary during a language upgrade in which case a dummy compiler-spec\n may be in-use.",
+      "javadoc": "Use of stack frame to compute parameter ordinals and validate stack offsets\n should not be done while \u003ccode\u003evalidateEnabled\u003c/code\u003e is false.  This may be\n necessary during a language upgrade in which case a dummy compiler-spec\n may be in-use.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "updateInProgressCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "updateRefreshRequired",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "manager",
+          "type_long": "ghidra.program.database.function.FunctionManagerDB",
+          "type_short": "FunctionManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "cache",
+          "type_long": "ghidra.program.database.DBObjectCache\u003cghidra.program.database.function.FunctionDB\u003e",
+          "type_short": "DBObjectCache",
+          "comment": ""
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMap",
+          "type_short": "AddressMap",
+          "comment": ""
+        },
+        {
+          "name": "rec",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDeleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setValidationEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkDeleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isThunk",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getThunkedFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "recursive",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setThunkedFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "referencedFunction",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionThunkAddresses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address[]",
+        "type_short": "ghidra.program.model.address.Address[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isExternal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCommentAsArray",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRepeatableComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRepeatableCommentAsArray",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRepeatableComment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEntryPoint",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBody",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSetView",
+        "type_short": "AddressSetView",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setBody",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.database.function.OverlappingFunctionException",
+          "type_short": "OverlappingFunctionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getReturnType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReturn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.function.ReturnParameterDB",
+        "type_short": "ReturnParameterDB",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setReturn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "storage",
+          "type_long": "ghidra.program.model.listing.VariableStorage",
+          "type_short": "VariableStorage",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setReturnType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setReturnStorageAndDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "storage",
+          "type_long": "ghidra.program.model.listing.VariableStorage",
+          "type_short": "VariableStorage",
+          "comment": ""
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getReturnDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deserializeStorage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "serializedStorage",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.VariableStorage",
+        "type_short": "VariableStorage",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSignature",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "formalSignature",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.FunctionSignature",
+        "type_short": "FunctionSignature",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSignature",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.FunctionSignature",
+        "type_short": "FunctionSignature",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPrototypeString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "formalSignature",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "includeCallingConvention",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateSignatureSourceAfterVariableChange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "variableSourceType",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "variableDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInferredSignatureSource",
+      "comment": "Get the inferred signature source type for use during upgrade",
+      "javadoc": "Get the inferred signature source type for use during upgrade\n@return inferred signature source",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.SourceType",
+        "type_short": "SourceType",
+        "comment": "inferred signature source"
+      },
+      "throws": []
+    },
+    {
+      "name": "getStackFrame",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Function#getStackFrame()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.StackFrame",
+        "type_short": "StackFrame",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStackPurgeSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setStackPurgeSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "change",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isStackPurgeSizeValid",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBadVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "varSym",
+          "type_long": "ghidra.program.database.symbol.VariableSymbolDB",
+          "type_short": "VariableSymbolDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadSymbolBasedVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadReturn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "hasCustomVariableStorage",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateParametersAndReturn",
+      "comment": "Update parameter ordinals and re-assign dynamic parameter storage\n NOTE: loadVariables must have been called first",
+      "javadoc": "Update parameter ordinals and re-assign dynamic parameter storage\n NOTE: loadVariables must have been called first",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAutoParamCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "renumberParameterOrdinals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "purgeBadVariables",
+      "comment": "Re-assign dynamic storage for return",
+      "javadoc": "Re-assign dynamic storage for return",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFunctionManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.function.FunctionManagerDB",
+        "type_short": "FunctionManagerDB",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addLocalVariable",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Function#addLocalVariable(ghidra.program.model.listing.Variable, ghidra.program.model.symbol.SourceType)",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.function.VariableDB",
+        "type_short": "VariableDB",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "adjustThunkThisParameter",
+      "comment": "Adjust thunk \u0027this\u0027 auto-param if function has non-default source and\n does not reside within the global namespace.",
+      "javadoc": "Adjust thunk \u0027this\u0027 auto-param if function has non-default source and\n does not reside within the global namespace.\n@param variables array of thunk variables\n@return variables array with \u0027this\u0027 auto-param adjusted if needed",
+      "static": false,
+      "params": [
+        {
+          "name": "variables",
+          "type_long": "ghidra.program.model.listing.Variable[]",
+          "type_short": "ghidra.program.model.listing.Variable[]",
+          "comment": "array of thunk variables"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable[]",
+        "type_short": "ghidra.program.model.listing.Variable[]",
+        "comment": "variables array with \u0027this\u0027 auto-param adjusted if needed"
+      },
+      "throws": []
+    },
+    {
+      "name": "adjustThunkThisParameter",
+      "comment": "Adjust thunk \u0027this\u0027 auto-param if function has non-default source and\n does not reside within the global namespace.",
+      "javadoc": "Adjust thunk \u0027this\u0027 auto-param if function has non-default source and\n does not reside within the global namespace.\n@param parameters array of thunk parameters\n@return variables array with \u0027this\u0027 auto-param adjusted if needed",
+      "static": false,
+      "params": [
+        {
+          "name": "parameters",
+          "type_long": "ghidra.program.model.listing.Parameter[]",
+          "type_short": "ghidra.program.model.listing.Parameter[]",
+          "comment": "array of thunk parameters"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter[]",
+        "type_short": "ghidra.program.model.listing.Parameter[]",
+        "comment": "variables array with \u0027this\u0027 auto-param adjusted if needed"
+      },
+      "throws": []
+    },
+    {
+      "name": "adjustThunkThisParameter",
+      "comment": "Adjust the specified parameter for a thunk function if required.\n This method will return a newly minted this auto-param if required\n to reflect the overriden name and class within which this thunk\n resides.",
+      "javadoc": "Adjust the specified parameter for a thunk function if required.\n This method will return a newly minted this auto-param if required\n to reflect the overriden name and class within which this thunk\n resides.\n@param parameter thunk parameter\n@return an adjusted auto-parameter or the original parameter\n if no adjustment was required",
+      "static": false,
+      "params": [
+        {
+          "name": "parameter",
+          "type_long": "ghidra.program.model.listing.Parameter",
+          "type_short": "Parameter",
+          "comment": "thunk parameter"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter",
+        "type_short": "Parameter",
+        "comment": "an adjusted auto-parameter or the original parameter\n if no adjustment was required"
+      },
+      "throws": []
+    },
+    {
+      "name": "getVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.model.listing.VariableFilter",
+          "type_short": "VariableFilter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable[]",
+        "type_short": "ghidra.program.model.listing.Variable[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAllVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable[]",
+        "type_short": "ghidra.program.model.listing.Variable[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.model.listing.VariableFilter",
+          "type_short": "VariableFilter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter[]",
+        "type_short": "ghidra.program.model.listing.Parameter[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter[]",
+        "type_short": "ghidra.program.model.listing.Parameter[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocalVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filter",
+          "type_long": "ghidra.program.model.listing.VariableFilter",
+          "type_short": "VariableFilter",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable[]",
+        "type_short": "ghidra.program.model.listing.Variable[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLocalVariables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable[]",
+        "type_short": "ghidra.program.model.listing.Variable[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParameterCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAutoParameterCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResolvedVariable",
+      "comment": "Resolve a variable\u0027s type and storage.",
+      "javadoc": "Resolve a variable\u0027s type and storage.\n@param var variable to be resolved\n@return resolved variable\n@throws InvalidInputException if unable to resize variable storage due to\n resolved datatype size change",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "variable to be resolved"
+        },
+        {
+          "name": "voidOK",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "useUnassignedStorage",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": "resolved variable"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": "if unable to resize variable storage due to\n resolved datatype size change"
+        }
+      ]
+    },
+    {
+      "name": "replaceParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "updateType",
+          "type_long": "ghidra.program.model.listing.Function.FunctionUpdateType",
+          "type_short": "FunctionUpdateType",
+          "comment": ""
+        },
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "newParams",
+          "type_long": "ghidra.program.model.listing.Variable[]",
+          "type_short": "ghidra.program.model.listing.Variable[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newParams",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "updateType",
+          "type_long": "ghidra.program.model.listing.Function.FunctionUpdateType",
+          "type_short": "FunctionUpdateType",
+          "comment": ""
+        },
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "updateFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "callingConvention",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "returnValue",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "updateType",
+          "type_long": "ghidra.program.model.listing.Function.FunctionUpdateType",
+          "type_short": "FunctionUpdateType",
+          "comment": ""
+        },
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        },
+        {
+          "name": "newParams",
+          "type_long": "ghidra.program.model.listing.Variable[]",
+          "type_short": "ghidra.program.model.listing.Variable[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "startUpdate",
+      "comment": "Increment updateInProgressCount indicating that an update operation is in progress and \n that any attempted refresh should be deferred.  The updateRefreshReqd flag will be set\n if a refresh was attempted while an update operation was in progress.",
+      "javadoc": "Increment updateInProgressCount indicating that an update operation is in progress and \n that any attempted refresh should be deferred.  The updateRefreshReqd flag will be set\n if a refresh was attempted while an update operation was in progress.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "endUpdate",
+      "comment": "Decrement updateInProgressCount indicating that an update operation has completed and \n check the updateRefreshReqd flag and perform refresh if needed.",
+      "javadoc": "Decrement updateInProgressCount indicating that an update operation has completed and \n check the updateRefreshReqd flag and perform refresh if needed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "callingConvention",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "returnVar",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "newParams",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "updateType",
+          "type_long": "ghidra.program.model.listing.Function.FunctionUpdateType",
+          "type_short": "FunctionUpdateType",
+          "comment": ""
+        },
+        {
+          "name": "force",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkForParameterNameConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "param",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "newParams",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "nonParamNames",
+          "type_long": "java.util.Set\u003cjava.lang.String\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "checkStorageConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newParams",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "removeConflictingLocals",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.listing.VariableSizeException",
+          "type_short": "VariableSizeException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter",
+        "type_short": "Parameter",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "insertParameter",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.listing.Function#insertParameter(int, ghidra.program.model.listing.Variable, ghidra.program.model.symbol.SourceType)",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.function.ParameterDB",
+        "type_short": "ParameterDB",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "variable",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refresh",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refresh",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "refreshRec",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doDeleteVariable",
+      "comment": "Callback to remove variable just prior to removal\n of the underlying symbol.",
+      "javadoc": "Callback to remove variable just prior to removal\n of the underlying symbol.\n@param symbol variable symbol which is about to be deleted.",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.database.symbol.VariableSymbolDB",
+          "type_short": "VariableSymbolDB",
+          "comment": "variable symbol which is about to be deleted."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeVariable",
+      "comment": "Remove variable instance from list.",
+      "javadoc": "Remove variable instance from list.\n@param list variable list\n@param var variable instance\n@return true if deleted",
+      "static": false,
+      "params": [
+        {
+          "name": "list",
+          "type_long": "java.util.List\u003c?\u003e",
+          "type_short": "List",
+          "comment": "variable list"
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.database.function.VariableDB",
+          "type_short": "VariableDB",
+          "comment": "variable instance"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if deleted"
+      },
+      "throws": []
+    },
+    {
+      "name": "getVariable",
+      "comment": "Return the Variable for the given symbol.",
+      "javadoc": "Return the Variable for the given symbol.\n@param symbol variable symbol",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.program.database.symbol.VariableSymbolDB",
+          "type_short": "VariableSymbolDB",
+          "comment": "variable symbol"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter",
+        "type_short": "Parameter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveParameter",
+      "comment": "",
+      "javadoc": "@throws InvalidInputException\n@see ghidra.program.model.listing.Function#moveParameter(int, int)",
+      "static": false,
+      "params": [
+        {
+          "name": "fromOrdinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "toOrdinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Parameter",
+        "type_short": "Parameter",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setLocalSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReturnAddressOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setReturnAddressOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Symbol",
+        "type_short": "Symbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setParentNamespace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newParentScope",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.CircularDependencyException",
+          "type_short": "CircularDependencyException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getParentNamespace",
+      "comment": "",
+      "javadoc": "@see ghidra.program.model.symbol.Namespace#getParentNamespace()",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Namespace",
+        "type_short": "Namespace",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "includeNamespacePath",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasVarArgs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setVarArgs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "hasVarArgs",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInline",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setInline",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "isInline",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasNoReturn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setNoReturn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "hasNoReturn",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasCustomVariableStorage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findExplicitThisParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "params",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExplicitThisParameter",
+      "comment": "Remove \u0027this\u0027 parameter if using __thiscall and first non-auto parameter is\n a pointer and named \u0027this\u0027.",
+      "javadoc": "Remove \u0027this\u0027 parameter if using __thiscall and first non-auto parameter is\n a pointer and named \u0027this\u0027.\n@param params list of parameters to search and affect\n@param callingConventionName\n@return true if \u0027this\u0027 parameter removed",
+      "static": true,
+      "params": [
+        {
+          "name": "params",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": "list of parameters to search and affect"
+        },
+        {
+          "name": "callingConventionName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if \u0027this\u0027 parameter removed"
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExplicitThisParameter",
+      "comment": "Remove \u0027this\u0027 parameter if using __thiscall and first non-auto parameter is\n a pointer and named \u0027this\u0027.  Variables must be pre-loaded.",
+      "javadoc": "Remove \u0027this\u0027 parameter if using __thiscall and first non-auto parameter is\n a pointer and named \u0027this\u0027.  Variables must be pre-loaded.\n@return true if \u0027this\u0027 parameter removed",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if \u0027this\u0027 parameter removed"
+      },
+      "throws": []
+    },
+    {
+      "name": "findExplicitReturnStorageParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "params",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExplicitReturnStorageParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "params",
+          "type_long": "java.util.List\u003c? extends ghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeExplicitReturnStorageParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "revertIndirectParameter",
+      "comment": "Strip indirect pointer data type from a parameter.",
+      "javadoc": "Strip indirect pointer data type from a parameter.\n@param param parameter to be examined and optionally modified\n@param create if true the specified param will not be affected and a new parameter\n instance will be returned if strip performed, otherwise orginal param will be changed\n if possible and returned.\n@return parameter with pointer stripped or original param if pointer not used.\n Returned parameter will have unassigned storage if affected.",
+      "static": true,
+      "params": [
+        {
+          "name": "param",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "parameter to be examined and optionally modified"
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the specified param will not be affected and a new parameter\n instance will be returned if strip performed, otherwise orginal param will be changed\n if possible and returned."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": "parameter with pointer stripped or original param if pointer not used.\n Returned parameter will have unassigned storage if affected."
+      },
+      "throws": []
+    },
+    {
+      "name": "setCustomVariableStorage",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "hasCustomVariableStorage",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFunctionFlagSet",
+      "comment": "Determines whether the indicated function flag is set.",
+      "javadoc": "Determines whether the indicated function flag is set.\n@param functionFlagIndicator the function flag from the FunctionAdapter class (i.e.\n            FunctionAdapter.FUNCTION_VARARG_FLAG,\n            FunctionAdapter.FUNCTION_INLINE_FLAG,\n            FunctionAdapter.FUNCTION_NO_RETURN_FLAG)\n@return true if the indicated flag is set",
+      "static": false,
+      "params": [
+        {
+          "name": "functionFlagIndicator",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "the function flag from the FunctionAdapter class (i.e.\n            FunctionAdapter.FUNCTION_VARARG_FLAG,\n            FunctionAdapter.FUNCTION_INLINE_FLAG,\n            FunctionAdapter.FUNCTION_NO_RETURN_FLAG)"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the indicated flag is set"
+      },
+      "throws": []
+    },
+    {
+      "name": "setFunctionFlag",
+      "comment": "Sets the indicated function flag to true or false.",
+      "javadoc": "Sets the indicated function flag to true or false.\n@param functionFlagIndicator the function flag from the FunctionAdapter class (i.e.\n            FunctionAdapter.FUNCTION_VARARG_FLAG,\n            FunctionAdapter.FUNCTION_INLINE_FLAG,\n            FunctionAdapter.FUNCTION_NO_RETURN_FLAG,\n            FunctionAdapter.FUNCTION_CUSTOM_PARAM_STORAGE_FLAG)\n@param shouldBeSet true means the indicated flag should be set.",
+      "static": false,
+      "params": [
+        {
+          "name": "functionFlagIndicator",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "the function flag from the FunctionAdapter class (i.e.\n            FunctionAdapter.FUNCTION_VARARG_FLAG,\n            FunctionAdapter.FUNCTION_INLINE_FLAG,\n            FunctionAdapter.FUNCTION_NO_RETURN_FLAG,\n            FunctionAdapter.FUNCTION_CUSTOM_PARAM_STORAGE_FLAG)"
+        },
+        {
+          "name": "shouldBeSet",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means the indicated flag should be set."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSignatureSource",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.SourceType",
+        "type_short": "SourceType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getStoredSignatureSource",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.SourceType",
+        "type_short": "SourceType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSignatureSource",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "signatureSource",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCallingConvention",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.PrototypeModel",
+        "type_short": "PrototypeModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCallingConventionName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRealCallingConventionName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultCallingConvention",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.lang.PrototypeModel",
+        "type_short": "PrototypeModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultCallingConventionName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCallingConvention",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createClassStructIfNeeded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.database.function.VariableDB",
+          "type_short": "VariableDB",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCallFixup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCallFixup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCallingFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.program.model.listing.Function\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCalledFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.program.model.listing.Function\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getReferencesFromBody",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.program.model.symbol.Reference\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTags",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+        "type_short": "Set",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTag",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTag",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "promoteLocalUserLabelsToGlobal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

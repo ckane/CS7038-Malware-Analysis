@@ -1,0 +1,1161 @@
+{
+  "name": "Plugin",
+  "comment": "Plugins are a basic building block in Ghidra, used to bundle features or capabilities\n into a unit that can be enabled or disabled by the user in their Tool.\n \n Plugins expose their features or capabilities to users via menu items and buttons that\n the user can click on, and via \"service\" APIs that other Plugins can programmatically subscribe\n to, and via PluginEvents that are broadcast.\n \n Well formed Plugins:\n \n \tDerive from Plugin (directly or indirectly).\n \tClass name ends with \"Plugin\" and does not match any other Plugin, regardless of\n \tits location in the package tree.\n \tHave a PluginInfo annotation.\n \tHave a constructor with exactly 1 parameter: PluginTool.\n \t\t\n  \t\t\tpublic MyPlugin(PluginTool tool) { ... }\n  \t\t\n  \tUsually overrides protected void init().\n \n Class naming\n All Plugin Classes MUST END IN \"Plugin\".  If not, the ClassSearcher will not find them.\n \n Some special Plugins marked with the ProgramaticUseOnly interface are manually\n created and do not follow this naming requirement.\n\n Plugin Life cycle\n \n \tYour Plugin\u0027s constructor is called\n \t\t\n \t\t\tPlugin base class constructor is called.\n \t\t\t\t\n \t\t\t\t\tServices listed in the @PluginInfo annotation are automatically added\n \t\t\t\t\tto dependency list\n \t\t\t\t\n \t\t\tYour Plugin publishes any services listed in PluginInfo using\n \t\t\tPlugin#registerServiceProvided(Class, Object).\n \t\t\t(required)\n  \t\t\tCreate Actions (optional)\n  \t\t\tRegister ghidra.framework.options.Options with the\n PluginTool#getOptions(String). (optional)\n \t\t\n \tOther Plugins are constructed, dependencies evaluated, etc.\n \tIf your dependencies are not available (ie. not installed, threw an exception during their\n\tinitialization, etc), your Plugin\u0027s #dispose() will be called and then your Plugin\n\tinstance will be discarded.\n\tYour Plugin\u0027s #init() method is called (when its dependencies are met).\n \t\t\n \t\t\tCall PluginTool#getService(Class) to get service\n \t\t\timplementations. (the service class being requested should already be\n \t\t\tlisted in the @PluginInfo)\n \t\t\tCreate Actions (optional)\n \t\t\tOther initialization stuff.\n \t\t\n\tYour Plugin\u0027s #readConfigState(SaveState) is called.\n \t...user uses Ghidra...\n \t\t\n \t\t\tYour Plugin\u0027s #processEvent(PluginEvent) is called for events.\n \t\t\tYour Plugin\u0027s Action\u0027s methods (ie.\n \t\t\tDockingAction#actionPerformed(docking.ActionContext)) are called.\n \t\t\tYour Plugin\u0027s published service methods are called by other Plugins.\n \t\t\tYour Plugin\u0027s listener methods are called.\n \t\t\n \tPlugin is unloaded due to shutdown of the Tool or being disabled by user\n \t\t\n\t\t\tYour Plugin\u0027s #writeConfigState(SaveState) is called - override this\n\t\t\tmethod to write configuration info into the Tool definition.\n \t\t\tYour Plugin\u0027s #dispose() is called - override this method to free\n \t\t\tany resources and perform any needed cleanup.\n \t\t\tYour Plugin\u0027s services and events are de-registered automatically.\n \t\t\n \n\n Plugin Service dependency\n All Plugins must be tagged with a PluginInfo annotation.\n \n The annotation gives you the ability to declare a dependency on another Plugin\n via the PluginInfo#servicesRequired()\n \n Ghidra will ensure that your Plugin will not be #init() until all\n of its required services are loaded successfully and are available for use when your Plugin\n calls the PluginTool#getService(Class) method.\n \n Conversely, any services your Plugin advertises in PluginInfo must be published via calls to\n #registerServiceProvided(Class, Object) in your Plugin\u0027s \n constructor.\n \n Cyclic dependencies are not allowed and will cause the Plugin management code to fail to \n load your Plugin. (ie. PluginA requires a service that PluginB provides, which requires a service\n that PluginA provides)\n\n Plugin Service implementation\n A Plugin may provide a service to other Plugins by advertising in its PluginInfo\n annotation that it PluginInfo#servicesProvided() an interface class.\n \n Your Plugin can either directly implement the interface in your Plugin class:\n \n public class MyPlugin extends Plugin implements MyService {....}\n \n or it may delegate the handling of the service interface to another object during its\n constructor:\n \n public MyPlugin(PluginTool tool) {\n ...\n MyService serviceObj \u003d new MyService() { ... };\n registerServiceProvided(MyService.class, serviceObj);\n \n }\n \n When your Plugin directly implements the advertised service interface, you should not\n call #registerServiceProvided(Class, Object) for that service\n interface.\n \n Service interface classes are just normal java interface declarations and have no\n preconditions or other requirements to be used as a Plugin\u0027s advertised service interface.\n \n Optionally, service interface classes can be marked with meta-data via a\n ServiceInfo annotation that can have a\n ServiceInfo#defaultProvider() property which specifies a Plugin\u0027s\n class (or classname) that should be auto-loaded to provide an implementation of the service\n interface when that service is required by some other Plugin.  Without the defaultProvider\n information, dependent Plugins will fail to load unless the user manually loads a Plugin\n that provides the necessary interface service.\n \n Multiple Plugins can implement the same service interface.  Plugins that use that\n multi-implemented service will either receive a randomly picked instance if using\n PluginTool#getService(Class) or will receive all implementations if using\n PluginTool#getServices(Class).\n \n\n Plugin Events\n \n \tEvery type of plugin event should be represented by some class extending PluginEvent.\n  One PluginEvent subclass may be used for more than one event type as long as there\u0027s some \n  natural grouping.\n \n\n Component Providers\n \n  A plugin may supply a ComponentProvider that provides a visual component when \n  the plugin is added to the tool.\n \n\n Important interfaces Plugins often need to implement\n \n \tOptionsChangeListener - to receive notification when a configuration option\n \tis changed by the user.\n \tFrontEndable - marks this Plugin as being suitable for inclusion in the FrontEnd \n \t\ttool.\n \tFrontEndOnly - marks this Plugin as FrontEnd only, not usable in CodeBrowser or \n \t\tother tools.\n \tProgramaticUseOnly - marks this Plugin as special and not for user configuration.\n ",
+  "javadoc": "Plugins are a basic building block in Ghidra, used to bundle features or capabilities\n into a unit that can be enabled or disabled by the user in their Tool.\n \u003cp\u003e\n Plugins expose their features or capabilities to users via menu items and buttons that\n the user can click on, and via \"service\" APIs that other Plugins can programmatically subscribe\n to, and via {@link PluginEvent}s that are broadcast.\n \u003cp\u003e\n \u003ch2\u003eWell formed Plugins:\u003c/h2\u003e\n \u003cUL\u003e\n \t\u003cLI\u003eDerive from \u003ccode\u003ePlugin\u003c/code\u003e (directly or indirectly).\n \t\u003cLI\u003eClass name ends with \"Plugin\" and does not match any other Plugin, regardless of\n \tits location in the package tree.\n \t\u003cLI\u003eHave a {@link PluginInfo @PluginInfo()} annotation.\n \t\u003cLI\u003eHave a constructor with exactly 1 parameter: PluginTool.\n \t\t\u003cUL\u003e\n  \t\t\t\u003cLI\u003e\u003ccode\u003epublic MyPlugin(PluginTool tool) { ... }\u003c/code\u003e\n  \t\t\u003c/UL\u003e\n  \t\u003cLI\u003eUsually overrides \u003ccode\u003eprotected void init()\u003c/code\u003e.\n \u003c/UL\u003e\n \u003ch2\u003eClass naming\u003c/h2\u003e\n All Plugin Classes \u003cb\u003eMUST END IN\u003c/b\u003e \"Plugin\".  If not, the ClassSearcher will not find them.\n \u003cp\u003e\n Some special Plugins marked with the {@link ProgramaticUseOnly} interface are manually\n created and do not follow this naming requirement.\n\n \u003ch2\u003ePlugin Life cycle\u003c/h2\u003e\n \u003cOL\u003e\n \t\u003cLI\u003eYour Plugin\u0027s constructor is called\n \t\t\u003cOL\u003e\n \t\t\t\u003cLI\u003ePlugin base class constructor is called.\n \t\t\t\t\u003cOL\u003e\n \t\t\t\t\t\u003cLI\u003eServices listed in the @PluginInfo annotation are automatically added\n \t\t\t\t\tto dependency list\n \t\t\t\t\u003c/OL\u003e\n \t\t\t\u003cLI\u003eYour Plugin publishes any services listed in PluginInfo using\n \t\t\t{@link Plugin#registerServiceProvided(Class, Object) registerServiceProvided()}.\n \t\t\t(required)\n  \t\t\t\u003cLI\u003eCreate Actions (optional)\n  \t\t\t\u003cLI\u003eRegister {@link ghidra.framework.options.Options Options} with the\n {@link PluginTool#getOptions(String)}. (optional)\u003cbr\u003e\n \t\t\u003c/OL\u003e\n \t\u003cLI\u003eOther Plugins are constructed, dependencies evaluated, etc.\u003cbr\u003e\n \tIf your dependencies are not available (ie. not installed, threw an exception during their\n\tinitialization, etc), your Plugin\u0027s {@link #dispose()} will be called and then your Plugin\n\tinstance will be discarded.\u003cbr\u003e\n\t\u003cLI\u003eYour Plugin\u0027s {@link #init()} method is called (when its dependencies are met).\n \t\t\u003cOL\u003e\n \t\t\t\u003cLI\u003eCall {@link PluginTool#getService(Class)} to get service\n \t\t\timplementations. (the service class being requested should already be\n \t\t\tlisted in the @PluginInfo)\n \t\t\t\u003cLI\u003eCreate Actions (optional)\n \t\t\t\u003cLI\u003eOther initialization stuff.\n \t\t\u003c/OL\u003e\n\t\u003cLI\u003eYour Plugin\u0027s {@link #readConfigState(SaveState)} is called.\n \t\u003cLI\u003e...user uses Ghidra...\n \t\t\u003cUL\u003e\n \t\t\t\u003cLI\u003eYour Plugin\u0027s {@link #processEvent(PluginEvent)} is called for events.\n \t\t\t\u003cLI\u003eYour Plugin\u0027s Action\u0027s methods (ie.\n \t\t\t{@link DockingAction#actionPerformed(docking.ActionContext) actionPerformed}) are called.\n \t\t\t\u003cLI\u003eYour Plugin\u0027s published service methods are called by other Plugins.\n \t\t\t\u003cLI\u003eYour Plugin\u0027s listener methods are called.\n \t\t\u003c/UL\u003e\n \t\u003cLI\u003ePlugin is unloaded due to shutdown of the Tool or being disabled by user\n \t\t\u003cOL\u003e\n\t\t\t\u003cLI\u003eYour Plugin\u0027s {@link #writeConfigState(SaveState)} is called - override this\n\t\t\tmethod to write configuration info into the Tool definition.\n \t\t\t\u003cLI\u003eYour Plugin\u0027s {@link #dispose()} is called - override this method to free\n \t\t\tany resources and perform any needed cleanup.\n \t\t\t\u003cLI\u003eYour Plugin\u0027s services and events are de-registered automatically.\n \t\t\u003c/OL\u003e\n \u003c/OL\u003e\n\n \u003ch2\u003ePlugin Service dependency\u003c/h2\u003e\n All Plugins must be tagged with a {@link PluginInfo @PluginInfo(...)} annotation.\n \u003cp\u003e\n The annotation gives you the ability to declare a dependency on another Plugin\n via the {@link PluginInfo#servicesRequired() servicesRequired}\n \u003cp\u003e\n Ghidra will ensure that your Plugin will not be {@link #init() initialized} until all\n of its required services are loaded successfully and are available for use when your Plugin\n calls the {@link PluginTool#getService(Class)} method.\n \u003cp\u003e\n Conversely, any services your Plugin advertises in \u0026#64;PluginInfo must be published via calls to\n {@link #registerServiceProvided(Class, Object) registerServiceProvided()} in your Plugin\u0027s \n constructor.\n \u003cp\u003e\n \u003cb\u003eCyclic dependencies\u003c/b\u003e are not allowed and will cause the Plugin management code to fail to \n load your Plugin. (ie. PluginA requires a service that PluginB provides, which requires a service\n that PluginA provides)\n\n \u003ch2\u003ePlugin Service implementation\u003c/h2\u003e\n A Plugin may provide a service to other Plugins by advertising in its {@link PluginInfo}\n annotation that it {@link PluginInfo#servicesProvided() provides} an interface class.\n \u003cp\u003e\n Your Plugin can either directly implement the interface in your Plugin class:\n \u003cp\u003e\n \u0026nbsp;\u0026nbsp;\u003ccode\u003epublic class MyPlugin extends Plugin \u003cb\u003eimplements MyService\u003c/b\u003e {....}\u003c/code\u003e\n \u003cp\u003e\n or it may delegate the handling of the service interface to another object during its\n constructor:\n \u003cp\u003e\n \u0026nbsp;\u0026nbsp;\u003ccode\u003epublic MyPlugin(PluginTool tool) {\u003c/code\u003e\u003cbr\u003e\n \u0026nbsp;\u0026nbsp;\u0026nbsp;\u0026nbsp;\u003ccode\u003e...\u003c/code\u003e\u003cbr\u003e\n \u0026nbsp;\u0026nbsp;\u0026nbsp;\u0026nbsp;\u003ccode\u003eMyService serviceObj \u003d new MyService() { ... };\u003c/code\u003e\u003cbr\u003e\n \u0026nbsp;\u0026nbsp;\u0026nbsp;\u0026nbsp;\u003ccode\u003e\u003cb\u003eregisterServiceProvided(MyService.class, serviceObj);\u003c/b\u003e\n \u003c/code\u003e\u003cbr\u003e\n \u0026nbsp;\u0026nbsp;\u003ccode\u003e}\u003c/code\u003e\u003cbr\u003e\n \u003cp\u003e\n When your Plugin directly implements the advertised service interface, you should \u003cb\u003enot\u003c/b\u003e\n call {@link #registerServiceProvided(Class, Object) registerServiceProvided} for that service\n interface.\n \u003cp\u003e\n Service interface classes are just normal java interface declarations and have no\n preconditions or other requirements to be used as a Plugin\u0027s advertised service interface.\n \u003cp\u003e\n Optionally, service interface classes can be marked with meta-data via a\n {@link ServiceInfo @ServiceInfo} annotation that can have a\n {@link ServiceInfo#defaultProvider() defaultProvider} property which specifies a Plugin\u0027s\n class (or classname) that should be auto-loaded to provide an implementation of the service\n interface when that service is required by some other Plugin.  Without the defaultProvider\n information, dependent Plugins will fail to load unless the user manually loads a Plugin\n that provides the necessary interface service.\n \u003cp\u003e\n Multiple Plugins can implement the same service interface.  Plugins that use that\n multi-implemented service will either receive a randomly picked instance if using\n {@link PluginTool#getService(Class)} or will receive all implementations if using\n {@link PluginTool#getServices(Class)}.\n \u003cp\u003e\n\n \u003ch2\u003ePlugin Events\u003c/h2\u003e\n \u003cUL\u003e\n \t\u003cLI\u003eEvery type of plugin event should be represented by some class extending {@link PluginEvent}.\n  \u003cLI\u003eOne PluginEvent subclass may be used for more than one event type as long as there\u0027s some \n  natural grouping.\n \u003c/UL\u003e\n\n \u003ch2\u003eComponent Providers\u003c/h2\u003e\n \u003cUL\u003e\n  \u003cLI\u003eA plugin may supply a {@link ComponentProvider} that provides a visual component when \n  the plugin is added to the tool.\n \u003c/UL\u003e\n\n \u003ch2\u003eImportant interfaces Plugins often need to implement\u003c/h2\u003e\n \u003cUL\u003e\n \t\u003cLI\u003e{@link OptionsChangeListener} - to receive notification when a configuration option\n \tis changed by the user.\n \t\u003cLI\u003e{@link FrontEndable} - marks this Plugin as being suitable for inclusion in the FrontEnd \n \t\ttool.\n \t\u003cLI\u003e{@link FrontEndOnly} - marks this Plugin as FrontEnd only, not usable in CodeBrowser or \n \t\tother tools.\n \t\u003cLI\u003e{@link ProgramaticUseOnly} - marks this Plugin as special and not for user configuration.\n \u003c/UL\u003e",
+  "static": false,
+  "implements": [
+    "ghidra.util.classfinder.ExtensionPoint",
+    "ghidra.framework.plugintool.util.PluginEventListener",
+    "ghidra.framework.plugintool.util.ServiceListener"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "tool",
+      "comment": "The PluginTool that hosts/contains this Plugin.",
+      "javadoc": "The {@link PluginTool} that hosts/contains this Plugin.",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.PluginTool",
+      "type_short": "PluginTool",
+      "constant_value": null
+    },
+    {
+      "name": "name",
+      "comment": "Name of this plugin, derived from the simple class name.",
+      "javadoc": "Name of this plugin, derived from the simple class name.",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "pluginDescription",
+      "comment": "Static information about this Plugin, derived from its PluginInfo annotation.",
+      "javadoc": "Static information about this Plugin, derived from its {@link PluginInfo} annotation.",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.util.PluginDescription",
+      "type_short": "PluginDescription",
+      "constant_value": null
+    },
+    {
+      "name": "legacyRequiredServices",
+      "comment": "Temporary compatibility for Plugins that have not been updated to new PluginInfo API.\n \n Contains the list of service classes that this plugin registered as being required.\n \n Ignored if the PluginDescription has values for requiredServices.",
+      "javadoc": "Temporary compatibility for Plugins that have not been updated to new PluginInfo API.\n \u003cp\u003e\n Contains the list of service classes that this plugin registered as being required.\n \u003cp\u003e\n Ignored if the PluginDescription has values for requiredServices.",
+      "static": false,
+      "type_long": "java.util.List\u003cjava.lang.Class\u003c?\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "eventsProduced",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cjava.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "eventsConsumed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cjava.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "services",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.framework.plugintool.ServiceInterfaceImplementationPair\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "constructorFinished",
+      "comment": "Flag that indicates that this Plugin\u0027s constructor phase has finished.  Used to\n decide if events or services should be directly registered with the Tool or if they\n should be queued to be registered later.",
+      "javadoc": "Flag that indicates that this Plugin\u0027s constructor phase has finished.  Used to\n decide if events or services should be directly registered with the Tool or if they\n should be queued to be registered later.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "disposed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new Plugin.\n ",
+      "javadoc": "Construct a new Plugin.\n \u003cp\u003e\n@param tool PluginTool that will host/contain this plugin.",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "PluginTool that will host/contain this plugin."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new Plugin.\n \n Deprecated, use Plugin#Plugin(PluginTool) instead.",
+      "javadoc": "Construct a new Plugin.\n \u003cp\u003e\n Deprecated, use {@link Plugin#Plugin(PluginTool)} instead.\n@param pluginName name of plugin - not used.\n@param tool tool that will contain this plugin",
+      "static": false,
+      "params": [
+        {
+          "name": "pluginName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "name of plugin - not used."
+        },
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": "tool that will contain this plugin"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerPluginImplementedServices",
+      "comment": "Auto-registers any services directly implemented by this Plugin instance (ie.\n the MyService in \"class MyPlugin extends Plugin implements MyService { }\" )",
+      "javadoc": "Auto-registers any services directly implemented by this Plugin instance (ie.\n the MyService in \"class MyPlugin extends Plugin implements MyService { }\" )",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerStaticEvents",
+      "comment": "Auto-registers any PluginEvents listed in the Plugin\u0027s description.",
+      "javadoc": "Auto-registers any PluginEvents listed in the Plugin\u0027s description.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPluginName",
+      "comment": "Returns plugin name or null if given class does not extend Plugin\n \n Deprecated, use PluginUtils#getPluginNameFromClass(Class)\n ",
+      "javadoc": "Returns plugin name or null if given class does not extend {@link Plugin}\n \u003cp\u003e\n Deprecated, use {@link PluginUtils#getPluginNameFromClass(Class)}\n \u003cp\u003e\n@param pluginClass the plugin class\n@return the plugin name",
+      "static": true,
+      "params": [
+        {
+          "name": "pluginClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "the plugin class"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the plugin name"
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Returns this plugin\u0027s name.\n ",
+      "javadoc": "Returns this plugin\u0027s name.\n \u003cp\u003e\n@return String name, derived from simple class name.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "String name, derived from simple class name."
+      },
+      "throws": []
+    },
+    {
+      "name": "eventSent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processEvent",
+      "comment": "Method called to process a plugin event.  Plugins should override this method\n if the plugin processes PluginEvents;",
+      "javadoc": "Method called to process a plugin event.  Plugins should override this method\n if the plugin processes PluginEvents;\n@param event plugin to process",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": "plugin to process"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTool",
+      "comment": "Get the PluginTool that hosts/contains this plugin.",
+      "javadoc": "Get the {@link PluginTool} that hosts/contains this plugin.\n@return PluginTool",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.PluginTool",
+        "type_short": "PluginTool",
+        "comment": "PluginTool"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSupportedDataTypes",
+      "comment": "Return classes of data types that this plugin can support.\n ",
+      "javadoc": "Return classes of data types that this plugin can support.\n \u003cp\u003e\n@return classes of data types that this plugin can support",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Class\u003c?\u003e[]",
+        "type_short": "java.lang.Class\u003c?\u003e[]",
+        "comment": "classes of data types that this plugin can support"
+      },
+      "throws": []
+    },
+    {
+      "name": "acceptData",
+      "comment": "Method called if the plugin supports this domain file.\n ",
+      "javadoc": "Method called if the plugin supports this domain file.\n \u003cp\u003e\n@param data array of {@link DomainFile}s\n@return boolean true if can accept",
+      "static": false,
+      "params": [
+        {
+          "name": "data",
+          "type_long": "ghidra.framework.model.DomainFile[]",
+          "type_short": "ghidra.framework.model.DomainFile[]",
+          "comment": "array of DomainFiles"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if can accept"
+      },
+      "throws": []
+    },
+    {
+      "name": "getData",
+      "comment": "Get the domain files that this plugin has open.\n ",
+      "javadoc": "Get the domain files that this plugin has open.\n \u003cp\u003e\n@return array of {@link DomainFile}s that are open by this Plugin.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFile[]",
+        "type_short": "ghidra.framework.model.DomainFile[]",
+        "comment": "array of DomainFiles that are open by this Plugin."
+      },
+      "throws": []
+    },
+    {
+      "name": "initServices",
+      "comment": "Called after the constructor and before #init() to publish services to \n the Tool\u0027s service registry.\n \n Services registered during the constructor call will be queued in the services list.\n This method will register those early services with the Tool, and henceforth,\n new services will be directly registered with the Tool.",
+      "javadoc": "Called after the constructor and before {@link #init()} to publish services to \n the Tool\u0027s service registry.\n \u003cp\u003e\n Services registered during the constructor call will be queued in the services list.\n This method will register those early services with the Tool, and henceforth,\n new services will be directly registered with the Tool.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerQueuedServices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processLastEvents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "lastEvents",
+          "type_long": "ghidra.framework.plugintool.PluginEvent[]",
+          "type_short": "ghidra.framework.plugintool.PluginEvent[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "Initialization method; override to add initialization for this plugin.\n This is where a plugin should acquire its services. When this method\n is called, all plugins have been instantiated in the tool.",
+      "javadoc": "Initialization method; override to add initialization for this plugin.\n This is where a plugin should acquire its services. When this method\n is called, all plugins have been instantiated in the tool.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Tells a plugin that it is no longer needed.  The plugin should release\n any resources that it has.  All actions, components, services will automatically\n be cleaned up.",
+      "javadoc": "Tells a plugin that it is no longer needed.  The plugin should release\n any resources that it has.  All actions, components, services will automatically\n be cleaned up.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readConfigState",
+      "comment": "Tells the Plugin to read its data-independent (preferences)\n properties from the input stream.",
+      "javadoc": "Tells the Plugin to read its data-independent (preferences)\n properties from the input stream.\n@param saveState object that holds primitives for state information",
+      "static": false,
+      "params": [
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": "object that holds primitives for state information"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeConfigState",
+      "comment": "Tells a Plugin to write any data-independent (preferences)\n properties to the output stream.",
+      "javadoc": "Tells a Plugin to write any data-independent (preferences)\n properties to the output stream.\n@param saveState object that holds primitives for state information",
+      "static": false,
+      "params": [
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": "object that holds primitives for state information"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeDataState",
+      "comment": "Tells the Plugin to write any data-dependent state to the\n output stream.",
+      "javadoc": "Tells the Plugin to write any data-dependent state to the\n output stream.\n@param saveState object that holds primitives for state information",
+      "static": false,
+      "params": [
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": "object that holds primitives for state information"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readDataState",
+      "comment": "Tells the Plugin to read its data-dependent state from the\n given SaveState object.",
+      "javadoc": "Tells the Plugin to read its data-dependent state from the\n given SaveState object.\n@param saveState object that holds primitives for state information",
+      "static": false,
+      "params": [
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": "object that holds primitives for state information"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "firePluginEvent",
+      "comment": "Fire the given plugin event; the tool notifies all other plugins\n who are interested in receiving the given event type.",
+      "javadoc": "Fire the given plugin event; the tool notifies all other plugins\n who are interested in receiving the given event type.\n@param event event to fire",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": "event to fire"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getServiceClasses",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Class\u003c?\u003e[]",
+        "type_short": "java.lang.Class\u003c?\u003e[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "serviceAdded",
+      "comment": "Notifies this plugin that a service has been added to\n   the plugin tool.\n Plugins should override this method if they update their state\n when a particular service is added.",
+      "javadoc": "Notifies this plugin that a service has been added to\n   the plugin tool.\n Plugins should override this method if they update their state\n when a particular service is added.\n@param interfaceClass The \u003cb\u003einterface\u003c/b\u003e of the added service\n@param service service that is being added",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "The interface of the added service"
+        },
+        {
+          "name": "service",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "service that is being added"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "serviceRemoved",
+      "comment": "Notifies this plugin that service has been removed from the\n   plugin tool.\n Plugins should override this method if they update their state\n when a particular service is removed.",
+      "javadoc": "Notifies this plugin that service has been removed from the\n   plugin tool.\n Plugins should override this method if they update their state\n when a particular service is removed.\n@param interfaceClass The \u003cb\u003einterface\u003c/b\u003e of the added service\n@param service that is being removed.",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "The interface of the added service"
+        },
+        {
+          "name": "service",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "that is being removed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dependsUpon",
+      "comment": "Check if this plugin depends on the given plugin",
+      "javadoc": "Check if this plugin depends on the given plugin\n@param plugin the plugin\n@return true if this plugin depends on the given plugin",
+      "static": false,
+      "params": [
+        {
+          "name": "plugin",
+          "type_long": "ghidra.framework.plugintool.Plugin",
+          "type_short": "Plugin",
+          "comment": "the plugin"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this plugin depends on the given plugin"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMissingRequiredServices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.Class\u003c?\u003e\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasMissingRequiredService",
+      "comment": "Checks if this plugin is missing a required service.",
+      "javadoc": "Checks if this plugin is missing a required service.\n@return boolean true if a required service isn\u0027t available via the PluginTool.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if a required service isn\u0027t available via the PluginTool."
+      },
+      "throws": []
+    },
+    {
+      "name": "getList",
+      "comment": "Used to choose between lists to support the old Plugin ABI backward compatible lists",
+      "javadoc": "Used to choose between lists to support the old Plugin ABI backward compatible lists\n@param l1 the new list from the static PluginDescription config - preferred if it has any elements\n@param l2 the old list - only returned if l1 is empty\n@return either l1 or l2, depending on which one has elements.",
+      "static": true,
+      "params": [
+        {
+          "name": "l1",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": "the new list from the static PluginDescription config - preferred if it has any elements"
+        },
+        {
+          "name": "l2",
+          "type_long": "java.util.List\u003cT\u003e",
+          "type_short": "List",
+          "comment": "the old list - only returned if l1 is empty"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cT\u003e",
+        "type_short": "List",
+        "comment": "either l1 or l2, depending on which one has elements."
+      },
+      "throws": []
+    },
+    {
+      "name": "registerEventProduced",
+      "comment": "Register event that this plugin produces.\n \n Deprecated, use PluginInfo instead.\n ",
+      "javadoc": "Register event that this plugin produces.\n \u003cp\u003e\n Deprecated, use {@link PluginInfo @PluginInfo.eventsProduced} instead.\n \u003cp\u003e\n@param eventClass Class of the produced event; class is required to force it\n to be loaded",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": "Class of the produced event; class is required to force it\n to be loaded"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "unregisterEvents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerEventConsumed",
+      "comment": "Register event that this plugin consumes.\n \n Deprecated, use PluginInfo instead.\n ",
+      "javadoc": "Register event that this plugin consumes.\n \u003cp\u003e\n Deprecated, use {@link PluginInfo @PluginInfo.eventsConsumed} instead.\n \u003cp\u003e\n@param eventClass Class for the event; class is required to force it\n to be loaded",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": "Class for the event; class is required to force it\n to be loaded"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerDynamicEventConsumed",
+      "comment": "Register event that this plugin consumes.\n ",
+      "javadoc": "Register event that this plugin consumes.\n \u003cp\u003e\n@param eventClass Class for the event; class is required to force it\n to be loaded",
+      "static": false,
+      "params": [
+        {
+          "name": "eventClass",
+          "type_long": "java.lang.Class\u003c? extends ghidra.framework.plugintool.PluginEvent\u003e",
+          "type_short": "Class",
+          "comment": "Class for the event; class is required to force it\n to be loaded"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doRegisterServiceProvided",
+      "comment": "Registers a service.\n \n If the constructor isn\u0027t finished yet (constructorFinished \u003d\u003d false), the service is\n just queued up in the services list.\n \n If the constructor is finished, the service is added to the services list and registered\n with the PluginTool\u0027s services.\n \n The #initServices() handles registering the services queued during the constructor.\n ",
+      "javadoc": "Registers a service.\n \u003cp\u003e\n If the constructor isn\u0027t finished yet (constructorFinished \u003d\u003d false), the service is\n just queued up in the services list.\n \u003cp\u003e\n If the constructor is finished, the service is added to the services list and registered\n with the PluginTool\u0027s services.\n \u003cp\u003e\n The {@link #initServices()} handles registering the services queued during the constructor.\n \u003cp\u003e\n@param interfaceClass Class that the service object implements.\n@param service Service object instance.\n@param dynamicRegister boolean flag that indicates that the service being registered\n is being registered during the \u0027static\u0027 initialization phase (using information from\n the static {@link PluginDescription}) or in a dynamic manner during runtime.",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "Class that the service object implements."
+        },
+        {
+          "name": "service",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "Service object instance."
+        },
+        {
+          "name": "dynamicRegister",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "boolean flag that indicates that the service being registered\n is being registered during the \u0027static\u0027 initialization phase (using information from\n the static PluginDescription) or in a dynamic manner during runtime."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerServiceProvided",
+      "comment": "Used to register a service (that has already been announced in this Plugin\u0027s\n PluginInfo annotation via\n PluginInfo#servicesProvided()) during the\n Plugin\u0027s constructor phase, IFF the service is implemented by an object other\n than the Plugin instance itself.\n \n Do not use this to register a service if your Plugin class implements that\n service\u0027s interface because your Plugin will have been automatically registered as\n providing that service.\n \n If you need to register a service after the constructor is finished, use\n #registerDynamicServiceProvided(Class, Object).\n \n Using this method outside of your constructor will (someday) throw an IllegalArgumentException.",
+      "javadoc": "Used to register a service (that has already been announced in this Plugin\u0027s\n PluginInfo annotation via\n {@link PluginInfo#servicesProvided() servicesProvided \u003d SomeService.class}) during the\n Plugin\u0027s constructor phase, IFF the service is implemented by an object other\n than the Plugin instance itself.\n \u003cp\u003e\n Do not use this to register a service if your Plugin class implements that\n service\u0027s interface because your Plugin will have been automatically registered as\n providing that service.\n \u003cp\u003e\n If you need to register a service after the constructor is finished, use\n {@link #registerDynamicServiceProvided(Class, Object)}.\n \u003cp\u003e\n Using this method outside of your constructor will (someday) throw an IllegalArgumentException.\n@param interfaceClass service interface class\n@param service service implementation",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c? super T\u003e",
+          "type_short": "Class",
+          "comment": "service interface class"
+        },
+        {
+          "name": "service",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "service implementation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerDynamicServiceProvided",
+      "comment": "Used to register a service dynamically, during runtime, instead of during the Plugin\u0027s\n constructor.\n ",
+      "javadoc": "Used to register a service dynamically, during runtime, instead of during the Plugin\u0027s\n constructor.\n \u003cp\u003e\n@param interfaceClass service interface class\n@param service service implementation",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c? super T\u003e",
+          "type_short": "Class",
+          "comment": "service interface class"
+        },
+        {
+          "name": "service",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "service implementation"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getServicesRequired",
+      "comment": "Returns the combination of required and non-required used services.",
+      "javadoc": "Returns the combination of required and non-required used services.\n@return union of the lists of required and non-required used services.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.Class\u003c?\u003e\u003e",
+        "type_short": "List",
+        "comment": "union of the lists of required and non-required used services."
+      },
+      "throws": []
+    },
+    {
+      "name": "unregisterServices",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "registerServiceUsed",
+      "comment": "Registers a dependency on a service interface Class.\n \n This method is deprecated.  Use PluginInfo#servicesRequired()\n instead.\n ",
+      "javadoc": "Registers a dependency on a service interface Class.\n \u003cp\u003e\n This method is deprecated.  Use {@link PluginInfo#servicesRequired() @PluginInfo.servicesRequired}\n instead.\n \u003cp\u003e\n@param interfaceClass interface class that this plugin depends on\n@param isDependency boolean flag, if true this plugin will not work without the\n specified service, if false this service can work without it.  If false, this\n method is a no-op as non-dependency registration information is now discarded.",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "interface class that this plugin depends on"
+        },
+        {
+          "name": "isDependency",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "boolean flag, if true this plugin will not work without the\n specified service, if false this service can work without it.  If false, this\n method is a no-op as non-dependency registration information is now discarded."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deregisterService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        },
+        {
+          "name": "service",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "providesService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getServiceProviderInstances",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "interfaceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjava.lang.Object\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isOnlyProviderOfService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "serviceClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canClose",
+      "comment": "Called to force this plugin to terminate any tasks it has running and\n apply any unsaved data to domain objects or files. If it can\u0027t do\n this or the user cancels then this returns false.",
+      "javadoc": "Called to force this plugin to terminate any tasks it has running and\n apply any unsaved data to domain objects or files. If it can\u0027t do\n this or the user cancels then this returns false.\n@return true if this plugin can close.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this plugin can close."
+      },
+      "throws": []
+    },
+    {
+      "name": "canCloseDomainObject",
+      "comment": "Override this method if the plugin needs to cancel the closing of the domain object",
+      "javadoc": "Override this method if the plugin needs to cancel the closing of the domain object\n@param dObj the domain object\n@return false if the domain object should NOT be closed",
+      "static": false,
+      "params": [
+        {
+          "name": "dObj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": "the domain object"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "false if the domain object should NOT be closed"
+      },
+      "throws": []
+    },
+    {
+      "name": "prepareToSave",
+      "comment": "Called to allow this plugin to flush any caches to the domain object before it is\n saved.",
+      "javadoc": "Called to allow this plugin to flush any caches to the domain object before it is\n saved.\n@param dObj domain object about to be saved",
+      "static": false,
+      "params": [
+        {
+          "name": "dObj",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": "domain object about to be saved"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveData",
+      "comment": "Called to force this plugin to save any domain object data it is controlling.",
+      "javadoc": "Called to force this plugin to save any domain object data it is controlling.\n@return false if this plugin controls a domain object, but couldn\u0027t\n save its data or the user canceled the save.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "false if this plugin controls a domain object, but couldn\u0027t\n save its data or the user canceled the save."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasUnsaveData",
+      "comment": "Returns true if this plugin has data that needs saving;",
+      "javadoc": "Returns true if this plugin has data that needs saving;\n@return true if this plugin has data that needs saving;",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this plugin has data that needs saving;"
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "Close the plugin.   This is when the plugin should release resources, such as those from\n other services.  This method should not close resources being used by others (that should\n happen in dispose()).\n \n This method will be called before #dispose().",
+      "javadoc": "Close the plugin.   This is when the plugin should release resources, such as those from\n other services.  This method should not close resources being used by others (that should\n happen in dispose()).\n \n \u003cp\u003eThis method will be called before {@link #dispose()}.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDisposed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreTransientState",
+      "comment": "Provides the transient state object that was returned in the corresponding getTransientState()\n call.  Plugins should override this method if they have state that needs to be saved as domain objects\n get switched between active and inactive.",
+      "javadoc": "Provides the transient state object that was returned in the corresponding getTransientState()\n call.  Plugins should override this method if they have state that needs to be saved as domain objects\n get switched between active and inactive.\n@param state the state object that was generated by this plugin\u0027s getTransientState() method.",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the state object that was generated by this plugin\u0027s getTransientState() method."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTransientState",
+      "comment": "Returns an object containing the plugins state.  Plugins should override this method if\n they have state that they want to maintain between domain object state transitions (i.e. when the\n user tabs to a different domain object and back) Whatever object is returned will be fed back to\n the plugin after the tool state is switch back to the domain object that was active when the this\n method was called.",
+      "javadoc": "Returns an object containing the plugins state.  Plugins should override this method if\n they have state that they want to maintain between domain object state transitions (i.e. when the\n user tabs to a different domain object and back) Whatever object is returned will be fed back to\n the plugin after the tool state is switch back to the domain object that was active when the this\n method was called.\n@return Object to be return in the restoreTransientState() method.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": "Object to be return in the restoreTransientState() method."
+      },
+      "throws": []
+    },
+    {
+      "name": "dataStateRestoreCompleted",
+      "comment": "Notification that all plugins have had their data states restored.",
+      "javadoc": "Notification that all plugins have had their data states restored.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUndoRedoState",
+      "comment": "Returns an object containing the plugin\u0027s state as needed to restore itself after an undo\n or redo operation.  Plugins should override this method if they have special undo/redo handling.",
+      "javadoc": "Returns an object containing the plugin\u0027s state as needed to restore itself after an undo\n or redo operation.  Plugins should override this method if they have special undo/redo handling.\n@param domainObject the object that is about to or has had undoable changes made to it.\n@return the state object",
+      "static": false,
+      "params": [
+        {
+          "name": "domainObject",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": "the object that is about to or has had undoable changes made to it."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": "the state object"
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreUndoRedoState",
+      "comment": "Updates the plugin\u0027s state based on the data stored in the state object.  The state object\n is the object that was returned by this plugin in the #getUndoRedoState(DomainObject)",
+      "javadoc": "Updates the plugin\u0027s state based on the data stored in the state object.  The state object\n is the object that was returned by this plugin in the {@link #getUndoRedoState(DomainObject)}\n@param domainObject the domain object that has had an undo or redo operation applied to it.\n@param state the state that was recorded before the undo or redo operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "domainObject",
+          "type_long": "ghidra.framework.model.DomainObject",
+          "type_short": "DomainObject",
+          "comment": "the domain object that has had an undo or redo operation applied to it."
+        },
+        {
+          "name": "state",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the state that was recorded before the undo or redo operation."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPluginDescription",
+      "comment": "Returns the static PluginDescription object that was derived from the\n PluginInfo annotation at the top of your Plugin.\n ",
+      "javadoc": "Returns the static {@link PluginDescription} object that was derived from the\n {@link PluginInfo @PluginInfo} annotation at the top of your Plugin.\n \u003cp\u003e\n@return the static/shared {@link PluginDescription} instance that describes this Plugin.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.plugintool.util.PluginDescription",
+        "type_short": "PluginDescription",
+        "comment": "the static/shared PluginDescription instance that describes this Plugin."
+      },
+      "throws": []
+    }
+  ]
+}

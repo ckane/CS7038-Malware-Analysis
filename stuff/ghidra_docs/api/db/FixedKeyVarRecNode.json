@@ -1,0 +1,664 @@
+{
+  "name": "FixedKeyVarRecNode",
+  "comment": "FixedKeyVarRecNode is an implementation of a BTree leaf node\n which utilizes fixed-length key values and stores variable-length records.\n \n This type of node has the following layout within a single DataBuffer \n (field size in bytes, where \u0027L\u0027 is the fixed length of the fixed-length \n key as specified by key type in associated Schema)::\n \n   | NodeType(1) | KeyCount(4) | PrevLeafId(4) | NextLeafId(4) | Key0(L) | RecOffset0(4) | IndFlag0(1) |...  \n     \n   | KeyN(L) | RecOffsetN(4) | IndFlagN(1) |...FreeSpace... | RecN |... | Rec0 |\n \n IndFlag - if not zero the record has been stored within a chained DBBuffer \n whose 4-byte integer buffer ID has been stored within this leaf at the record offset.",
+  "javadoc": "\u003ccode\u003eFixedKeyVarRecNode\u003c/code\u003e is an implementation of a BTree leaf node\n which utilizes fixed-length key values and stores variable-length records.\n \u003cp\u003e\n This type of node has the following layout within a single DataBuffer \n (field size in bytes, where \u0027L\u0027 is the fixed length of the fixed-length \n key as specified by key type in associated Schema)::\n \u003cpre\u003e\n   | NodeType(1) | KeyCount(4) | PrevLeafId(4) | NextLeafId(4) | Key0(L) | RecOffset0(4) | IndFlag0(1) |...  \n     \n   | KeyN(L) | RecOffsetN(4) | IndFlagN(1) |...\u0026lt;FreeSpace\u0026gt;... | RecN |... | Rec0 |\n \u003c/pre\u003e\n IndFlag - if not zero the record has been stored within a chained DBBuffer \n whose 4-byte integer buffer ID has been stored within this leaf at the record offset.",
+  "static": false,
+  "implements": [],
+  "extends": "db.FixedKeyRecordNode",
+  "fields": [
+    {
+      "name": "HEADER_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "13"
+    },
+    {
+      "name": "OFFSET_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "INDIRECT_OPTION_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "KEY_BASE_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "13"
+    },
+    {
+      "name": "entrySize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "dataOffsetBaseOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "indirectOptionBaseOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct an existing fixed-length key variable-length record leaf node.",
+      "javadoc": "Construct an existing fixed-length key variable-length record leaf node.\n@param nodeMgr table node manager instance\n@param buf node buffer\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager instance"
+        },
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "node buffer"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new fixed-length key variable-length record leaf node.",
+      "javadoc": "Construct a new fixed-length key variable-length record leaf node.\n@param nodeMgr table node manager instance\n@param prevLeafId node buffer id for previous leaf ( \u0026lt; 0: no leaf)\n@param nextLeafId node buffer id for next leaf ( \u0026lt; 0 : no leaf)\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "nodeMgr",
+          "type_long": "db.NodeMgr",
+          "type_short": "NodeMgr",
+          "comment": "table node manager instance"
+        },
+        {
+          "name": "prevLeafId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "node buffer id for previous leaf (  0: no leaf)"
+        },
+        {
+          "name": "nextLeafId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "node buffer id for next leaf (  0 : no leaf)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "createNewLeaf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "prevLeafId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "nextLeafId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyRecordNode",
+        "type_short": "FixedKeyRecordNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getKeyOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecordDataOffset",
+      "comment": "Get the record offset within the buffer",
+      "javadoc": "Get the record offset within the buffer\n@param index key index\n@return record offset",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key index"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "record offset"
+      },
+      "throws": []
+    },
+    {
+      "name": "putRecordDataOffset",
+      "comment": "Store the record offset within the buffer for the specified key index",
+      "javadoc": "Store the record offset within the buffer for the specified key index\n@param index key index\n@param offset record offset",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key index"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "record offset"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasIndirectStorage",
+      "comment": "Determine if a record is utilizing a chained DBBuffer for data storage",
+      "javadoc": "Determine if a record is utilizing a chained DBBuffer for data storage\n@param index key index\n@return true if indirect storage is used for record, else false",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key index"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if indirect storage is used for record, else false"
+      },
+      "throws": []
+    },
+    {
+      "name": "enableIndirectStorage",
+      "comment": "Set the indirect storage flag associated with a record",
+      "javadoc": "Set the indirect storage flag associated with a record\n@param index key index\n@param state indirect storage used (true) or not used (false)",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "key index"
+        },
+        {
+          "name": "state",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "indirect storage used (true) or not used (false)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFreeSpace",
+      "comment": "",
+      "javadoc": "@return unused free space within node",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "unused free space within node"
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecordLength",
+      "comment": "Get the length of a stored record.",
+      "javadoc": "Get the length of a stored record.\n@param index index associated with record.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index associated with record."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecordLength",
+      "comment": "Get the length of a stored record.  Optimized if record offset \n already known.",
+      "javadoc": "Get the length of a stored record.  Optimized if record offset \n already known.\n@param index index associated with record.\n@param offset record offset",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "index associated with record."
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "record offset"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveRecords",
+      "comment": "Move all record data, starting with index, by the specified offset amount.\n If the node contains 5 records, an index of 3 would shift the record data\n for indexes 3 and 4 left by the spacified offset amount.  This is used to \n make space for a new or updated record.",
+      "javadoc": "Move all record data, starting with index, by the specified offset amount.\n If the node contains 5 records, an index of 3 would shift the record data\n for indexes 3 and 4 left by the spacified offset amount.  This is used to \n make space for a new or updated record.\n@param index the smaller key/record index (0 \u0026lt;\u003d index1)\n@param offset movement offset in bytes\n@return insertion offset immediately following moved block.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the smaller key/record index (0 \u003d index1)"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "movement offset in bytes"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "insertion offset immediately following moved block."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRecordOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "key",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        },
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.DBRecord",
+        "type_short": "DBRecord",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getSplitIndex",
+      "comment": "Find the index which represents the halfway point within the record data.",
+      "javadoc": "Find the index which represents the halfway point within the record data.\n@returns key index.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "splitData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newRightLeaf",
+          "type_long": "db.FixedKeyRecordNode",
+          "type_short": "FixedKeyRecordNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateRecord",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "insertRecord",
+      "comment": "Insert the specified record at the specified key index.\n Existing data may be shifted within the buffer to make room for\n the new record.  Parent must be notified if this changes the leftmost\n key.",
+      "javadoc": "Insert the specified record at the specified key index.\n Existing data may be shifted within the buffer to make room for\n the new record.  Parent must be notified if this changes the leftmost\n key.\n@param index insertion index for stored key\n@param record record to be inserted\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "insertion index for stored key"
+        },
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "record to be inserted"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "remove",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeLeaf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.FixedKeyNode",
+        "type_short": "FixedKeyNode",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "removeChainedBuffer",
+      "comment": "Remove a chained buffer.",
+      "javadoc": "Remove a chained buffer.\n@param bufferId chained buffer ID",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferId",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "chained buffer ID"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBufferReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int[]",
+        "type_short": "int[]",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

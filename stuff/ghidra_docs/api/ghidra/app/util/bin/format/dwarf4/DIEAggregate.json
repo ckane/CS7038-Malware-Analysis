@@ -1,0 +1,1069 @@
+{
+  "name": "DIEAggregate",
+  "comment": "DIEAggregate groups related DebugInfoEntry records together in a single interface\n for querying attribute values.\n \n Information about program elements are written into the .debug_info as partial snapshots\n of the element, with later follow-up records that more fully specify the program element.\n \n (For instance, a declaration-only DIE that introduces the name of a structure type\n will be found at the beginning of a compilation unit, followed later by a DIE that\n specifies the contents of the structure type)\n \n A DIEAggregate groups these DebugInfoEntry records under one interface so a fully\n specified view of the program element can be presented.",
+  "javadoc": "DIEAggregate groups related {@link DebugInfoEntry} records together in a single interface\n for querying attribute values.\n \u003cp\u003e\n Information about program elements are written into the .debug_info as partial snapshots\n of the element, with later follow-up records that more fully specify the program element.\n \u003cp\u003e\n (For instance, a declaration-only DIE that introduces the name of a structure type\n will be found at the beginning of a compilation unit, followed later by a DIE that\n specifies the contents of the structure type)\n \u003cp\u003e\n A DIEAggregate groups these {@link DebugInfoEntry} records under one interface so a fully\n specified view of the program element can be presented.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "MAX_FRAGMENT_COUNT",
+      "comment": "Sanity check upper limit on how many DIE records can be in a aggregate.",
+      "javadoc": "Sanity check upper limit on how many DIE records can be in a aggregate.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "20"
+    },
+    {
+      "name": "fragments",
+      "comment": "A list of DebugInfoEntry that make up this DWARF program element, with\n the \u0027head\u0027-most listed first, followed by earlier less specified DIEs, ending with\n the first \u0027decl\u0027 DIE in the last element.\n \n For example:\n [0] - head\n [1] - specification\n [2] - decl\n \n A primitive array is used instead of a java.util.List because of memory constraint issues\n and also that the set of fragments does not change after the bootstrap process in\n #createFromHead(DebugInfoEntry).",
+      "javadoc": "A list of {@link DebugInfoEntry DIEs} that make up this DWARF program element, with\n the \u0027head\u0027-most listed first, followed by earlier less specified DIEs, ending with\n the first \u0027decl\u0027 DIE in the last element.\n \u003cp\u003e\n For example:\u003cp\u003e\n [0] - head\u003cbr\u003e\n [1] - specification\u003cbr\u003e\n [2] - decl\u003cbr\u003e\n \u003cp\u003e\n A primitive array is used instead of a java.util.List because of memory constraint issues\n and also that the set of fragments does not change after the bootstrap process in\n {@link #createFromHead(DebugInfoEntry) createFromHead()}.",
+      "static": false,
+      "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry[]",
+      "type_short": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry[]",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "createFromHead",
+      "comment": "Creates a DIEAggregate starting from a \u0027head\u0027 DebugInfoEntry instance.\n \n DW_AT_abstract_origin and DW_AT_specification attributes are followed to find the previous\n DebugInfoEntry instances.\n ",
+      "javadoc": "Creates a {@link DIEAggregate} starting from a \u0027head\u0027 {@link DebugInfoEntry} instance.\n \u003cp\u003e\n DW_AT_abstract_origin and DW_AT_specification attributes are followed to find the previous\n {@link DebugInfoEntry} instances.\n \u003cp\u003e\n@param die starting DIE record\n@return new {@link DIEAggregate} made up of the starting DIE and all DIEs that it points\n to via abstract_origin and spec attributes.",
+      "static": true,
+      "params": [
+        {
+          "name": "die",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+          "type_short": "DebugInfoEntry",
+          "comment": "starting DIE record"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": "new DIEAggregate made up of the starting DIE and all DIEs that it points\n to via abstract_origin and spec attributes."
+      },
+      "throws": []
+    },
+    {
+      "name": "createSkipHead",
+      "comment": "Creates a new DIEAggregate from the contents of the specified DIEA, using\n all the source\u0027s DebugInfoEntry fragments except for the head fragment\n which is skipped.\n \n Used when a DIEA is composed of a head DIE with a different TAG type than the rest of\n the DIEs.  (ie. a dw_tag_call_site - dw_tag_sub DIEA)",
+      "javadoc": "Creates a new {@link DIEAggregate} from the contents of the specified DIEA, using\n all the source\u0027s {@link DebugInfoEntry} fragments except for the head fragment\n which is skipped.\n \u003cp\u003e\n Used when a DIEA is composed of a head DIE with a different TAG type than the rest of\n the DIEs.  (ie. a dw_tag_call_site -\u0026gt; dw_tag_sub DIEA)\n@param source\n@return ",
+      "static": true,
+      "params": [
+        {
+          "name": "source",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+          "type_short": "DIEAggregate",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSingle",
+      "comment": "Create a DIEAggregate from a single DebugInfoEntry.\n \n Mainly useful early in the DWARFCompilationUnit\u0027s bootstrapping process\n when it needs to read values from DIEs.\n ",
+      "javadoc": "Create a {@link DIEAggregate} from a single {@link DebugInfoEntry DIE}.\n \u003cp\u003e\n Mainly useful early in the {@link DWARFCompilationUnit}\u0027s bootstrapping process\n when it needs to read values from DIEs.\n \u003cp\u003e\n@param die\n@return ",
+      "static": true,
+      "params": [
+        {
+          "name": "die",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+          "type_short": "DebugInfoEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Private ctor to force use of the static factory methods #createFromHead(DebugInfoEntry)\n and #createSingle(DebugInfoEntry).",
+      "javadoc": "Private ctor to force use of the static factory methods {@link #createFromHead(DebugInfoEntry)}\n and {@link #createSingle(DebugInfoEntry)}.\n@param die",
+      "static": false,
+      "params": [
+        {
+          "name": "fragments",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry[]",
+          "type_short": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFragment",
+      "comment": "Used during creation process to add new DebugInfoEntry elements as they are found by\n following links in the current set of DIEs.\n \n Adds the new DIE fragment to the front of the fragment array list, which is reversed\n from how it needs to be when this DIEA is being used.  The caller needs to\n call #flipFragments() after the build phase to reverse the order of the\n DIE fragments list so that querying for attribute values will return the correct values.",
+      "javadoc": "Used during creation process to add new DebugInfoEntry elements as they are found by\n following links in the current set of DIEs.\n \u003cp\u003e\n Adds the new DIE fragment to the front of the fragment array list, which is reversed\n from how it needs to be when this DIEA is being used.  The caller needs to\n call {@link #flipFragments()} after the build phase to reverse the order of the\n DIE fragments list so that querying for attribute values will return the correct values.\n@param newDIE",
+      "static": false,
+      "params": [
+        {
+          "name": "newDIE",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+          "type_short": "DebugInfoEntry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "flipFragments",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFragmentCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOffsets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long[]",
+        "type_short": "long[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasOffset",
+      "comment": "Returns true if any of the DebugInfoEntry that makeup this aggregate\n have the specified offset.",
+      "javadoc": "Returns true if any of the {@link DebugInfoEntry DIEs} that makeup this aggregate\n have the specified offset.\n@param offset DIE offset to search for\n@return true if this {@link DIEAggregate} has a fragment DIE at that offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "DIE offset to search for"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this DIEAggregate has a fragment DIE at that offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "getDeclOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHexOffset",
+      "comment": "Returns #getOffset() as a hex string.",
+      "javadoc": "Returns {@link #getOffset()} as a hex string.\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTag",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompilationUnit",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFCompilationUnit",
+        "type_short": "DWARFCompilationUnit",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.next.DWARFProgram",
+        "type_short": "DWARFProgram",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastFragment",
+      "comment": "Returns the last DebugInfoEntry fragment, ie. the decl DIE.",
+      "javadoc": "Returns the last {@link DebugInfoEntry DIE} fragment, ie. the decl DIE.\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+        "type_short": "DebugInfoEntry",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHeadFragment",
+      "comment": "Returns the first DebugInfoEntry fragment, ie. the spec or abstract_origin\n DIE.",
+      "javadoc": "Returns the first {@link DebugInfoEntry DIE} fragment, ie. the spec or abstract_origin\n DIE.\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+        "type_short": "DebugInfoEntry",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDeclParent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDepth",
+      "comment": "Returns the depth of the head fragment, where depth is defined as\n the distance between the DIE and the root DIE of the owning compilation\n unit.\n \n The root die would return 0, the children of the root will return 1, etc.\n \n This value matches the nesting value shown when dumping DWARF\n info using \u0027readelf\u0027.",
+      "javadoc": "Returns the depth of the head fragment, where depth is defined as\n the distance between the DIE and the root DIE of the owning compilation\n unit.\n \u003cp\u003e\n The root die would return 0, the children of the root will return 1, etc.\n \u003cp\u003e\n This value matches the nesting value shown when dumping DWARF\n info using \u0027readelf\u0027.\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findAttribute",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate.AttrInfo",
+        "type_short": "AttrInfo",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAttribute",
+      "comment": "Finds a DWARFAttributeValue with a matching DWARFAttribute type\n \n Returns null if the attribute does not exist or is wrong java class type.\n \n Attributes are searched for in each fragment in this aggregate, starting with the\n \u0027head\u0027 fragment, progressing toward the \u0027decl\u0027 fragment.\n ",
+      "javadoc": "Finds a {@link DWARFAttributeValue attribute} with a matching {@link DWARFAttribute} type\n \u003cp\u003e\n Returns null if the attribute does not exist or is wrong java class type.\n \u003cp\u003e\n Attributes are searched for in each fragment in this aggregate, starting with the\n \u0027head\u0027 fragment, progressing toward the \u0027decl\u0027 fragment.\n \u003cp\u003e\n@param attribute See {@link DWARFAttribute}\n@param clazz must be derived from {@link DWARFAttributeValue}\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "See DWARFAttribute"
+        },
+        {
+          "name": "clazz",
+          "type_long": "java.lang.Class\u003cT\u003e",
+          "type_short": "Class",
+          "comment": "must be derived from DWARFAttributeValue"
+        }
+      ],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAttribute",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.attribs.DWARFAttributeValue",
+        "type_short": "DWARFAttributeValue",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLong",
+      "comment": "Returns the value of the requested attribute, or -defaultValue- if the\n attribute is missing.",
+      "javadoc": "Returns the value of the requested attribute, or -defaultValue- if the\n attribute is missing.\n@param attribute\n@param defaultValue\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBool",
+      "comment": "Returns the boolean value of the requested attribute, or -defaultValue- if\n the attribute is missing or not the correct type.\n ",
+      "javadoc": "Returns the boolean value of the requested attribute, or -defaultValue- if\n the attribute is missing or not the correct type.\n \u003cp\u003e\n@param attribute\n@param defaultValue\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getString",
+      "comment": "Returns the string value of the requested attribute, or -defaultValue- if\n the attribute is missing or not the correct type.\n ",
+      "javadoc": "Returns the string value of the requested attribute, or -defaultValue- if\n the attribute is missing or not the correct type.\n \u003cp\u003e\n@param attribute\n@param defaultValue\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Returns the string value of the DWARFAttribute#DW_AT_name attribute,\n or null if it is missing.\n ",
+      "javadoc": "Returns the string value of the {@link DWARFAttribute#DW_AT_name dw_at_name} attribute,\n or null if it is missing.\n \u003cp\u003e\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUnsignedLong",
+      "comment": "Returns the unsigned long integer value of the requested attribute, or -defaultValue-\n if the attribute is missing.\n \n The \u0027unsigned\u0027ness of this method refers to how the binary value is read from\n the dwarf information (ie. a value with the high bit set is not treated as signed).\n \n The -defaultValue- parameter can accept a negative value.",
+      "javadoc": "Returns the unsigned long integer value of the requested attribute, or -defaultValue-\n if the attribute is missing.\n \u003cp\u003e\n The \u0027unsigned\u0027ness of this method refers to how the binary value is read from\n the dwarf information (ie. a value with the high bit set is not treated as signed).\n \u003cp\u003e\n The -defaultValue- parameter can accept a negative value.\n@param attribute\n@param defaultValue\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRefDIE",
+      "comment": "Returns the DebugInfoEntry instance pointed to by the requested attribute,\n or null if the attribute does not exist.\n ",
+      "javadoc": "Returns the {@link DebugInfoEntry die} instance pointed to by the requested attribute,\n or null if the attribute does not exist.\n \u003cp\u003e\n@param attribute\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DebugInfoEntry",
+        "type_short": "DebugInfoEntry",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getContainingTypeRef",
+      "comment": "Returns the DIE pointed to by a DW_AT_containing_type attribute.",
+      "javadoc": "Returns the DIE pointed to by a DW_AT_containing_type attribute.\n@return DIEA pointed to by the DW_AT_containing_type attribute, or null if not present.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": "DIEA pointed to by the DW_AT_containing_type attribute, or null if not present."
+      },
+      "throws": []
+    },
+    {
+      "name": "getTypeRef",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.util.bin.format.dwarf4.DIEAggregate",
+        "type_short": "DIEAggregate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasAttribute",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseInt",
+      "comment": "Returns the signed integer value of the requested attribute after resolving\n any DWARF expression opcodes.\n ",
+      "javadoc": "Returns the signed integer value of the requested attribute after resolving\n any DWARF expression opcodes.\n \u003cp\u003e\n@param attribute\n@param defaultValue\n@return \n@throws IOException\n@throws DWARFExpressionException",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "parseUnsignedLong",
+      "comment": "Returns the unsigned integer value of the requested attribute after resolving\n any DWARF expression opcodes.\n ",
+      "javadoc": "Returns the unsigned integer value of the requested attribute after resolving\n any DWARF expression opcodes.\n \u003cp\u003e\n@param attribute\n@param defaultValue\n@return \n@throws IOException\n@throws DWARFExpressionException",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "assertValidInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "assertValidUInt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "l",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "parseDataMemberOffset",
+      "comment": "Returns the unsigned integer value of the requested attribute after resolving\n any DWARF expression opcodes.",
+      "javadoc": "Returns the unsigned integer value of the requested attribute after resolving\n any DWARF expression opcodes.\n@param attribute\n@param defaultValue\n@return \n@throws IOException\n@throws DWARFExpressionException",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "defaultValue",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getAsLocation",
+      "comment": "Returns the location list info specified in the attribute.\n \n Numeric attributes are treated as offsets into the debug_loc section.\n \n Blob attributes are treated as a single location record for the current CU, using the\n blob bytes as the DWARF expression of the location record.\n ",
+      "javadoc": "Returns the location list info specified in the attribute.\n \u003cp\u003e\n Numeric attributes are treated as offsets into the debug_loc section.\n \u003cp\u003e\n Blob attributes are treated as a single location record for the current CU, using the\n blob bytes as the DWARF expression of the location record.\n \u003cp\u003e\n@param attribute\n@return \n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.bin.format.dwarf4.DWARFLocation\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "evaluateLocation",
+      "comment": "Evaluate the DWARFExpression located in the DWARFLocation object in the context of\n this DIEA.\n ",
+      "javadoc": "Evaluate the DWARFExpression located in the DWARFLocation object in the context of\n this DIEA.\n \u003cp\u003e\n@param location\n@return \n@throws IOException\n@throws DWARFExpressionException",
+      "static": false,
+      "params": [
+        {
+          "name": "location",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.DWARFLocation",
+          "type_short": "DWARFLocation",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.app.util.bin.format.dwarf4.expression.DWARFExpressionException",
+          "type_short": "DWARFExpressionException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readDebugLocList",
+      "comment": "Return a list of DWARF locations read from the debug_loc section.",
+      "javadoc": "Return a list of DWARF locations read from the debug_loc section.\n@param offset offset into the debug_loc section\n@return list of DWARF locations (address range and location expression)\n@throws IOException if an I/O error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "offset into the debug_loc section"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.bin.format.dwarf4.DWARFLocation\u003e",
+        "type_short": "List",
+        "comment": "list of DWARF locations (address range and location expression)"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs"
+        }
+      ]
+    },
+    {
+      "name": "_exprBytesAsLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "attr",
+          "type_long": "ghidra.app.util.bin.format.dwarf4.attribs.DWARFBlobAttribute",
+          "type_short": "DWARFBlobAttribute",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.bin.format.dwarf4.DWARFLocation\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDanglingDeclaration",
+      "comment": "Returns true if this DIE has a DW_AT_declaration attribute and\n does NOT have a matching inbound DW_AT_specification reference.\n ",
+      "javadoc": "Returns true if this DIE has a DW_AT_declaration attribute and\n does NOT have a matching inbound DW_AT_specification reference.\n \u003cp\u003e\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isPartialDeclaration",
+      "comment": "Returns true if this DIE has a DW_AT_declaration attribute.",
+      "javadoc": "Returns true if this DIE has a DW_AT_declaration attribute.\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isNamedType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isNameSpaceContainer",
+      "comment": "Returns true if the children of this DIE are within a new namespace.\n \n Ie. Namespaces, subprogram, class, interface, struct, union, enum",
+      "javadoc": "Returns true if the children of this DIE are within a new namespace.\n \u003cp\u003e\n Ie. Namespaces, subprogram, class, interface, struct, union, enum\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isStructureType",
+      "comment": "Returns true if this DIE defines a structure-like element (class, struct, interface, union).",
+      "javadoc": "Returns true if this DIE defines a structure-like element (class, struct, interface, union).\n@return ",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFuncDefType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseDebugRange",
+      "comment": "Parses a range list from the debug_ranges section.\n See DWARF4 Section 2.17.3 (Non-Contiguous Address Ranges).\n ",
+      "javadoc": "Parses a range list from the debug_ranges section.\n See DWARF4 Section 2.17.3 (Non-Contiguous Address Ranges).\n \u003cp\u003e\n@param attribute attribute ie. {@link DWARFAttribute#DW_AT_ranges}\n@return list of ranges\n@throws IOException if an I/O error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "attribute",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "attribute ie. DWARFAttribute#DW_AT_ranges"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.app.util.bin.format.dwarf4.DWARFRange\u003e",
+        "type_short": "List",
+        "comment": "list of ranges"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getLowPC",
+      "comment": "Returns the value of the DW_AT_low_pc attribute, if it exists.",
+      "javadoc": "Returns the value of the DW_AT_low_pc attribute, if it exists.\n@param defaultValue\n@return ",
+      "static": false,
+      "params": [
+        {
+          "name": "defaultValue",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHighPC",
+      "comment": "Returns the value of the DW_AT_high_pc attribute, adjusted\n if necessary by the value of DW_AT_low_pc.\n ",
+      "javadoc": "Returns the value of the DW_AT_high_pc attribute, adjusted\n if necessary by the value of DW_AT_low_pc.\n \u003cp\u003e\n@return \n@throws IOException if the DW_AT_high_pc attribute isn\u0027t a numeric\n attribute, or if the DW_AT_low_pc value is needed and is not present.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if the DW_AT_high_pc attribute isn\u0027t a numeric\n attribute, or if the DW_AT_low_pc value is needed and is not present."
+        }
+      ]
+    },
+    {
+      "name": "isLowPCEqualHighPC",
+      "comment": "Returns true if the raw lowPc and highPc values are the same.\n \n This indicates an empty range, in which case the caller may want to take\n special steps to avoid issues with Ghidra ranges.\n \n Only seen in extremely old gcc versions.  Typically the low  high\n pc values are omitted if the CU is empty.",
+      "javadoc": "Returns true if the raw lowPc and highPc values are the same.\n \u003cp\u003e\n This indicates an empty range, in which case the caller may want to take\n special steps to avoid issues with Ghidra ranges.\n \u003cp\u003e\n Only seen in extremely old gcc versions.  Typically the low \u0026 high\n pc values are omitted if the CU is empty.\n@return boolean true if the LowPC and HighPC values are present and equal",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if the LowPC and HighPC values are present and equal"
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

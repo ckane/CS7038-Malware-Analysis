@@ -1,0 +1,1427 @@
+{
+  "name": "LocalBufferFile",
+  "comment": "LocalBufferFile implements a BufferFile as block-oriented\n random-access file.  This type of buffer file supports save-as but does\n not support the save operation.",
+  "javadoc": "\u003ccode\u003eLocalBufferFile\u003c/code\u003e implements a BufferFile as block-oriented\n random-access file.  This type of buffer file supports save-as but does\n not support the save operation.",
+  "static": false,
+  "implements": [
+    "db.buffers.BufferFile"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "MAGIC_NUMBER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "3400271784588160042"
+    },
+    {
+      "name": "BUFFER_FILE_EXTENSION",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".gbf\""
+    },
+    {
+      "name": "PRESAVE_FILE_EXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".ps\""
+    },
+    {
+      "name": "PRESAVE_FILE_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"tmp\""
+    },
+    {
+      "name": "TEMP_FILE_EXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".tmp\""
+    },
+    {
+      "name": "STRING_ENCODING",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"UTF-8\""
+    },
+    {
+      "name": "MINIMUM_BLOCK_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "128"
+    },
+    {
+      "name": "random",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Random",
+      "type_short": "Random",
+      "constant_value": null
+    },
+    {
+      "name": "HEADER_FORMAT_VERSION",
+      "comment": "Current file header format version number.\n The third field of the file header indicates a \n format version which indicates how the header\n is formatted.",
+      "javadoc": "Current file header format version number.\n The third field of the file header indicates a \n format version which indicates how the header\n is formatted.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "FILE_ID_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "BUFFER_PREFIX_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "5"
+    },
+    {
+      "name": "VER1_FIXED_HEADER_LENGTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "32"
+    },
+    {
+      "name": "EMPTY_BUFFER",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "byte",
+      "type_short": "byte",
+      "constant_value": "1"
+    },
+    {
+      "name": "MAX_BUFFER_INDEX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "2147483646"
+    },
+    {
+      "name": "userParms",
+      "comment": "userParms contains application parameters which correspond to\n this buffer file.  This list is established for \n an existing buffer file when the readHeader is invoked.  For a non-temporary \n writable buffer file, this list is flushed to the file when either close or\n setReadOnly is invoked.",
+      "javadoc": "\u003ccode\u003euserParms\u003c/code\u003e contains application parameters which correspond to\n this buffer file.  This list is established for \n an existing buffer file when the readHeader is invoked.  For a non-temporary \n writable buffer file, this list is flushed to the file when either close or\n setReadOnly is invoked.",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cjava.lang.String,java.lang.Integer\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "freeIndexes",
+      "comment": "freeIndexes contains those buffer indexes which are free/empty\n and may be re-used in an update of this file.  This list is established for \n an existing buffer file when the readHeader is invoked.  For a non-temporary \n writable buffer file, this list is flushed to the file when either close or\n setReadOnly is invoked.",
+      "javadoc": "\u003ccode\u003efreeIndexes\u003c/code\u003e contains those buffer indexes which are free/empty\n and may be re-used in an update of this file.  This list is established for \n an existing buffer file when the readHeader is invoked.  For a non-temporary \n writable buffer file, this list is flushed to the file when either close or\n setReadOnly is invoked.",
+      "static": false,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    },
+    {
+      "name": "file",
+      "comment": "file is the underlying storage file for this buffer file.",
+      "javadoc": "\u003ccode\u003efile\u003c/code\u003e is the underlying storage file for this buffer file.",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "raf",
+      "comment": "raf is the random-access object for the underlying file.",
+      "javadoc": "\u003ccode\u003eraf\u003c/code\u003e is the random-access object for the underlying file.",
+      "static": false,
+      "type_long": "java.io.RandomAccessFile",
+      "type_short": "RandomAccessFile",
+      "constant_value": null
+    },
+    {
+      "name": "activeOutputBlockStream",
+      "comment": "activeBlockStream provides a handle to the active \n OutputBlockStream used to update file via raf.  This should be\n checked during #close() to guard against partially \n written file.  A LocalOutputBlockStream should only be used\n for files open for writing (i.e., !readOnly).",
+      "javadoc": "\u003ccode\u003eactiveBlockStream\u003c/code\u003e provides a handle to the active \n OutputBlockStream used to update file via raf.  This should be\n checked during {@link #close()} to guard against partially \n written file.  A LocalOutputBlockStream should only be used\n for files open for writing (i.e., !readOnly).",
+      "static": false,
+      "type_long": "db.buffers.LocalBufferFile.LocalOutputBlockStream",
+      "type_short": "LocalOutputBlockStream",
+      "constant_value": null
+    },
+    {
+      "name": "temporary",
+      "comment": "When temporary is true and this file is writable (!readOnly)\n it will be deleted when disposed or closed.",
+      "javadoc": "When \u003ccode\u003etemporary\u003c/code\u003e is true and this file is writable (!readOnly)\n it will be deleted when disposed or closed.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "fileId",
+      "comment": "fileId corresponds to a random file ID assigned to this file.\n This file ID can be used as an integrity check when applying version files\n to a specific buffer file.",
+      "javadoc": "\u003ccode\u003efileId\u003c/code\u003e corresponds to a random file ID assigned to this file.\n This file ID can be used as an integrity check when applying version files\n to a specific buffer file.",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "readOnly",
+      "comment": "If readOnly is true, this file may not be modified \n via the buffer put method.  \n A read-only file may be considered \"updateable\" if the canSave\n method returns true.  The term \"updateable\" means that a Save file\n can be obtained via the getSaveFile method.",
+      "javadoc": "If \u003ccode\u003ereadOnly\u003c/code\u003e is true, this file may not be modified \n via the buffer put method.  \n A read-only file may be considered \"updateable\" if the canSave\n method returns true.  The term \"updateable\" means that a Save file\n can be obtained via the getSaveFile method.",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "blockSize",
+      "comment": "blockSize is the \"actual\" size of each block within this\n file. The blockSize equals the bufferSize plus\n a few bytes used for flags and to identify the user-level buffer ID.",
+      "javadoc": "\u003ccode\u003eblockSize\u003c/code\u003e is the \"actual\" size of each block within this\n file. The \u003ccode\u003eblockSize\u003c/code\u003e equals the \u003ccode\u003ebufferSize\u003c/code\u003e plus\n a few bytes used for flags and to identify the user-level buffer ID.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "bufferSize",
+      "comment": "bufferSize is the \"usable\" buffer space within each\n block of this file.",
+      "javadoc": "\u003ccode\u003ebufferSize\u003c/code\u003e is the \"usable\" buffer space within each\n block of this file.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "bufferCount",
+      "comment": "bufferCount indicates the number of buffer which have been \n allocated within this file and directly reflects the size of the file.\n The value corresponds to the next buffer index which can be allocated once all\n free indexes have been utilized.  When an existing file is opened, this value\n is computed based upon the file length and the buffer size.",
+      "javadoc": "\u003ccode\u003ebufferCount\u003c/code\u003e indicates the number of buffer which have been \n allocated within this file and directly reflects the size of the file.\n The value corresponds to the next buffer index which can be allocated once all\n free indexes have been utilized.  When an existing file is opened, this value\n is computed based upon the file length and the buffer size.",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a temporary read/write block file.",
+      "javadoc": "Create a temporary read/write block file.\n@param bufferSize user buffer size\n@param tmpPrefix temporary file prefix\n@param tmpExtension temporary file extension",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "user buffer size"
+        },
+        {
+          "name": "tmpPrefix",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "temporary file prefix"
+        },
+        {
+          "name": "tmpExtension",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "temporary file extension"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a new buffer file for writing.\n If the file does not exist and create is true, a new buffer file will\n be created.\n The file will be saved when closed.",
+      "javadoc": "Create a new buffer file for writing.\n If the file does not exist and create is true, a new buffer file will\n be created.\n The file will be saved when closed.\n@param file buffer file\n@param bufferSize user buffer size\n@throws DuplicateFileException if file already exists\n@throws IOException if an I/O error occurs during file creation",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "buffer file"
+        },
+        {
+          "name": "bufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "user buffer size"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs during file creation"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Open an existing block file.",
+      "javadoc": "Open an existing block file.\n@param file block file\n@param readOnly if true the file will be opened read-only\n@throws IOException if an IO error occurs or the incorrect magicNumber\n was read from the file.",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "block file"
+        },
+        {
+          "name": "readOnly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the file will be opened read-only"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an IO error occurs or the incorrect magicNumber\n was read from the file."
+        }
+      ]
+    },
+    {
+      "name": "poke",
+      "comment": "Modify an existing buffer file.\n WARNING! Use with extreme caution since this modifies\n the original file and could destroy data if used\n improperly.",
+      "javadoc": "Modify an existing buffer file.\n WARNING! Use with extreme caution since this modifies\n the original file and could destroy data if used\n improperly.\n@param file\n@param bufferIndex\n@param buf\n@throws IOException",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "bufferIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "peek",
+      "comment": "Read a buffer from an existing buffer file.",
+      "javadoc": "Read a buffer from an existing buffer file.\n@param file\n@param bufferIndex\n@return \n@throws IOException",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "bufferIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getFile",
+      "comment": "Returns the physical file associated with this BufferFile.",
+      "javadoc": "Returns the physical file associated with this BufferFile.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.io.File",
+        "type_short": "File",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isReadOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.util.NoSuchElementException",
+          "type_short": "NoSuchElementException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearParameters",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParameterNames",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFreeIndexes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int[]",
+        "type_short": "int[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFreeIndexes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "indexes",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFileId",
+      "comment": "",
+      "javadoc": "@return the file ID assigned to this file.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the file ID assigned to this file."
+      },
+      "throws": []
+    },
+    {
+      "name": "setFileId",
+      "comment": "Assigns the file ID for this file.  This should only be done\n when reconstructing a file.",
+      "javadoc": "Assigns the file ID for this file.  This should only be done\n when reconstructing a file.\n@param fileId file ID",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBufferCount",
+      "comment": "",
+      "javadoc": "@return number of buffers countained within this file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of buffers countained within this file"
+      },
+      "throws": []
+    },
+    {
+      "name": "setBufferCount",
+      "comment": "Assigns the buffer count for this file.  This should only be done\n when reconstructing a file.",
+      "javadoc": "Assigns the buffer count for this file.  This should only be done\n when reconstructing a file.\n@param count number of valid buffers contained within this file",
+      "static": false,
+      "params": [
+        {
+          "name": "count",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of valid buffers contained within this file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTemporary",
+      "comment": "Set the temporary status of this buffer file.\n Temporary buffer files are deleted when closed.",
+      "javadoc": "Set the temporary status of this buffer file.\n Temporary buffer files are deleted when closed.\n@param isTemporary",
+      "static": false,
+      "params": [
+        {
+          "name": "isTemporary",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "renameFile",
+      "comment": "Rename underlying file",
+      "javadoc": "Rename underlying file\n@param newFile\n@return true if rename successful\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "newFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if rename successful"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "seekBufferBlock",
+      "comment": "Set random access file (raf) position to the file block containing the specified buffer \n identified by its bufferIndex.  It is important to understand the distinction between \n blocks and buffers, where buffers are stored within file blocks which are slightly larger.  \n In addition, the first file block stores the file header and is not used to store a buffer.",
+      "javadoc": "Set random access file (raf) position to the file block containing the specified buffer \n identified by its bufferIndex.  It is important to understand the distinction between \n blocks and buffers, where buffers are stored within file blocks which are slightly larger.  \n In addition, the first file block stores the file header and is not used to store a buffer.\n@param bufferIndex buffer index\n@return file block index (\u003dbufferIndex+1)\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "buffer index"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "file block index (\u003dbufferIndex+1)"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "seekBlock",
+      "comment": "Set random access file (raf) position to the specified file block and offset\n within that block.  NOTE: block#0 contains the file header.",
+      "javadoc": "Set random access file (raf) position to the specified file block and offset\n within that block.  NOTE: block#0 contains the file header.\n@param blockIndex block index\n@param offsetWithinBlock offset within file block\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "blockIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "block index"
+        },
+        {
+          "name": "offsetWithinBlock",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset within file block"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readHeader",
+      "comment": "Read file header and initialize the user parameter and free buffer index lists.",
+      "javadoc": "Read file header and initialize the user parameter and free buffer index lists.\n@throws IOException if an I/O error occurs while reading file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs while reading file"
+        }
+      ]
+    },
+    {
+      "name": "writeHeader",
+      "comment": "Store the user parameter and free buffer index lists and write the \n file header.",
+      "javadoc": "Store the user parameter and free buffer index lists and write the \n file header.\n@throws IOException if an I/O error occurs while writing file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs while writing file"
+        }
+      ]
+    },
+    {
+      "name": "buildFreeIndexList",
+      "comment": "Build free index stack from file.",
+      "javadoc": "Build free index stack from file.",
+      "static": false,
+      "params": [
+        {
+          "name": "firstFreeBufferIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "putFreeBlock",
+      "comment": "Update a storage block as free and link to the next free block.",
+      "javadoc": "Update a storage block as free and link to the next free block.\n@param index block index of free block\n@param nextFreeIndex block index of next free block, a -1 should be\n specified to mark the end of the linked list.\n@throws IOException thrown if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "block index of free block"
+        },
+        {
+          "name": "nextFreeIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "block index of next free block, a -1 should be\n specified to mark the end of the linked list."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getDataBuffer",
+      "comment": "Generate a DataBuffer instance which corresponds to the specified block\n based upon LocalBufferFile block usage.",
+      "javadoc": "Generate a DataBuffer instance which corresponds to the specified block\n based upon LocalBufferFile block usage.\n@param block the buffer file block to be converted\n@return DataBuffer instance or null if head block.  If empty block\n DataBuffer will have null data",
+      "static": true,
+      "params": [
+        {
+          "name": "block",
+          "type_long": "db.buffers.BufferFileBlock",
+          "type_short": "BufferFileBlock",
+          "comment": "the buffer file block to be converted"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": "DataBuffer instance or null if head block.  If empty block\n DataBuffer will have null data"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBufferFileBlock",
+      "comment": "Generate a BufferFileBlock instance which corresponds to the specified DataBuffer\n based upon LocalBufferFile block usage.  This should generally not be used for writing\n empty blocks since they will not be properly linked which is normally handled during \n header flush which is performed by BufferFile close on files being written.",
+      "javadoc": "Generate a BufferFileBlock instance which corresponds to the specified DataBuffer\n based upon LocalBufferFile block usage.  This should generally not be used for writing\n empty blocks since they will not be properly linked which is normally handled during \n header flush which is performed by BufferFile close on files being written.\n@param buf the data buffer to be converted\n@param bufferSize data buffer size used for integrity check and generating empty buffer\n@return BufferFileBlock instance.",
+      "static": true,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": "the data buffer to be converted"
+        },
+        {
+          "name": "bufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "data buffer size used for integrity check and generating empty buffer"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.BufferFileBlock",
+        "type_short": "BufferFileBlock",
+        "comment": "BufferFileBlock instance."
+      },
+      "throws": []
+    },
+    {
+      "name": "get",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.DataBuffer",
+        "type_short": "DataBuffer",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "put",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "db.buffers.DataBuffer",
+          "type_short": "DataBuffer",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBufferSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndexCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "truncate",
+      "comment": "Truncate the buffer file length to the specified index count.",
+      "javadoc": "Truncate the buffer file length to the specified index count.\n@param indexCount",
+      "static": false,
+      "params": [
+        {
+          "name": "indexCount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "flush",
+      "comment": "Write all unwritten data to the file prior to closing.",
+      "javadoc": "Write all unwritten data to the file prior to closing.\n@return true if flush was performed, false if not required.\n@throws IOException thrown if flush failed",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if flush was performed, false if not required."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if flush failed"
+        }
+      ]
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "finalize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "setReadOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isTemporary",
+      "comment": "",
+      "javadoc": "@return true if this is a temporary buffer file",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is a temporary buffer file"
+      },
+      "throws": []
+    },
+    {
+      "name": "isClosed",
+      "comment": "",
+      "javadoc": "@return true if buffer file is closed",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if buffer file is closed"
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clone",
+      "comment": "Clone this buffer file to the specified file.  The file must not \n already exist.  If the operation is cancelled or an error occurs\n the file is not created.",
+      "javadoc": "Clone this buffer file to the specified file.  The file must not \n already exist.  If the operation is cancelled or an error occurs\n the file is not created.\n@param destinationFile destination file\n@param monitor progress monitor\n@throws IOException if IO error occurs.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": false,
+      "params": [
+        {
+          "name": "destinationFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "destination file"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInputBlockStream",
+      "comment": "Obtain a direct stream to read all blocks of this buffer file",
+      "javadoc": "Obtain a direct stream to read all blocks of this buffer file\n@return input block stream\n@throws IOException",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.InputBlockStream",
+        "type_short": "InputBlockStream",
+        "comment": "input block stream"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getOutputBlockStream",
+      "comment": "Obtain a direct stream to write blocks to this buffer file",
+      "javadoc": "Obtain a direct stream to write blocks to this buffer file\n@param blockCount number of blocks to be transferred\n@return output block stream\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "blockCount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of blocks to be transferred"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.OutputBlockStream",
+        "type_short": "OutputBlockStream",
+        "comment": "output block stream"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInputBlockStream",
+      "comment": "Factory method for generating the appropriate type of InputBlockStream\n for the specified read-only bufferFile.  Input stream may not supply header block in which case \n free list and file parameters may need to be set separately.",
+      "javadoc": "Factory method for generating the appropriate type of {@link InputBlockStream}\n for the specified read-only bufferFile.  Input stream may not supply header block in which case \n free list and file parameters may need to be set separately.\n@param bufferFile buffer file opened read-only\n@return input block stream object\n@throws IOException",
+      "static": true,
+      "params": [
+        {
+          "name": "bufferFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "buffer file opened read-only"
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.InputBlockStream",
+        "type_short": "InputBlockStream",
+        "comment": "input block stream object"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getInputBlockStream",
+      "comment": "Factory method for generating the appropriate type of InputBlockStream\n for the specified read-only bufferFile with an optional changeMap used\n to select which buffer should be transferred.  Input stream may not supply header block \n in which case free list and file parameters may need to be set separately.",
+      "javadoc": "Factory method for generating the appropriate type of {@link InputBlockStream}\n for the specified read-only bufferFile with an optional changeMap used\n to select which buffer should be transferred.  Input stream may not supply header block \n in which case free list and file parameters may need to be set separately.\n@param bufferFile buffer file opened read-only\n@return input block stream object\n@throws IOException",
+      "static": true,
+      "params": [
+        {
+          "name": "bufferFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "buffer file opened read-only"
+        },
+        {
+          "name": "changeMap",
+          "type_long": "db.buffers.ChangeMap",
+          "type_short": "ChangeMap",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.InputBlockStream",
+        "type_short": "InputBlockStream",
+        "comment": "input block stream object"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getOutputBlockStream",
+      "comment": "Factory method for generating the appropriate type of OutputBlockStream\n for the specified write-able bufferFile.",
+      "javadoc": "Factory method for generating the appropriate type of {@link OutputBlockStream}\n for the specified write-able bufferFile.\n@param bufferFile write-able buffer file\n@param blockCount number of blocks to be written.  This should be available from\n the corresponding {@link InputBlockStream}.\n@return output block stream object\n@throws IOException",
+      "static": true,
+      "params": [
+        {
+          "name": "bufferFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "write-able buffer file"
+        },
+        {
+          "name": "blockCount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of blocks to be written.  This should be available from\n the corresponding InputBlockStream."
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.OutputBlockStream",
+        "type_short": "OutputBlockStream",
+        "comment": "output block stream object"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "copyFile",
+      "comment": "Copy the complete content of a specfied srcFile into a destFile\n excluding file ID.  Both files remain open.",
+      "javadoc": "Copy the complete content of a specfied srcFile into a destFile\n excluding file ID.  Both files remain open.\n@param srcFile open buffer file\n@param destFile empty buffer file which is open for writing.\n@param changeMap optional change map which indicates those buffers which must be copied.\n Any buffer index outside the range of the change map will also be copied.\n@param monitor progress monitor\n@throws IOException if IO error occurs.\n@throws CancelledException if the monitor cancels the operation.",
+      "static": true,
+      "params": [
+        {
+          "name": "srcFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "open buffer file"
+        },
+        {
+          "name": "destFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "empty buffer file which is open for writing."
+        },
+        {
+          "name": "changeMap",
+          "type_long": "db.buffers.ChangeMap",
+          "type_short": "ChangeMap",
+          "comment": "optional change map which indicates those buffers which must be copied.\n Any buffer index outside the range of the change map will also be copied."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the monitor cancels the operation."
+        }
+      ]
+    },
+    {
+      "name": "completeBlockStreamTransfer",
+      "comment": "Perform a complete block stream transfer from in to out",
+      "javadoc": "Perform a complete block stream transfer from in to out\n@param in input block stream\n@param out output block stream\n@param monitor progress and cancel monitor\n@throws CancelledException\n@throws IOException",
+      "static": true,
+      "params": [
+        {
+          "name": "in",
+          "type_long": "db.buffers.InputBlockStream",
+          "type_short": "InputBlockStream",
+          "comment": "input block stream"
+        },
+        {
+          "name": "out",
+          "type_long": "db.buffers.OutputBlockStream",
+          "type_short": "OutputBlockStream",
+          "comment": "output block stream"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress and cancel monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "cleanupOldPreSaveFiles",
+      "comment": "Attempt to remove all pre-save files.\n Those still open by an existing process should \n not be removed by the operating system.",
+      "javadoc": "Attempt to remove all pre-save files.\n Those still open by an existing process should \n not be removed by the operating system.\n@param dir data directory containing presave files\n@param beforeNow if not 0, file mod time must be less than the specified time",
+      "static": true,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "data directory containing presave files"
+        },
+        {
+          "name": "beforeNow",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "if not 0, file mod time must be less than the specified time"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecommendedBufferSize",
+      "comment": "Get the recommended buffer size given a target buffer size.",
+      "javadoc": "Get the recommended buffer size given a target buffer size.\n@param requestedBufferSize target buffer size\n@return recommended buffer size",
+      "static": true,
+      "params": [
+        {
+          "name": "requestedBufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "target buffer size"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "recommended buffer size"
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,1913 @@
+{
+  "name": "StructureDB",
+  "comment": "Structure implementation for the Database.",
+  "javadoc": "Structure implementation for the Database.",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.data.StructureInternal"
+  ],
+  "extends": "ghidra.program.database.data.CompositeDB",
+  "fields": [
+    {
+      "name": "structLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "structAlignment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "computedAlignment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "numComponents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "components",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cghidra.program.database.data.DataTypeComponentDB\u003e",
+      "type_short": "List",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor",
+      "javadoc": "Constructor\n@param dataMgr\n@param cache\n@param compositeAdapter\n@param componentAdapter\n@param record",
+      "static": false,
+      "params": [
+        {
+          "name": "dataMgr",
+          "type_long": "ghidra.program.database.data.DataTypeManagerDB",
+          "type_short": "DataTypeManagerDB",
+          "comment": ""
+        },
+        {
+          "name": "cache",
+          "type_long": "ghidra.program.database.DBObjectCache\u003cghidra.program.database.data.DataTypeDB\u003e",
+          "type_short": "DBObjectCache",
+          "comment": ""
+        },
+        {
+          "name": "compositeAdapter",
+          "type_long": "ghidra.program.database.data.CompositeDBAdapter",
+          "type_short": "CompositeDBAdapter",
+          "comment": ""
+        },
+        {
+          "name": "componentAdapter",
+          "type_long": "ghidra.program.database.data.ComponentDBAdapter",
+          "type_short": "ComponentDBAdapter",
+          "comment": ""
+        },
+        {
+          "name": "record",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initialize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "migrateOldFlexArray",
+      "comment": "Eliminate use of old trailing flex-array specification which is now specified using\n a zero-element array.  Due to the specification of a new array datatype this must handle\n two cases when an old flex-array component is exists:\n \n read-only case: associated DataTypeManagerDB is not updateable.  This is the normal\n case for an open archive.  A non-DB ArrayDataType must be employed with an immutable\n DataTypeProxyComponentDB in place of the flex-array component.\n upgrade (open for update with open transaction): the flex-array record is modified to\n to indicate an appropriate resolved zero-element array.\n \n \n NOTE: When DataTypeManagerDB is instantiated for update an upgrade must be forced based upon the\n CompositeDBAdapter#isFlexArrayMigrationRequired() indicator.  The upgrade logic\n (see DataTypeManagerDB#migrateOldFlexArrayComponentsIfRequired(ghidra.util.task.TaskMonitor)) \n istantiates all structures within the databases with an open transaaction allowing this method\n to perform the neccessary flex-array record migration.\n \n NOTE: The offset of the migrated flex array component and structure length may change during upgrade \n when packing is enabled when the original packed structure length did not properly factor the flex-array\n alignment.  Repack does not occur in the read-only case.",
+      "javadoc": "Eliminate use of old trailing flex-array specification which is now specified using\n a zero-element array.  Due to the specification of a new array datatype this must handle\n two cases when an old flex-array component is exists:\n \u003col\u003e\n \u003cli\u003eread-only case: associated {@link DataTypeManagerDB} is not updateable.  This is the normal\n case for an open archive.  A non-DB ArrayDataType must be employed with an immutable\n {@link DataTypeProxyComponentDB} in place of the flex-array component.\u003c/li\u003e\n \u003cli\u003eupgrade (open for update with open transaction): the flex-array record is modified to\n to indicate an appropriate resolved zero-element array.\n \u003c/ol\u003e\n \u003cp\u003e\n NOTE: When {@link DataTypeManagerDB} is instantiated for update an upgrade must be forced based upon the\n {@link CompositeDBAdapter#isFlexArrayMigrationRequired()} indicator.  The upgrade logic\n (see {@link DataTypeManagerDB#migrateOldFlexArrayComponentsIfRequired(ghidra.util.task.TaskMonitor)}) \n istantiates all structures within the databases with an open transaaction allowing this method\n to perform the neccessary flex-array record migration.\n \u003cp\u003e\n NOTE: The offset of the migrated flex array component and structure length may change during upgrade \n when packing is enabled when the original packed structure length did not properly factor the flex-array\n alignment.  Repack does not occur in the read-only case.\n@param oldFlexArrayRecord record which corresponds to an olf flex-array component\n@throws IOException if a database error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "oldFlexArrayRecord",
+          "type_long": "db.DBRecord",
+          "type_short": "DBRecord",
+          "comment": "record which corresponds to an olf flex-array component"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a database error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getRepresentation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "add",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "doAdd",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "validatePackAndNotify",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.DataTypeDependencyException",
+          "type_short": "DataTypeDependencyException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "growStructure",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "amount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doGrowStructure",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "amount",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "insert",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addBitField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "componentName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "insertBitField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "byteWidth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "bitOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "componentName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.IndexOutOfBoundsException",
+          "type_short": "IndexOutOfBoundsException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "insertBitFieldAt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "byteOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "byteWidth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "bitOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "baseDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "bitSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "componentName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.InvalidDataTypeException",
+          "type_short": "InvalidDataTypeException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doDelete",
+      "comment": "Removes a defined component at the specified index without\n any alteration to other components.",
+      "javadoc": "Removes a defined component at the specified index without\n any alteration to other components.\n@param index defined component index\n@return the defined component which was removed.\n@throws IOException if an IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "defined component index"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.data.DataTypeComponentDB",
+        "type_short": "DataTypeComponentDB",
+        "comment": "the defined component which was removed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "doDeleteWithComponentShift",
+      "comment": "Removes a defined component at the specified index.\n If this corresponds to a zero-length or bit-field component it will \n be cleared without an offset shift to the remaining components.  Removal of\n other component types will result in an offset and ordinal shift\n to the remaining components.  In the case of a non-packed\n structure, the resulting shift will cause in a timestamp change\n for this structure.",
+      "javadoc": "Removes a defined component at the specified index.\n If this corresponds to a zero-length or bit-field component it will \n be cleared without an offset shift to the remaining components.  Removal of\n other component types will result in an offset and ordinal shift\n to the remaining components.  In the case of a non-packed\n structure, the resulting shift will cause in a timestamp change\n for this structure.\n@param index defined component index\n@param disableOffsetShift if false, and component is not a bit-field, an offset shift\n and possible structure length change will be performed for non-packed structure.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "defined component index"
+        },
+        {
+          "name": "disableOffsetShift",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if false, and component is not a bit-field, an offset shift\n and possible structure length change will be performed for non-packed structure."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "delete",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinals",
+          "type_long": "java.util.Set\u003cjava.lang.Integer\u003e",
+          "type_short": "Set",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isPartOf",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumComponents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumDefinedComponents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.data.DataTypeComponentDB",
+        "type_short": "DataTypeComponentDB",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent[]",
+        "type_short": "ghidra.program.model.data.DataTypeComponent[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "copy",
+      "comment": "Create copy of structure for target dtm (source archive information is discarded). \n \n WARNING! copying non-packed structures which contain bitfields can produce invalid results when\n switching endianess due to the differences in packing order.",
+      "javadoc": "Create copy of structure for target dtm (source archive information is discarded). \n \u003cp\u003e\n WARNING! copying non-packed structures which contain bitfields can produce invalid results when\n switching endianess due to the differences in packing order.\n@param dtm target data type manager\n@return cloned structure",
+      "static": false,
+      "params": [
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "target data type manager"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": "cloned structure"
+      },
+      "throws": []
+    },
+    {
+      "name": "clone",
+      "comment": "Create cloned structure for target dtm preserving source archive information. WARNING!\n cloning non-packed structures which contain bitfields can produce invalid results when\n switching endianess due to the differences in packing order.",
+      "javadoc": "Create cloned structure for target dtm preserving source archive information. WARNING!\n cloning non-packed structures which contain bitfields can produce invalid results when\n switching endianess due to the differences in packing order.\n@param dtm target data type manager\n@return cloned structure",
+      "static": false,
+      "params": [
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "target data type manager"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.Structure",
+        "type_short": "Structure",
+        "comment": "cloned structure"
+      },
+      "throws": []
+    },
+    {
+      "name": "getComputedAlignment",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "updateRecord",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isZeroLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasLanguageDependantLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearComponent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "backupToFirstComponentContainingOffset",
+      "comment": "Backup from specified defined-component index to the first component which contains the specified offset.",
+      "javadoc": "Backup from specified defined-component index to the first component which contains the specified offset.\n@param index any defined component index which contains offset\n@param offset offset within structure\n@return index of first defined component containing specific offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "any defined component index which contains offset"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset within structure"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "index of first defined component containing specific offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "indexOfFirstNonZeroLenComponentContainingOffset",
+      "comment": "Identify defined-component index of the first non-zero-length component which contains the specified offset.\n If only zero-length components exist, the last zero-length component which contains the offset will be returned.",
+      "javadoc": "Identify defined-component index of the first non-zero-length component which contains the specified offset.\n If only zero-length components exist, the last zero-length component which contains the offset will be returned.\n@param index any defined component index which contains offset\n@param offset offset within structure\n@return index of first defined component containing specific offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "any defined component index which contains offset"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset within structure"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "index of first defined component containing specific offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "advanceToLastComponentContainingOffset",
+      "comment": "Advance from specified defined-component index to the last component which contains the specified offset.",
+      "javadoc": "Advance from specified defined-component index to the last component which contains the specified offset.\n@param index any defined component index which contains offset\n@param offset offset within structure\n@return index of last defined component containing specific offset.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "any defined component index which contains offset"
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset within structure"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "index of last defined component containing specific offset."
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteAtOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearAtOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefinedComponentAtOrAfterOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponentContaining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getComponentsContaining",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.data.DataTypeComponent\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "generateUndefinedComponent",
+      "comment": "Generate an undefined component following a binary search across the defined components.",
+      "javadoc": "Generate an undefined component following a binary search across the defined components.\n@param offset the offset within this structure which was searched for\n@param missingComponentIndex the defined component binary search index result (must be negative)\n@return undefined component",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the offset within this structure which was searched for"
+        },
+        {
+          "name": "missingComponentIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the defined component binary search index result (must be negative)"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.database.data.DataTypeComponentDB",
+        "type_short": "DataTypeComponentDB",
+        "comment": "undefined component"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataTypeAt",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefinedComponents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.database.data.DataTypeComponentDB[]",
+        "type_short": "ghidra.program.database.data.DataTypeComponentDB[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "insertAtOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "insertAtOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "componentName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceAtOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceWith",
+      "comment": "Replaces the internal components of this structure with components of the given structure.",
+      "javadoc": "Replaces the internal components of this structure with components of the given structure.\n@param dataType the structure to get the component information from.\n@throws IllegalArgumentException if any of the component data types are not allowed to\n             replace a component in this composite data type. For example, suppose dt1\n             contains dt2. Therefore it is not valid to replace a dt2 component with dt1 since\n             this would cause a cyclic dependency.\n@see ghidra.program.database.data.DataTypeDB#replaceWith(ghidra.program.model.data.DataType)",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "the structure to get the component information from."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doReplaceWith",
+      "comment": "Replaces the internal components of this structure with components of the given structure\n including packing and alignment settings.",
+      "javadoc": "Replaces the internal components of this structure with components of the given structure\n including packing and alignment settings.\n@param struct structure to be copied\n@param notify provide notification if true\n@throws DataTypeDependencyException if circular dependency detected\n@throws IOException if database IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "struct",
+          "type_long": "ghidra.program.model.data.StructureInternal",
+          "type_short": "StructureInternal",
+          "comment": "structure to be copied"
+        },
+        {
+          "name": "notify",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "provide notification if true"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.data.DataTypeDependencyException",
+          "type_short": "DataTypeDependencyException",
+          "comment": "if circular dependency detected"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if database IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "doReplaceWithPacked",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "struct",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": ""
+        },
+        {
+          "name": "resolvedDts",
+          "type_long": "ghidra.program.model.data.DataType[]",
+          "type_short": "ghidra.program.model.data.DataType[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doReplaceWithNonPacked",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "struct",
+          "type_long": "ghidra.program.model.data.Structure",
+          "type_short": "Structure",
+          "comment": ""
+        },
+        {
+          "name": "resolvedDts",
+          "type_long": "ghidra.program.model.data.DataType[]",
+          "type_short": "ghidra.program.model.data.DataType[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "dataTypeDeleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeSizeChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fixupComponents",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "dataTypeAlignmentChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEquivalent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "consumeBytesAfter",
+      "comment": "",
+      "javadoc": "@param definedComponentIndex the index of the defined component that is consuming the bytes.\n@param numBytes the number of undefined bytes to consume\n@return the number of bytes actually consumed",
+      "static": false,
+      "params": [
+        {
+          "name": "definedComponentIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the defined component that is consuming the bytes."
+        },
+        {
+          "name": "numBytes",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the number of undefined bytes to consume"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of bytes actually consumed"
+      },
+      "throws": []
+    },
+    {
+      "name": "getLastDefinedComponentOrdinal",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shiftOffsets",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "definedComponentIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "deltaOrdinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "deltaOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "shiftOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dtc",
+          "type_long": "ghidra.program.database.data.DataTypeComponentDB",
+          "type_short": "DataTypeComponentDB",
+          "comment": ""
+        },
+        {
+          "name": "deltaOrdinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "deltaOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkUndefinedSpaceAvailabilityAfter",
+      "comment": "Check for available undefined bytes within a non-packed structure for a component\n update with the specified ordinal.",
+      "javadoc": "Check for available undefined bytes within a non-packed structure for a component\n update with the specified ordinal.\n@param lastOrdinalReplacedOrUpdated the ordinal of a component to be updated\n or the last ordinal with in a sequence of components being replaced.\n@param bytesNeeded number of additional bytes required to complete operation\n@throws IllegalArgumentException if unable to identify/make sufficient space",
+      "static": false,
+      "params": [
+        {
+          "name": "lastOrdinalReplacedOrUpdated",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the ordinal of a component to be updated\n or the last ordinal with in a sequence of components being replaced."
+        },
+        {
+          "name": "bytesNeeded",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "number of additional bytes required to complete operation"
+        },
+        {
+          "name": "newDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "offset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": "if unable to identify/make sufficient space"
+        }
+      ]
+    },
+    {
+      "name": "replaceComponents",
+      "comment": "Replace the specified components with a new component containing the specified data type.\n If DataType#DEFAULT is specified as the resolvedDataType only a clear operation \n is performed.",
+      "javadoc": "Replace the specified components with a new component containing the specified data type.\n If {@link DataType#DEFAULT} is specified as the resolvedDataType only a clear operation \n is performed.\n@param origComponents the original sequence of data type components in this structure \n        to be replaced.  These components must be adjacent components in sequential order.\n        If an non-packed undefined component is specified no other component may be included.\n@param resolvedDataType the data type of the new component\n@param newOffset offset of replacement component which must fall within origComponents bounds\n@param length the length of the new component\n@param name the field name of the new component\n@param comment the comment for the new component\n@return the new component or null if only a clear operation was performed.\n@throws IOException if database IO error occurs\n@throws IllegalArgumentException if unable to identify/make sufficient space",
+      "static": false,
+      "params": [
+        {
+          "name": "origComponents",
+          "type_long": "java.util.LinkedList\u003cghidra.program.database.data.DataTypeComponentDB\u003e",
+          "type_short": "LinkedList",
+          "comment": "the original sequence of data type components in this structure \n        to be replaced.  These components must be adjacent components in sequential order.\n        If an non-packed undefined component is specified no other component may be included."
+        },
+        {
+          "name": "resolvedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "the data type of the new component"
+        },
+        {
+          "name": "newOffset",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "offset of replacement component which must fall within origComponents bounds"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the length of the new component"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the field name of the new component"
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the comment for the new component"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataTypeComponent",
+        "type_short": "DataTypeComponent",
+        "comment": "the new component or null if only a clear operation was performed."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if database IO error occurs"
+        },
+        {
+          "type_long": "java.lang.IllegalArgumentException",
+          "type_short": "IllegalArgumentException",
+          "comment": "if unable to identify/make sufficient space"
+        }
+      ]
+    },
+    {
+      "name": "getNumUndefinedBytes",
+      "comment": "Gets the number of Undefined bytes beginning at the indicated component ordinal. Undefined\n bytes that have a field name or comment specified are also included.",
+      "javadoc": "Gets the number of Undefined bytes beginning at the indicated component ordinal. Undefined\n bytes that have a field name or comment specified are also included.\n@param ordinal the component ordinal to begin checking at.\n@return the number of contiguous undefined bytes",
+      "static": false,
+      "params": [
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the component ordinal to begin checking at."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of contiguous undefined bytes"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultLabelPrefix",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeReplaced",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldDt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "newDt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setComponentDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "comp",
+          "type_long": "ghidra.program.database.data.DataTypeComponentDB",
+          "type_short": "DataTypeComponentDB",
+          "comment": ""
+        },
+        {
+          "name": "newDt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "nextIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeNameChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteAll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "repack",
+      "comment": "Perform structure member repack.\n Perform lazy update of stored alignment introduced with v5 adapter.",
+      "javadoc": "Perform structure member repack.\n Perform lazy update of stored alignment introduced with v5 adapter.",
+      "static": false,
+      "params": [
+        {
+          "name": "isAutoChange",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "notify",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "adjustNonPackedComponents",
+      "comment": "Updates non-packed component ordinals and numComponents.\n If numComponents changes record update will be performed\n with new timestamp.",
+      "javadoc": "Updates non-packed component ordinals and numComponents.\n If numComponents changes record update will be performed\n with new timestamp.\n@return true if change detected else false",
+      "static": false,
+      "params": [
+        {
+          "name": "setLastChangeTime",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if change detected else false"
+      },
+      "throws": []
+    },
+    {
+      "name": "updateComposite",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "currentNumComponents",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "currentAlignment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "setLastChangeTime",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

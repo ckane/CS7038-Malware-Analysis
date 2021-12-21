@@ -1,0 +1,444 @@
+{
+  "name": "AssemblyParseMachine",
+  "comment": "A class that implements the LALR(1) parsing algorithm\n \n Instances of this class store a parse state. In order to work correctly, the class must be\n given a properly-constructed Action/Goto table.\n \n This implementation is somewhat unconventional. First, instead of strictly tokenizing and then\n parsing, each terminal is given the opportunity to match a token in the input. If none match, it\n results in a syntax error (equivalent to the token type having an empty cell in the classical\n algorithm). If more than one match, the parser branches. Also, because a single cell may also\n contain multiple actions, the parser could branch again. Thus, if a sentence is ambiguous, this\n algorithm will identify all possible parse trees, including ones where the input is tokenized\n differently than in other trees.",
+  "javadoc": "A class that implements the LALR(1) parsing algorithm\n \n Instances of this class store a parse state. In order to work correctly, the class must be\n given a properly-constructed Action/Goto table.\n \n This implementation is somewhat unconventional. First, instead of strictly tokenizing and then\n parsing, each terminal is given the opportunity to match a token in the input. If none match, it\n results in a syntax error (equivalent to the token type having an empty cell in the classical\n algorithm). If more than one match, the parser branches. Also, because a single cell may also\n contain multiple actions, the parser could branch again. Thus, if a sentence is ambiguous, this\n algorithm will identify all possible parse trees, including ones where the input is tokenized\n differently than in other trees.",
+  "static": false,
+  "implements": [
+    "java.lang.Comparable"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "ERROR_NONE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "ERROR_SYNTAX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "parser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParser",
+      "type_short": "AssemblyParser",
+      "constant_value": null
+    },
+    {
+      "name": "output",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cjava.lang.Integer\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "stack",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Stack\u003cjava.lang.Integer\u003e",
+      "type_short": "Stack",
+      "constant_value": null
+    },
+    {
+      "name": "treeStack",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Stack\u003cghidra.app.plugin.assembler.sleigh.tree.AssemblyParseTreeNode\u003e",
+      "type_short": "Stack",
+      "constant_value": null
+    },
+    {
+      "name": "buffer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "pos",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "lastTok",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseToken",
+      "type_short": "AssemblyParseToken",
+      "constant_value": null
+    },
+    {
+      "name": "labels",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "accepted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "error",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "got",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "expected",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Collection\u003cghidra.app.plugin.assembler.sleigh.symbol.AssemblyTerminal\u003e",
+      "type_short": "Collection",
+      "constant_value": null
+    },
+    {
+      "name": "id",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "nextMachineId",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "dbg",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.app.plugin.assembler.sleigh.util.DbgTimer",
+      "type_short": "DbgTimer",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a new parse state",
+      "javadoc": "Construct a new parse state\n@param parser the parser driving this machine\n@param input the full input line\n@param pos the position in the line identifying the next characters to parse\n@param labels a map of valid tokens to number for numeric terminals",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParser",
+          "type_short": "AssemblyParser",
+          "comment": "the parser driving this machine"
+        },
+        {
+          "name": "input",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the full input line"
+        },
+        {
+          "name": "pos",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the position in the line identifying the next characters to parse"
+        },
+        {
+          "name": "lastTok",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseToken",
+          "type_short": "AssemblyParseToken",
+          "comment": ""
+        },
+        {
+          "name": "labels",
+          "type_long": "java.util.Map\u003cjava.lang.String,java.lang.Long\u003e",
+          "type_short": "Map",
+          "comment": "a map of valid tokens to number for numeric terminals"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "that",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "compareTo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "that",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine",
+          "type_short": "AssemblyParseMachine",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "copy",
+      "comment": "Duplicate this machine state\n \n This is used extensively when branching",
+      "javadoc": "Duplicate this machine state\n \n This is used extensively when branching\n@return the duplicate",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine",
+        "type_short": "AssemblyParseMachine",
+        "comment": "the duplicate"
+      },
+      "throws": []
+    },
+    {
+      "name": "doAction",
+      "comment": "Perform a given action and continue parsing, exhausting all results after the action",
+      "javadoc": "Perform a given action and continue parsing, exhausting all results after the action\n@param a the action\n@param tok the token given by the terminal (column) of the entry containing this action\n@param results a place to store all the parsing results (each must be accept or error state)\n@param visited a collection of machine states already visited\n \n The visited \"collection\" prevents infinite loops or stack overflows resulting from\n \"consuming\" epsilon and going to the same state. Such loops may involve many states. It is\n also defined as a map here for debugging purposes, so that when a loop is detected, we can\n print the ID of the first visit.",
+      "static": false,
+      "params": [
+        {
+          "name": "a",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseActionGotoTable.Action",
+          "type_short": "Action",
+          "comment": "the action"
+        },
+        {
+          "name": "tok",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseToken",
+          "type_short": "AssemblyParseToken",
+          "comment": "the token given by the terminal (column) of the entry containing this action"
+        },
+        {
+          "name": "results",
+          "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+          "type_short": "Set",
+          "comment": "a place to store all the parsing results (each must be accept or error state)"
+        },
+        {
+          "name": "visited",
+          "type_long": "java.util.Deque\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+          "type_short": "Deque",
+          "comment": "a collection of machine states already visited\n \n The visited \"collection\" prevents infinite loops or stack overflows resulting from\n \"consuming\" epsilon and going to the same state. Such loops may involve many states. It is\n also defined as a map here for debugging purposes, so that when a loop is detected, we can\n print the ID of the first visit."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "consume",
+      "comment": "Consume a given terminal (and corresponding token) and continue parsing",
+      "javadoc": "Consume a given terminal (and corresponding token) and continue parsing\n@param t the terminal\n@param tok the corresponding token\n@param results a place to store all the parsing results\n@param visited a collection of machine states already visited",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.symbol.AssemblyTerminal",
+          "type_short": "AssemblyTerminal",
+          "comment": "the terminal"
+        },
+        {
+          "name": "tok",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseToken",
+          "type_short": "AssemblyParseToken",
+          "comment": "the corresponding token"
+        },
+        {
+          "name": "results",
+          "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+          "type_short": "Set",
+          "comment": "a place to store all the parsing results"
+        },
+        {
+          "name": "visited",
+          "type_long": "java.util.Deque\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+          "type_short": "Deque",
+          "comment": "a collection of machine states already visited"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findLoop",
+      "comment": "Look for previous machine states having the same stack and position\n \n This would imply we have gone in a loop without consuming anything. We need to prune.",
+      "javadoc": "Look for previous machine states having the same stack and position\n \n This would imply we have gone in a loop without consuming anything. We need to prune.\n@param machine the machine state to check\n@param visited the stack of previous machine states\n@return if there is a loop, the machine state proving it, null otherwise",
+      "static": true,
+      "params": [
+        {
+          "name": "machine",
+          "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine",
+          "type_short": "AssemblyParseMachine",
+          "comment": "the machine state to check"
+        },
+        {
+          "name": "visited",
+          "type_long": "java.util.Collection\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+          "type_short": "Collection",
+          "comment": "the stack of previous machine states"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine",
+        "type_short": "AssemblyParseMachine",
+        "comment": "if there is a loop, the machine state proving it, null otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "exhaust",
+      "comment": "Parse (or continue parsing) all possible trees from this machine state",
+      "javadoc": "Parse (or continue parsing) all possible trees from this machine state\n@param results a place to store all the parsing results\n@param visited a collection of machine states already visited",
+      "static": false,
+      "params": [
+        {
+          "name": "results",
+          "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+          "type_short": "Set",
+          "comment": "a place to store all the parsing results"
+        },
+        {
+          "name": "visited",
+          "type_long": "java.util.Deque\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+          "type_short": "Deque",
+          "comment": "a collection of machine states already visited"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "exhaust",
+      "comment": "Parse (or continue parsing) all possible trees from this machine state",
+      "javadoc": "Parse (or continue parsing) all possible trees from this machine state\n@return the set of all possible trees and errors",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.app.plugin.assembler.sleigh.parse.AssemblyParseMachine\u003e",
+        "type_short": "Set",
+        "comment": "the set of all possible trees and errors"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTree",
+      "comment": "If in the accepted state, get the resulting parse tree for this machine",
+      "javadoc": "If in the accepted state, get the resulting parse tree for this machine\n@return the parse tree",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.app.plugin.assembler.sleigh.tree.AssemblyParseBranch",
+        "type_short": "AssemblyParseBranch",
+        "comment": "the parse tree"
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,558 @@
+{
+  "name": "HashStore",
+  "comment": "HashStore is a sorted, basic-block aware, store for Instruction \"n-grams\" to help quickly match similar\n sequences of Instructions between two functions.  The Instructions comprising a single n-gram are hashed\n for quick lookup by the main matching algorithm (HashedFunctionAddressCorrelation).  Hash diversity is\n important to minimize collisions, even though the number of hashes calculated for a single function pair\n match is small.\n \n Hashes are built and sorted respectively using the calcHashes() and insertHashes() methods. The main sort\n is on the number of collisions for a hash (indicating that there are duplicate or near duplicate instruction\n sequences), the hashes with fewer (or no) duplicates come first. The secondary sort is on\n \"n\", the number of Instructions in the n-gram, which effectively describes the significance of the match, or how\n unlikely the match is to occur at random.  The main matching algorithm effectively creates a HashSort for both\n functions, and then in a loop calls\n    hash \u003d getFirstEntry()    on one side to get the most significant possible match\n    getEntry(has)             to see if there is a matching n-gram on the other side\n    \n If there is a match it is declared to the sort with the matchHash() call, allowing overlapping n-grams to be\n removed and deconflicting information to be updated.  If there is no match, hashes can be removed with the\n removeHash() method to allow new hashes to move to the top of the sort.\n \n The store uses a couple of methods to help deconflict very similar sequences of instructions within the same function.\n Primarily, the sort is basic-block aware.  All n-grams are contained within a single basic block, and when an initial\n match is found, hashes for other n-grams within that block (and its matching block on the other side) are modified\n so that n-grams within that block pair can only match each other.",
+  "javadoc": "HashStore is a sorted, basic-block aware, store for Instruction \"n-grams\" to help quickly match similar\n sequences of Instructions between two functions.  The Instructions comprising a single n-gram are hashed\n for quick lookup by the main matching algorithm (HashedFunctionAddressCorrelation).  Hash diversity is\n important to minimize collisions, even though the number of hashes calculated for a single function pair\n match is small.\n \n Hashes are built and sorted respectively using the calcHashes() and insertHashes() methods. The main sort\n is on the number of collisions for a hash (indicating that there are duplicate or near duplicate instruction\n sequences), the hashes with fewer (or no) duplicates come first. The secondary sort is on\n \"n\", the number of Instructions in the n-gram, which effectively describes the significance of the match, or how\n unlikely the match is to occur at random.  The main matching algorithm effectively creates a HashSort for both\n functions, and then in a loop calls\n    hash \u003d getFirstEntry()    on one side to get the most significant possible match\n    getEntry(has)             to see if there is a matching n-gram on the other side\n    \n If there is a match it is declared to the sort with the matchHash() call, allowing overlapping n-grams to be\n removed and deconflicting information to be updated.  If there is no match, hashes can be removed with the\n removeHash() method to allow new hashes to move to the top of the sort.\n \n The store uses a couple of methods to help deconflict very similar sequences of instructions within the same function.\n Primarily, the sort is basic-block aware.  All n-grams are contained within a single basic block, and when an initial\n match is found, hashes for other n-grams within that block (and its matching block on the other side) are modified\n so that n-grams within that block pair can only match each other.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "function",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Function",
+      "type_short": "Function",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitor",
+      "type_short": "TaskMonitor",
+      "constant_value": null
+    },
+    {
+      "name": "blockList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeMap\u003cghidra.program.model.address.Address,ghidra.program.model.correlate.Block\u003e",
+      "type_short": "TreeMap",
+      "constant_value": null
+    },
+    {
+      "name": "hashSort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeMap\u003cghidra.program.model.correlate.Hash,ghidra.program.model.correlate.HashEntry\u003e",
+      "type_short": "TreeMap",
+      "constant_value": null
+    },
+    {
+      "name": "matchSort",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.TreeSet\u003cghidra.program.model.correlate.HashEntry\u003e",
+      "type_short": "TreeSet",
+      "constant_value": null
+    },
+    {
+      "name": "matchedBlockCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "matchedInstructionCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "totalInstructions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "a",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "mon",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getTotalInstructions",
+      "comment": "",
+      "javadoc": "@return total number of Instructions in the whole function",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "total number of Instructions in the whole function"
+      },
+      "throws": []
+    },
+    {
+      "name": "numMatchedInstructions",
+      "comment": "",
+      "javadoc": "@return number of instructions that have been matched so far",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of instructions that have been matched so far"
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeStructures",
+      "comment": "Set up the basic-block and instruction model and the accompanying hash containers",
+      "javadoc": "Set up the basic-block and instruction model and the accompanying hash containers\n@throws CancelledException",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createBlock",
+      "comment": "Create the basic Block structure, walk the Instructions creating InstructHash structures",
+      "javadoc": "Create the basic Block structure, walk the Instructions creating InstructHash structures\n@param codeBlock is the set of instruction addresses corresponding to the basic block",
+      "static": false,
+      "params": [
+        {
+          "name": "codeBlock",
+          "type_long": "ghidra.program.model.block.CodeBlock",
+          "type_short": "CodeBlock",
+          "comment": "is the set of instruction addresses corresponding to the basic block"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "insertNGram",
+      "comment": "Low level insert of an n-gram into the HashStore",
+      "javadoc": "Low level insert of an n-gram into the HashStore\n@param curHash is hash of the n-gram\n@param instHash is (starting Instruction of) the n-gram",
+      "static": false,
+      "params": [
+        {
+          "name": "curHash",
+          "type_long": "ghidra.program.model.correlate.Hash",
+          "type_short": "Hash",
+          "comment": "is hash of the n-gram"
+        },
+        {
+          "name": "instHash",
+          "type_long": "ghidra.program.model.correlate.InstructHash",
+          "type_short": "InstructHash",
+          "comment": "is (starting Instruction of) the n-gram"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "insertInstructionNGrams",
+      "comment": "Insert all n-gram hashes for a particular instruction",
+      "javadoc": "Insert all n-gram hashes for a particular instruction\n@param instHash is the instruction",
+      "static": false,
+      "params": [
+        {
+          "name": "instHash",
+          "type_long": "ghidra.program.model.correlate.InstructHash",
+          "type_short": "InstructHash",
+          "comment": "is the instruction"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeNGram",
+      "comment": "Low level removal of a particular n-gram from the sort",
+      "javadoc": "Low level removal of a particular n-gram from the sort\n@param instHash is (starting instruction) of the n-gram\n@param curHash is hash (and size) of the n-gram",
+      "static": false,
+      "params": [
+        {
+          "name": "instHash",
+          "type_long": "ghidra.program.model.correlate.InstructHash",
+          "type_short": "InstructHash",
+          "comment": "is (starting instruction) of the n-gram"
+        },
+        {
+          "name": "curHash",
+          "type_long": "ghidra.program.model.correlate.Hash",
+          "type_short": "Hash",
+          "comment": "is hash (and size) of the n-gram"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeInstructionNGrams",
+      "comment": "Remove all n-grams associated with a particular instruction",
+      "javadoc": "Remove all n-grams associated with a particular instruction\n@param instHash is the particular instruction",
+      "static": false,
+      "params": [
+        {
+          "name": "instHash",
+          "type_long": "ghidra.program.model.correlate.InstructHash",
+          "type_short": "InstructHash",
+          "comment": "is the particular instruction"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeHash",
+      "comment": "Remove a particular HashEntry.  This may affect multiple instructions.",
+      "javadoc": "Remove a particular HashEntry.  This may affect multiple instructions.\n@param hashEntry is the entry",
+      "static": false,
+      "params": [
+        {
+          "name": "hashEntry",
+          "type_long": "ghidra.program.model.correlate.HashEntry",
+          "type_short": "HashEntry",
+          "comment": "is the entry"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "calcHashes",
+      "comment": "Calculate hashes for all blocks",
+      "javadoc": "Calculate hashes for all blocks\n@param minLength is the minimum length of an n-gram for these passes\n@param maxLength is the maximum length of an n-gram for these passes\n@param wholeBlock if true, allows blocks that are smaller than the minimum length to be considered as 1 n-gram.\n@param matchOnly if true, only generates n-grams for sequences in previously matched blocks\n@param hashCalc is the hash function\n@throws MemoryAccessException",
+      "static": false,
+      "params": [
+        {
+          "name": "minLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the minimum length of an n-gram for these passes"
+        },
+        {
+          "name": "maxLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the maximum length of an n-gram for these passes"
+        },
+        {
+          "name": "wholeBlock",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, allows blocks that are smaller than the minimum length to be considered as 1 n-gram."
+        },
+        {
+          "name": "matchOnly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, only generates n-grams for sequences in previously matched blocks"
+        },
+        {
+          "name": "hashCalc",
+          "type_long": "ghidra.program.model.correlate.HashCalculator",
+          "type_short": "HashCalculator",
+          "comment": "is the hash function"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "insertHashes",
+      "comment": "Insert all hashes associated with unknown (i.e not matched) blocks and instructions",
+      "javadoc": "Insert all hashes associated with unknown (i.e not matched) blocks and instructions",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "matchHash",
+      "comment": "Mark a particular n-gram hash and instruction as having a match.\n Set of instructions covered by n-gram are removed, and data structures are updated",
+      "javadoc": "Mark a particular n-gram hash and instruction as having a match.\n Set of instructions covered by n-gram are removed, and data structures are updated\n@param match is the n-gram being declared as a match\n@param instResult collects the explicit set of Instructions matched\n@param blockResult collects the explicit set of CodeBlocks matched",
+      "static": false,
+      "params": [
+        {
+          "name": "match",
+          "type_long": "ghidra.program.model.correlate.HashStore.NgramMatch",
+          "type_short": "NgramMatch",
+          "comment": "is the n-gram being declared as a match"
+        },
+        {
+          "name": "instResult",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Instruction\u003e",
+          "type_short": "List",
+          "comment": "collects the explicit set of Instructions matched"
+        },
+        {
+          "name": "blockResult",
+          "type_long": "java.util.List\u003cghidra.program.model.block.CodeBlock\u003e",
+          "type_short": "List",
+          "comment": "collects the explicit set of CodeBlocks matched"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "extendMatch",
+      "comment": "Try to extend a match on a pair of n-grams to the Instructions right before and right after the n-gram.\n The match is extended if the Instruction adjacent to the n-gram, and its corresponding pair on the other side,\n hash to the same value using the hash function. The NgramMatch objects are updated to reflect the\n original n-gram match plus any additional extension.",
+      "javadoc": "Try to extend a match on a pair of n-grams to the Instructions right before and right after the n-gram.\n The match is extended if the Instruction adjacent to the n-gram, and its corresponding pair on the other side,\n hash to the same value using the hash function. The NgramMatch objects are updated to reflect the\n original n-gram match plus any additional extension.\n@param nGramSize is the original size of the matching n-gram.\n@param srcInstruct is the first Instruction in the \"source\" n-gram\n@param srcMatch is the \"source\" NgramMatch object to be populate\n@param destInstruct is the first Instruction in the \"destination\" n-gram\n@param destMatch is the \"destination\" NgramMatch object to populate\n@param hashCalc is the hash function object\n@throws MemoryAccessException",
+      "static": true,
+      "params": [
+        {
+          "name": "nGramSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the original size of the matching n-gram."
+        },
+        {
+          "name": "srcInstruct",
+          "type_long": "ghidra.program.model.correlate.InstructHash",
+          "type_short": "InstructHash",
+          "comment": "is the first Instruction in the \"source\" n-gram"
+        },
+        {
+          "name": "srcMatch",
+          "type_long": "ghidra.program.model.correlate.HashStore.NgramMatch",
+          "type_short": "NgramMatch",
+          "comment": "is the \"source\" NgramMatch object to be populate"
+        },
+        {
+          "name": "destInstruct",
+          "type_long": "ghidra.program.model.correlate.InstructHash",
+          "type_short": "InstructHash",
+          "comment": "is the first Instruction in the \"destination\" n-gram"
+        },
+        {
+          "name": "destMatch",
+          "type_long": "ghidra.program.model.correlate.HashStore.NgramMatch",
+          "type_short": "NgramMatch",
+          "comment": "is the \"destination\" NgramMatch object to populate"
+        },
+        {
+          "name": "hashCalc",
+          "type_long": "ghidra.program.model.correlate.HashCalculator",
+          "type_short": "HashCalculator",
+          "comment": "is the hash function object"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getUnmatchedInstructions",
+      "comment": "",
+      "javadoc": "@return list of unmatched instructions across the whole function",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.listing.Instruction\u003e",
+        "type_short": "List",
+        "comment": "list of unmatched instructions across the whole function"
+      },
+      "throws": []
+    },
+    {
+      "name": "clearSort",
+      "comment": "Clear the main sort structures, but preserve blocks and instructions",
+      "javadoc": "Clear the main sort structures, but preserve blocks and instructions",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmpty",
+      "comment": "",
+      "javadoc": "@return true if there are no n-grams left in the sort",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there are no n-grams left in the sort"
+      },
+      "throws": []
+    },
+    {
+      "name": "getFirstEntry",
+      "comment": "",
+      "javadoc": "@return the first HashEntry in the sort.  The least number of matching n-grams and the biggest n-gram.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.correlate.HashEntry",
+        "type_short": "HashEntry",
+        "comment": "the first HashEntry in the sort.  The least number of matching n-grams and the biggest n-gram."
+      },
+      "throws": []
+    },
+    {
+      "name": "getEntry",
+      "comment": "Get the HashEntry corresponding to a given hash",
+      "javadoc": "Get the HashEntry corresponding to a given hash\n@param hash is the Hash to match\n@return the set of n-grams (HashEntry) matching this hash",
+      "static": false,
+      "params": [
+        {
+          "name": "hash",
+          "type_long": "ghidra.program.model.correlate.Hash",
+          "type_short": "Hash",
+          "comment": "is the Hash to match"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.correlate.HashEntry",
+        "type_short": "HashEntry",
+        "comment": "the set of n-grams (HashEntry) matching this hash"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBlock",
+      "comment": "Get the basic-block with the corresponding start Address",
+      "javadoc": "Get the basic-block with the corresponding start Address\n@param addr is the starting address\n@return the Block object",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the starting address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.correlate.Block",
+        "type_short": "Block",
+        "comment": "the Block object"
+      },
+      "throws": []
+    },
+    {
+      "name": "getMonitor",
+      "comment": "",
+      "javadoc": "@return the TaskMonitor for this store",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.task.TaskMonitor",
+        "type_short": "TaskMonitor",
+        "comment": "the TaskMonitor for this store"
+      },
+      "throws": []
+    }
+  ]
+}

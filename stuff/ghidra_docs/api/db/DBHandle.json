@@ -1,0 +1,1536 @@
+{
+  "name": "DBHandle",
+  "comment": "DBHandle provides access to an open database.",
+  "javadoc": "\u003ccode\u003eDBHandle\u003c/code\u003e provides access to an open database.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "bufferMgr",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.buffers.BufferMgr",
+      "type_short": "BufferMgr",
+      "constant_value": null
+    },
+    {
+      "name": "dbParms",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.DBParms",
+      "type_short": "DBParms",
+      "constant_value": null
+    },
+    {
+      "name": "masterTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.MasterTable",
+      "type_short": "MasterTable",
+      "constant_value": null
+    },
+    {
+      "name": "tables",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Hashtable\u003cjava.lang.String,db.Table\u003e",
+      "type_short": "Hashtable",
+      "constant_value": null
+    },
+    {
+      "name": "databaseId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "scratchPad",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.DBHandle",
+      "type_short": "DBHandle",
+      "constant_value": null
+    },
+    {
+      "name": "listenerList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.WeakSet\u003cdb.DBListener\u003e",
+      "type_short": "WeakSet",
+      "constant_value": null
+    },
+    {
+      "name": "lastTransactionID",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "txStarted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "waitingForNewTransaction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "checkpointNum",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "lastRecoverySnapshotId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a temporary database handle.\n The saveAs method must be used to save the database.",
+      "javadoc": "Construct a temporary database handle.\n The saveAs method must be used to save the database.\n@throws IOException if a IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a temporary database handle.\n The saveAs method must be used to save the database.",
+      "javadoc": "Construct a temporary database handle.\n The saveAs method must be used to save the database.\n@param requestedBufferSize requested buffer size.  Actual buffer size may vary.\n@throws IOException if a IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "requestedBufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "requested buffer size.  Actual buffer size may vary."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a temporary database handle.\n The saveAs method must be used to save the database.",
+      "javadoc": "Construct a temporary database handle.\n The saveAs method must be used to save the database.\n@param requestedBufferSize requested buffer size.  Actual buffer size may vary.\n@param approxCacheSize approximate size of cache in Bytes.\n@throws IOException if a IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "requestedBufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "requested buffer size.  Actual buffer size may vary."
+        },
+        {
+          "name": "approxCacheSize",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "approximate size of cache in Bytes."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if a IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Open the database contained within the specified\n bufferFile.  The update mode is determined by the buffer file.",
+      "javadoc": "Open the database contained within the specified\n bufferFile.  The update mode is determined by the buffer file.\n@param bufferFile database buffer file\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "database buffer file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Open the database contained within the specified\n bufferFile.  The update mode is determined by the buffer file.",
+      "javadoc": "Open the database contained within the specified\n bufferFile.  The update mode is determined by the buffer file.\n@param bufferFile database buffer file\n@param recover if true an attempt will be made to recover unsaved data if the file is open for update\n@param monitor recovery monitor\n@throws IOException if IO error occurs\n@throws CancelledException if buffer file recovery is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "bufferFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "database buffer file"
+        },
+        {
+          "name": "recover",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true an attempt will be made to recover unsaved data if the file is open for update"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "recovery monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if buffer file recovery is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Open a specific buffer file containing a database\n for non-update use.  This method is provided primarily\n for testing.",
+      "javadoc": "Open a specific buffer file containing a database\n for non-update use.  This method is provided primarily\n for testing.\n@param file buffer file\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "buffer file"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "isConsistent",
+      "comment": "Check the consistency of this database.",
+      "javadoc": "Check the consistency of this database.\n@param monitor task monitor\n@return true if consistency check passed, else false\n@throws CancelledException if consistency check is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if consistency check passed, else false"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if consistency check is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "rebuild",
+      "comment": "Rebuild database tables to resolve certain consistency problems.  Use of this\n method does not recover lost data which may have occurred during original \n database corruption.",
+      "javadoc": "Rebuild database tables to resolve certain consistency problems.  Use of this\n method does not recover lost data which may have occurred during original \n database corruption.\n@param monitor task monitor\n@return true if rebuild succeeded, else false\n@throws CancelledException if rebuild is cancelled",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if rebuild succeeded, else false"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if rebuild is cancelled"
+        }
+      ]
+    },
+    {
+      "name": "resetDatabaseId",
+      "comment": "Reset the database ID contained within the specified database file.\n This method is intended to be used when unpacking a packed database\n to ensure that a duplicate database ID does not exist within the project.\n WARNING! Use with extreme caution since this modifies\n the original file and could destroy data if used\n improperly.",
+      "javadoc": "Reset the database ID contained within the specified database file.\n This method is intended to be used when unpacking a packed database\n to ensure that a duplicate database ID does not exist within the project.\n WARNING! Use with extreme caution since this modifies\n the original file and could destroy data if used\n improperly.\n@param file database buffer file to be updated\n@throws IOException if IO error occurs",
+      "static": true,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "database buffer file to be updated"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "setDatabaseId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "initDatabaseId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "readDatabaseId",
+      "comment": "Read current databaseId",
+      "javadoc": "Read current databaseId\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getDatabaseId",
+      "comment": "",
+      "javadoc": "@return unique database ID or 0 if this is an older read-only database.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "unique database ID or 0 if this is an older read-only database."
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecoveryChangeSetFile",
+      "comment": "Returns the recovery changeSet data file for reading or null if one is not available.\n The caller must dispose of the returned file before peforming generating any new\n recovery snapshots.",
+      "javadoc": "Returns the recovery changeSet data file for reading or null if one is not available.\n The caller must dispose of the returned file before peforming generating any new\n recovery snapshots.\n@return recovery changeSet data file for reading or null if one is not available.\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.LocalBufferFile",
+        "type_short": "LocalBufferFile",
+        "comment": "recovery changeSet data file for reading or null if one is not available."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "takeRecoverySnapshot",
+      "comment": "Request a recovery snapshot be taken of any unsaved changes;",
+      "javadoc": "Request a recovery snapshot be taken of any unsaved changes;\n@param changeSet an optional database-backed change set which reflects changes \n made since the last version.\n@param monitor task monitor\n@return true if snapshot successful or not needed, false if an active transaction prevented snapshot\n@throws CancelledException if cancelled by monitor\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "changeSet",
+          "type_long": "db.DBChangeSet",
+          "type_short": "DBChangeSet",
+          "comment": "an optional database-backed change set which reflects changes \n made since the last version."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "task monitor"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if snapshot successful or not needed, false if an active transaction prevented snapshot"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if cancelled by monitor"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getScratchPad",
+      "comment": "Returns a shared temporary database handle.\n This temporary handle will remain open unitl either this \n handle is closed or closeScratchPad is invoked.",
+      "javadoc": "Returns a shared temporary database handle.\n This temporary handle will remain open unitl either this \n handle is closed or closeScratchPad is invoked.\n@return shared temporary database handle.\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.DBHandle",
+        "type_short": "DBHandle",
+        "comment": "shared temporary database handle."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "closeScratchPad",
+      "comment": "Close the scratch-pad database handle if it open.",
+      "javadoc": "Close the scratch-pad database handle if it open.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addListener",
+      "comment": "Add Database listener",
+      "javadoc": "Add Database listener\n@param listener database listener",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "db.DBListener",
+          "type_short": "DBListener",
+          "comment": "database listener"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dbRestored",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dbClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tableAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "table",
+          "type_long": "db.Table",
+          "type_short": "Table",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tableDeleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "table",
+          "type_long": "db.Table",
+          "type_short": "Table",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMasterTable",
+      "comment": "",
+      "javadoc": "@return the master database table",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.MasterTable",
+        "type_short": "MasterTable",
+        "comment": "the master database table"
+      },
+      "throws": []
+    },
+    {
+      "name": "getBufferMgr",
+      "comment": "",
+      "javadoc": "@return the buffer manager",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.buffers.BufferMgr",
+        "type_short": "BufferMgr",
+        "comment": "the buffer manager"
+      },
+      "throws": []
+    },
+    {
+      "name": "enablePreCache",
+      "comment": "Enable and start source file pre-cache if appropriate.\n WARNING! EXPERIMENTAL !!!",
+      "javadoc": "Enable and start source file pre-cache if appropriate.\n WARNING! EXPERIMENTAL !!!",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDBParms",
+      "comment": "",
+      "javadoc": "@return the database parameters",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.DBParms",
+        "type_short": "DBParms",
+        "comment": "the database parameters"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkTransaction",
+      "comment": "Verify that a valid transaction has been started.",
+      "javadoc": "Verify that a valid transaction has been started.\n@throws NoTransactionException if transaction has not been started\n@throws TerminatedTransactionException transaction was prematurely terminated",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isTransactionActive",
+      "comment": "",
+      "javadoc": "@return true if transaction is currently active",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if transaction is currently active"
+      },
+      "throws": []
+    },
+    {
+      "name": "startTransaction",
+      "comment": "Start a new transaction",
+      "javadoc": "Start a new transaction\n@return transaction ID",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "transaction ID"
+      },
+      "throws": []
+    },
+    {
+      "name": "endTransaction",
+      "comment": "Terminate transaction.  If commit is false, Table instances may be added \n or removed/invalidated.",
+      "javadoc": "Terminate transaction.  If commit is false, Table instances may be added \n or removed/invalidated.\n@param id transaction ID\n@param commit if true a new checkpoint will be established, if\n false all changes since the previous checkpoint will be discarded.\n@return true if new checkpoint established.\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "transaction ID"
+        },
+        {
+          "name": "commit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true a new checkpoint will be established, if\n false all changes since the previous checkpoint will be discarded."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if new checkpoint established."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "hasUncommittedChanges",
+      "comment": "Returns true if there are uncommitted changes to the database.",
+      "javadoc": "Returns true if there are uncommitted changes to the database.\n@return true if there are uncommitted changes to the database.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there are uncommitted changes to the database."
+      },
+      "throws": []
+    },
+    {
+      "name": "terminateTransaction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "commit",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "canUndo",
+      "comment": "Determine if there are any changes which can be undone.",
+      "javadoc": "Determine if there are any changes which can be undone.\n@return true if an undo can be performed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if an undo can be performed."
+      },
+      "throws": []
+    },
+    {
+      "name": "undo",
+      "comment": "Undo changes made during the previous transaction checkpoint.\n All upper-levels must clear table-based cached data prior to \n invoking this method.",
+      "javadoc": "Undo changes made during the previous transaction checkpoint.\n All upper-levels must clear table-based cached data prior to \n invoking this method.\n@return true if an undo was successful\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if an undo was successful"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "getAvailableUndoCount",
+      "comment": "",
+      "javadoc": "@return number of undo-able transactions",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of undo-able transactions"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAvailableRedoCount",
+      "comment": "",
+      "javadoc": "@return the number of redo-able transactions",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of redo-able transactions"
+      },
+      "throws": []
+    },
+    {
+      "name": "canRedo",
+      "comment": "Determine if there are any changes which can be redone",
+      "javadoc": "Determine if there are any changes which can be redone\n@return true if a redo can be performed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if a redo can be performed."
+      },
+      "throws": []
+    },
+    {
+      "name": "redo",
+      "comment": "Redo previously undone transaction checkpoint.\n Moves forward by one checkpoint only.\n All upper-levels must clear table-based cached data prior to \n invoking this method.",
+      "javadoc": "Redo previously undone transaction checkpoint.\n Moves forward by one checkpoint only.\n All upper-levels must clear table-based cached data prior to \n invoking this method.\n@return boolean\n@throws IOException if IO error occurs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        }
+      ]
+    },
+    {
+      "name": "setMaxUndos",
+      "comment": "Set the maximum number of undo transaction checkpoints maintained by the\n underlying buffer manager.",
+      "javadoc": "Set the maximum number of undo transaction checkpoints maintained by the\n underlying buffer manager.\n@param maxUndos maximum number of undo checkpoints.  An illegal \n value restores the default value.",
+      "static": false,
+      "params": [
+        {
+          "name": "maxUndos",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of undo checkpoints.  An illegal \n value restores the default value."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableCount",
+      "comment": "Return the number of tables defined within the master table.",
+      "javadoc": "Return the number of tables defined within the master table.\n@return int number of tables.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "int number of tables."
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "Close the database and dispose of the underlying buffer manager.\n Any existing recovery data will be discarded.",
+      "javadoc": "Close the database and dispose of the underlying buffer manager.\n Any existing recovery data will be discarded.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "close",
+      "comment": "Close the database and dispose of the underlying buffer manager.",
+      "javadoc": "Close the database and dispose of the underlying buffer manager.\n@param keepRecoveryData true if existing recovery data should be retained or false to remove\n any recovery data",
+      "static": false,
+      "params": [
+        {
+          "name": "keepRecoveryData",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if existing recovery data should be retained or false to remove\n any recovery data"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isChanged",
+      "comment": "",
+      "javadoc": "@return true if unsaved changes have been made.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if unsaved changes have been made."
+      },
+      "throws": []
+    },
+    {
+      "name": "isClosed",
+      "comment": "",
+      "javadoc": "@return true if this database handle has been closed.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this database handle has been closed."
+      },
+      "throws": []
+    },
+    {
+      "name": "save",
+      "comment": "Save this database to a new version.",
+      "javadoc": "Save this database to a new version.\n@param comment if version history is maintained, this comment will be \n associated with the new version.\n@param changeSet an optional database-backed change set which reflects changes \n made since the last version.\n@param monitor progress monitor\n@throws CancelledException if task monitor cancelled operation.\n@throws IOException thrown if an IO error occurs.",
+      "static": false,
+      "params": [
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "if version history is maintained, this comment will be \n associated with the new version."
+        },
+        {
+          "name": "changeSet",
+          "type_long": "db.DBChangeSet",
+          "type_short": "DBChangeSet",
+          "comment": "an optional database-backed change set which reflects changes \n made since the last version."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if an IO error occurs."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if task monitor cancelled operation."
+        }
+      ]
+    },
+    {
+      "name": "saveAs",
+      "comment": "Save the database to the specified buffer file.",
+      "javadoc": "Save the database to the specified buffer file.\n@param outFile buffer file open for writing\n@param associateWithNewFile if true the outFile will be associated with this DBHandle as the \n current source file, if false no change will be made to this DBHandle\u0027s state and the outFile\n will be written and set as read-only.  The caller is responsbile for disposing the outFile if \n this parameter is false.\n@param monitor progress monitor\n@throws IOException if IO error occurs\n@throws CancelledException if monitor cancels operation",
+      "static": false,
+      "params": [
+        {
+          "name": "outFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "buffer file open for writing"
+        },
+        {
+          "name": "associateWithNewFile",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the outFile will be associated with this DBHandle as the \n current source file, if false no change will be made to this DBHandle\u0027s state and the outFile\n will be written and set as read-only.  The caller is responsbile for disposing the outFile if \n this parameter is false."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor cancels operation"
+        }
+      ]
+    },
+    {
+      "name": "saveAs",
+      "comment": "Save the database to the specified buffer file and a newDatabaseId.\n Open handle will always be associated with the new file.\n NOTE: This method is intended for use in transforming one database to\n match another existing database.",
+      "javadoc": "Save the database to the specified buffer file and a newDatabaseId.\n Open handle will always be associated with the new file.\n NOTE: This method is intended for use in transforming one database to\n match another existing database.\n@param outFile buffer file open for writing\n@param newDatabaseId database ID to be forced for new database or null to generate \n new database ID\n@param monitor progress monitor\n@throws IOException if IO error occurs\n@throws CancelledException if monitor cancels operation",
+      "static": false,
+      "params": [
+        {
+          "name": "outFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": "buffer file open for writing"
+        },
+        {
+          "name": "newDatabaseId",
+          "type_long": "java.lang.Long",
+          "type_short": "Long",
+          "comment": "database ID to be forced for new database or null to generate \n new database ID"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor cancels operation"
+        }
+      ]
+    },
+    {
+      "name": "saveAs",
+      "comment": "Save the database to the specified buffer file.",
+      "javadoc": "Save the database to the specified buffer file.\n@param file buffer file to be created\n@param associateWithNewFile if true the outFile will be associated with this DBHandle as the \n current source file, if false no change will be made to this DBHandle\u0027s state and the outFile\n will be written and set as read-only.  The caller is responsbile for disposing the outFile if \n this parameter is false.\n@param monitor progress monitor\n@throws DuplicateFileException if file already exists.\n@throws IOException if IO error occurs\n@throws CancelledException if monitor cancels operation",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": "buffer file to be created"
+        },
+        {
+          "name": "associateWithNewFile",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true the outFile will be associated with this DBHandle as the \n current source file, if false no change will be made to this DBHandle\u0027s state and the outFile\n will be written and set as read-only.  The caller is responsbile for disposing the outFile if \n this parameter is false."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "progress monitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs"
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if monitor cancels operation"
+        }
+      ]
+    },
+    {
+      "name": "createBuffer",
+      "comment": "Create a new buffer with the specified length.\n This method may only be invoked while a database transaction \n is in progress. A database transaction must also be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.",
+      "javadoc": "Create a new buffer with the specified length.\n This method may only be invoked while a database transaction \n is in progress. A database transaction must also be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.\n@param length the size of the buffer to create\n@return Buffer the newly created buffer\n@throws IOException if an I/O error occurs while creating the buffer.",
+      "static": false,
+      "params": [
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the size of the buffer to create"
+        }
+      ],
+      "return": {
+        "type_long": "db.DBBuffer",
+        "type_short": "DBBuffer",
+        "comment": "Buffer the newly created buffer"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs while creating the buffer."
+        }
+      ]
+    },
+    {
+      "name": "createBuffer",
+      "comment": "Create a new buffer that layers on top of another buffer.  This buffer\n will return values from the shadowBuffer unless they have been changed in this buffer.\n This method may only be invoked while a database transaction \n is in progress. A database transaction must also be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.",
+      "javadoc": "Create a new buffer that layers on top of another buffer.  This buffer\n will return values from the shadowBuffer unless they have been changed in this buffer.\n This method may only be invoked while a database transaction \n is in progress. A database transaction must also be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.\n@param shadowBuffer the source of the byte values to use unless they have been changed.\n@return Buffer the newly created buffer\n@throws IOException if an I/O error occurs while creating the buffer.",
+      "static": false,
+      "params": [
+        {
+          "name": "shadowBuffer",
+          "type_long": "db.DBBuffer",
+          "type_short": "DBBuffer",
+          "comment": "the source of the byte values to use unless they have been changed."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBBuffer",
+        "type_short": "DBBuffer",
+        "comment": "Buffer the newly created buffer"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs while creating the buffer."
+        }
+      ]
+    },
+    {
+      "name": "getBuffer",
+      "comment": "Get an existing buffer.  This method should be used with care to avoid \n providing an improper id.  A database transaction must be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.",
+      "javadoc": "Get an existing buffer.  This method should be used with care to avoid \n providing an improper id.  A database transaction must be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.\n@param id the buffer id.\n@return Buffer the buffer associated with the given id.\n@throws IOException if an I/O error occurs while getting the buffer.",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the buffer id."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBBuffer",
+        "type_short": "DBBuffer",
+        "comment": "Buffer the buffer associated with the given id."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs while getting the buffer."
+        }
+      ]
+    },
+    {
+      "name": "getBuffer",
+      "comment": "Get an existing buffer that uses a shadowBuffer for byte values if they haven\u0027t been\n explicitly changed in this buffer.  This method should be used with care to avoid \n providing an improper id.  A database transaction must be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.",
+      "javadoc": "Get an existing buffer that uses a shadowBuffer for byte values if they haven\u0027t been\n explicitly changed in this buffer.  This method should be used with care to avoid \n providing an improper id.  A database transaction must be in progress\n when invoking the various put, delete and setSize methods on the returned buffer.\n@param id the buffer id.\n@param shadowBuffer the buffer to use for byte values if they haven\u0027t been changed in \n this buffer.\n@return Buffer the buffer associated with the given id.\n@throws IOException if an I/O error occurs while getting the buffer.",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the buffer id."
+        },
+        {
+          "name": "shadowBuffer",
+          "type_long": "db.DBBuffer",
+          "type_short": "DBBuffer",
+          "comment": "the buffer to use for byte values if they haven\u0027t been changed in \n this buffer."
+        }
+      ],
+      "return": {
+        "type_long": "db.DBBuffer",
+        "type_short": "DBBuffer",
+        "comment": "Buffer the buffer associated with the given id."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if an I/O error occurs while getting the buffer."
+        }
+      ]
+    },
+    {
+      "name": "canUpdate",
+      "comment": "Determine if this database can be updated.",
+      "javadoc": "Determine if this database can be updated.\n@return true if this database handle is intended for update",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this database handle is intended for update"
+      },
+      "throws": []
+    },
+    {
+      "name": "loadTables",
+      "comment": "Load existing tables from database.",
+      "javadoc": "Load existing tables from database.\n@throws IOException thrown if IO error occurs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "reloadTables",
+      "comment": "Reload tables from database following an undo or redo.",
+      "javadoc": "Reload tables from database following an undo or redo.\n@throws IOException thrown if IO error occurs.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "thrown if IO error occurs."
+        }
+      ]
+    },
+    {
+      "name": "getTable",
+      "comment": "Returns the Table that was created with the given name or null if\n no such table exists.",
+      "javadoc": "Returns the Table that was created with the given name or null if\n no such table exists.\n@param name of requested table\n@return table instance or null if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "of requested table"
+        }
+      ],
+      "return": {
+        "type_long": "db.Table",
+        "type_short": "Table",
+        "comment": "table instance or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTables",
+      "comment": "Get all tables defined within the database.",
+      "javadoc": "Get all tables defined within the database.\n@return Table[] tables",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "db.Table[]",
+        "type_short": "db.Table[]",
+        "comment": "Table[] tables"
+      },
+      "throws": []
+    },
+    {
+      "name": "createTable",
+      "comment": "Creates a new table with the given name and schema.",
+      "javadoc": "Creates a new table with the given name and schema.\n@param name table name\n@param schema table schema\n@return new table instance\n@throws IOException if IO error occurs during table creation",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "table name"
+        },
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": "table schema"
+        }
+      ],
+      "return": {
+        "type_long": "db.Table",
+        "type_short": "Table",
+        "comment": "new table instance"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs during table creation"
+        }
+      ]
+    },
+    {
+      "name": "createTable",
+      "comment": "Creates a new table with the given name and schema.\n Create secondary indexes as specified by the array of column indexes.",
+      "javadoc": "Creates a new table with the given name and schema.\n Create secondary indexes as specified by the array of column indexes.\n@param name table name\n@param schema table schema\n@param indexedColumns array of column indices which should have an index associated with them\n@return new table instance\n@throws IOException if IO error occurs during table creation",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "table name"
+        },
+        {
+          "name": "schema",
+          "type_long": "db.Schema",
+          "type_short": "Schema",
+          "comment": "table schema"
+        },
+        {
+          "name": "indexedColumns",
+          "type_long": "int[]",
+          "type_short": "int[]",
+          "comment": "array of column indices which should have an index associated with them"
+        }
+      ],
+      "return": {
+        "type_long": "db.Table",
+        "type_short": "Table",
+        "comment": "new table instance"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if IO error occurs during table creation"
+        }
+      ]
+    },
+    {
+      "name": "setTableName",
+      "comment": "Changes the name of an existing table.",
+      "javadoc": "Changes the name of an existing table.\n@param oldName the old name of the table\n@param newName the new name of the table\n@throws DuplicateNameException if a table with the new name already exists\n@return true if the name was changed successfully",
+      "static": false,
+      "params": [
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the old name of the table"
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the new name of the table"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the name was changed successfully"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": "if a table with the new name already exists"
+        }
+      ]
+    },
+    {
+      "name": "deleteTable",
+      "comment": "Delete the specified table from the database.",
+      "javadoc": "Delete the specified table from the database.\n@param name table name\n@throws IOException if there is an I/O error or the table does not exist",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "table name"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if there is an I/O error or the table does not exist"
+        }
+      ]
+    },
+    {
+      "name": "getCacheHits",
+      "comment": "",
+      "javadoc": "@return number of buffer cache hits",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "number of buffer cache hits"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCacheMisses",
+      "comment": "",
+      "javadoc": "@return number of buffer cache misses",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "number of buffer cache misses"
+      },
+      "throws": []
+    },
+    {
+      "name": "getLowBufferCount",
+      "comment": "",
+      "javadoc": "@return low water mark (minimum buffer pool size)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "low water mark (minimum buffer pool size)"
+      },
+      "throws": []
+    },
+    {
+      "name": "finalize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Throwable",
+          "type_short": "Throwable",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getBufferSize",
+      "comment": "Returns size of buffers utilized within the underlying\n buffer file.  This may be larger than than the requested \n buffer size.  This value may be used to instatiate a \n new BufferFile which is compatible with this database\n when using the saveAs method.",
+      "javadoc": "Returns size of buffers utilized within the underlying\n buffer file.  This may be larger than than the requested \n buffer size.  This value may be used to instatiate a \n new BufferFile which is compatible with this database\n when using the saveAs method.\n@return buffer size utilized by this database",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "buffer size utilized by this database"
+      },
+      "throws": []
+    }
+  ]
+}

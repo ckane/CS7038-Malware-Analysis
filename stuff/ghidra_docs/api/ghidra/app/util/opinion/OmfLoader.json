@@ -1,0 +1,536 @@
+{
+  "name": "OmfLoader",
+  "comment": "",
+  "javadoc": "",
+  "static": false,
+  "implements": [],
+  "extends": "ghidra.app.util.opinion.AbstractLibrarySupportLoader",
+  "fields": [
+    {
+      "name": "OMF_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Relocatable Object Module Format (OMF)\""
+    },
+    {
+      "name": "MIN_BYTE_LENGTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "11"
+    },
+    {
+      "name": "IMAGE_BASE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "8192"
+    },
+    {
+      "name": "MAX_UNINITIALIZED_FILL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "8192"
+    },
+    {
+      "name": "externsyms",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.app.util.bin.format.omf.OmfSymbol\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mapTranslator",
+      "comment": "OMF usually stores a string describing the compiler that produced it in a\n translator comment.  This routine maps this string to official\n \"secondary constraint\" used by the Ghidra opinion service to pick a\n language module for the program",
+      "javadoc": "OMF usually stores a string describing the compiler that produced it in a\n translator comment.  This routine maps this string to official\n \"secondary constraint\" used by the Ghidra opinion service to pick a\n language module for the program\n@param record is the translator comment string\n@return the \"secondary constraint\"",
+      "static": false,
+      "params": [
+        {
+          "name": "record",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is the translator comment string"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the \"secondary constraint\""
+      },
+      "throws": []
+    },
+    {
+      "name": "findSupportedLoadSpecs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Collection\u003cghidra.app.util.opinion.LoadSpec\u003e",
+        "type_short": "Collection",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "load",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "provider",
+          "type_long": "ghidra.app.util.bin.ByteProvider",
+          "type_short": "ByteProvider",
+          "comment": ""
+        },
+        {
+          "name": "loadSpec",
+          "type_long": "ghidra.app.util.opinion.LoadSpec",
+          "type_short": "LoadSpec",
+          "comment": ""
+        },
+        {
+          "name": "options",
+          "type_long": "java.util.List\u003cghidra.app.util.Option\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "relocationError",
+      "comment": "Log a (hopefully) descriptive error, if we can\u0027t process a specific relocation",
+      "javadoc": "Log a (hopefully) descriptive error, if we can\u0027t process a specific relocation\n@param program is the Program\n@param log will receive the error message\n@param state is the relocation record that could not be processed",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the Program"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "will receive the error message"
+        },
+        {
+          "name": "state",
+          "type_long": "ghidra.app.util.bin.format.omf.OmfFixupRecord.FixupState",
+          "type_short": "FixupState",
+          "comment": "is the relocation record that could not be processed"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processRelocations",
+      "comment": "Process an relocation (FIXUPP) records and create formal Ghidra relocation objects",
+      "javadoc": "Process an relocation (FIXUPP) records and create formal Ghidra relocation objects\n@param header is the file header for the program\n@param program is the Program\n@param monitor is checked for cancellation\n@param log receives error messages",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.omf.OmfFileHeader",
+          "type_short": "OmfFileHeader",
+          "comment": "is the file header for the program"
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the Program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is checked for cancellation"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "receives error messages"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processSegmentHeaders",
+      "comment": "Run through the OMF segments an produce Ghidra memory blocks.\n Most segments cause an initialized block to be created, but if a segment\n consists only of a string of zero bytes, as described by a compact LIDATA record,\n an uninitialized block is created.",
+      "javadoc": "Run through the OMF segments an produce Ghidra memory blocks.\n Most segments cause an initialized block to be created, but if a segment\n consists only of a string of zero bytes, as described by a compact LIDATA record,\n an uninitialized block is created.\n@param reader is a reader for the underlying file\n@param header is the OMF file header\n@param program is the Program\n@param mbu is the block creation utility\n@param monitor is checked for cancellation\n@param log receives error messages\n@throws AddressOverflowException if the underlying data stream causes an address to wrap\n@throws IOException for problems accessing the OMF file through the reader",
+      "static": false,
+      "params": [
+        {
+          "name": "reader",
+          "type_long": "ghidra.app.util.bin.BinaryReader",
+          "type_short": "BinaryReader",
+          "comment": "is a reader for the underlying file"
+        },
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.omf.OmfFileHeader",
+          "type_short": "OmfFileHeader",
+          "comment": "is the OMF file header"
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the Program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is checked for cancellation"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "receives error messages"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.address.AddressOverflowException",
+          "type_short": "AddressOverflowException",
+          "comment": "if the underlying data stream causes an address to wrap"
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "for problems accessing the OMF file through the reader"
+        }
+      ]
+    },
+    {
+      "name": "findFreeAddress",
+      "comment": "Locate the start of a free range of memory (for holding external symbols)\n by finding an Address beyond any memory block in the program",
+      "javadoc": "Locate the start of a free range of memory (for holding external symbols)\n by finding an Address beyond any memory block in the program\n@param program is the Program\n@return the starting address of the free region",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the Program"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the starting address of the free region"
+      },
+      "throws": []
+    },
+    {
+      "name": "processPublicSymbols",
+      "comment": "Process any public symbol records and produce corresponding Ghidra symbols",
+      "javadoc": "Process any public symbol records and produce corresponding Ghidra symbols\n@param header is the file header for the program\n@param program is the Program\n@param monitor is checked for cancellations\n@param log receives any error messages",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.omf.OmfFileHeader",
+          "type_short": "OmfFileHeader",
+          "comment": "is the file header for the program"
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the Program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is checked for cancellations"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "receives any error messages"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSymbol",
+      "comment": "Create an OMF symbol in the program",
+      "javadoc": "Create an OMF symbol in the program\n@param symbol is the symbol record\n@param address is the resolved address for the symbol\n@param symbolTable is the table to hold the symbol\n@param log is used to log error messages\n@return true if there are no errors creating the symbol",
+      "static": false,
+      "params": [
+        {
+          "name": "symbol",
+          "type_long": "ghidra.app.util.bin.format.omf.OmfSymbol",
+          "type_short": "OmfSymbol",
+          "comment": "is the symbol record"
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the resolved address for the symbol"
+        },
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": "is the table to hold the symbol"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "is used to log error messages"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there are no errors creating the symbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "processExternalSymbols",
+      "comment": "Process any external symbol records and create the corresponding Ghidra symbols.\n Build an external memory block to hold them if necessary",
+      "javadoc": "Process any external symbol records and create the corresponding Ghidra symbols.\n Build an external memory block to hold them if necessary\n@param header is the file header for the program\n@param program is the Program\n@param monitor is checked for cancellation\n@param log receives error messages",
+      "static": false,
+      "params": [
+        {
+          "name": "header",
+          "type_long": "ghidra.app.util.bin.format.omf.OmfFileHeader",
+          "type_short": "OmfFileHeader",
+          "comment": "is the file header for the program"
+        },
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the Program"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "is checked for cancellation"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "receives error messages"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createExternalBlock",
+      "comment": "If necessary, create an external block to hold external symbols for this file",
+      "javadoc": "If necessary, create an external block to hold external symbols for this file\n@param program is the program representing the file\n@param log for error messages\n@param externalAddress is the address of the first byte of the external block\n@param externalAddressStart is the address of the last byte (+1)",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "is the program representing the file"
+        },
+        {
+          "name": "log",
+          "type_long": "ghidra.app.util.importer.MessageLog",
+          "type_short": "MessageLog",
+          "comment": "for error messages"
+        },
+        {
+          "name": "externalAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the address of the first byte of the external block"
+        },
+        {
+          "name": "externalAddressStart",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the address of the last byte (+1)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createUndefined",
+      "comment": "Create undefined data at a specific address in the program",
+      "javadoc": "Create undefined data at a specific address in the program\n@param listing is the Program listing\n@param memory is the Program Memory\n@param addr is the Address of the data\n@param size is the number of bytes in the data\n@return the new created Data object\n@throws CodeUnitInsertionException if the new data conflicts with another object\n@throws DataTypeConflictException if the data-type cannot be created",
+      "static": false,
+      "params": [
+        {
+          "name": "listing",
+          "type_long": "ghidra.program.model.listing.Listing",
+          "type_short": "Listing",
+          "comment": "is the Program listing"
+        },
+        {
+          "name": "memory",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": "is the Program Memory"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "is the Address of the data"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the number of bytes in the data"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Data",
+        "type_short": "Data",
+        "comment": "the new created Data object"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.util.CodeUnitInsertionException",
+          "type_short": "CodeUnitInsertionException",
+          "comment": "if the new data conflicts with another object"
+        },
+        {
+          "type_long": "ghidra.program.model.data.DataTypeConflictException",
+          "type_short": "DataTypeConflictException",
+          "comment": "if the data-type cannot be created"
+        }
+      ]
+    }
+  ]
+}

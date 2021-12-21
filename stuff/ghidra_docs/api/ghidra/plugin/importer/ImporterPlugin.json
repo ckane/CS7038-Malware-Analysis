@@ -1,0 +1,489 @@
+{
+  "name": "ImporterPlugin",
+  "comment": "A Plugin that supplies menu items and tasks to import files into Ghidra.",
+  "javadoc": "A {@link Plugin} that supplies menu items and tasks to import files into Ghidra.",
+  "static": false,
+  "implements": [
+    "ghidra.app.services.FileImporterService",
+    "ghidra.framework.main.FrontEndable",
+    "ghidra.framework.model.ProjectListener"
+  ],
+  "extends": "ghidra.framework.plugintool.Plugin",
+  "fields": [
+    {
+      "name": "IMPORT_MENU_GROUP",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Import\""
+    },
+    {
+      "name": "IMPORTER_PLUGIN_DESC",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"This plugin manages importing files, including those contained within firmware/filesystem images.\""
+    },
+    {
+      "name": "importAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.action.DockingAction",
+      "type_short": "DockingAction",
+      "constant_value": null
+    },
+    {
+      "name": "importSelectionAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.action.DockingAction",
+      "type_short": "DockingAction",
+      "constant_value": null
+    },
+    {
+      "name": "addToProgramAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.action.DockingAction",
+      "type_short": "DockingAction",
+      "constant_value": null
+    },
+    {
+      "name": "chooser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.filechooser.GhidraFileChooser",
+      "type_short": "GhidraFileChooser",
+      "constant_value": null
+    },
+    {
+      "name": "frontEndService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.main.FrontEndService",
+      "type_short": "FrontEndService",
+      "constant_value": null
+    },
+    {
+      "name": "batchImportAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.action.DockingAction",
+      "type_short": "DockingAction",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "tool",
+          "type_long": "ghidra.framework.plugintool.PluginTool",
+          "type_short": "PluginTool",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "readConfigState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "writeConfigState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "saveState",
+          "type_long": "ghidra.framework.options.SaveState",
+          "type_short": "SaveState",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "processEvent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "ghidra.framework.plugintool.PluginEvent",
+          "type_short": "PluginEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "importFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "destFolder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": ""
+        },
+        {
+          "name": "files",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "files2FSRLs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "files",
+          "type_long": "java.util.List\u003cjava.io.File\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "importFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": ""
+        },
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "projectClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "project",
+          "type_long": "ghidra.framework.model.Project",
+          "type_short": "Project",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "projectOpened",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "project",
+          "type_long": "ghidra.framework.model.Project",
+          "type_short": "Project",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupImportAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupBatchImportAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupImportSelectionAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setupAddToProgramAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFolderFromContext",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "context",
+          "type_long": "docking.ActionContext",
+          "type_short": "ActionContext",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.model.DomainFolder",
+        "type_short": "DomainFolder",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "initializeChooser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "title",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "buttonText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "multiSelect",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doSingleImportAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "defaultFolder",
+          "type_long": "ghidra.framework.model.DomainFolder",
+          "type_short": "DomainFolder",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doAddToProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addToProgram",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "file",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doImportSelectionAction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "selection",
+          "type_long": "ghidra.program.util.ProgramSelection",
+          "type_short": "ProgramSelection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,1474 @@
+{
+  "name": "LocalFileSystem",
+  "comment": "LocalFileSystem provides access to FolderItem\u0027s which\n exist within a File-based directory structure.  Although FolderItem\n caching is highly recommended, it is not provided by this implementation\n and should be provided by an encompassing set of folder/file objects.\n \n A LocalFileSystem may optionally support version control of its\n FolderItem\u0027s.  When versioned, FolderItem\u0027s must be checked-out\n to create new versions.  When not versioned, the check-out mechanism\n is not used.\n \n FileSystemListener\u0027s will only be notified of changes made by the\n associated LocalFileSystem instance.  For this reason, it is important\n that proper measures are taken to prevent concurrent modification of the\n underlying files/directories by another instance or by any other\n means.",
+  "javadoc": "\u003ccode\u003eLocalFileSystem\u003c/code\u003e provides access to FolderItem\u0027s which\n exist within a File-based directory structure.  Although FolderItem\n caching is highly recommended, it is not provided by this implementation\n and should be provided by an encompassing set of folder/file objects.\n \u003cp\u003e\n A LocalFileSystem may optionally support version control of its\n FolderItem\u0027s.  When versioned, FolderItem\u0027s must be checked-out\n to create new versions.  When not versioned, the check-out mechanism\n is not used.\n \u003cp\u003e\n FileSystemListener\u0027s will only be notified of changes made by the\n associated LocalFileSystem instance.  For this reason, it is important\n that proper measures are taken to prevent concurrent modification of the\n underlying files/directories by another instance or by any other\n means.",
+  "static": false,
+  "implements": [
+    "ghidra.framework.store.FileSystem"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "org.apache.logging.log4j.Logger",
+      "type_short": "Logger",
+      "constant_value": null
+    },
+    {
+      "name": "HIDDEN_DIR_PREFIX_CHAR",
+      "comment": "Hidden directory name prefix.\n Should only be prepended to an escaped base-name.",
+      "javadoc": "Hidden directory name prefix.\n Should only be prepended to an escaped base-name.\n@see #escapeHiddenDirPrefixChars(String)",
+      "static": true,
+      "type_long": "char",
+      "type_short": "char",
+      "constant_value": "~"
+    },
+    {
+      "name": "HIDDEN_DIR_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "HIDDEN_ITEM_PREFIX",
+      "comment": "Hidden item name prefix.",
+      "javadoc": "Hidden item name prefix.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".ghidra.\""
+    },
+    {
+      "name": "INVALID_FILENAME_CHARS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"/\\\u0027`\"*:\u003c\u003e?|\""
+    },
+    {
+      "name": "PROPERTY_EXT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\".prp\""
+    },
+    {
+      "name": "refreshRequired",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "root",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.io.File",
+      "type_short": "File",
+      "constant_value": null
+    },
+    {
+      "name": "isVersioned",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "readOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "eventManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.FileSystemEventManager",
+      "type_short": "FileSystemEventManager",
+      "constant_value": null
+    },
+    {
+      "name": "repositoryLogger",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.store.local.RepositoryLogger",
+      "type_short": "RepositoryLogger",
+      "constant_value": null
+    },
+    {
+      "name": "isShared",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "getLocalFileSystem",
+      "comment": "Construct a local filesystem for existing data",
+      "javadoc": "Construct a local filesystem for existing data\n@param rootPath\n@param create\n@param isVersioned\n@param readOnly\n@param enableAsyncronousDispatching\n@return local filesystem\n@throws FileNotFoundException if specified rootPath does not exist\n@throws IOException if error occurs while reading/writing index files",
+      "static": true,
+      "params": [
+        {
+          "name": "rootPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "create",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "isVersioned",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "readOnly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "enableAsyncronousDispatching",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalFileSystem",
+        "type_short": "LocalFileSystem",
+        "comment": "local filesystem"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if error occurs while reading/writing index files"
+        }
+      ]
+    },
+    {
+      "name": "getUserName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasAnyHiddenFiles",
+      "comment": "Returns true if any file found within dir whose name starts\n with \u0027~\u0027 character (e.g., ~index.dat, etc)",
+      "javadoc": "Returns true if any file found within dir whose name starts\n with \u0027~\u0027 character (e.g., ~index.dat, etc)\n@param dir\n@return true if any hidden file found with \u0027~\u0027 prefix",
+      "static": true,
+      "params": [
+        {
+          "name": "dir",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if any hidden file found with \u0027~\u0027 prefix"
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor.",
+      "javadoc": "Constructor.\n@param rootPath root path directory.\n@param isVersioned if true item versioning will be enabled.\n@param readOnly if true modifications within this file-system will not be allowed\n and result in an ReadOnlyException\n@param enableAsyncronousDispatching if true a separate dispatch thread will be used\n to notify listeners.  If false, blocking notification will be performed.\n@throws FileNotFoundException if specified rootPath does not exist",
+      "static": false,
+      "params": [
+        {
+          "name": "rootPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "root path directory."
+        },
+        {
+          "name": "isVersioned",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true item versioning will be enabled."
+        },
+        {
+          "name": "readOnly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true modifications within this file-system will not be allowed\n and result in an ReadOnlyException"
+        },
+        {
+          "name": "enableAsyncronousDispatching",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true a separate dispatch thread will be used\n to notify listeners.  If false, blocking notification will be performed."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.FileNotFoundException",
+          "type_short": "FileNotFoundException",
+          "comment": "if specified rootPath does not exist"
+        }
+      ]
+    },
+    {
+      "name": "cleanupAfterConstruction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructor for an empty read-only file-system.",
+      "javadoc": "Constructor for an empty read-only file-system.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cleanupTemporaryFiles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setAssociatedRepositoryLogger",
+      "comment": "Associate file system with a specific repository logger",
+      "javadoc": "Associate file system with a specific repository logger\n@param repositoryLogger",
+      "static": false,
+      "params": [
+        {
+          "name": "repositoryLogger",
+          "type_long": "ghidra.framework.store.local.RepositoryLogger",
+          "type_short": "RepositoryLogger",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "log",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "item",
+          "type_long": "ghidra.framework.store.local.LocalFolderItem",
+          "type_short": "LocalFolderItem",
+          "comment": ""
+        },
+        {
+          "name": "msg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setValidationRequired",
+      "comment": "If set, the state of folder item resources will be continually refreshed.\n This is required if multiple instances exist for a single item.  The default is\n disabled.   This feature should be enabled for testing only since it may have a\n significant performance impact.  This does not provide locking which may be\n required for a shared environment (e.g., checkin locking is only managed by a\n single instance).",
+      "javadoc": "If set, the state of folder item resources will be continually refreshed.\n This is required if multiple instances exist for a single item.  The default is\n disabled.   This feature should be enabled for testing only since it may have a\n significant performance impact.  This does not provide locking which may be\n required for a shared environment (e.g., checkin locking is only managed by a\n single instance).",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isRefreshRequired",
+      "comment": "",
+      "javadoc": "@return true if folder item resources must be refreshed.\n@see #setValidationRequired()",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if folder item resources must be refreshed."
+      },
+      "throws": []
+    },
+    {
+      "name": "isVersioned",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isOnline",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isReadOnly",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findItemStorage",
+      "comment": "Find an existing storage location",
+      "javadoc": "Find an existing storage location\n@param folderPath\n@param itemName\n@return storage location.  A non-null value does not guarantee that the associated\n item actually exists.\n@throws FileNotFoundException",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "itemName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalFileSystem.ItemStorage",
+        "type_short": "ItemStorage",
+        "comment": "storage location.  A non-null value does not guarantee that the associated\n item actually exists."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.FileNotFoundException",
+          "type_short": "FileNotFoundException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "allocateItemStorage",
+      "comment": "Allocate a new storage location",
+      "javadoc": "Allocate a new storage location\n@param folderPath\n@param itemName\n@return storage location\n@throws DuplicateFileException if item path has previously been allocated\n@throws IOException if invalid path/item name specified\n@throws InvalidNameException if folderPath or itemName contains invalid characters",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "itemName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalFileSystem.ItemStorage",
+        "type_short": "ItemStorage",
+        "comment": "storage location"
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if invalid path/item name specified"
+        },
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": "if folderPath or itemName contains invalid characters"
+        }
+      ]
+    },
+    {
+      "name": "deallocateItemStorage",
+      "comment": "Deallocate item storage",
+      "javadoc": "Deallocate item storage\n@param folderPath\n@param itemName\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "itemName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getItemNames",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "includeHiddenFiles",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getItemNames",
+      "comment": "",
+      "javadoc": "@see ghidra.framework.store.FileSystem#getItemNames(java.lang.String)",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String[]",
+        "type_short": "java.lang.String[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getItem",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalFolderItem",
+        "type_short": "LocalFolderItem",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "fileIdChanged",
+      "comment": "Notification that FileID has been changed within propertyFile",
+      "javadoc": "Notification that FileID has been changed within propertyFile\n@param propertyFile\n@param oldFileId\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "propertyFile",
+          "type_long": "ghidra.util.PropertyFile",
+          "type_short": "PropertyFile",
+          "comment": ""
+        },
+        {
+          "name": "oldFileId",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getItem",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fileID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.FolderItem",
+        "type_short": "FolderItem",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "fileID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "bufferFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "resetDatabaseId",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalDatabaseItem",
+        "type_short": "LocalDatabaseItem",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createTemporaryDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "fileID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "bufferFile",
+          "type_long": "db.buffers.BufferFile",
+          "type_short": "BufferFile",
+          "comment": ""
+        },
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "resetDatabaseId",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalDatabaseItem",
+        "type_short": "LocalDatabaseItem",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createDatabase",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "fileID",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "bufferSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "projectPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "db.buffers.LocalManagedBufferFile",
+        "type_short": "LocalManagedBufferFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createDataFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "istream",
+          "type_long": "java.io.InputStream",
+          "type_short": "InputStream",
+          "comment": ""
+        },
+        {
+          "name": "comment",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "contentType",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalDataFile",
+        "type_short": "LocalDataFile",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "createFile",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parentPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "packedFile",
+          "type_long": "java.io.File",
+          "type_short": "File",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        },
+        {
+          "name": "user",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.framework.store.local.LocalDatabaseItem",
+        "type_short": "LocalDatabaseItem",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "moveItem",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newFolderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "folderExists",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "fileExists",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addFileSystemListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.store.FileSystemListener",
+          "type_short": "FileSystemListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeFileSystemListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "ghidra.framework.store.FileSystemListener",
+          "type_short": "FileSystemListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getListener",
+      "comment": "Returns file system listener.",
+      "javadoc": "Returns file system listener.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.framework.store.FileSystemListener",
+        "type_short": "FileSystemListener",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxNameLength",
+      "comment": "",
+      "javadoc": "@return the maximum name length permitted for folders or items.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the maximum name length permitted for folders or items."
+      },
+      "throws": []
+    },
+    {
+      "name": "testValidName",
+      "comment": "Validate a folder/item name or path.",
+      "javadoc": "Validate a folder/item name or path.\n@param name folder or item name\n@param isPath if true name represents full path\n@throws InvalidNameException if name is invalid",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "folder or item name"
+        },
+        {
+          "name": "isPath",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true name represents full path"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.InvalidNameException",
+          "type_short": "InvalidNameException",
+          "comment": "if name is invalid"
+        }
+      ]
+    },
+    {
+      "name": "isValidNameCharacter",
+      "comment": "",
+      "javadoc": "@return true if c is a valid character within the FileSystem.",
+      "static": true,
+      "params": [
+        {
+          "name": "c",
+          "type_long": "char",
+          "type_short": "char",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if c is a valid character within the FileSystem."
+      },
+      "throws": []
+    },
+    {
+      "name": "deleteEmptyVersionedFolders",
+      "comment": "Remove the directory which corresponds to the specified folder path if it is empty.\n If folder directory is removed, this method is invoked recursively for parent folder\n path which may also be removed if it is empty.\n This method is intended for use with a versioned file system\n which only retains folders if they contain one or more items or sub-folders.",
+      "javadoc": "Remove the directory which corresponds to the specified folder path if it is empty.\n If folder directory is removed, this method is invoked recursively for parent folder\n path which may also be removed if it is empty.\n This method is intended for use with a versioned file system\n which only retains folders if they contain one or more items or sub-folders.\n@param folderPath folder path",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "folder path"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "itemDeleted",
+      "comment": "Notify the filesystem that the property file and associated data files for\n an item have been removed from the filesystem.",
+      "javadoc": "Notify the filesystem that the property file and associated data files for\n an item have been removed from the filesystem.\n@param folderPath\n@param itemName\n@throws IOException",
+      "static": false,
+      "params": [
+        {
+          "name": "folderPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "itemName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getPath",
+      "comment": "Returns the full path for a specific folder or item",
+      "javadoc": "Returns the full path for a specific folder or item\n@param parentPath full parent path\n@param name child folder or item name",
+      "static": true,
+      "params": [
+        {
+          "name": "parentPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "full parent path"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "child folder or item name"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getParentPath",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isShared",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "migrationInProgress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isHiddenDirName",
+      "comment": "Determines if the specified storage directory name corresponds to a \n hidden directory (includes both system and application hidden directories).",
+      "javadoc": "Determines if the specified storage directory name corresponds to a \n hidden directory (includes both system and application hidden directories).\n@param name directory name as it appears on storage file system.\n@return true if name is a hidden name, else false",
+      "static": true,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "directory name as it appears on storage file system."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if name is a hidden name, else false"
+      },
+      "throws": []
+    },
+    {
+      "name": "escapeHiddenDirPrefixChars",
+      "comment": "Escape hidden prefix chars in name",
+      "javadoc": "Escape hidden prefix chars in name\n@param name\n@return escaped name",
+      "static": true,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "escaped name"
+      },
+      "throws": []
+    },
+    {
+      "name": "unescapeHiddenDirPrefixChars",
+      "comment": "Unescape a non-hidden directory name",
+      "javadoc": "Unescape a non-hidden directory name\n@param name\n@return unescaped name or null if name is a hidden name",
+      "static": true,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "unescaped name or null if name is a hidden name"
+      },
+      "throws": []
+    },
+    {
+      "name": "countHiddenDirPrefixChars",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

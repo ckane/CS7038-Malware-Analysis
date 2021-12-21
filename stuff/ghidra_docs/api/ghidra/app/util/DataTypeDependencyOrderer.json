@@ -1,0 +1,385 @@
+{
+  "name": "DataTypeDependencyOrderer",
+  "comment": "",
+  "javadoc": "",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "processed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.Boolean",
+      "type_short": "Boolean",
+      "constant_value": null
+    },
+    {
+      "name": "dtManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataTypeManager",
+      "type_short": "DataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "inputSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cghidra.app.util.DataTypeDependencyOrderer.Entry\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "procSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cghidra.app.util.DataTypeDependencyOrderer.Entry\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "doneSet",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cghidra.app.util.DataTypeDependencyOrderer.Entry\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "structList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.data.DataType\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "orderedDependentsList",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.data.DataType\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "whoIDependOn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cghidra.app.util.DataTypeDependencyOrderer.Entry,java.util.Set\u003cghidra.app.util.DataTypeDependencyOrderer.Entry\u003e\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "whoDependsOnMe",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cghidra.app.util.DataTypeDependencyOrderer.Entry,java.util.Set\u003cghidra.app.util.DataTypeDependencyOrderer.Entry\u003e\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "noDependentsQueue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.LinkedList\u003cghidra.app.util.DataTypeDependencyOrderer.Entry\u003e",
+      "type_short": "LinkedList",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "createEntry",
+      "comment": "Associate a DataType with its ID (relative to the DataTypeManager) in an Entry",
+      "javadoc": "Associate a DataType with its ID (relative to the DataTypeManager) in an Entry\n@param dt is the raw DataType\n@return the Entry with both DataType and ID",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "is the raw DataType"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.DataTypeDependencyOrderer.Entry",
+        "type_short": "Entry",
+        "comment": "the Entry with both DataType and ID"
+      },
+      "throws": []
+    },
+    {
+      "name": "addType",
+      "comment": "This method adds a single DataTypes to the input DataType list and\n  marks the data as dirty (all must need recalculated).",
+      "javadoc": "This method adds a single DataTypes to the input DataType list and\n  marks the data as dirty (all must need recalculated).\n@param dataType A single DataType to add to the input DataType list.",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "A single DataType to add to the input DataType list."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTypeList",
+      "comment": "This method adds a list of DataTypes to the input DataType list and\n  marks the data as dirty (all must need recalculated).",
+      "javadoc": "This method adds a list of DataTypes to the input DataType list and\n  marks the data as dirty (all must need recalculated).\n@param dtlist List of DataTypes to add to the input DataType list.",
+      "static": false,
+      "params": [
+        {
+          "name": "dtlist",
+          "type_long": "java.util.ArrayList\u003cghidra.program.model.data.DataType\u003e",
+          "type_short": "ArrayList",
+          "comment": "List of DataTypes to add to the input DataType list."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeType",
+      "comment": "This method removes a DataType from the list and\n  marks the data as dirty (all must need recalculated).",
+      "javadoc": "This method removes a DataType from the list and\n  marks the data as dirty (all must need recalculated).\n@param dataType The DataType to remove from the input list",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "The DataType to remove from the input list"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "This method clears the input DataType list and\n  marks the data as dirty (all must need recalculated).",
+      "javadoc": "This method clears the input DataType list and\n  marks the data as dirty (all must need recalculated).",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "This constructor starts with an empty DataType list, which can be added to.",
+      "javadoc": "This constructor starts with an empty DataType list, which can be added to.\n@param dtManager the manager used to extract IDs",
+      "static": false,
+      "params": [
+        {
+          "name": "dtManager",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "the manager used to extract IDs"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "This constructor takes an initial DataType list.",
+      "javadoc": "This constructor takes an initial DataType list.\n@param dtManager the manager used to extract IDs\n@param dtlist Initial list of DataTypes to order",
+      "static": false,
+      "params": [
+        {
+          "name": "dtManager",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "the manager used to extract IDs"
+        },
+        {
+          "name": "dtlist",
+          "type_long": "java.util.ArrayList\u003cghidra.program.model.data.DataType\u003e",
+          "type_short": "ArrayList",
+          "comment": "Initial list of DataTypes to order"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAcyclicDependencyLists",
+      "comment": "This method returns two lists:\n 1) is the set of structs. Intended for outputting zero-sized definitions.\n 2) is the acyclic dependency list (broken at structs and pointers to structs)\n This works (and the dependency graph is able to be broken of cycles) because\n  structures can be given zero size to start with and then later updated with full size.",
+      "javadoc": "This method returns two lists:\n 1) is the set of structs. Intended for outputting zero-sized definitions.\n 2) is the acyclic dependency list (broken at structs and pointers to structs)\n This works (and the dependency graph is able to be broken of cycles) because\n  structures can be given zero size to start with and then later updated with full size.\n@return pair of arrayLists--one of structs and one complete list of dependents",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "generic.stl.Pair\u003cjava.util.ArrayList\u003cghidra.program.model.data.DataType\u003e,java.util.ArrayList\u003cghidra.program.model.data.DataType\u003e\u003e",
+        "type_short": "Pair",
+        "comment": "pair of arrayLists--one of structs and one complete list of dependents"
+      },
+      "throws": []
+    },
+    {
+      "name": "getStructList",
+      "comment": "This method returns the ArrayList of structs\n  to structs found in the input list, intended\n  to be used initially as zero-sized structures.",
+      "javadoc": "This method returns the ArrayList of structs\n  to structs found in the input list, intended\n  to be used initially as zero-sized structures.\n@return An arrayList of structs",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.ArrayList\u003cghidra.program.model.data.DataType\u003e",
+        "type_short": "ArrayList",
+        "comment": "An arrayList of structs"
+      },
+      "throws": []
+    },
+    {
+      "name": "getDependencyList",
+      "comment": "This returns the acyclic dependency list (broken at structs and pointers to structs)",
+      "javadoc": "This returns the acyclic dependency list (broken at structs and pointers to structs)\n@return An ArrayList of dependents.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.ArrayList\u003cghidra.program.model.data.DataType\u003e",
+        "type_short": "ArrayList",
+        "comment": "An ArrayList of dependents."
+      },
+      "throws": []
+    },
+    {
+      "name": "dumpDebug",
+      "comment": "",
+      "javadoc": "@return String of debug data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "String of debug data."
+      },
+      "throws": []
+    },
+    {
+      "name": "processDependencyLists",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createAcyclicDependencyLists",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addDependent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.app.util.DataTypeDependencyOrderer.Entry",
+          "type_short": "Entry",
+          "comment": ""
+        },
+        {
+          "name": "subType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addDependent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.app.util.DataTypeDependencyOrderer.Entry",
+          "type_short": "Entry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeMyDependentsEdgesToMe",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.app.util.DataTypeDependencyOrderer.Entry",
+          "type_short": "Entry",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

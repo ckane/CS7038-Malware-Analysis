@@ -1,0 +1,667 @@
+{
+  "name": "DynamicHash",
+  "comment": "A hash utility to uniquely identify a temporary Varnode in data-flow\n\n Most Varnodes can be identified within the data-flow graph by their storage address\n and the address of the PcodeOp that defines them.  For temporary registers,\n this does not work because the storage address is ephemeral. This class allows\n Varnodes like temporary registers (and constants) to be robustly identified\n by hashing details of the local data-flow.\n\n This class, when presented with a Varnode (via constructor), calculates a hash (getHash())\n and an address (getAddress()) of the PcodeOp most closely associated with the Varnode,\n either the defining op or the op directly reading the Varnode.\n There are actually four hash variants that can be calculated, labeled 0, 1, 2, or 3,\n which incrementally hash in a larger portion of data-flow.",
+  "javadoc": "A hash utility to uniquely identify a temporary Varnode in data-flow\n\n Most Varnodes can be identified within the data-flow graph by their storage address\n and the address of the PcodeOp that defines them.  For temporary registers,\n this does not work because the storage address is ephemeral. This class allows\n Varnodes like temporary registers (and constants) to be robustly identified\n by hashing details of the local data-flow.\n\n This class, when presented with a Varnode (via constructor), calculates a hash (getHash())\n and an address (getAddress()) of the PcodeOp most closely associated with the Varnode,\n either the defining op or the op directly reading the Varnode.\n There are actually four hash variants that can be calculated, labeled 0, 1, 2, or 3,\n which incrementally hash in a larger portion of data-flow.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "transtable",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    },
+    {
+      "name": "vnproc",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "opproc",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "opedgeproc",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "markop",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.pcode.PcodeOp\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "markvn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.pcode.Varnode\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "vnedge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.pcode.Varnode\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "opedge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.ArrayList\u003cghidra.program.model.pcode.DynamicHash.ToOpEdge\u003e",
+      "type_short": "ArrayList",
+      "constant_value": null
+    },
+    {
+      "name": "markset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashSet\u003cjava.lang.Object\u003e",
+      "type_short": "HashSet",
+      "constant_value": null
+    },
+    {
+      "name": "addrresult",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "hash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a hash of the given Varnode with a specific hash method.",
+      "javadoc": "Construct a hash of the given Varnode with a specific hash method.\n@param root is the given Varnode\n@param method is the method (0, 1, 2, 3)",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": "is the given Varnode"
+        },
+        {
+          "name": "method",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the method (0, 1, 2, 3)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a unique hash for the given Varnode, which must be in\n a syntax tree.  The hash method is cycled into a uniquely identifying one is found.",
+      "javadoc": "Construct a unique hash for the given Varnode, which must be in\n a syntax tree.  The hash method is cycled into a uniquely identifying one is found.\n@param root is the given Varnode\n@param fd is the PcodeSyntaxTree containing the Varnode",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": "is the given Varnode"
+        },
+        {
+          "name": "fd",
+          "type_long": "ghidra.program.model.pcode.PcodeSyntaxTree",
+          "type_short": "PcodeSyntaxTree",
+          "comment": "is the PcodeSyntaxTree containing the Varnode"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a level 0 hash on the input Varnode to the given PcodeOp\n \n The PcodeOp can be raw, no linked into a PcodeSyntaxTree",
+      "javadoc": "Construct a level 0 hash on the input Varnode to the given PcodeOp\n \n The PcodeOp can be raw, no linked into a PcodeSyntaxTree\n@param op is the given PcodeOp\n@param inputIndex is the index of the input Varnode to hash",
+      "static": false,
+      "params": [
+        {
+          "name": "op",
+          "type_long": "ghidra.program.model.pcode.PcodeOp",
+          "type_short": "PcodeOp",
+          "comment": "is the given PcodeOp"
+        },
+        {
+          "name": "inputIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the index of the input Varnode to hash"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clear",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "calcHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        },
+        {
+          "name": "method",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "uniqueHash",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        },
+        {
+          "name": "fd",
+          "type_long": "ghidra.program.model.pcode.PcodeSyntaxTree",
+          "type_short": "PcodeSyntaxTree",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildVnUp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vn",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildVnDown",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "vn",
+          "type_long": "ghidra.program.model.pcode.Varnode",
+          "type_short": "Varnode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildOpUp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "op",
+          "type_long": "ghidra.program.model.pcode.PcodeOp",
+          "type_short": "PcodeOp",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "buildOpDown",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "op",
+          "type_long": "ghidra.program.model.pcode.PcodeOp",
+          "type_short": "PcodeOp",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "gatherUnmarkedVn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "gatherUnmarkedOp",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findVarnode",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "fd",
+          "type_long": "ghidra.program.model.pcode.PcodeSyntaxTree",
+          "type_short": "PcodeSyntaxTree",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.Varnode",
+        "type_short": "Varnode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "gatherFirstLevelVars",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "varlist",
+          "type_long": "java.util.ArrayList\u003cghidra.program.model.pcode.Varnode\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        },
+        {
+          "name": "fd",
+          "type_long": "ghidra.program.model.pcode.PcodeSyntaxTree",
+          "type_short": "PcodeSyntaxTree",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSlotFromHash",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMethodFromHash",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getOpCodeFromHash",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPositionFromHash",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTotalFromHash",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getIsNotAttached",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearTotalPosition",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "h",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "matchWithPossibleExtension",
+      "comment": "Test that extendval is equal to val1, where extendval may be an extension",
+      "javadoc": "Test that extendval is equal to val1, where extendval may be an extension\n@param val1 is the value that needs to be matched\n@param size is the number of bytes in the value to be matched\n@param extendval is the possibly extended value\n@return true if they are equal",
+      "static": true,
+      "params": [
+        {
+          "name": "val1",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the value that needs to be matched"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the number of bytes in the value to be matched"
+        },
+        {
+          "name": "extendval",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "is the possibly extended value"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if they are equal"
+      },
+      "throws": []
+    },
+    {
+      "name": "calcConstantHash",
+      "comment": "Given a constant value accessed as an operand by a particular instruction,\n calculate a (level 0) hash for (any) corresponding constant varnode",
+      "javadoc": "Given a constant value accessed as an operand by a particular instruction,\n calculate a (level 0) hash for (any) corresponding constant varnode\n@param instr is the instruction referencing the constant\n@param value of the constant\n@return array of hash values (may be zero length)",
+      "static": true,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "is the instruction referencing the constant"
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "of the constant"
+        }
+      ],
+      "return": {
+        "type_long": "long[]",
+        "type_short": "long[]",
+        "comment": "array of hash values (may be zero length)"
+      },
+      "throws": []
+    }
+  ]
+}

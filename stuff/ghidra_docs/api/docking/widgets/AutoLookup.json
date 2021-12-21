@@ -1,0 +1,436 @@
+{
+  "name": "AutoLookup",
+  "comment": "A class that holds the logic and state for finding matching rows in a widget when a user types\n in the widget.   This class was designed for row-based widgets, such as tables and lists.",
+  "javadoc": "A class that holds the logic and state for finding matching rows in a widget when a user types\n in the widget.   This class was designed for row-based widgets, such as tables and lists.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "KEY_TYPING_TIMEOUT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "800"
+    },
+    {
+      "name": "MAX_SEARCH_ROWS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "50000"
+    },
+    {
+      "name": "keyTimeout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "keyTimeoutPredicate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.function.Predicate\u003cjava.lang.Long\u003e",
+      "type_short": "Predicate",
+      "constant_value": null
+    },
+    {
+      "name": "lastLookup",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.AutoLookup.AutoLookupItem",
+      "type_short": "AutoLookupItem",
+      "constant_value": null
+    },
+    {
+      "name": "lookupColumn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCurrentRow",
+      "comment": "Returns the currently selected row",
+      "javadoc": "Returns the currently selected row\n@return the row",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the row"
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowCount",
+      "comment": "Returns the total number of rows",
+      "javadoc": "Returns the total number of rows\n@return the row count",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the row count"
+      },
+      "throws": []
+    },
+    {
+      "name": "getValueString",
+      "comment": "Returns a string representation of the item at the given row and column.  The text \n should match what the user sees.",
+      "javadoc": "Returns a string representation of the item at the given row and column.  The text \n should match what the user sees.\n@param row the row\n@param col the column\n@return the text",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the row"
+        },
+        {
+          "name": "col",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the column"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the text"
+      },
+      "throws": []
+    },
+    {
+      "name": "isSorted",
+      "comment": "Returns true if the given column is sorted.  This class will use a binary search if the\n given column is sorted.  Otherwise, a brute-force search will be used.",
+      "javadoc": "Returns true if the given column is sorted.  This class will use a binary search if the\n given column is sorted.  Otherwise, a brute-force search will be used.\n@param column the column\n@return true if sorted",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the column"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if sorted"
+      },
+      "throws": []
+    },
+    {
+      "name": "canBinarySearchColumn",
+      "comment": "A method that subclasses can override to affect whether this class uses a binary search\n for a particular column",
+      "javadoc": "A method that subclasses can override to affect whether this class uses a binary search\n for a particular column\n@param column the column\n@return true if the binary search algorithm will work on the given column",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the column"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the binary search algorithm will work on the given column"
+      },
+      "throws": []
+    },
+    {
+      "name": "isSortedAscending",
+      "comment": "Returns true if the currently sorted column is sorted ascending.  This is used in \n conjunction with #isSorted(int).  If that method returns false, then this method\n will not be called.",
+      "javadoc": "Returns true if the currently sorted column is sorted ascending.  This is used in \n conjunction with {@link #isSorted(int)}.  If that method returns false, then this method\n will not be called.\n@return true if sorted ascending",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if sorted ascending"
+      },
+      "throws": []
+    },
+    {
+      "name": "matchFound",
+      "comment": "This method will be called when a match for the call to #keyTyped(KeyEvent) is \n found",
+      "javadoc": "This method will be called when a match for the call to {@link #keyTyped(KeyEvent)} is \n found\n@param row the matching row",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the matching row"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTimeout",
+      "comment": "Sets the delay between keystrokes after which each keystroke is considered a new lookup",
+      "javadoc": "Sets the delay between keystrokes after which each keystroke is considered a new lookup\n@param timeout the timeout",
+      "static": false,
+      "params": [
+        {
+          "name": "timeout",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the timeout"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setColumn",
+      "comment": "Sets the column that is searched when a lookup is performed",
+      "javadoc": "Sets the column that is searched when a lookup is performed\n@param column the column",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the column"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTimeoutPredicate",
+      "comment": "Sets the logic for deciding whether the elapsed time between keystrokes is enough to\n trigger a new auto lookup or to continue with the previous match.\n \n This method is intended for tests that need precise control over the timeout mechanism.",
+      "javadoc": "Sets the logic for deciding whether the elapsed time between keystrokes is enough to\n trigger a new auto lookup or to continue with the previous match.\n \n \u003cp\u003eThis method is intended for tests that need precise control over the timeout mechanism.\n@param p the predicate that takes the amount of elapsed time\n@see #setTimeout(long)",
+      "static": false,
+      "params": [
+        {
+          "name": "p",
+          "type_long": "java.util.function.Predicate\u003cjava.lang.Long\u003e",
+          "type_short": "Predicate",
+          "comment": "the predicate that takes the amount of elapsed time"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "keyTyped",
+      "comment": "Clients call this method when the user types keys",
+      "javadoc": "Clients call this method when the user types keys\n@param e the key event",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": "the key event"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "lookupText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "textMatches",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "row",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "col",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isIgnorableKeyEvent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.KeyEvent",
+          "type_short": "KeyEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUnmodifiedOrShift",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "modifiers",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoLookupLinear",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "autoLookupBinary",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "binarySearch",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

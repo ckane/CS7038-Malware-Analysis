@@ -1,0 +1,2619 @@
+{
+  "name": "GTree",
+  "comment": "Class for creating a JTree that supports filtering, threading, and a progress bar.",
+  "javadoc": "Class for creating a JTree that supports filtering, threading, and a progress bar.",
+  "static": false,
+  "implements": [
+    "ghidra.util.task.BusyListener"
+  ],
+  "extends": "javax.swing.JPanel",
+  "fields": [
+    {
+      "name": "tree",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTree.AutoScrollTree",
+      "type_short": "AutoScrollTree",
+      "constant_value": null
+    },
+    {
+      "name": "model",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.internal.GTreeModel",
+      "type_short": "GTreeModel",
+      "constant_value": null
+    },
+    {
+      "name": "realModelRootNode",
+      "comment": "This is the root node of the tree\u0027s data model.  It may or may not be the root node\n that is currently being displayed by the tree. If there is currently a \n filter applied, then then the displayed root node will be a clone whose children have been\n trimmed to only those that match the filter.  By keeping this variable around, we can give\n this node to clients, regardless of the root node visible in the tree.",
+      "javadoc": "This is the root node of the tree\u0027s data model.  It may or may not be the root node\n that is currently being displayed by the tree. If there is currently a \n filter applied, then then the displayed root node will be a clone whose children have been\n trimmed to only those that match the filter.  By keeping this variable around, we can give\n this node to clients, regardless of the root node visible in the tree.",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTreeNode",
+      "type_short": "GTreeNode",
+      "constant_value": null
+    },
+    {
+      "name": "realViewRootNode",
+      "comment": "This is the root that is currently being displayed. This node will be either exactly the \n same instance as the realModelRootNode (if no filter has been applied) or it will be the\n filtered clone of the realModelRootNode.",
+      "javadoc": "This is the root that is currently being displayed. This node will be either exactly the \n same instance as the realModelRootNode (if no filter has been applied) or it will be the\n filtered clone of the realModelRootNode.",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTreeNode",
+      "type_short": "GTreeNode",
+      "constant_value": null
+    },
+    {
+      "name": "rootParent",
+      "comment": "The rootParent is a node that is assigned as the parent to the realRootNode. It\u0027s primary purpose is\n to allow nodes access to the tree. It overrides the getTree() method on GTreeNode to return\n this tree. This eliminated the need for clients to create special root nodes that had \n public setTree/getTree methods.",
+      "javadoc": "The rootParent is a node that is assigned as the parent to the realRootNode. It\u0027s primary purpose is\n to allow nodes access to the tree. It overrides the getTree() method on GTreeNode to return\n this tree. This eliminated the need for clients to create special root nodes that had \n public setTree/getTree methods.",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTreeRootParentNode",
+      "type_short": "GTreeRootParentNode",
+      "constant_value": null
+    },
+    {
+      "name": "scrollPane",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JScrollPane",
+      "type_short": "JScrollPane",
+      "constant_value": null
+    },
+    {
+      "name": "renderer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.support.GTreeRenderer",
+      "type_short": "GTreeRenderer",
+      "constant_value": null
+    },
+    {
+      "name": "transformer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.FilterTransformer\u003cdocking.widgets.tree.GTreeNode\u003e",
+      "type_short": "FilterTransformer",
+      "constant_value": null
+    },
+    {
+      "name": "mouseListenerDelegate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.JTreeMouseListenerDelegate",
+      "type_short": "JTreeMouseListenerDelegate",
+      "constant_value": null
+    },
+    {
+      "name": "dragNDropHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.support.GTreeDragNDropHandler",
+      "type_short": "GTreeDragNDropHandler",
+      "constant_value": null
+    },
+    {
+      "name": "isFilteringEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "threadLocalMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.ThreadLocal\u003cghidra.util.task.TaskMonitor\u003e",
+      "type_short": "ThreadLocal",
+      "constant_value": null
+    },
+    {
+      "name": "worker",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.worker.PriorityWorker",
+      "type_short": "PriorityWorker",
+      "constant_value": null
+    },
+    {
+      "name": "showTimer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.Timer",
+      "type_short": "Timer",
+      "constant_value": null
+    },
+    {
+      "name": "monitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.TaskMonitorComponent",
+      "type_short": "TaskMonitorComponent",
+      "constant_value": null
+    },
+    {
+      "name": "progressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JComponent",
+      "type_short": "JComponent",
+      "constant_value": null
+    },
+    {
+      "name": "mainPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "javax.swing.JPanel",
+      "type_short": "JPanel",
+      "constant_value": null
+    },
+    {
+      "name": "filterRestoreTreeState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTreeState",
+      "type_short": "GTreeState",
+      "constant_value": null
+    },
+    {
+      "name": "lastFilterTask",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTreeFilterTask",
+      "type_short": "GTreeFilterTask",
+      "constant_value": null
+    },
+    {
+      "name": "uniquePreferenceKey",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "filter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.support.GTreeFilter",
+      "type_short": "GTreeFilter",
+      "constant_value": null
+    },
+    {
+      "name": "filterProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.tree.GTreeFilterProvider",
+      "type_short": "GTreeFilterProvider",
+      "constant_value": null
+    },
+    {
+      "name": "filterUpdateManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.task.SwingUpdateManager",
+      "type_short": "SwingUpdateManager",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a GTree with the given root node.  The created GTree will use a threaded model\n for performing tasks, which allows the GUI to be responsive for reaaaaaaaaly big trees.",
+      "javadoc": "Creates a GTree with the given root node.  The created GTree will use a threaded model\n for performing tasks, which allows the GUI to be responsive for reaaaaaaaaly big trees.\n@param root The root node of the tree.",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "The root node of the tree."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setThreadLocalMonitor",
+      "comment": "Should be called by threads running GTreeTasks.",
+      "javadoc": "Should be called by threads running {@link GTreeTask}s.\n@param monitor the monitor being used for the currently running task.\n@see #getThreadLocalMonitor()",
+      "static": false,
+      "params": [
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the monitor being used for the currently running task."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getThreadLocalMonitor",
+      "comment": "Returns the monitor in associated with the GTree for the calling thread.  This method is\n designed to be used by slow loading nodes that are loading off the Swing thread.\n Some of the loading methods are called by the slow loading node at a point when it is\n not passed a monitor (like when clients ask how many children the node has).\n \n When a GTreeTask is run in thread from a thread pool, it registers its monitor\n (which is different than the GTree\u0027s) with this tree.  Then, if a node performing work,\n like loading, needs a monitor, it can call #getThreadLocalMonitor() in order to\n get the monitor that was registered with that thread.\n \n This method is necessary because the concurrent library used by this tree will provide a\n unique monitor for each task that is run, which will be different (but connected) to the\n monitor created by this tree.\n \n If this method is called from a client other than a GTreeTask, then a dummy\n monitor will be returned.",
+      "javadoc": "Returns the monitor in associated with the GTree for the calling thread.  This method is\n designed to be used by slow loading nodes that are loading \u003cb\u003eoff the Swing thread\u003c/b\u003e.\n Some of the loading methods are called by the slow loading node at a point when it is\n not passed a monitor (like when clients ask how many children the node has).\n \u003cp\u003e\n When a {@link GTreeTask} is run in thread from a thread pool, it registers its monitor\n (which is different than the GTree\u0027s) with this tree.  Then, if a node performing work,\n like loading, needs a monitor, it can call {@link #getThreadLocalMonitor()} in order to\n get the monitor that was registered with that thread.\n \u003cP\u003e\n This method is necessary because the concurrent library used by this tree will provide a\n unique monitor for each task that is run, which will be different (but connected) to the\n monitor created by this tree.\n \u003cp\u003e\n If this method is called from a client other than a {@link GTreeTask}, then a dummy\n monitor will be returned.\n@return the monitor associated with the calling thread; null if the monitor was not set\n@see #setThreadLocalMonitor(TaskMonitor)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.util.task.TaskMonitor",
+        "type_short": "TaskMonitor",
+        "comment": "the monitor associated with the calling thread; null if the monitor was not set"
+      },
+      "throws": []
+    },
+    {
+      "name": "setEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "enabled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setEventsEnabled",
+      "comment": "Turns tree event notifications on/off",
+      "javadoc": "Turns tree event notifications on/off\n@param b true to enable events, false to disable events",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to enable events, false to disable events"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDragNDropHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dragNDropHandler",
+          "type_long": "docking.widgets.tree.support.GTreeDragNDropHandler",
+          "type_short": "GTreeDragNDropHandler",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setTransferHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "handler",
+          "type_long": "javax.swing.TransferHandler",
+          "type_short": "TransferHandler",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDragNDropHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.support.GTreeDragNDropHandler",
+        "type_short": "GTreeDragNDropHandler",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCellRenderer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "renderer",
+          "type_long": "docking.widgets.tree.support.GTreeRenderer",
+          "type_short": "GTreeRenderer",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCellRenderer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.support.GTreeRenderer",
+        "type_short": "GTreeRenderer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDisposed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cancelWork",
+      "comment": "Signals that any multithreaded work should be cancelled.",
+      "javadoc": "Signals that any multithreaded work should be cancelled.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "filterChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "updateModelFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createMouseListenerDelegate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.JTreeMouseListenerDelegate",
+        "type_short": "JTreeMouseListenerDelegate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTreeState",
+      "comment": "Returns a state object that allows this tree to later restore its expanded and selected\n state.\n \n Note: See the usage note at the header of this class concerning how tree state\n is used relative to the equals() method.",
+      "javadoc": "Returns a state object that allows this tree to later restore its expanded and selected\n state.\n \u003cp\u003e\n \u003cb\u003eNote: \u003c/b\u003eSee the usage note at the header of this class concerning how tree state\n is used relative to the \u003ccode\u003eequals()\u003c/code\u003e method.\n@return the saved state",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeState",
+        "type_short": "GTreeState",
+        "comment": "the saved state"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTreeState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeState",
+        "type_short": "GTreeState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restoreTreeState",
+      "comment": "Restores the expanded and selected state of this tree to that contained in the given\n state object.\n \n Note: See the usage note at the header of this class concerning how tree state\n is used relative to the equals() method.",
+      "javadoc": "Restores the expanded and selected state of this tree to that contained in the given\n state object.\n \u003cp\u003e\n \u003cb\u003eNote: \u003c/b\u003eSee the usage note at the header of this class concerning how tree state\n is used relative to the \u003ccode\u003eequals()\u003c/code\u003e method.\n@param state the state to restore\n@see #getTreeState()\n@see #getTreeState(GTreeNode)",
+      "static": false,
+      "params": [
+        {
+          "name": "state",
+          "type_long": "docking.widgets.tree.GTreeState",
+          "type_short": "GTreeState",
+          "comment": "the state to restore"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveFilterRestoreState",
+      "comment": "Signal to the tree that it should record its expanded and selected state when a \n new filter is applied",
+      "javadoc": "Signal to the tree that it should record its expanded and selected state when a \n new filter is applied",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilterRestoreState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeState",
+        "type_short": "GTreeState",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearFilterRestoreState",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "expandedStateRestored",
+      "comment": "A method that subclasses can use to be notified when tree state has been restored.  This\n method is called after a major structural tree change has happened and the paths\n that should be opened have been opened.  Thus any other nodes are closed and can be\n disposed, if desired.",
+      "javadoc": "A method that subclasses can use to be notified when tree state has been restored.  This\n method is called after a major structural tree change has happened \u003cb\u003eand\u003c/b\u003e the paths\n that should be opened have been opened.  Thus any other nodes are closed and can be\n disposed, if desired.\n@param taskMonitor the TaskMonitor",
+      "static": false,
+      "params": [
+        {
+          "name": "taskMonitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the TaskMonitor"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExpandedPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cjavax.swing.tree.TreePath\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getExpandedPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cjavax.swing.tree.TreePath\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "expandTree",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "expandAll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "collapseAll",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "expandPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "expandPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "expandPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "paths",
+          "type_long": "javax.swing.tree.TreePath[]",
+          "type_short": "javax.swing.tree.TreePath[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "expandPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pathsList",
+          "type_long": "java.util.List\u003cjavax.swing.tree.TreePath\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearSelectionPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedNodes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "nodes",
+          "type_long": "docking.widgets.tree.GTreeNode[]",
+          "type_short": "docking.widgets.tree.GTreeNode[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedNodes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "nodes",
+          "type_long": "java.util.Collection\u003cdocking.widgets.tree.GTreeNode\u003e",
+          "type_short": "Collection",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectionPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "paths",
+          "type_long": "javax.swing.tree.TreePath[]",
+          "type_short": "javax.swing.tree.TreePath[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectionPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "pathsList",
+          "type_long": "java.util.List\u003cjavax.swing.tree.TreePath\u003e",
+          "type_short": "List",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectionPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedNodeByNamePath",
+      "comment": "A convenience method to select a node by a path, starting with the tree root name, down\n each level until the desired node name.",
+      "javadoc": "A convenience method to select a node by a path, starting with the tree root name, down\n each level until the desired node name.\n@param namePath The path to select",
+      "static": false,
+      "params": [
+        {
+          "name": "namePath",
+          "type_long": "java.lang.String[]",
+          "type_short": "java.lang.String[]",
+          "comment": "The path to select"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSeletedNodeByName",
+      "comment": "A convenience method that allows clients that have created a new child node to select that\n node in the tree, without having to lookup the actual GTreeNode implementation.",
+      "javadoc": "A convenience method that allows clients that have created a new child node to select that\n node in the tree, without having to lookup the actual GTreeNode implementation.\n@param parentNode The parent containing a child by the given name\n@param childName The name of the child to select",
+      "static": false,
+      "params": [
+        {
+          "name": "parentNode",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "The parent containing a child by the given name"
+        },
+        {
+          "name": "childName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "The name of the child to select"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectedNodeByPathName",
+      "comment": "Selects the node that matches the each name in the given tree path.  It is worth noting\n that the items in the tree path themselves are not used to identify nodes, but the\n #toString() of those items will be used.",
+      "javadoc": "Selects the node that matches the each name in the given tree path.  It is worth noting\n that the items in the tree path themselves are not used to identify nodes, but the\n {@link #toString()} of those items will be used.\n@param treePath The path containing the names of the path of the node to select",
+      "static": false,
+      "params": [
+        {
+          "name": "treePath",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": "The path containing the names of the path of the node to select"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectionPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath[]",
+          "type_short": "javax.swing.tree.TreePath[]",
+          "comment": ""
+        },
+        {
+          "name": "origin",
+          "type_long": "docking.widgets.tree.support.GTreeSelectionEvent.EventOrigin",
+          "type_short": "EventOrigin",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isCollapsed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setHorizontalScrollPolicy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "policy",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getScrollPane",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JScrollPane",
+        "type_short": "JScrollPane",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setScrollableUnitIncrement",
+      "comment": "Sets the size of the scroll when mouse scrolling or pressing the scroll up/down buttons.\n Most clients will not need this method, as the default behavior of the tree is correct,\n which is to scroll based upon the size of the nodes (which is usually uniform and a\n single row in size).  However, some clients that have variable row height, with potentially\n large rows, may wish to change the scrolling behavior so that it is not too fast.",
+      "javadoc": "Sets the size of the scroll when mouse scrolling or pressing the scroll up/down buttons.\n Most clients will not need this method, as the default behavior of the tree is correct,\n which is to scroll based upon the size of the nodes (which is usually uniform and a\n single row in size).  However, some clients that have variable row height, with potentially\n large rows, may wish to change the scrolling behavior so that it is not too fast.\n@param increment the new (uniform) scroll increment.",
+      "static": false,
+      "params": [
+        {
+          "name": "increment",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the new (uniform) scroll increment."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModel",
+      "comment": "Returns the model for this tree",
+      "javadoc": "Returns the model for this tree\n@return the model for this tree",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.internal.GTreeModel",
+        "type_short": "GTreeModel",
+        "comment": "the model for this tree"
+      },
+      "throws": []
+    },
+    {
+      "name": "getJTree",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.JTree",
+        "type_short": "JTree",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewPosition",
+      "comment": "Returns the current viewport position of the scrollable tree.",
+      "javadoc": "Returns the current viewport position of the scrollable tree.\n@return the current viewport position of the scrollable tree.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Point",
+        "type_short": "Point",
+        "comment": "the current viewport position of the scrollable tree."
+      },
+      "throws": []
+    },
+    {
+      "name": "setViewPosition",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "p",
+          "type_long": "java.awt.Point",
+          "type_short": "Point",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewRect",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Rectangle",
+        "type_short": "Rectangle",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNodeForLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "x",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "y",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModelNodeForPath",
+      "comment": "Gets the model node for the given path. This is useful if the node that is in the path has\n been replaced by a new node that is equal, but a different instance.  One way this happens\n is if the tree is filtered and therefor the displayed nodes are clones of the model nodes.  This\n can also happen if the tree nodes are rebuilt for some reason.",
+      "javadoc": "Gets the model node for the given path. This is useful if the node that is in the path has\n been replaced by a new node that is equal, but a different instance.  One way this happens\n is if the tree is filtered and therefor the displayed nodes are clones of the model nodes.  This\n can also happen if the tree nodes are rebuilt for some reason.\n@param path the path of the node\n@return the corresponding model node in the tree.  If the tree is filtered the viewed node will\n be a clone of the corresponding model node.",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": "the path of the node"
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": "the corresponding model node in the tree.  If the tree is filtered the viewed node will\n be a clone of the corresponding model node."
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewNodeForPath",
+      "comment": "Gets the view node for the given path. This is useful to translate to a tree path that\n is valid for the currently displayed tree.  (Remember that if the tree is filtered,\n then the displayed nodes are clones of the model nodes.)",
+      "javadoc": "Gets the view node for the given path. This is useful to translate to a tree path that\n is valid for the currently displayed tree.  (Remember that if the tree is filtered,\n then the displayed nodes are clones of the model nodes.)\n@param path the path of the node\n@return the current node in the displayed (possibly filtered) tree",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": "the path of the node"
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": "the current node in the displayed (possibly filtered) tree"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNodeForPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "root",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        },
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setActiveDropTargetNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilterText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilterProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeFilterProvider",
+        "type_short": "GTreeFilterProvider",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilterProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filterProvider",
+          "type_long": "docking.widgets.tree.GTreeFilterProvider",
+          "type_short": "GTreeFilterProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilterFieldEnabled",
+      "comment": "Disabled the filter text field, but allows the tree to still filter.  This is useful if\n you want to allow programmatic filtering, but to not allow the user to filter.",
+      "javadoc": "Disabled the filter text field, but allows the tree to still filter.  This is useful if\n you want to allow programmatic filtering, but to not allow the user to filter.\n@param enabled True makes the filter field editable; false makes it uneditable\n@see #setFilteringEnabled(boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "enabled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True makes the filter field editable; false makes it uneditable"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilteringEnabled",
+      "comment": "Disables all filtering performed by this tree.  Also, the filter field of the tree will\n be disabled.\n \n Use this method to temporarily disable filtering.",
+      "javadoc": "Disables all filtering performed by this tree.  Also, the filter field of the tree will\n be disabled.\n \u003cp\u003e\n Use this method to temporarily disable filtering.\n@param enabled True to allow normal filtering; false to disable all filtering\n@see #setFilterFieldEnabled(boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "enabled",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "True to allow normal filtering; false to disable all filtering"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setFilterVisible",
+      "comment": "Hides the filter field.  Filtering will still take place, as defined by the\n GTreeFilterProvider.",
+      "javadoc": "Hides the filter field.  Filtering will still take place, as defined by the\n {@link GTreeFilterProvider}.\n@param visible true to show the filter; false to hide it.\n@see #setFilteringEnabled(boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "visible",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true to show the filter; false to hide it."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFilteringEnabled",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDataTransformer",
+      "comment": "Sets a transformer object used to perform filtering.  This object is responsible for\n turning the tree\u0027s nodes into a list of strings that can be searched when filtering.",
+      "javadoc": "Sets a transformer object used to perform filtering.  This object is responsible for\n turning the tree\u0027s nodes into a list of strings that can be searched when filtering.\n@param transformer the transformer to set",
+      "static": false,
+      "params": [
+        {
+          "name": "transformer",
+          "type_long": "ghidra.util.FilterTransformer\u003cdocking.widgets.tree.GTreeNode\u003e",
+          "type_short": "FilterTransformer",
+          "comment": "the transformer to set"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilterField",
+      "comment": "Returns the filter text field in this tree.",
+      "javadoc": "Returns the filter text field in this tree.\n@return the filter text field in this tree.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.Component",
+        "type_short": "Component",
+        "comment": "the filter text field in this tree."
+      },
+      "throws": []
+    },
+    {
+      "name": "isMyJTree",
+      "comment": "Returns true if the given JTree is the actual JTree used by this GTree.",
+      "javadoc": "Returns true if the given JTree is the actual JTree used by this GTree.\n@param jTree the tree to test\n@return true if the given JTree is the actual JTree used by this GTree.",
+      "static": false,
+      "params": [
+        {
+          "name": "jTree",
+          "type_long": "javax.swing.JTree",
+          "type_short": "JTree",
+          "comment": "the tree to test"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the given JTree is the actual JTree used by this GTree."
+      },
+      "throws": []
+    },
+    {
+      "name": "setRootNode",
+      "comment": "Sets the root node for this tree. \n \n NOTE: if this method is not called from the Swing thread, then the root node will be set\n later on the Swing thread.  That is, this method will return before the work has been done.",
+      "javadoc": "Sets the root node for this tree. \n \u003cP\u003e\n NOTE: if this method is not called from the Swing thread, then the root node will be set\n later on the Swing thread.  That is, this method will return before the work has been done.\n@param rootNode The node to set as the new root.",
+      "static": false,
+      "params": [
+        {
+          "name": "rootNode",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "The node to set as the new root."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "swingSetFilteredRootNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "filteredRootNode",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "swingRestoreNonFilteredRootNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "swingSetModelRootNode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rootNode",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getModelRoot",
+      "comment": "This method returns the root node that was provided to the tree by the client, whether from the\n constructor or from #setRootNode(GTreeNode). \n This node represents the data model and always contains all the nodes regardless of any filter\n being applied. If a filter is applied to the tree, then this is not the actual root node being\n displayed by the JTree.",
+      "javadoc": "This method returns the root node that was provided to the tree by the client, whether from the\n constructor or from {@link #setRootNode(GTreeNode)}. \n This node represents the data model and always contains all the nodes regardless of any filter\n being applied. If a filter is applied to the tree, then this is not the actual root node being\n displayed by the {@link JTree}.\n@return the root node as provided by the client.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": "the root node as provided by the client."
+      },
+      "throws": []
+    },
+    {
+      "name": "getViewRoot",
+      "comment": "This method returns the root node currently being displayed by the JTree.  If there\n are no filters applied, then this will be the same as the model root (See #getModelRoot()).\n If a filter is applied, then this will be a clone of the model root that contains clones of all\n nodes matching the filter.",
+      "javadoc": "This method returns the root node currently being displayed by the {@link JTree}.  If there\n are no filters applied, then this will be the same as the model root (See {@link #getModelRoot()}).\n If a filter is applied, then this will be a clone of the model root that contains clones of all\n nodes matching the filter.\n@return the root node currently being display by the {@link JTree}",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.GTreeNode",
+        "type_short": "GTreeNode",
+        "comment": "the root node currently being display by the JTree"
+      },
+      "throws": []
+    },
+    {
+      "name": "printEvent",
+      "comment": "This method is useful for debugging tree problems.  Don\u0027t know where else to put it.",
+      "javadoc": "This method is useful for debugging tree problems.  Don\u0027t know where else to put it.\n@param out the output writer\n@param name use this to indicate what tree event occurred (\"node inserted\" \"node removed\", etc.)\n@param e the TreeModelEvent;",
+      "static": true,
+      "params": [
+        {
+          "name": "out",
+          "type_long": "java.io.PrintWriter",
+          "type_short": "PrintWriter",
+          "comment": "the output writer"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "use this to indicate what tree event occurred (\"node inserted\" \"node removed\", etc.)"
+        },
+        {
+          "name": "e",
+          "type_long": "javax.swing.event.TreeModelEvent",
+          "type_short": "TreeModelEvent",
+          "comment": "the TreeModelEvent;"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectionModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.tree.TreeSelectionModel",
+        "type_short": "TreeSelectionModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getGTSelectionModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.internal.GTreeSelectionModel",
+        "type_short": "GTreeSelectionModel",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setSelectionModel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "selectionModel",
+          "type_long": "docking.widgets.tree.internal.GTreeSelectionModel",
+          "type_short": "GTreeSelectionModel",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRowForPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "treePath",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPathForRow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "row",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.tree.TreePath",
+        "type_short": "TreePath",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectionPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.tree.TreePath",
+        "type_short": "TreePath",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectionPaths",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.tree.TreePath[]",
+        "type_short": "javax.swing.tree.TreePath[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isExpanded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "treePath",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isPathSelected",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "treePath",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isRootVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRootVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setShowsRootHandles",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "b",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scrollPathToVisible",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "treePath",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCellEditor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "javax.swing.CellEditor",
+        "type_short": "CellEditor",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPathForLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "x",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "y",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.tree.TreePath",
+        "type_short": "TreePath",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPathBounds",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Rectangle",
+        "type_short": "Rectangle",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRowHeight",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rowHeight",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addSelectionPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTreeExpansionListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.TreeExpansionListener",
+          "type_short": "TreeExpansionListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTreeExpansionListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.TreeExpansionListener",
+          "type_short": "TreeExpansionListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addGTreeSelectionListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.tree.support.GTreeSelectionListener",
+          "type_short": "GTreeSelectionListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeGTreeSelectionListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "docking.widgets.tree.support.GTreeSelectionListener",
+          "type_short": "GTreeSelectionListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addGTModelListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.TreeModelListener",
+          "type_short": "TreeModelListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeGTModelListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "javax.swing.event.TreeModelListener",
+          "type_short": "TreeModelListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setEditable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "editable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "startEditing",
+      "comment": "Requests that the node with the given name, in the given parent, be edited.  This \n operation is asynchronous.  This request will be buffered as needed to wait for \n the given node to be added to the parent, up to a timeout period.",
+      "javadoc": "Requests that the node with the given name, in the given parent, be edited.  This \n operation is asynchronous.  This request will be buffered as needed to wait for \n the given node to be added to the parent, up to a timeout period.\n@param parent the parent node\n@param childName the name of the child to edit",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "the parent node"
+        },
+        {
+          "name": "childName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the child to edit"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "startEditing",
+      "comment": "Requests that the node be edited.  This operation is asynchronous.",
+      "javadoc": "Requests that the node be edited.  This operation is asynchronous.\n@param child the node to edit",
+      "static": false,
+      "params": [
+        {
+          "name": "child",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "the node to edit"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addMouseListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.MouseListener",
+          "type_short": "MouseListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeMouseListener",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "listener",
+          "type_long": "java.awt.event.MouseListener",
+          "type_short": "MouseListener",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMouseListeners",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.awt.event.MouseListener[]",
+        "type_short": "java.awt.event.MouseListener[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCellEditor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "editor",
+          "type_long": "javax.swing.tree.TreeCellEditor",
+          "type_short": "TreeCellEditor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isPathEditable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "path",
+          "type_long": "javax.swing.tree.TreePath",
+          "type_short": "TreePath",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setPaintHandlesForLeafNodes",
+      "comment": "Passing a value of false signals to disable the JTree\u0027s default behavior\n of showing handles for leaf nodes until they are opened.",
+      "javadoc": "Passing a value of \u003ccode\u003efalse\u003c/code\u003e signals to disable the {@link JTree}\u0027s default behavior\n of showing handles for leaf nodes until they are opened.\n@param enable False to disable the default JTree behavior",
+      "static": false,
+      "params": [
+        {
+          "name": "enable",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "False to disable the default JTree behavior"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isRootAllowedToCollapse",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRootNodeAllowedToCollapse",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "allowed",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showProgressPanel",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "show",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "showProgress",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "delay",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setBusy",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "busy",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refilterNow",
+      "comment": "Causes the tree to refilter immediately (before this method returns)",
+      "javadoc": "Causes the tree to refilter immediately (before this method returns)",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refilterLater",
+      "comment": "Causes the tree to refilter some time later",
+      "javadoc": "Causes the tree to refilter some time later",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "refilterLater",
+      "comment": "Re-filters the tree if the newNode should be included in the current filter results. If\n the new node doesn\u0027t match the filter, there is no need to refilter the tree.",
+      "javadoc": "Re-filters the tree if the newNode should be included in the current filter results. If\n the new node doesn\u0027t match the filter, there is no need to refilter the tree.\n@param newNode the node that may cause the tree to refilter.",
+      "static": false,
+      "params": [
+        {
+          "name": "newNode",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": "the node that may cause the tree to refilter."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.tree.support.GTreeFilter",
+        "type_short": "GTreeFilter",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isFiltered",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasFilterText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFilterText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearFilter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runTask",
+      "comment": "Used to run tree tasks.  This method is not meant for general clients of this tree, but\n rather for tasks to tell the tree to perform subtasks.",
+      "javadoc": "Used to run tree tasks.  This method is not meant for general clients of this tree, but\n rather for tasks to tell the tree to perform subtasks.\n@param task the task to run",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "docking.widgets.tree.GTreeTask",
+          "type_short": "GTreeTask",
+          "comment": "the task to run"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runTask",
+      "comment": "Used to run simple GTree tasks that can be expressed as a MonitoredRunnable\n (or a lambda taking a TaskMonitor).\n ",
+      "javadoc": "Used to run simple GTree tasks that can be expressed as a {@link MonitoredRunnable}\n (or a lambda taking a {@link TaskMonitor}).\n \u003cp\u003e\n@param runnableTask {@link TaskMonitor} to watch and update with progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "runnableTask",
+          "type_long": "ghidra.util.task.MonitoredRunnable",
+          "type_short": "MonitoredRunnable",
+          "comment": "TaskMonitor to watch and update with progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "runBulkTask",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "task",
+          "type_long": "docking.widgets.tree.tasks.GTreeBulkTask",
+          "type_short": "GTreeBulkTask",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEditing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopEditing",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setNodeEditable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "child",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getToolTipText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "event",
+          "type_long": "java.awt.event.MouseEvent",
+          "type_short": "MouseEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearSizeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "recurseClearSizeCache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "node",
+          "type_long": "docking.widgets.tree.GTreeNode",
+          "type_short": "GTreeNode",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "generateFilterPreferenceKey",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getInceptionInformationFromTheFirstClassThatIsNotUs",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "stackTrace",
+          "type_long": "java.lang.StackTraceElement[]",
+          "type_short": "java.lang.StackTraceElement[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

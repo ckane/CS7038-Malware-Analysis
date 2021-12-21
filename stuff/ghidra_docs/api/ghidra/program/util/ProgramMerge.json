@@ -1,0 +1,3745 @@
+{
+  "name": "ProgramMerge",
+  "comment": "ProgramMerge is a class for merging the differences between two\n programs. The differences are merged from program2 into program1.\n Program1 is the program being modified by the merge. Program2 is source\n for obtaining differences to apply to program1.\n If name conflicts occur while merging, the item (for example, symbol) will\n be merged with a new name that consists of the original name followed by \"_conflict\"\n and a one up number.",
+  "javadoc": "\u003cCODE\u003eProgramMerge\u003c/CODE\u003e is a class for merging the differences between two\n programs. The differences are merged from program2 into program1.\n \u003cP\u003eProgram1 is the program being modified by the merge. Program2 is source\n for obtaining differences to apply to program1.\n \u003cP\u003eIf name conflicts occur while merging, the item (for example, symbol) will\n be merged with a new name that consists of the original name followed by \"_conflict\"\n and a one up number.",
+  "static": false,
+  "implements": [
+    "ghidra.util.prop.PropertyVisitor"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "SYMBOL_CONFLICT_SUFFIX",
+      "comment": "Suffix that is attached to a symbol name and then followed by a number to create a new unique symbol name.",
+      "javadoc": "Suffix that is attached to a symbol name and then followed by a number to create a new unique symbol name.",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "PROGRESS_COUNTER_GRANULARITY",
+      "comment": "Indicates how often to show progress counter changes.",
+      "javadoc": "Indicates how often to show progress counter changes.",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "129"
+    },
+    {
+      "name": "errorMsg",
+      "comment": "Message indicating errors that occurred during a merge.",
+      "javadoc": "Message indicating errors that occurred during a merge.",
+      "static": false,
+      "type_long": "java.lang.StringBuffer",
+      "type_short": "StringBuffer",
+      "constant_value": null
+    },
+    {
+      "name": "infoMsg",
+      "comment": "Message indicating non-error information about a merge.",
+      "javadoc": "Message indicating non-error information about a merge.",
+      "static": false,
+      "type_long": "java.lang.StringBuffer",
+      "type_short": "StringBuffer",
+      "constant_value": null
+    },
+    {
+      "name": "originToResultTranslator",
+      "comment": "The address translator converts an address from the origin program to an equivalent address in the result program.",
+      "javadoc": "The address translator converts an address from the origin program to an equivalent address in the result program.",
+      "static": false,
+      "type_long": "ghidra.program.util.AddressTranslator",
+      "type_short": "AddressTranslator",
+      "constant_value": null
+    },
+    {
+      "name": "resultProgram",
+      "comment": "The first program that will be modified by the merge.",
+      "javadoc": "The first program that will be modified by the merge.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "originProgram",
+      "comment": "The second program (used as read only) for obtaining differences to merge.",
+      "javadoc": "The second program (used as read only) for obtaining differences to merge.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "resultListing",
+      "comment": "The listing for the program being merged into.",
+      "javadoc": "The listing for the program being merged into.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "originListing",
+      "comment": "The listing for the program being merged from.",
+      "javadoc": "The listing for the program being merged from.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Listing",
+      "type_short": "Listing",
+      "constant_value": null
+    },
+    {
+      "name": "resultCu",
+      "comment": "The current code unit that is being modified when a user defined property is merged.",
+      "javadoc": "The current code unit that is being modified when a user defined property is merged.",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.CodeUnit",
+      "type_short": "CodeUnit",
+      "constant_value": null
+    },
+    {
+      "name": "propertyName",
+      "comment": "The current property name being merged, when merging user defined properties.",
+      "javadoc": "The current property name being merged, when merging user defined properties.",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "symbolMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.SymbolMerge",
+      "type_short": "SymbolMerge",
+      "constant_value": null
+    },
+    {
+      "name": "functionMerge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.util.FunctionMerge",
+      "type_short": "FunctionMerge",
+      "constant_value": null
+    },
+    {
+      "name": "conflictSymbolIDMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.datastruct.LongLongHashtable",
+      "type_short": "LongLongHashtable",
+      "constant_value": null
+    },
+    {
+      "name": "dupEquates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.program.util.ProgramMerge.DupEquate\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "ProgramMerge allows the merging of differences from program2\n into program1 (the result program).",
+      "javadoc": "\u003cCODE\u003eProgramMerge\u003c/CODE\u003e allows the merging of differences from program2\n into program1 (the result program).\n@param resultProgram The result program that will get modified by merge.\n@param originProgram The program (used as read only) for obtaining\n differences to merge.",
+      "static": false,
+      "params": [
+        {
+          "name": "resultProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "The result program that will get modified by merge."
+        },
+        {
+          "name": "originProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "The program (used as read only) for obtaining\n differences to merge."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "ProgramMerge allows the merging of differences from program2 (the origin program)\n into program1 (the result program).\n If the address translator is not a \"one for one translator\" then certain methods within\n this class will throw an UnsupportedOperationException.\n The destination program from the address translator should be the result program into\n which changes are made.\n The source program from the translator is the origin program for obtaining the changes.",
+      "javadoc": "\u003cCODE\u003eProgramMerge\u003c/CODE\u003e allows the merging of differences from program2 (the origin program)\n into program1 (the result program).\n \u003cbr\u003eIf the address translator is not a \"one for one translator\" then certain methods within\n this class will throw an UnsupportedOperationException.\n The destination program from the address translator should be the result program into\n which changes are made.\n The source program from the translator is the origin program for obtaining the changes.\n@param originToResultTranslator converts addresses from the origin program into an\n equivalent address in the destination program.\n@see AddressTranslator",
+      "static": false,
+      "params": [
+        {
+          "name": "originToResultTranslator",
+          "type_long": "ghidra.program.util.AddressTranslator",
+          "type_short": "AddressTranslator",
+          "comment": "converts addresses from the origin program into an\n equivalent address in the destination program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "Initializes numerous variables to be used by the ProgramMerge.",
+      "javadoc": "Initializes numerous variables to be used by the ProgramMerge.\n@param result the result program where changes are written.\n@param origin the origin program to get information to apply to program1.",
+      "static": false,
+      "params": [
+        {
+          "name": "result",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the result program where changes are written."
+        },
+        {
+          "name": "origin",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the origin program to get information to apply to program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getResultProgram",
+      "comment": "Gets the result program. Merge changes are applied to this program.",
+      "javadoc": "Gets the result program. Merge changes are applied to this program.\n@return the program being changed by the merge.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "the program being changed by the merge."
+      },
+      "throws": []
+    },
+    {
+      "name": "getOriginProgram",
+      "comment": "Gets the origin program. This program is used for obtaining things to merge into program1.",
+      "javadoc": "Gets the origin program. This program is used for obtaining things to merge into program1.\n@return the program we are obtaining the changes from which we will merge.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Program",
+        "type_short": "Program",
+        "comment": "the program we are obtaining the changes from which we will merge."
+      },
+      "throws": []
+    },
+    {
+      "name": "clearMessages",
+      "comment": "Clears all error messages and information messages.",
+      "javadoc": "Clears all error messages and information messages.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasErrorMessage",
+      "comment": "Determines if this ProgramMerge currently has an error message.",
+      "javadoc": "Determines if this ProgramMerge currently has an error message.\n@return true if there is an error message.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is an error message."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasInfoMessage",
+      "comment": "Determines if this ProgramMerge currently has an informational message.",
+      "javadoc": "Determines if this ProgramMerge currently has an informational message.\n@return true if there is an information message.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if there is an information message."
+      },
+      "throws": []
+    },
+    {
+      "name": "getErrorMessage",
+      "comment": "Get the error messages that resulted from the last call to a merge or\n replace method. These are errors that prevented something from being merged.\n Important: Call clearErrorMessage() to clear the current error message after this returns it.",
+      "javadoc": "Get the error messages that resulted from the last call to a merge or\n replace method. These are errors that prevented something from being merged.\n \u003cbr\u003eImportant: Call clearErrorMessage() to clear the current error message after this returns it.\n@return the error message string or an empty string if there were no problems with the merge.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the error message string or an empty string if there were no problems with the merge."
+      },
+      "throws": []
+    },
+    {
+      "name": "getInfoMessage",
+      "comment": "Get the information messages that resulted from the last call to a merge or\n replace method. These messages are non-critical changes that were\n necessary during the merge. For example giving a symbol a name with a conflict\n extension because another symbol with that name existed elsewhere in the\n program already.\n Important: Call clearInfoMessage() to clear the current info message after this returns it.",
+      "javadoc": "Get the information messages that resulted from the last call to a merge or\n replace method. These messages are non-critical changes that were\n necessary during the merge. For example giving a symbol a name with a conflict\n extension because another symbol with that name existed elsewhere in the\n program already.\n \u003cbr\u003eImportant: Call clearInfoMessage() to clear the current info message after this returns it.\n@return the information message string or an empty string if there were no informational\n messages for the merge.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the information message string or an empty string if there were no informational\n messages for the merge."
+      },
+      "throws": []
+    },
+    {
+      "name": "clearErrorMessage",
+      "comment": "This method clears the current error message.",
+      "javadoc": "This method clears the current error message.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearInfoMessage",
+      "comment": "This method clears the current informational message.",
+      "javadoc": "This method clears the current informational message.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeProgramContext",
+      "comment": "mergeProgramContext merges the program context (register values)\n into the result program.",
+      "javadoc": "\u003cCODE\u003emergeProgramContext\u003c/CODE\u003e merges the program context (register values)\n into the result program.\n@param originAddressSet the addresses to be merged.\n The addresses in this set are derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translator is not a\n \"one for one translator\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set are derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translator is not a\n \"one for one translator\"."
+        }
+      ]
+    },
+    {
+      "name": "mergeProgramContext",
+      "comment": "Merge context register values over a specified address range.  It is very important that all\n instructions be cleared over this range in the result program prior to invoking this\n method.",
+      "javadoc": "Merge context register values over a specified address range.  It is very important that all\n instructions be cleared over this range in the result program prior to invoking this\n method.\n@param resultContext\n@param originContext\n@param originReg\n@param originRange\n@param resultRange\n@param monitor\n@throws CancelledException\n@throws ContextChangeException if an instruction was encountered where a context register\n value change was attempted",
+      "static": false,
+      "params": [
+        {
+          "name": "resultContext",
+          "type_long": "ghidra.program.model.listing.ProgramContext",
+          "type_short": "ProgramContext",
+          "comment": ""
+        },
+        {
+          "name": "originContext",
+          "type_long": "ghidra.program.model.listing.ProgramContext",
+          "type_short": "ProgramContext",
+          "comment": ""
+        },
+        {
+          "name": "originReg",
+          "type_long": "ghidra.program.model.lang.Register",
+          "type_short": "Register",
+          "comment": ""
+        },
+        {
+          "name": "originRange",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": ""
+        },
+        {
+          "name": "resultRange",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.listing.ContextChangeException",
+          "type_short": "ContextChangeException",
+          "comment": "if an instruction was encountered where a context register\n value change was attempted"
+        }
+      ]
+    },
+    {
+      "name": "copyBytesInRanges",
+      "comment": "Copies the bytes to the result program from the origin program for the specified set of\n address ranges.",
+      "javadoc": "Copies the bytes to the result program from the origin program for the specified set of\n address ranges.\n@param toProgram program that the bytes are copied to.\n@param fromProgram program the bytes are copied from.\n@param originAddressSet the set of address ranges to be copied.\n The addresses in this set are derived from the origin program.\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels copy bytes via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the set of address ranges to be copied.\n The addresses in this set are derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels copy bytes via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "copyByteRange",
+      "comment": "Copies the bytes to one program memory from another for the specified\n address range.",
+      "javadoc": "Copies the bytes to one program memory from another for the specified\n address range.\n@param toMem program memory that the bytes are copied to.\n@param fromMem program memory the bytes are copied from.\n@param fromAddressRange the address range to be copied.\n The addresses in this range are derived from the program associated with the \"to memory\".\n@throws MemoryAccessException if bytes can\u0027t be copied.",
+      "static": false,
+      "params": [
+        {
+          "name": "toMem",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": "program memory that the bytes are copied to."
+        },
+        {
+          "name": "fromMem",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": "program memory the bytes are copied from."
+        },
+        {
+          "name": "fromAddressRange",
+          "type_long": "ghidra.program.model.address.AddressRange",
+          "type_short": "AddressRange",
+          "comment": "the address range to be copied.\n The addresses in this range are derived from the program associated with the \"to memory\"."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        }
+      ]
+    },
+    {
+      "name": "mergeBytes",
+      "comment": "mergeBytes merges byte differences within the specified\n  address set.\n Note: Any instructions at the equivalent byte addresses in the result program will get cleared and\n re-created resulting in the existing references being dropped.",
+      "javadoc": "\u003cCODE\u003emergeBytes\u003c/CODE\u003e merges byte differences within the specified\n  address set.\n \u003cbr\u003eNote: Any instructions at the equivalent byte addresses in the result program will get cleared and\n re-created resulting in the existing references being dropped.\n@param originAddressSet the addresses to be merged.\n The addresses in this set are derived from the origin program.\n@param overwriteInstructions if true affected instructions will be cleared and\n re-disassmebled after bytes are modified\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws MemoryAccessException if bytes can\u0027t be merged.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translator is not a\n \"one for one translator\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set are derived from the origin program."
+        },
+        {
+          "name": "overwriteInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true affected instructions will be cleared and\n re-disassmebled after bytes are modified"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be merged."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translator is not a\n \"one for one translator\"."
+        }
+      ]
+    },
+    {
+      "name": "getInstructionSet",
+      "comment": "Get the address set for all instructions that overlap the indicated byte address set.",
+      "javadoc": "Get the address set for all instructions that overlap the indicated byte address set.\n@param byteAddressSet the byte address set\n The addresses in this set should be derived from the same program for the listing passed as\n parameter 2.\n@param listing the listing to check for instructions\n@return the instruction address set. The addresses in this set will have an address\n factory matching that of the byteAddressSet.",
+      "static": false,
+      "params": [
+        {
+          "name": "byteAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "the byte address set\n The addresses in this set should be derived from the same program for the listing passed as\n parameter 2."
+        },
+        {
+          "name": "listing",
+          "type_long": "ghidra.program.model.listing.Listing",
+          "type_short": "Listing",
+          "comment": "the listing to check for instructions"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the instruction address set. The addresses in this set will have an address\n factory matching that of the byteAddressSet."
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeCodeUnits",
+      "comment": "mergeCodeUnits merges all instructions and/or data\n (as indicated) in the specified address set from the origin program.\n It merges them into the result program. When merging\n instructions, the bytes are also replaced if they differ.\n This assumes originToResultTranslator maps address spaces and does\n not do fine-grained mapping of addresses.",
+      "javadoc": "\u003cCODE\u003emergeCodeUnits\u003c/CODE\u003e merges all instructions and/or data\n (as indicated) in the specified address set from the origin program.\n It merges them into the result program. When merging\n instructions, the bytes are also replaced if they differ.\n This assumes originToResultTranslator maps address spaces and does\n not do fine-grained mapping of addresses.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from the origin program.\n@param byteDiffs address set indicating addresses where the bytes differ\n between the result program and the origin program.\n The addresses in this set should be derived from the origin program.\n@param mergeDataBytes true indicates bytes that differ should be copied when merging Data.\n false means don\u0027t copy any bytes for Data.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws MemoryAccessException if bytes can\u0027t be copied.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translator is not a\n \"one for one translator\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "byteDiffs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "address set indicating addresses where the bytes differ\n between the result program and the origin program.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "mergeDataBytes",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates bytes that differ should be copied when merging Data.\n false means don\u0027t copy any bytes for Data."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translator is not a\n \"one for one translator\"."
+        }
+      ]
+    },
+    {
+      "name": "shouldClearInstruction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "instruction",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "resultInstruction",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "performMergeInstruction",
+      "comment": "performMergeInstruction merges the indicated instruction\n into the merge program. Before the instruction is created the bytes for\n the instruction are copied from program2 to program1.\n Corresponding code unit(s) must already be cleared in result program,\n as well as having copied context-register value.",
+      "javadoc": "\u003cCODE\u003eperformMergeInstruction\u003c/CODE\u003e merges the indicated instruction\n into the merge program. Before the instruction is created the bytes for\n the instruction are copied from program2 to program1.\n Corresponding code unit(s) must already be cleared in result program,\n as well as having copied context-register value.\n@param originInstruction the instruction to be merged\n This instruction should be from the origin program.\n@param originByteDiffs address set indicating addresses where the bytes differ\n between program1 and program2.\n The addresses in this set should be from program1.\n@throws CodeUnitInsertionException if the instruction can\u0027t be created\n in the merge program.\n@throws MemoryAccessException if bytes can\u0027t be copied.",
+      "static": false,
+      "params": [
+        {
+          "name": "originInstruction",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "the instruction to be merged\n This instruction should be from the origin program."
+        },
+        {
+          "name": "originByteDiffs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "address set indicating addresses where the bytes differ\n between program1 and program2.\n The addresses in this set should be from program1."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": "if bytes can\u0027t be copied."
+        }
+      ]
+    },
+    {
+      "name": "copyInstructionAttributes",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originInstruction",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        },
+        {
+          "name": "targetInstruction",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disassembleDelaySlottedInstruction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Instruction",
+        "type_short": "Instruction",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disassembleNonDelaySlotInstruction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Instruction",
+        "type_short": "Instruction",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "bytesAreDifferent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originByteDiffs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "originMin",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "resultMin",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "byteCnt",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "performMergeData",
+      "comment": "performMergeData merges the indicated defined data\n into the merge program. The bytes in the merge program are not affected\n by this method.\n Corresponding code unit(s) must already be cleared in result program.",
+      "javadoc": "\u003cCODE\u003eperformMergeData\u003c/CODE\u003e merges the indicated defined data\n into the merge program. The bytes in the merge program are not affected\n by this method.\n Corresponding code unit(s) must already be cleared in result program.\n@param originData the defined data to be merged\n This data should be from the origin program.\n@param originByteDiffs address set indicating addresses where the bytes differ\n between the result program and the origin program.\n This addresses in this set should be derived from the origin program.\n@param copyBytes true indicates bytes that differ should be copied.\n false means don\u0027t copy any bytes.\n@throws CodeUnitInsertionException if the defined data can\u0027t be created\n in the merge program.",
+      "static": false,
+      "params": [
+        {
+          "name": "originData",
+          "type_long": "ghidra.program.model.listing.Data",
+          "type_short": "Data",
+          "comment": "the defined data to be merged\n This data should be from the origin program."
+        },
+        {
+          "name": "originByteDiffs",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "address set indicating addresses where the bytes differ\n between the result program and the origin program.\n This addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "copyBytes",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates bytes that differ should be copied.\n false means don\u0027t copy any bytes."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.util.CodeUnitInsertionException",
+          "type_short": "CodeUnitInsertionException",
+          "comment": "if the defined data can\u0027t be created\n in the merge program."
+        },
+        {
+          "type_long": "ghidra.program.model.mem.MemoryAccessException",
+          "type_short": "MemoryAccessException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "mergeEquates",
+      "comment": "mergeEquates merges the equate differences in the specified\n address set.",
+      "javadoc": "\u003cCODE\u003emergeEquates\u003c/CODE\u003e merges the equate differences in the specified\n address set.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translators are not\n \"one for one translators\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translators are not\n \"one for one translators\"."
+        }
+      ]
+    },
+    {
+      "name": "mergeEquate",
+      "comment": "mergeEquate replaces the current equates in program1 with those in program2.",
+      "javadoc": "\u003cCODE\u003emergeEquate\u003c/CODE\u003e replaces the current equates in program1 with those in program2.\n@param originAddress the address where the equates should be merged.\n This address should be derived from the origin program.\n@param opIndex the operand index where the equates should be merged.\n@param value the scalar value where the equate is used.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address where the equates should be merged.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the operand index where the equates should be merged."
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the scalar value where the equate is used."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueEquate",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "et",
+          "type_long": "ghidra.program.model.symbol.EquateTable",
+          "type_short": "EquateTable",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Equate",
+        "type_short": "Equate",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeEquates",
+      "comment": "mergeEquates merges all equates for the indicated\n address from the second program. It merges them into the merge program.",
+      "javadoc": "\u003cCODE\u003emergeEquates\u003c/CODE\u003e merges all equates for the indicated\n address from the second program. It merges them into the merge program.\n@param originAddress the address where the equates are to be merged.\n This address should be derived from the origin program.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address where the equates are to be merged.\n This address should be derived from the origin program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "saveDuplicateEquate",
+      "comment": "",
+      "javadoc": "@param dupEquate\n@param desiredName",
+      "static": false,
+      "params": [
+        {
+          "name": "dupEquate",
+          "type_long": "ghidra.program.model.symbol.Equate",
+          "type_short": "Equate",
+          "comment": ""
+        },
+        {
+          "name": "desiredName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reApplyDuplicateEquates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDuplicateEquatesInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearDuplicateEquates",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceReferences",
+      "comment": "replaceReferences replaces all references in\n program1 for the specified address set with those in program2.\n If an equivalent reference already exists then it is updated to match the\n new reference.\n  Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.",
+      "javadoc": "\u003cCODE\u003ereplaceReferences\u003c/CODE\u003e replaces all references in\n program1 for the specified address set with those in program2.\n If an equivalent reference already exists then it is updated to match the\n new reference.\n \u003cbr\u003e Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if the user cancels the replace via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translators are not\n \"one for one translators\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the replace via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translators are not\n \"one for one translators\"."
+        }
+      ]
+    },
+    {
+      "name": "replaceReferences",
+      "comment": "replaceReferences replaces all references in\n program1 for the specified address set with the references from program2.\n If an equivalent reference already exists then it is updated to match the\n new reference.\n  Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.",
+      "javadoc": "\u003cCODE\u003ereplaceReferences\u003c/CODE\u003e replaces all references in\n program1 for the specified address set with the references from program2.\n If an equivalent reference already exists then it is updated to match the\n new reference.\n \u003cbr\u003e Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from the origin program.\n@param onlyKeepDefaults true indicates to replace all references with only\n the default references from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if the user cancels the replace via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translators are not\n \"one for one translators\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "onlyKeepDefaults",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates to replace all references with only\n the default references from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the replace via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translators are not\n \"one for one translators\"."
+        }
+      ]
+    },
+    {
+      "name": "replaceRefs",
+      "comment": "",
+      "javadoc": "@param resultAddress This address should be derived from program 1.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "defaultsOnly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeReferences",
+      "comment": "mergeReferences merges the references in\n program1 for the specified address set with the references from program2.\n If an equivalent reference already exists then it is updated to match the\n new reference if possible. A merge of references prevents the loss of any\n non-default references already in the result program.\n  Important: Fallthrough references will not be merged by this method.\n Fallthroughs are handled by merging code units.\n  Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.",
+      "javadoc": "\u003cCODE\u003emergeReferences\u003c/CODE\u003e merges the references in\n program1 for the specified address set with the references from program2.\n If an equivalent reference already exists then it is updated to match the\n new reference if possible. A merge of references prevents the loss of any\n non-default references already in the result program.\n \u003cbr\u003e Important: Fallthrough references will not be merged by this method.\n Fallthroughs are handled by merging code units.\n \u003cbr\u003e Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from the origin program.\n@param onlyKeepDefaults true indicates to merge only the default references\n from the origin program into the result program. Non-default references will not be merged.\n false indicates merge all references except fallthroughs.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if the user cancels the replace via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translators are not\n \"one for one translators\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "onlyKeepDefaults",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates to merge only the default references\n from the origin program into the result program. Non-default references will not be merged.\n false indicates merge all references except fallthroughs."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the replace via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translators are not\n \"one for one translators\"."
+        }
+      ]
+    },
+    {
+      "name": "mergeRefs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "defaultsOnly",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceReferences",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originCu",
+          "type_long": "ghidra.program.model.listing.CodeUnit",
+          "type_short": "CodeUnit",
+          "comment": ""
+        },
+        {
+          "name": "opIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceReferences",
+      "comment": "replaceReferences replaces all references in\n program1 for the specified address and operand index with those in program2.\n If an equivalent reference already exists then it is updated to match the\n new reference.\n  Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.",
+      "javadoc": "\u003cCODE\u003ereplaceReferences\u003c/CODE\u003e replaces all references in\n program1 for the specified address and operand index with those in program2.\n If an equivalent reference already exists then it is updated to match the\n new reference.\n \u003cbr\u003e Note: All reference types (memory, stack, external) get replaced\n where possible. i.e. If a function or variable doesn\u0027t exist for a\n variable reference then it will not be able to replace the reference.\n@param originAddress the \"from\" address where references are to be replaced\n@param operandIndex the operand of the code unit at the address where\n references are to be replaced.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the \"from\" address where references are to be replaced"
+        },
+        {
+          "name": "operandIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the operand of the code unit at the address where\n references are to be replaced."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceReference",
+      "comment": "Replaces the reference in program1 with the reference from the origin program.",
+      "javadoc": "Replaces the reference in program1 with the reference from the origin program.\n@param resultRef the program1 reference to be replaced.\n@param originRef the program2 reference used to replace what\u0027s in program1.\n@return the resulting reference in program1. null if reference is removed\n by the replace.",
+      "static": false,
+      "params": [
+        {
+          "name": "resultRef",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "the program1 reference to be replaced."
+        },
+        {
+          "name": "originRef",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "the program2 reference used to replace what\u0027s in program1."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": "the resulting reference in program1. null if reference is removed\n by the replace."
+      },
+      "throws": []
+    },
+    {
+      "name": "updateExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toPgm",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "fromRef",
+          "type_long": "ghidra.program.model.symbol.ExternalReference",
+          "type_short": "ExternalReference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceReference",
+      "comment": "Replaces the reference in program1 with the reference from the origin program.",
+      "javadoc": "Replaces the reference in program1 with the reference from the origin program.\n@param resultRef the program1 reference to be replaced.\n@param originRef the program2 reference used to replace what\u0027s in program1.\n@param toSymbolID ID of the symbol in program1 the resulting reference is to.\n@return the resulting reference in program1. null if reference is removed\n by the replace.",
+      "static": false,
+      "params": [
+        {
+          "name": "resultRef",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "the program1 reference to be replaced."
+        },
+        {
+          "name": "originRef",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "the program2 reference used to replace what\u0027s in program1."
+        },
+        {
+          "name": "toSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "ID of the symbol in program1 the resulting reference is to."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": "the resulting reference in program1. null if reference is removed\n by the replace."
+      },
+      "throws": []
+    },
+    {
+      "name": "addReference",
+      "comment": "addReference creates a reference in program1 that is equivalent\n to the one specified as a parameter. If a symbol ID is specified, the\n reference will refer to the symbol in program1 with that ID. If the reference\n is an external reference, then the external location associated with it can be replaced\n also by setting the replace external location flag.",
+      "javadoc": "\u003cCODE\u003eaddReference\u003c/CODE\u003e creates a reference in program1 that is equivalent\n to the one specified as a parameter. If a symbol ID is specified, the\n reference will refer to the symbol in program1 with that ID. If the reference\n is an external reference, then the external location associated with it can be replaced\n also by setting the replace external location flag.\n@param originRef the reference equivalent to the one to be created.\n@param toSymbolID ID of the symbol to referred to. null indicates don\u0027t\n refer directly to a symbol.\n@param replaceExtLoc the replace external location flag. true indicates to replace the\n external location, if applicable, with the one defined for the reference passed to this method.\n@return the reference that was created. null if none created.",
+      "static": false,
+      "params": [
+        {
+          "name": "originRef",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": "the reference equivalent to the one to be created."
+        },
+        {
+          "name": "toSymbolID",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "ID of the symbol to referred to. null indicates don\u0027t\n refer directly to a symbol."
+        },
+        {
+          "name": "replaceExtLoc",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "the replace external location flag. true indicates to replace the\n external location, if applicable, with the one defined for the reference passed to this method."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.Reference",
+        "type_short": "Reference",
+        "comment": "the reference that was created. null if none created."
+      },
+      "throws": []
+    },
+    {
+      "name": "findExternalLocation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "origExtLoc",
+          "type_long": "ghidra.program.model.symbol.ExternalLocation",
+          "type_short": "ExternalLocation",
+          "comment": ""
+        },
+        {
+          "name": "resultToSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.symbol.ExternalLocation",
+        "type_short": "ExternalLocation",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFallThroughs",
+      "comment": "replaceFallThroughs replaces all fallthroughs in\n program1 for the specified address set with those in program2 where they differ.",
+      "javadoc": "\u003cCODE\u003ereplaceFallThroughs\u003c/CODE\u003e replaces all fallthroughs in\n program1 for the specified address set with those in program2 where they differ.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if the user cancels the replace via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the replace via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "replaceFallThrough",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeComment",
+      "comment": "mergeComment merges/replaces comments of the indicated\n type wherever they occur in the specified address set.",
+      "javadoc": "\u003cCODE\u003emergeComment\u003c/CODE\u003e merges/replaces comments of the indicated\n type wherever they occur in the specified address set.\n@param originAddressSet the addresses where comments should be merged/replaced.\n The addresses in this set should be from the origin program.\n@param type ProgramMergeFilter comment type.\n The comment type can be PLATE, PRE, EOL, REPEATABLE, POST.\n@param both true means merge both program1 and program2 comments.\n false means replace the program1 comment with the program2 comment.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "the addresses where comments should be merged/replaced.\n The addresses in this set should be from the origin program."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "ProgramMergeFilter comment type.\n The comment type can be PLATE, PRE, EOL, REPEATABLE, POST."
+        },
+        {
+          "name": "both",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true means merge both program1 and program2 comments.\n false means replace the program1 comment with the program2 comment."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeCommentType",
+      "comment": "mergeCommentType merges/replaces comments of the indicated\n type wherever they occur in the specified address set.\n It merges them from program2 into program1.\n This merges eol, pre, post, repeatable, and plate comments.",
+      "javadoc": "\u003cCODE\u003emergeCommentType\u003c/CODE\u003e merges/replaces comments of the indicated\n type wherever they occur in the specified address set.\n It merges them from program2 into program1.\n This merges eol, pre, post, repeatable, and plate comments.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from the origin program.\n@param type the comment type. PLATE, PRE, EOL, REPEATABLE, POST\n@param setting how to merge. IGNORE, REPLACE, MERGE\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from the origin program."
+        },
+        {
+          "name": "type",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the comment type. PLATE, PRE, EOL, REPEATABLE, POST"
+        },
+        {
+          "name": "setting",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "how to merge. IGNORE, REPLACE, MERGE"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeComments",
+      "comment": "mergeComments merges the comment of the indicated\n type in program1 with the comment in program2 at the specified address.",
+      "javadoc": "\u003cCODE\u003emergeComments\u003c/CODE\u003e merges the comment of the indicated\n type in program1 with the comment in program2 at the specified address.\n@param commentType comment type to merge (from CodeUnit class).\n \u003cbr\u003eEOL_COMMENT, PRE_COMMENT, POST_COMMENT, REPEATABLE_COMMENT, OR PLATE_COMMENT.\n@param originAddress the address\n This address should be derived from the origin program.",
+      "static": false,
+      "params": [
+        {
+          "name": "commentType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "comment type to merge (from CodeUnit class).\n EOL_COMMENT, PRE_COMMENT, POST_COMMENT, REPEATABLE_COMMENT, OR PLATE_COMMENT."
+        },
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address\n This address should be derived from the origin program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceComment",
+      "comment": "replaceComment replaces the comment of the indicated\n type in program1 with the comment in program2 at the specified address.",
+      "javadoc": "\u003cCODE\u003ereplaceComment\u003c/CODE\u003e replaces the comment of the indicated\n type in program1 with the comment in program2 at the specified address.\n@param commentType comment type to replace (from CodeUnit class).\n \u003cbr\u003eEOL_COMMENT, PRE_COMMENT, POST_COMMENT, REPEATABLE_COMMENT, OR PLATE_COMMENT.\n@param originAddress the address\n This address should be derived from the origin program.",
+      "static": false,
+      "params": [
+        {
+          "name": "commentType",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "comment type to replace (from CodeUnit class).\n EOL_COMMENT, PRE_COMMENT, POST_COMMENT, REPEATABLE_COMMENT, OR PLATE_COMMENT."
+        },
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address\n This address should be derived from the origin program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applyFunctionTagChanges",
+      "comment": "Merges/replaces tags of program2 into program1. When merging, tags that are in\n conflict are replaced according to the user setting (ignore, replace, merge).",
+      "javadoc": "Merges/replaces tags of program2 into program1. When merging, tags that are in\n conflict are replaced according to the user setting (ignore, replace, merge).\n@param originAddressSet the addresses to be merged.\n@param setting how to merge. IGNORE, REPLACE, MERGE\n@param discardTags tags to keep out of the final result\n@param keepTags tags to add to the final result\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged."
+        },
+        {
+          "name": "setting",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "how to merge. IGNORE, REPLACE, MERGE"
+        },
+        {
+          "name": "discardTags",
+          "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Set",
+          "comment": "tags to keep out of the final result"
+        },
+        {
+          "name": "keepTags",
+          "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Set",
+          "comment": "tags to add to the final result"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeFunctionTags",
+      "comment": "Combines function tags in Original with Result, making sure that all tags in the\n keepTags list are included, while removing any in the discardTags list.",
+      "javadoc": "Combines function tags in Original with Result, making sure that all tags in the\n keepTags list are included, while removing any in the discardTags list.\n@param originAddress the address\n@param discardTags tags to discard from the result\n@param keepTags tags to add to the result",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address"
+        },
+        {
+          "name": "discardTags",
+          "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Set",
+          "comment": "tags to discard from the result"
+        },
+        {
+          "name": "keepTags",
+          "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Set",
+          "comment": "tags to add to the result"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTagIfUnassigned",
+      "comment": "Removes the given tag from the program if it is not currently being used by\n any functions.",
+      "javadoc": "Removes the given tag from the program if it is not currently being used by\n any functions.\n@param tag the tag to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "tag",
+          "type_long": "ghidra.program.model.listing.FunctionTag",
+          "type_short": "FunctionTag",
+          "comment": "the tag to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "containsTag",
+      "comment": "Returns true if the given set of tags contains one with the given name.",
+      "javadoc": "Returns true if the given set of tags contains one with the given name.\n@param tags the list of tags to inspect\n@param name the name to find\n@return true if the list contains the tag",
+      "static": false,
+      "params": [
+        {
+          "name": "tags",
+          "type_long": "java.util.Collection\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Collection",
+          "comment": "the list of tags to inspect"
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name to find"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the list contains the tag"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTagNames",
+      "comment": "Returns a list of all tag names in the given set of function tags.",
+      "javadoc": "Returns a list of all tag names in the given set of function tags.\n@param tags the list of function tags\n@return list of tag names",
+      "static": false,
+      "params": [
+        {
+          "name": "tags",
+          "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+          "type_short": "Set",
+          "comment": "the list of function tags"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cjava.lang.String\u003e",
+        "type_short": "Set",
+        "comment": "list of tag names"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTagsAtAddress",
+      "comment": "Returns a set of all function tags for the function containing the given address, for the\n given listing.",
+      "javadoc": "Returns a set of all function tags for the function containing the given address, for the\n given listing.\n@param listing the listing\n@param addr the function address to inspect\n@return set of function tags or an empty set if the address isn\u0027t in a function.",
+      "static": false,
+      "params": [
+        {
+          "name": "listing",
+          "type_long": "ghidra.program.model.listing.Listing",
+          "type_short": "Listing",
+          "comment": "the listing"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the function address to inspect"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Set\u003cghidra.program.model.listing.FunctionTag\u003e",
+        "type_short": "Set",
+        "comment": "set of function tags or an empty set if the address isn\u0027t in a function."
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionTags",
+      "comment": "Clears out the function tags at the given address in Result and\n replaces them with tags from Origin.",
+      "javadoc": "Clears out the function tags at the given address in Result and\n replaces them with tags from Origin.\n@param originAddress the function entry point in Origin",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the function entry point in Origin"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeLabels",
+      "comment": "mergeLabels merges all symbols and aliases\n in the specified address set from the second program.\n It merges them into the merge program.",
+      "javadoc": "\u003cCODE\u003emergeLabels\u003c/CODE\u003e merges all symbols and aliases\n in the specified address set from the second program.\n It merges them into the merge program.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param setting the current merge label setting.\n@param replacePrimary true indicates the primary label should become the same as in the second program.\n@param replaceFunction true indicates the function symbol should also be merged.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "setting",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the current merge label setting."
+        },
+        {
+          "name": "replacePrimary",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates the primary label should become the same as in the second program."
+        },
+        {
+          "name": "replaceFunction",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates the function symbol should also be merged."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeLabels",
+      "comment": "mergeLabels merges all symbols and aliases\n in the specified address set from the second program.\n It merges them into the merge program.",
+      "javadoc": "\u003cCODE\u003emergeLabels\u003c/CODE\u003e merges all symbols and aliases\n in the specified address set from the second program.\n It merges them into the merge program.\n@param originAddressSet the addresses to be merged.\n The addresses in this address set should be derived from program1.\n@param setting the current label setting.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "setting",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the current label setting."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "replaceLabels",
+      "comment": "replaceLabels replaces all symbols and aliases\n in the specified address set from the second program.",
+      "javadoc": "\u003cCODE\u003ereplaceLabels\u003c/CODE\u003e replaces all symbols and aliases\n in the specified address set from the second program.\n@param originAddressSet the addresses to be replaced\n The addresses in this address set should be derived from program1.\n@param replaceFunction true indicates the function symbol should be replaced\n@param monitor the task monitor for notifying the user of this merge\u0027s progress\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "the addresses to be replaced\n The addresses in this address set should be derived from program1."
+        },
+        {
+          "name": "replaceFunction",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true indicates the function symbol should be replaced"
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "reApplyDuplicateSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDuplicateSymbolsInfo",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearDuplicateSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "overlapsOtherFunctions",
+      "comment": "Determines whether the \"fromFunc\" function\u0027s body overlaps any function bodies that already\n exist within the \"toProgram\" other than a function with an\n entry point at the \"fromFunc\" function\u0027s entry point.",
+      "javadoc": "Determines whether the \"fromFunc\" function\u0027s body overlaps any function bodies that already\n exist within the \"toProgram\" other than a function with an\n entry point at the \"fromFunc\" function\u0027s entry point.\n@param fromFunc the function whose body should get checked.\n@param toProgram the program to check the function body against.\n@return true if it overlaps functions other than one with an entry point matching\n that of the \"fromFunc\".",
+      "static": true,
+      "params": [
+        {
+          "name": "fromFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the function whose body should get checked."
+        },
+        {
+          "name": "toProgram",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "the program to check the function body against."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if it overlaps functions other than one with an entry point matching\n that of the \"fromFunc\"."
+      },
+      "throws": []
+    },
+    {
+      "name": "overlapsOtherFunctions",
+      "comment": "Determines whether the \"fromFunc\" function\u0027s body overlaps any function bodies that already\n exist within the \"toProgram\" other than a function with an\n entry point at the \"fromFunc\" function\u0027s entry point.",
+      "javadoc": "Determines whether the \"fromFunc\" function\u0027s body overlaps any function bodies that already\n exist within the \"toProgram\" other than a function with an\n entry point at the \"fromFunc\" function\u0027s entry point.\n@param fromFunc the function whose body should get checked.\n@param toProgram the program to check the function body against.\n@return true if it overlaps functions other than one with an entry point matching\n that of the \"fromFunc\".\n@throws UnsupportedOperationException if the ProgramMerge translators are not\n \"one for one translators\".",
+      "static": true,
+      "params": [
+        {
+          "name": "addressTranslator",
+          "type_long": "ghidra.program.util.AddressTranslator",
+          "type_short": "AddressTranslator",
+          "comment": ""
+        },
+        {
+          "name": "fromFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the function whose body should get checked."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if it overlaps functions other than one with an entry point matching\n that of the \"fromFunc\"."
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translators are not\n \"one for one translators\"."
+        }
+      ]
+    },
+    {
+      "name": "replaceFunctionNames",
+      "comment": "replaceFunctionNames merges function name and namespace differences\n within the specified address set.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionNames\u003c/CODE\u003e merges function name and namespace differences\n within the specified address set.\n@param originAddressSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeFunctions",
+      "comment": "mergeFunctions merges function differences within the specified\n  address set.",
+      "javadoc": "\u003cCODE\u003emergeFunctions\u003c/CODE\u003e merges function differences within the specified\n  address set.\n@param addrSet the addresses to be merged.\n The addresses in this set should be derived from program1.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged.\n The addresses in this set should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "removeFunctionsNotInProgram2",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet2",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceFunctions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSet2",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceThunks",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "thunkSet",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "isThunkFunction",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeFunction",
+      "comment": "mergeFunction completely replaces any function at the\n indicated address in program1 with the function, if any, in program2.",
+      "javadoc": "\u003cCODE\u003emergeFunction\u003c/CODE\u003e completely replaces any function at the\n indicated address in program1 with the function, if any, in program2.\n@param entry the entry point address of the function to be merged.\n This address should be derived from program1.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to be merged.\n This address should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "mergeFunctionReturn",
+      "comment": "mergeFunctionReturn replaces the return type/storage of the\n function in program1 with the return type/storage of the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003emergeFunctionReturn\u003c/CODE\u003e replaces the return type/storage of the\n function in program1 with the return type/storage of the function in program2\n at the specified entry point address.\n@param entry2 the entry point address of the function.\n This address should be derived from the origin program.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeFunctionName",
+      "comment": "mergeFunctionName replaces the name of the\n function in program1 with the name of the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003emergeFunctionName\u003c/CODE\u003e replaces the name of the\n function in program1 with the name of the function in program2\n at the specified entry point address.\n@param entry2 the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "function",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "sameDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt1",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "dt2",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionSignatureSource",
+      "comment": "replaceFunctionSignatureSource changes the result function\u0027s signature source\n to match the origin program\u0027s signature source.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionSignatureSource\u003c/CODE\u003e changes the result function\u0027s signature source\n to match the origin program\u0027s signature source.\n@param originEntryPoint the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeFunctionReturnAddressOffset",
+      "comment": "mergeFunctionReturnAddressOffset replaces the return address offset of the\n function in program1 with the return address offset of the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003emergeFunctionReturnAddressOffset\u003c/CODE\u003e replaces the return address offset of the\n function in program1 with the return address offset of the function in program2\n at the specified entry point address.\n@param entry2 the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeFunctionLocalSize",
+      "comment": "mergeFunctionLocalSize replaces the local size of the\n function in program1 with the local size of the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003emergeFunctionLocalSize\u003c/CODE\u003e replaces the local size of the\n function in program1 with the local size of the function in program2\n at the specified entry point address.\n@param entry2 the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeFunctionStackPurgeSize",
+      "comment": "mergeFunctionStackPurgeSize replaces the stack purge size of the\n function in program1 with the stack purge size of the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003emergeFunctionStackPurgeSize\u003c/CODE\u003e replaces the stack purge size of the\n function in program1 with the stack purge size of the function in program2\n at the specified entry point address.\n@param entry2 the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionVarArgs",
+      "comment": "replaceFunctionVarArgs changes whether the function has VarArgs\n in program1 if it doesn\u0027t match the use of VarArgs in the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionVarArgs\u003c/CODE\u003e changes whether the function has VarArgs\n in program1 if it doesn\u0027t match the use of VarArgs in the function in program2\n at the specified entry point address.\n@param entry2 the entry point address of the function.\n This address should be derived from program1.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "entry2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from program1."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionCallingConvention",
+      "comment": "replaceFunctionCallingConvention changes the function calling convention\n in program1 if it doesn\u0027t match the function calling convention in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionCallingConvention\u003c/CODE\u003e changes the function calling convention\n in program1 if it doesn\u0027t match the function calling convention in program2\n at the specified entry point address.\n@param originEntryPoint the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionInlineFlag",
+      "comment": "replaceFunctionInlineFlag changes whether the function is inline\n in program1 if it doesn\u0027t match whether the function is inline in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionInlineFlag\u003c/CODE\u003e changes whether the function is inline\n in program1 if it doesn\u0027t match whether the function is inline in program2\n at the specified entry point address.\n@param originEntryPoint the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionNoReturnFlag",
+      "comment": "replaceFunctionNoReturnFlag changes whether the flag is set indicating\n the function does not return\n in program1 if it doesn\u0027t match the \"does not return\" flag in the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionNoReturnFlag\u003c/CODE\u003e changes whether the flag is set indicating\n the function does not return\n in program1 if it doesn\u0027t match the \"does not return\" flag in the function in program2\n at the specified entry point address.\n@param originEntryPoint the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionCustomStorageFlag",
+      "comment": "replaceFunctionCustomStorageFlag changes whether the flag is set indicating\n the function does not return\n in program1 if it doesn\u0027t match the \"custom storage\" flag in the function in program2\n at the specified entry point address.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionCustomStorageFlag\u003c/CODE\u003e changes whether the flag is set indicating\n the function does not return\n in program1 if it doesn\u0027t match the \"custom storage\" flag in the function in program2\n at the specified entry point address.\n@param originEntryPoint the entry point address of the function.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionParameters",
+      "comment": "replaceFunctionParameters replaces the parameters of the\n function in program1 with the parameters of the function in program2\n at the specified entry point address.  It also replaces the return\n type/storage as well as custom storage use.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionParameters\u003c/CODE\u003e replaces the parameters of the\n function in program1 with the parameters of the function in program2\n at the specified entry point address.  It also replaces the return\n type/storage as well as custom storage use.\n@param originEntryPoint the entry point address of the function.\n This address should be derived from the origin program.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionParameters",
+      "comment": "replaceFunctionParameters replaces the parameters of the\n function in program1 with the parameters of the function in program2\n at the specified entry point address.  It also replaces the return\n type/storage as well as custom storage use.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionParameters\u003c/CODE\u003e replaces the parameters of the\n function in program1 with the parameters of the function in program2\n at the specified entry point address.  It also replaces the return\n type/storage as well as custom storage use.\n@param toFunc target function\n@param fromFunc source function",
+      "static": false,
+      "params": [
+        {
+          "name": "toFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "target function"
+        },
+        {
+          "name": "fromFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "source function"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueName",
+      "comment": "Create a name that is unique in both namespaces of the given symbolTable.",
+      "javadoc": "Create a name that is unique in both namespaces of the given symbolTable.\n@param symbolTable the symbolTable where the symbol will be created.\n@param name the desired name. This name will be given a conflict suffix if necessary\n to make it unique.\n@param address the address of the symbol.\n@param namespace1 the first namespace where the new symbol should be unique. \n This namespace must be from the same program as the symbol table.\n@param namespace2 the second namespace where the new symbol should be unique.\n This namespace must be from the same program as the symbol table.\n@param type the symbol type of the symbol.\n@return a unique name for both namespaces.",
+      "static": true,
+      "params": [
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": "the symbolTable where the symbol will be created."
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the desired name. This name will be given a conflict suffix if necessary\n to make it unique."
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the symbol."
+        },
+        {
+          "name": "namespace1",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the first namespace where the new symbol should be unique. \n This namespace must be from the same program as the symbol table."
+        },
+        {
+          "name": "namespace2",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the second namespace where the new symbol should be unique.\n This namespace must be from the same program as the symbol table."
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.SymbolType",
+          "type_short": "SymbolType",
+          "comment": "the symbol type of the symbol."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "a unique name for both namespaces."
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueName",
+      "comment": "Create a name that is unique in the indicated namespace of the symbol table.",
+      "javadoc": "Create a name that is unique in the indicated namespace of the symbol table.\n@param symbolTable the symbolTable where the symbol will be created.\n@param name the desired name. This name will be given a conflict suffix if necessary\n to make it unique.\n@param address the address of the symbol.\n@param namespace the namespace where the new symbol would be created.\n This namespace must be from the same program as the symbol table.\n@param type the type of symbol.\n@return a unique name within the namespace.",
+      "static": true,
+      "params": [
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": "the symbolTable where the symbol will be created."
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the desired name. This name will be given a conflict suffix if necessary\n to make it unique."
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the symbol."
+        },
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the namespace where the new symbol would be created.\n This namespace must be from the same program as the symbol table."
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.SymbolType",
+          "type_short": "SymbolType",
+          "comment": "the type of symbol."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "a unique name within the namespace."
+      },
+      "throws": []
+    },
+    {
+      "name": "isUniqueSymbolName",
+      "comment": "Tests if a symbol can successfully be created.  This is useful when creating symbol\n types that require unique names such as Namespaces, Libraries, and Classes.",
+      "javadoc": "Tests if a symbol can successfully be created.  This is useful when creating symbol\n types that require unique names such as Namespaces, Libraries, and Classes.\n@param namespace the namespace where the new symbol would be created.\n@param name the name of the symbol to test.\n@param address the address of the symbol to test. (Can be null)\n@param type the symbol type of the symbol to test.\n@return true if the symbol with the given properties could be created without causing\n a duplicate name exception.",
+      "static": true,
+      "params": [
+        {
+          "name": "symbolTable",
+          "type_long": "ghidra.program.model.symbol.SymbolTable",
+          "type_short": "SymbolTable",
+          "comment": ""
+        },
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "the namespace where the new symbol would be created."
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the name of the symbol to test."
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the symbol to test. (Can be null)"
+        },
+        {
+          "name": "type",
+          "type_long": "ghidra.program.model.symbol.SymbolType",
+          "type_short": "SymbolType",
+          "comment": "the symbol type of the symbol to test."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the symbol with the given properties could be created without causing\n a duplicate name exception."
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunction",
+      "comment": "Adds/Replaces/Removes a function at the specified address in the\n resultListing based on the function in the origListing.\n Note: This method will replace the function, but does not create\n the parent namespace or put the function in the parent namespace.\n This must be done separately.",
+      "javadoc": "Adds/Replaces/Removes a function at the specified address in the\n resultListing based on the function in the origListing.\n \u003cbr\u003eNote: This method will replace the function, but does not create\n the parent namespace or put the function in the parent namespace.\n This must be done separately.\n@param originEntryPoint the address of the functions entry point.\n This address should be derived from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@return the new function that was created in the resultListing or null\n if no function was created. If null is returned you should call\n getErrorMessage() to see if an error occurred.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translators are not\n \"one for one translators\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the functions entry point.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": "the new function that was created in the resultListing or null\n if no function was created. If null is returned you should call\n getErrorMessage() to see if an error occurred."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translators are not\n \"one for one translators\"."
+        }
+      ]
+    },
+    {
+      "name": "replaceExternalFunction",
+      "comment": "Replaces the external result function with the origin Function.\n Note: This method will replace the function, but does not create\n the parent namespace or put the function in the parent namespace.\n This must be done separately.",
+      "javadoc": "Replaces the external result function with the origin Function.\n \u003cbr\u003eNote: This method will replace the function, but does not create\n the parent namespace or put the function in the parent namespace.\n This must be done separately.\n@param toFunction the result function to replace.\n@param fromFunction the function to use as the model when replacing the result function.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@return the new function that was created in the resultListing or null\n if no function was created. If null is returned you should call\n getErrorMessage() to see if an error occurred.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translators are not\n \"one for one translators\".",
+      "static": false,
+      "params": [
+        {
+          "name": "toFunction",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the result function to replace."
+        },
+        {
+          "name": "fromFunction",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the function to use as the model when replacing the result function."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Function",
+        "type_short": "Function",
+        "comment": "the new function that was created in the resultListing or null\n if no function was created. If null is returned you should call\n getErrorMessage() to see if an error occurred."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translators are not\n \"one for one translators\"."
+        }
+      ]
+    },
+    {
+      "name": "replaceVariables",
+      "comment": "",
+      "javadoc": "@param newFunc\n@param fromFunc\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "newFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "fromFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "resolveParamaterNameConflicts",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "fromParams",
+          "type_long": "ghidra.program.model.listing.Parameter[]",
+          "type_short": "ghidra.program.model.listing.Parameter[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveParameterNameConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceLocals",
+      "comment": "Replaces the local symbols in toFunc with the local symbols that are in the fromFunc.",
+      "javadoc": "Replaces the local symbols in toFunc with the local symbols that are in the fromFunc.\n@param toFunc the function having its local variables replaced.\n@param fromFunc the source of the replacement variables.\n@throws CancelledException if user cancels via the monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "toFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the function having its local variables replaced."
+        },
+        {
+          "name": "fromFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "the source of the replacement variables."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        }
+      ]
+    },
+    {
+      "name": "replaceVariable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "fromFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "fromVar",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": ""
+        },
+        {
+          "name": "toFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resolveLocalNameConflict",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "toFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "renameVarUniquely",
+      "comment": "Changes the variable\u0027s name to a unique name.",
+      "javadoc": "Changes the variable\u0027s name to a unique name.\n@param namedSymbol the variable\u0027s symbol\n@param source the source of this variable\u0027s symbol\n@return the new name or null if it couldn\u0027t be renamed.",
+      "static": false,
+      "params": [
+        {
+          "name": "namedSymbol",
+          "type_long": "ghidra.program.model.symbol.Symbol",
+          "type_short": "Symbol",
+          "comment": "the variable\u0027s symbol"
+        },
+        {
+          "name": "source",
+          "type_long": "ghidra.program.model.symbol.SourceType",
+          "type_short": "SourceType",
+          "comment": "the source of this variable\u0027s symbol"
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "the new name or null if it couldn\u0027t be renamed."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAdjustedResultOrdinal",
+      "comment": "Detail level parameter adjustments may only be done when both source and result functions\n initially had the same number of auto-params and the same total number of parameters\n (only complete signature replacement is supported otherwise).  This method is intended to\n adjust the result ordinal based upon adjustments which may have already been performed on\n the result function causing its number of auto-params to change from when the\n conflicts were initially determined.",
+      "javadoc": "Detail level parameter adjustments may only be done when both source and result functions\n initially had the same number of auto-params and the same total number of parameters\n (only complete signature replacement is supported otherwise).  This method is intended to\n adjust the result ordinal based upon adjustments which may have already been performed on\n the result function causing its number of auto-params to change from when the\n conflicts were initially determined.\n@param func\n@param ordinal\n@return adjusted result parameter ordinal",
+      "static": false,
+      "params": [
+        {
+          "name": "resultFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "srcFunc",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": ""
+        },
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "adjusted result parameter ordinal"
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionParameterName",
+      "comment": "replaceFunctionParameterName replaces the name of the indicated\n function parameter in program1 with the name from the origin program.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionParameterName\u003c/CODE\u003e replaces the name of the indicated\n function parameter in program1 with the name from the origin program.\n@param originEntryPoint the entry point address of the function to modify.\n This address should be derived from the origin program.\n@param ordinal the index of the parameter to change.\n@param monitor the task monitor for notifying the user of progress.\n@throws InvalidInputException\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to modify.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the parameter to change."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceFunctionParameterDataType",
+      "comment": "replaceFunctionParameterDataType replaces the data type of the indicated\n function parameter in program1 with the data type from the origin program.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionParameterDataType\u003c/CODE\u003e replaces the data type of the indicated\n function parameter in program1 with the data type from the origin program.\n@param originEntryPoint the entry point address of the function to modify.\n This address should be derived from the origin program.\n@param ordinal the index of the parameter to change.\n@param monitor the task monitor for notifying the user of progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to modify.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the parameter to change."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionParameterComment",
+      "comment": "replaceFunctionParameterComment replaces the comment of the indicated\n function parameter in program1 with the comment from the origin program.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionParameterComment\u003c/CODE\u003e replaces the comment of the indicated\n function parameter in program1 with the comment from the origin program.\n@param originEntryPoint the entry point address of the function to modify.\n This address should be derived from the origin program.\n@param ordinal the index of the parameter to change.\n@param monitor the task monitor for notifying the user of progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to modify.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "ordinal",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the parameter to change."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionVariable",
+      "comment": "replaceFunctionVariable replaces the name of the indicated\n function variable in program1 with that from the origin program.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionVariable\u003c/CODE\u003e replaces the name of the indicated\n function variable in program1 with that from the origin program.\n@param originEntryPoint the entry point address of the function to modify.\n This address should be derived from program1.\n@param var a variable that is equivalent to the one in program1 to be replaced.\n The variable passed here could be from another program.\n@param monitor the task monitor for notifying the user of progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to modify.\n This address should be derived from program1."
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "a variable that is equivalent to the one in program1 to be replaced.\n The variable passed here could be from another program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceVariables",
+      "comment": "replaceFunctionVariables replaces the\n function variables/parameters in program1 with that from the origin program.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionVariables\u003c/CODE\u003e replaces the\n function variables/parameters in program1 with that from the origin program.\n@param originEntryPoint the entry point address of the function to modify.\n This address should be derived from program1.\n@param varList the list of variables to replace.\n@param monitor the task monitor for notifying the user of progress.\n@throws CancelledException if the user canceled the operation via the task monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to modify.\n This address should be derived from program1."
+        },
+        {
+          "name": "varList",
+          "type_long": "java.util.List\u003cghidra.program.model.listing.Variable\u003e",
+          "type_short": "List",
+          "comment": "the list of variables to replace."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user canceled the operation via the task monitor."
+        }
+      ]
+    },
+    {
+      "name": "findVariable",
+      "comment": "Finds a variable in the array that is equivalent to the one specified by var.",
+      "javadoc": "Finds a variable in the array that is equivalent to the one specified by var.\n@param var a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program.\n@param variables the variables to be searched\n@return the equivalent variable in the array or null.",
+      "static": false,
+      "params": [
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program."
+        },
+        {
+          "name": "variables",
+          "type_long": "ghidra.program.model.listing.Variable[]",
+          "type_short": "ghidra.program.model.listing.Variable[]",
+          "comment": "the variables to be searched"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Variable",
+        "type_short": "Variable",
+        "comment": "the equivalent variable in the array or null."
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionVariableName",
+      "comment": "replaceFunctionVariableName replaces the name on the indicated\n function variable in program1 with the name from the equivalent variable in program2.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionVariableName\u003c/CODE\u003e replaces the name on the indicated\n function variable in program1 with the name from the equivalent variable in program2.\n@param originEntryPoint the entry point address of the function to modify.\n This address should be derived from the origin program.\n@param var a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program.\n@param monitor the task monitor for notifying the user of progress.\n@throws InvalidInputException\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to modify.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.InvalidInputException",
+          "type_short": "InvalidInputException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "replaceFunctionVariableDataType",
+      "comment": "replaceFunctionVariableDataType replaces the data type on the indicated\n function variable in program1 with the data type from the equivalent variable in program2.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionVariableDataType\u003c/CODE\u003e replaces the data type on the indicated\n function variable in program1 with the data type from the equivalent variable in program2.\n@param originEntryPoint the entry point address of the function to modify.\n This address should be derived from the origin program.\n@param var a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program.\n@param monitor the task monitor for notifying the user of progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the entry point address of the function to modify.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceFunctionVariableComment",
+      "comment": "replaceFunctionVariableComment replaces the comment on the indicated\n function variable in program1 with the comment from the equivalent variable in program2.",
+      "javadoc": "\u003cCODE\u003ereplaceFunctionVariableComment\u003c/CODE\u003e replaces the comment on the indicated\n function variable in program1 with the comment from the equivalent variable in program2.\n@param originEntryPoint entry point address of the function whose variable is getting the comment replaced.\n This address should be derived from the origin program.\n@param var a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program.\n@param monitor the task monitor for notifying the user of progress.",
+      "static": false,
+      "params": [
+        {
+          "name": "originEntryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point address of the function whose variable is getting the comment replaced.\n This address should be derived from the origin program."
+        },
+        {
+          "name": "var",
+          "type_long": "ghidra.program.model.listing.Variable",
+          "type_short": "Variable",
+          "comment": "a variable that is equivalent to the one in program1 to be changed.\n The variable passed here could be from another program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeBookmarks",
+      "comment": "mergeBookmarks merges bookmark differences from the origin program to the\n result program\n  within the specified address set.",
+      "javadoc": "\u003cCODE\u003emergeBookmarks\u003c/CODE\u003e merges bookmark differences from the origin program to the\n result program\n  within the specified address set.\n@param originAddressSet the addresses in the origin program where bookmarks are to be\n merged to the equivalent address in the result program.\n@param monitor the task monitor for notifying the user of this merge\u0027s\n progress.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translator is not a\n \"one for one translator\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses in the origin program where bookmarks are to be\n merged to the equivalent address in the result program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s\n progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translator is not a\n \"one for one translator\"."
+        }
+      ]
+    },
+    {
+      "name": "mergeBookmarksAtAddress",
+      "comment": "Merges the bookmarks from the origin program into the result\n  program at an address equivalent to the originAddress. Merging means replace any existing\n  bookmarks in the merge program at the address with the bookmarks\n  found in the listing at that address.",
+      "javadoc": "Merges the bookmarks from the origin program into the result\n  program at an address equivalent to the originAddress. Merging means replace any existing\n  bookmarks in the merge program at the address with the bookmarks\n  found in the listing at that address.\n@param originAddress the address in the origin program to get the bookmarks from.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address in the origin program to get the bookmarks from."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeBookmark",
+      "comment": "mergeBookmark merges the indicated bookmark from the origin program into the\n result program at an address equivalent to the originAddress.\n Merging means replace any existing bookmark of the specified type for NOTEs\n or of the specified type and category for non-NOTE types.\n Note: This method merges a single bookmark without affecting\n other bookmarks at the indicated address.",
+      "javadoc": "\u003cCODE\u003emergeBookmark\u003c/CODE\u003e merges the indicated bookmark from the origin program into the\n result program at an address equivalent to the originAddress.\n Merging means replace any existing bookmark of the specified type for NOTEs\n or of the specified type and category for non-NOTE types.\n \u003cp\u003eNote: This method merges a single bookmark without affecting\n other bookmarks at the indicated address.\n@param originAddress the address in the origin program where the bookmark is to be merged.\n@param type indicates the type of bookmark to merge.\n@param category indicates the category of the bookmark.\n@param monitor a task monitor for providing feedback to the user.\n@throws CancelledException if the user cancels the bookmark merge from the monitor dialog.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address in the origin program where the bookmark is to be merged."
+        },
+        {
+          "name": "type",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "indicates the type of bookmark to merge."
+        },
+        {
+          "name": "category",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "indicates the category of the bookmark."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "a task monitor for providing feedback to the user."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user cancels the bookmark merge from the monitor dialog."
+        }
+      ]
+    },
+    {
+      "name": "mergeProperties",
+      "comment": "mergeProperties merges user defined property differences\n  within the specified address set.",
+      "javadoc": "\u003cCODE\u003emergeProperties\u003c/CODE\u003e merges user defined property differences\n  within the specified address set.\n@param originAddressSet the addresses to be merged from the origin program.\n@param monitor the task monitor for notifying the user of this merge\u0027s progress.\n@throws CancelledException if user cancels via the monitor.\n@throws UnsupportedOperationException if the ProgramMerge translator is not a\n \"one for one translator\".",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddressSet",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": "the addresses to be merged from the origin program."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor for notifying the user of this merge\u0027s progress."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if user cancels via the monitor."
+        },
+        {
+          "type_long": "java.lang.UnsupportedOperationException",
+          "type_short": "UnsupportedOperationException",
+          "comment": "if the ProgramMerge translator is not a\n \"one for one translator\"."
+        }
+      ]
+    },
+    {
+      "name": "mergePropertiesAtAddress",
+      "comment": "Replaces the user defined properties from the origin program into the result\n  program at the address that is equivalent to the origin address.\n  Note: To merge properties, there must be a code unit AT the equivalent address\n  in the result program.",
+      "javadoc": "Replaces the user defined properties from the origin program into the result\n  program at the address that is equivalent to the origin address.\n  Note: To merge properties, there must be a code unit AT the equivalent address\n  in the result program.\n@param originAddress the address of the code unit to get the properties from in the origin program.",
+      "static": false,
+      "params": [
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the code unit to get the properties from in the origin program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeUserProperty",
+      "comment": "Replaces the user defined properties from the specified origin address in the origin program\n to the equivalent result address in the result program.\n Note: To merge properties, there must be a code unit AT the equivalent address\n in the result program.",
+      "javadoc": "Replaces the user defined properties from the specified origin address in the origin program\n to the equivalent result address in the result program.\n Note: To merge properties, there must be a code unit AT the equivalent address\n in the result program.\n@param originAddress the address of the code unit to get the properties from in the origin program.",
+      "static": false,
+      "params": [
+        {
+          "name": "userPropertyName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "originAddress",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the code unit to get the properties from in the origin program."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getProperty",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "map",
+          "type_long": "ghidra.program.model.util.PropertyMap",
+          "type_short": "PropertyMap",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setProperty",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "map",
+          "type_long": "ghidra.program.model.util.PropertyMap",
+          "type_short": "PropertyMap",
+          "comment": ""
+        },
+        {
+          "name": "address",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "property",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "visit",
+      "comment": "Set the property on the merge program\u0027s code unit if the named property\n  is a void property type.",
+      "javadoc": "Set the property on the merge program\u0027s code unit if the named property\n  is a void property type.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "visit",
+      "comment": "Set the property on the merge program\u0027s code unit if the named property\n  is a String property type.",
+      "javadoc": "Set the property on the merge program\u0027s code unit if the named property\n  is a String property type.\n@param value the value for the named property.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the value for the named property."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "visit",
+      "comment": "Set the property on the merge program\u0027s code unit if the named property\n  is an Object property type.",
+      "javadoc": "Set the property on the merge program\u0027s code unit if the named property\n  is an Object property type.\n@param value the value for the named property.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": "the value for the named property."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "visit",
+      "comment": "Set the property on the merge program\u0027s code unit if the named property\n  is an Object property type.",
+      "javadoc": "Set the property on the merge program\u0027s code unit if the named property\n  is an Object property type.\n@param value the value for the named property.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "ghidra.util.Saveable",
+          "type_short": "Saveable",
+          "comment": "the value for the named property."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "visit",
+      "comment": "Set the property on the merge program\u0027s code unit if the named property\n  is an int property type.",
+      "javadoc": "Set the property on the merge program\u0027s code unit if the named property\n  is an int property type.\n@param value the value for the named property.",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the value for the named property."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

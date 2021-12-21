@@ -1,0 +1,686 @@
+{
+  "name": "LocalSymbolMap",
+  "comment": "A container for local symbols within the decompiler\u0027s model of a function. It contains HighSymbol\n objects for any symbol within the scope of the function, including parameters. The container is populated\n either from the underlying Function object (when sending information to the decompiler) or read in from\n an XML description (when receiving a function model from the decompiler). HighSymbols can be obtained\n via Address using findLocal() or by id using getSymbol().  Parameters can be accessed specifically\n using getParamSymbol().",
+  "javadoc": "A container for local symbols within the decompiler\u0027s model of a function. It contains HighSymbol\n objects for any symbol within the scope of the function, including parameters. The container is populated\n either from the underlying Function object (when sending information to the decompiler) or read in from\n an XML description (when receiving a function model from the decompiler). HighSymbols can be obtained\n via Address using findLocal() or by id using getSymbol().  Parameters can be accessed specifically\n using getParamSymbol().",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "func",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.pcode.HighFunction",
+      "type_short": "HighFunction",
+      "constant_value": null
+    },
+    {
+      "name": "spacename",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "addrMappedSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cghidra.program.model.pcode.LocalSymbolMap.MappedVarKey,ghidra.program.model.pcode.HighSymbol\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "symbolMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.Long,ghidra.program.model.pcode.HighSymbol\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "paramSymbols",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.pcode.HighSymbol[]",
+      "type_short": "ghidra.program.model.pcode.HighSymbol[]",
+      "constant_value": null
+    },
+    {
+      "name": "uniqueSymbolId",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "PARAM_SYMBOL_SLOT_COMPARATOR",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.Comparator\u003cghidra.program.model.pcode.HighSymbol\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "@param highFunc HighFunction the local variables are defined within.\n@param spcname space name the local variables are defined within.",
+      "static": false,
+      "params": [
+        {
+          "name": "highFunc",
+          "type_long": "ghidra.program.model.pcode.HighFunction",
+          "type_short": "HighFunction",
+          "comment": "HighFunction the local variables are defined within."
+        },
+        {
+          "name": "spcname",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "space name the local variables are defined within."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHighFunction",
+      "comment": "Get the decompiler\u0027s function model owning this container",
+      "javadoc": "Get the decompiler\u0027s function model owning this container\n@return the owning HighFunction",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighFunction",
+        "type_short": "HighFunction",
+        "comment": "the owning HighFunction"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextId",
+      "comment": "Assign a unique id to a new symbol being put in this container.",
+      "javadoc": "Assign a unique id to a new symbol being put in this container.\n@return the unique id",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": "the unique id"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNameToSymbolMap",
+      "comment": "Construct and return a map from a HighSymbol\u0027s name to the HighSymbol object",
+      "javadoc": "Construct and return a map from a HighSymbol\u0027s name to the HighSymbol object\n@return the new name to symbol map",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,ghidra.program.model.pcode.HighSymbol\u003e",
+        "type_short": "Map",
+        "comment": "the new name to symbol map"
+      },
+      "throws": []
+    },
+    {
+      "name": "removeSymbol",
+      "comment": "Remove the given HighSymbol from this container.\n The key is removed from the main symbolMap.  It is also removed from the MappedEntry map\n and from the list of parameter symbols if applicable.",
+      "javadoc": "Remove the given HighSymbol from this container.\n The key is removed from the main symbolMap.  It is also removed from the MappedEntry map\n and from the list of parameter symbols if applicable.\n@param highSymbol is the given symbol",
+      "static": false,
+      "params": [
+        {
+          "name": "highSymbol",
+          "type_long": "ghidra.program.model.pcode.HighSymbol",
+          "type_short": "HighSymbol",
+          "comment": "is the given symbol"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "mergeNamedSymbols",
+      "comment": "Given names of the form:  \"baseName\", \"baseName$1\", \"baseName@2\", ...\n find the corresponding HighSymbols in this container and merge them into a single HighSymbol.\n The name passed into this method must be of the form \"baseName$1\", the base name is extracted from it.",
+      "javadoc": "Given names of the form:  \"baseName\", \"baseName$1\", \"baseName@2\", ...\n find the corresponding HighSymbols in this container and merge them into a single HighSymbol.\n The name passed into this method must be of the form \"baseName$1\", the base name is extracted from it.\n@param name is a string with the base name concatenated with \"$1\"\n@param nameMap is a map from all symbols names in this container to the corresponding HighSymbol",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "is a string with the base name concatenated with \"$1\""
+        },
+        {
+          "name": "nameMap",
+          "type_long": "java.util.Map\u003cjava.lang.String,ghidra.program.model.pcode.HighSymbol\u003e",
+          "type_short": "Map",
+          "comment": "is a map from all symbols names in this container to the corresponding HighSymbol"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "grabFromFunction",
+      "comment": "Populate the local variable map from information attached to the Program DB\u0027s function.",
+      "javadoc": "Populate the local variable map from information attached to the Program DB\u0027s function.\n@param includeDefaultNames is true if default symbol names should be considered locked",
+      "static": false,
+      "params": [
+        {
+          "name": "includeDefaultNames",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "is true if default symbol names should be considered locked"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isUserDefinedName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parseSymbolXML",
+      "comment": "Parse a mapsym tag in XML",
+      "javadoc": "Parse a \u0026lt;mapsym\u0026gt; tag in XML\n@param parser is the XML parser\n@return the reconstructed HighSymbol\n@throws PcodeXMLException for problems sub tags",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": "is the XML parser"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighSymbol",
+        "type_short": "HighSymbol",
+        "comment": "the reconstructed HighSymbol"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.pcode.PcodeXMLException",
+          "type_short": "PcodeXMLException",
+          "comment": "for problems sub tags"
+        }
+      ]
+    },
+    {
+      "name": "parseScopeXML",
+      "comment": "Parse a local symbol scope in XML from the localdb tag.",
+      "javadoc": "Parse a local symbol scope in XML from the \u0026lt;localdb\u0026gt; tag.\n@param parser is the XML parser\n@throws PcodeXMLException for problems parsing individual tags",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": "is the XML parser"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.pcode.PcodeXMLException",
+          "type_short": "PcodeXMLException",
+          "comment": "for problems parsing individual tags"
+        }
+      ]
+    },
+    {
+      "name": "parseSymbolList",
+      "comment": "Add mapped symbols to this LocalVariableMap, by parsing the symbollist and mapsym tags.",
+      "javadoc": "Add mapped symbols to this LocalVariableMap, by parsing the \u0026lt;symbollist\u0026gt; and \u0026lt;mapsym\u0026gt; tags.\n@param parser is the XML parser\n@throws PcodeXMLException for problems parsing a tag",
+      "static": false,
+      "params": [
+        {
+          "name": "parser",
+          "type_long": "ghidra.xml.XmlPullParser",
+          "type_short": "XmlPullParser",
+          "comment": "is the XML parser"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.pcode.PcodeXMLException",
+          "type_short": "PcodeXMLException",
+          "comment": "for problems parsing a tag"
+        }
+      ]
+    },
+    {
+      "name": "buildLocalDbXML",
+      "comment": "Output an XML document representing this local variable map.",
+      "javadoc": "Output an XML document representing this local variable map.\n@param resBuf is the buffer to write to\n@param namespace if the namespace of the function",
+      "static": false,
+      "params": [
+        {
+          "name": "resBuf",
+          "type_long": "java.lang.StringBuilder",
+          "type_short": "StringBuilder",
+          "comment": "is the buffer to write to"
+        },
+        {
+          "name": "namespace",
+          "type_long": "ghidra.program.model.symbol.Namespace",
+          "type_short": "Namespace",
+          "comment": "if the namespace of the function"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbols",
+      "comment": "Get all the symbols mapped for this program, Param, Locals.\n The HighSymbol can either be a HighParam, or HighLocal",
+      "javadoc": "Get all the symbols mapped for this program, Param, Locals.\n The HighSymbol can either be a HighParam, or HighLocal\n@return an iterator over all mapped symbols.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.Iterator\u003cghidra.program.model.pcode.HighSymbol\u003e",
+        "type_short": "Iterator",
+        "comment": "an iterator over all mapped symbols."
+      },
+      "throws": []
+    },
+    {
+      "name": "findLocal",
+      "comment": "Find any local variable (including input params) by address",
+      "javadoc": "Find any local variable (including input params) by address\n@param store - variable storage\n@param pc \u003d Address of first use, or null if address\n             is valid throughout the entire scope\n@return HighLocal or null",
+      "static": false,
+      "params": [
+        {
+          "name": "store",
+          "type_long": "ghidra.program.model.listing.VariableStorage",
+          "type_short": "VariableStorage",
+          "comment": "- variable storage"
+        },
+        {
+          "name": "pc",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "\u003d Address of first use, or null if address\n             is valid throughout the entire scope"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighSymbol",
+        "type_short": "HighSymbol",
+        "comment": "HighLocal or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "findLocal",
+      "comment": "Find any local variable (including input params) by address",
+      "javadoc": "Find any local variable (including input params) by address\n@param addr - variable storage address\n@param pc \u003d Address of first use, or null if address\n             is valid throughout the entire scope\n@return HighLocal or null",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "- variable storage address"
+        },
+        {
+          "name": "pc",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "\u003d Address of first use, or null if address\n             is valid throughout the entire scope"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighSymbol",
+        "type_short": "HighSymbol",
+        "comment": "HighLocal or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSymbol",
+      "comment": "Lookup high variable based upon its symbol-id",
+      "javadoc": "Lookup high variable based upon its symbol-id\n@param id symbol-id\n@return variable or null if not found",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "symbol-id"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighSymbol",
+        "type_short": "HighSymbol",
+        "comment": "variable or null if not found"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNumParams",
+      "comment": "Get the number of parameter symbols in this scope",
+      "javadoc": "Get the number of parameter symbols in this scope\n@return the number of parameters",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the number of parameters"
+      },
+      "throws": []
+    },
+    {
+      "name": "getParamSymbol",
+      "comment": "",
+      "javadoc": "@param i is the desired parameter position\n@return the i-th parameter HighSymbol",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the desired parameter position"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighSymbol",
+        "type_short": "HighSymbol",
+        "comment": "the i-th parameter HighSymbol"
+      },
+      "throws": []
+    },
+    {
+      "name": "getParam",
+      "comment": "",
+      "javadoc": "@param i is the desired parameter position\n@return the i-th parameter variable",
+      "static": false,
+      "params": [
+        {
+          "name": "i",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "is the desired parameter position"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighParam",
+        "type_short": "HighParam",
+        "comment": "the i-th parameter variable"
+      },
+      "throws": []
+    },
+    {
+      "name": "containsVariableWithName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "newMappedSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "nm",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "store",
+          "type_long": "ghidra.program.model.listing.VariableStorage",
+          "type_short": "VariableStorage",
+          "comment": ""
+        },
+        {
+          "name": "pcaddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "slot",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighSymbol",
+        "type_short": "HighSymbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "newDynamicSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "id",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "nm",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "hash",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "pcaddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.HighSymbol",
+        "type_short": "HighSymbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "insertSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sym",
+          "type_long": "ghidra.program.model.pcode.HighSymbol",
+          "type_short": "HighSymbol",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "newEquateSymbol",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "uniqueId",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "nm",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "val",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "hash",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.pcode.EquateSymbol",
+        "type_short": "EquateSymbol",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "grabEquates",
+      "comment": "Build dynamic symbols based on equates",
+      "javadoc": "Build dynamic symbols based on equates\n@param dbFunction is the function to pull equates for",
+      "static": false,
+      "params": [
+        {
+          "name": "dbFunction",
+          "type_long": "ghidra.program.model.listing.Function",
+          "type_short": "Function",
+          "comment": "is the function to pull equates for"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "grabMerges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "mergeNames",
+          "type_long": "java.util.ArrayList\u003cjava.lang.String\u003e",
+          "type_short": "ArrayList",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

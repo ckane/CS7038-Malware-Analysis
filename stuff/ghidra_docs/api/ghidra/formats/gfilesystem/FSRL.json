@@ -1,0 +1,675 @@
+{
+  "name": "FSRL",
+  "comment": "A _F_ile _S_ystem _R_esource _L_ocator, (name and string format patterned after URLs)\n \n Used to locate a resource (by name) on a \"filesystem\", in a recursively nested fashion.\n \n The string format of FSRLs is  + \"://\" +  + \n [ + \"|\" pipe +  ]*\n \n See #fromPartString(FSRL, String) for more format info.\n \n Read the string format from right-to-left for easiest understanding... ie.\n \"file://z|y://x\" reads as \"file x inside a filesystem y inside a container file z\".\n \n FSRL instances are immutable and thread-safe.\n \n Examples (pipes shown in red since they are hard to see):\n \n file://dir/subdir -- simplest example, locates a file on local computer filesystem.\n file://dir/subdir/example.zip|zip://readme.txt -- points to a file named \"readme.txt\" in a zip file.\n file://dir/subdir/example.zip|zip://dir/nested.tar|tar://file.txt -- points to\n a file inside a TAR archive, which is inside a ZIP archive, which is on the local filesystem.\n file://dir/subdir/example.zip?MD5\u003d1234567|zip://readme.txt?MD5\u003d987654 --\n points to a file named \"readme.txt\" (with a MD5 hash) in a zip file (that has another\n MD5 hash).\n \n \n See FSRLRoot for examples of how FSRL and FSRLRoot\u0027s are related.\n \n FSRL\u0027s can be created either piecemeal, from the bottom up, starting with a root filesystem\n FSRL and calling #appendPath(String) or FSRLRoot#nestedFS(FSRL, String) methods\n to create deeper and deeper nested FSRLs,\n \n or\n \n FSRL\u0027s can be created from strings using #fromString(String).\n \n FSRLs that have a MD5 value are FileSystemService#getFullyQualifiedFSRL(FSRL, ghidra.util.task.TaskMonitor).\n ",
+  "javadoc": "A _F_ile _S_ystem _R_esource _L_ocator, (name and string format patterned after URLs)\n \u003cp\u003e\n Used to locate a resource (by name) on a \"filesystem\", in a recursively nested fashion.\n \u003cp\u003e\n The string format of FSRLs is {@code fstype} + \u003cb\u003e\"://\"\u003c/b\u003e + {@code path} + {@code optional_MD5}\n [ + \u003cb\u003e\"|\"\u003c/b\u003e pipe + {@code FSRL} ]*\n \u003cp\u003e\n See {@link #fromPartString(FSRL, String)} for more format info.\n \u003cp\u003e\n Read the string format from right-to-left for easiest understanding... ie.\n \"file://z|y://x\" reads as \"file x inside a filesystem y inside a container file z\".\n \u003cp\u003e\n FSRL instances are immutable and thread-safe.\n \u003cp\u003e\n Examples (pipes shown in red since they are hard to see):\n \u003cul\u003e\n \u003cli\u003e\u003cb\u003efile://dir/subdir\u003c/b\u003e -- simplest example, locates a file on local computer filesystem.\n \u003cli\u003e\u003cb\u003efile://dir/subdir/example.zip\u003cspan style\u003d\"color:red\"\u003e|\u003c/span\u003ezip://readme.txt\u003c/b\u003e -- points to a file named \"readme.txt\" in a zip file.\n \u003cli\u003e\u003cb\u003efile://dir/subdir/example.zip\u003cspan style\u003d\"color:red\"\u003e|\u003c/span\u003ezip://dir/nested.tar\u003cspan style\u003d\"color:red\"\u003e|\u003c/span\u003etar://file.txt\u003c/b\u003e -- points to\n a file inside a TAR archive, which is inside a ZIP archive, which is on the local filesystem.\n \u003cli\u003e\u003cb\u003efile://dir/subdir/example.zip?MD5\u003d1234567\u003cspan style\u003d\"color:red\"\u003e|\u003c/span\u003ezip://readme.txt?MD5\u003d987654\u003c/b\u003e --\n points to a file named \"readme.txt\" (with a MD5 hash) in a zip file (that has another\n MD5 hash).\n \u003c/ul\u003e\n \u003cp\u003e\n See {@link FSRLRoot} for examples of how FSRL and FSRLRoot\u0027s are related.\n \u003cp\u003e\n FSRL\u0027s can be created either piecemeal, from the bottom up, starting with a root filesystem\n FSRL and calling {@link #appendPath(String)} or {@link FSRLRoot#nestedFS(FSRL, String)} methods\n to create deeper and deeper nested FSRLs,\n \u003cp\u003e\n or\n \u003cp\u003e\n FSRL\u0027s can be created from strings using {@link #fromString(String)}.\n \u003cp\u003e\n FSRLs that have a MD5 value are {@link FileSystemService#getFullyQualifiedFSRL(FSRL, ghidra.util.task.TaskMonitor) \"fully qualified\"}.\n \u003cp\u003e",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "PARAM_MD5",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"MD5\""
+    },
+    {
+      "name": "parent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.formats.gfilesystem.FSRL",
+      "type_short": "FSRL",
+      "constant_value": null
+    },
+    {
+      "name": "path",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "md5",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "fromString",
+      "comment": "Creates a FSRL from a raw string.  The parent portions of the FSRL\n are not intern()\u0027d so will not be shared with other FSRL instances.\n \n See #fromPartString(FSRL, String) for details of character encoding fixups.\n ",
+      "javadoc": "Creates a {@link FSRL} from a raw string.  The parent portions of the FSRL\n are not intern()\u0027d so will not be shared with other FSRL instances.\n \u003cp\u003e\n See {@link #fromPartString(FSRL, String)} for details of character encoding fixups.\n \u003cp\u003e\n@param fsrlStr something like \"fstype://path/path|fs2type://path2/path2|etc://etc/etc\"\n@return new {@link FSRL} instance, never null\n@throws MalformedURLException if empty string or bad format",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrlStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "something like \"fstype://path/path|fs2type://path2/path2|etc://etc/etc\""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "new FSRL instance, never null"
+      },
+      "throws": [
+        {
+          "type_long": "java.net.MalformedURLException",
+          "type_short": "MalformedURLException",
+          "comment": "if empty string or bad format"
+        }
+      ]
+    },
+    {
+      "name": "fromString",
+      "comment": "Creates a FSRL from a raw string.\n \n See #fromPartString(FSRL, String) for details of character encoding fixups.\n ",
+      "javadoc": "Creates a {@link FSRL} from a raw string.\n \u003cp\u003e\n See {@link #fromPartString(FSRL, String)} for details of character encoding fixups.\n \u003cp\u003e\n@param parent Parent {@link FSRL}\n@param fsrlStr something like \"fstype://path/path|fs2type://path2/path2|etc://etc/etc\"\n@return new {@link FSRL} instance, never null\n@throws MalformedURLException if empty string or bad format",
+      "static": true,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "Parent FSRL"
+        },
+        {
+          "name": "fsrlStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "something like \"fstype://path/path|fs2type://path2/path2|etc://etc/etc\""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "new FSRL instance, never null"
+      },
+      "throws": [
+        {
+          "type_long": "java.net.MalformedURLException",
+          "type_short": "MalformedURLException",
+          "comment": "if empty string or bad format"
+        }
+      ]
+    },
+    {
+      "name": "convertRootToContainer",
+      "comment": "Ensures that a FSRL instance is a file type reference by converting any FSRLRoots\n into the container file that hosts the FSRLRoot.",
+      "javadoc": "Ensures that a FSRL instance is a file type reference by converting any FSRLRoots\n into the container file that hosts the FSRLRoot.\n@param fsrl FSRL or FSRLRoot instance to possibly convert\n@return original FSRL if already a normal FSRL, or the container if it was a FSRLRoot",
+      "static": true,
+      "params": [
+        {
+          "name": "fsrl",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL or FSRLRoot instance to possibly convert"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "original FSRL if already a normal FSRL, or the container if it was a FSRLRoot"
+      },
+      "throws": []
+    },
+    {
+      "name": "fromPartString",
+      "comment": "Creates a single FSRL from a FSRL-part string.\n \n A FSRL-part string is defined as protocol_string + \"://\" + path_string + \"?\" + param_string.\n \n There should be  no \u0027|\u0027 separator characters present in the FSRL-part string.\n \n Backslash characters in the path are normalized to forward slashes after decoding any\n hex encoded character values (ie. %20 becomes \u0027 \u0027 (32) ).  See FSUtilities#escapeEncode(String).",
+      "javadoc": "Creates a single {@link FSRL} from a FSRL-part string.\n \u003cp\u003e\n A FSRL-part string is defined as protocol_string + \"://\" + path_string + \"?\" + param_string.\n \u003cp\u003e\n There should be  no \u0027|\u0027 separator characters present in the FSRL-part string.\n \u003cp\u003e\n Backslash characters in the path are normalized to forward slashes after decoding any\n hex encoded character values (ie. %20 becomes \u0027 \u0027 (32) ).  See {@link FSUtilities#escapeEncode(String)}.\n@param containerFile the parent container file that contains this filesystem\u0027s data\n@param partStr the string that defines this portion of the FSRL\n@return new FSRL instance, who\u0027s FSLRRoot is parented on containerFile.\n@throws MalformedURLException if the partStr is formatted incorrectly",
+      "static": true,
+      "params": [
+        {
+          "name": "containerFile",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "the parent container file that contains this filesystem\u0027s data"
+        },
+        {
+          "name": "partStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the string that defines this portion of the FSRL"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "new FSRL instance, who\u0027s FSLRRoot is parented on containerFile."
+      },
+      "throws": [
+        {
+          "type_long": "java.net.MalformedURLException",
+          "type_short": "MalformedURLException",
+          "comment": "if the partStr is formatted incorrectly"
+        }
+      ]
+    },
+    {
+      "name": "getParamMapFromString",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "paramsStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+        "type_short": "Map",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.net.MalformedURLException",
+          "type_short": "MalformedURLException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Protected constructor called by static factory methods such as #fromString(String)\n or methods that return a new instance such as #withPath(String).",
+      "javadoc": "Protected constructor called by static factory methods such as {@link #fromString(String)}\n or methods that return a new instance such as {@link #withPath(String)}.\n@param parent FSRL parent, null if this instance is root FSRLRoot\n@param path String path, meaning dependent on context",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL parent, null if this instance is root FSRLRoot"
+        },
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "String path, meaning dependent on context"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Protected constructor called by static factory methods such as #fromString(String)\n or methods that return a new instance such as #withPath(String).",
+      "javadoc": "Protected constructor called by static factory methods such as {@link #fromString(String)}\n or methods that return a new instance such as {@link #withPath(String)}.\n@param parent FSRL parent, null if this instance is root FSRLRoot\n@param path String path, meaning dependent on context\n@param md5 hex string with the md5 hash of the file this FSRL points to, null ok.",
+      "static": false,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL parent, null if this instance is root FSRLRoot"
+        },
+        {
+          "name": "path",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "String path, meaning dependent on context"
+        },
+        {
+          "name": "md5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "hex string with the md5 hash of the file this FSRL points to, null ok."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFS",
+      "comment": "Returns the FSRLRoot object that represents the entire\n GFileSystem for this FSRL.\n \n Never returns NULL, and calling getFS() on a FSRLRoot object\n returns itself.",
+      "javadoc": "Returns the {@link FSRLRoot} object that represents the entire\n {@link GFileSystem filesystem} for this FSRL.\n \u003cp\u003e\n Never returns NULL, and calling getFS() on a {@link FSRLRoot} object\n returns itself.\n@return {@link FSRLRoot} instance that is the parent of this {@link FSRL}, never\n null.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+        "type_short": "FSRLRoot",
+        "comment": "FSRLRoot instance that is the parent of this FSRL, never\n null."
+      },
+      "throws": []
+    },
+    {
+      "name": "getNestingDepth",
+      "comment": "Returns the number of FSRLRoots there are in this FSRL.\n \n A single level FSRL such as \"file://path\" will return 1.\n A two level FSRL such as \"file://path|subfs://path2\" will return 2.\n etc.",
+      "javadoc": "Returns the number of {@link FSRLRoot}s there are in this {@link FSRL}.\n \u003cp\u003e\n A single level FSRL such as \"file://path\" will return 1.\u003cbr\u003e\n A two level FSRL such as \"file://path|subfs://path2\" will return 2.\u003cbr\u003e\n etc.\u003cbr\u003e\n@return number of levels in this FSRL, min value returned is 1.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "number of levels in this FSRL, min value returned is 1."
+      },
+      "throws": []
+    },
+    {
+      "name": "getPath",
+      "comment": "Returns the full path/filename of this FSRL.  Does not include parent filesystem path\n or info.\n \n \"file://path|subfs://subpath/blah\" returns \"/subpath/blah\"\n \n May return null if this instance is a FSRLRoot.",
+      "javadoc": "Returns the full path/filename of this FSRL.  Does not include parent filesystem path\n or info.\n \u003cp\u003e\n \"file://path|subfs://subpath/blah\" returns \"/subpath/blah\"\n \u003cp\u003e\n May return null if this instance is a {@link FSRLRoot}.\n@return string path and filename of this object.  Null if this {@link FSRL} is a\n {@link FSRLRoot}.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "string path and filename of this object.  Null if this FSRL is a\n FSRLRoot."
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Returns the name portion of this FSRL\u0027s path, everything after the last \u0027/\u0027\n \n \"file://path/name.ext\" returns \"name.ext\"",
+      "javadoc": "Returns the name portion of this FSRL\u0027s path, everything after the last \u0027/\u0027\n \u003cp\u003e\n \"file://path/name.ext\" returns \"name.ext\"\n@return name portion of this FSRL path, or null if path is null also.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "name portion of this FSRL path, or null if path is null also."
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "Returns the name portion of the FSRL part at parent depth , where 0\n is ourself (equiv to just calling #getName(), 1 is the parent\n container\u0027s name, etc.\n ",
+      "javadoc": "Returns the name portion of the FSRL part at parent depth {@code nestedDepth}, where 0\n is ourself (equiv to just calling {@link #getName()}, 1 is the parent\n container\u0027s name, etc.\n \u003cp\u003e\n@param nestedDepth relative parent index of FSRL part to query, 0 \u003d\u003d this instance.\n@return name portion of the path of the specified FSRL part.\n@throws IOException if nestedDepth is larger than number of FSRL parent parts.",
+      "static": false,
+      "params": [
+        {
+          "name": "nestedDepth",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "relative parent index of FSRL part to query, 0 \u003d\u003d this instance."
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "name portion of the path of the specified FSRL part."
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": "if nestedDepth is larger than number of FSRL parent parts."
+        }
+      ]
+    },
+    {
+      "name": "getMD5",
+      "comment": "Returns the MD5 string associated with this file.\n \n NULL if no MD5 value present.\n ",
+      "javadoc": "Returns the MD5 string associated with this file.\n \u003cp\u003e\n NULL if no MD5 value present.\n \u003cp\u003e\n@return md5 string associated with this file object, or null if not present.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "md5 string associated with this file object, or null if not present."
+      },
+      "throws": []
+    },
+    {
+      "name": "isMD5Equal",
+      "comment": "Tests specified MD5 value against MD5 in this FSRL.",
+      "javadoc": "Tests specified MD5 value against MD5 in this FSRL.\n@param otherMD5 md5 in a hex string\n@return boolean true if equal, or that both are null, false otherwise",
+      "static": false,
+      "params": [
+        {
+          "name": "otherMD5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "md5 in a hex string"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if equal, or that both are null, false otherwise"
+      },
+      "throws": []
+    },
+    {
+      "name": "withMD5",
+      "comment": "Creates a new FSRL instance, using the same information as this instance,\n but with a new #getMD5() value.",
+      "javadoc": "Creates a new {@link FSRL} instance, using the same information as this instance,\n but with a new {@link #getMD5() MD5} value.\n@param newMD5 string md5\n@return new {@link FSRL} instance with the same path and the specified md5 value,\n         or if newMD5 is same as existing, returns this",
+      "static": false,
+      "params": [
+        {
+          "name": "newMD5",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "string md5"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "new FSRL instance with the same path and the specified md5 value,\n         or if newMD5 is same as existing, returns this"
+      },
+      "throws": []
+    },
+    {
+      "name": "withPath",
+      "comment": "Creates a new FSRL instance, using the same FSRLRoot as this instance,\n but with a new path.\n \n See also #appendPath(String).\n ",
+      "javadoc": "Creates a new {@link FSRL} instance, using the same {@link FSRLRoot} as this instance,\n but with a new path.\n \u003cp\u003e\n See also {@link #appendPath(String)}.\n \u003cp\u003e\n@param newpath string path\n@return new {@link FSRL} instance with the specified path.",
+      "static": false,
+      "params": [
+        {
+          "name": "newpath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "string path"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "new FSRL instance with the specified path."
+      },
+      "throws": []
+    },
+    {
+      "name": "withPath",
+      "comment": "Creates a new FSRL instance using the same path and other metadata\n present in the  instance.\n \n Used when re-root\u0027ing a FSRL path onto another parent object (usually during intern()\u0027ing)",
+      "javadoc": "Creates a new {@link FSRL} instance using the same path and other metadata\n present in the {@code copyPath} instance.\n \u003cp\u003e\n Used when re-root\u0027ing a FSRL path onto another parent object (usually during intern()\u0027ing)\n@param copyPath another FSRL to copy path and md5 from\n@return new FSRL instance",
+      "static": false,
+      "params": [
+        {
+          "name": "copyPath",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "another FSRL to copy path and md5 from"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "new FSRL instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "appendPath",
+      "comment": "Creates a new FSRL instance, using the same FSRLRoot as this instance,\n combining the current #getPath() with the  value.\n ",
+      "javadoc": "Creates a new {@link FSRL} instance, using the same {@link FSRLRoot} as this instance,\n combining the current {@link #getPath() path} with the {@code relPath} value.\n \u003cp\u003e\n@param relPath relative path string to append, \u0027/\u0027s will be automatically added\n@return new {@link FSRL} instance with additional path appended.",
+      "static": false,
+      "params": [
+        {
+          "name": "relPath",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "relative path string to append, \u0027/\u0027s will be automatically added"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRL",
+        "type_short": "FSRL",
+        "comment": "new FSRL instance with additional path appended."
+      },
+      "throws": []
+    },
+    {
+      "name": "makeNested",
+      "comment": "Creates a new FSRLRoot instance that is a child of this FSRL.\n \n See FSRLRoot#nestedFS(FSRL, FSRLRoot) and FSRLRoot#nestedFS(FSRL, String).",
+      "javadoc": "Creates a new {@link FSRLRoot} instance that is a child of this FSRL.\n \u003cp\u003e\n See {@link FSRLRoot#nestedFS(FSRL, FSRLRoot)} and {@link FSRLRoot#nestedFS(FSRL, String)}.\n@param fstype file system type string.\n@return new {@link FSRLRoot} instance",
+      "static": false,
+      "params": [
+        {
+          "name": "fstype",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "file system type string."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.formats.gfilesystem.FSRLRoot",
+        "type_short": "FSRLRoot",
+        "comment": "new FSRLRoot instance"
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "Returns a string containing the full FSRL.\n \n Example: \"file://path|subfs://blah?MD5\u003d1234567\"",
+      "javadoc": "Returns a string containing the full FSRL.\n \u003cp\u003e\n Example: \"file://path|subfs://blah?MD5\u003d1234567\"\n@return string with full FSRL",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "string with full FSRL"
+      },
+      "throws": []
+    },
+    {
+      "name": "toPrettyString",
+      "comment": "Returns a string containing the full FSRL, excluding MD5 portions.",
+      "javadoc": "Returns a string containing the full FSRL, excluding MD5 portions.\n@return string with full FSRL, excluding MD5 portions.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "string with full FSRL, excluding MD5 portions."
+      },
+      "throws": []
+    },
+    {
+      "name": "toPrettyFullpathString",
+      "comment": "Returns a string containing the full FSRL, without FS \"fstype://\" portions\n \n Example:\n \n \n \n will result in\n \n .",
+      "javadoc": "Returns a string containing the full FSRL, without FS \"fstype://\" portions\n \u003cp\u003e\n Example:\n \u003cp\u003e\n {@code \"fsrl://path/filename?MD5\u003d1234|subfsrl://subpath/subfile\"}\n \u003cp\u003e\n will result in\n \u003cp\u003e\n {@code \"path/filename|subpath/subfile\"}.\n@return formatted string such as: \"path/filename|subpath/subfile\"",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "formatted string such as: \"path/filename|subpath/subfile\""
+      },
+      "throws": []
+    },
+    {
+      "name": "appendToStringBuilder",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "sb",
+          "type_long": "java.lang.StringBuilder",
+          "type_short": "StringBuilder",
+          "comment": ""
+        },
+        {
+          "name": "recurse",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "includeParams",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "includeFSRoot",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toStringPart",
+      "comment": "Returns a string containing just the current FSRL protocol and path.\n \n Example: \"file://path|subfs://blah?MD5\u003d123456\" returns \"subfs://blah?MD5\u003d123456\"",
+      "javadoc": "Returns a string containing just the current {@link FSRL} protocol and path.\n \u003cp\u003e\n Example: \"file://path|subfs://blah?MD5\u003d123456\" returns \"subfs://blah?MD5\u003d123456\"\n@return string containing just the current {@link FSRL} protocol and path.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": "string containing just the current FSRL protocol and path."
+      },
+      "throws": []
+    },
+    {
+      "name": "split",
+      "comment": "Splits a FSRL into a List, with each element pointing to\n each level of the full FSRL.\n \n Example: \"file://path|subfs://blah|subfs2://blah2\"\n \n Produces a list of 3 elements:\n \"file://path\"\n \"file://path|subfs://blah\"\n \"file://path|subfs://blah|subfs2://blah2\"\n ",
+      "javadoc": "Splits a {@link FSRL} into a {@link List}, with each element pointing to\n each level of the full FSRL.\n \u003cp\u003e\n Example: \"file://path|subfs://blah|subfs2://blah2\"\n \u003cp\u003e\n Produces a list of 3 elements:\u003cbr\u003e\n \"file://path\"\u003cbr\u003e\n \"file://path|subfs://blah\"\u003cbr\u003e\n \"file://path|subfs://blah|subfs2://blah2\"\n \u003cp\u003e\n@return {@link List} of {@link FSRL} elements pointing to each level of this FSRL.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.formats.gfilesystem.FSRL\u003e",
+        "type_short": "List",
+        "comment": "List of FSRL elements pointing to each level of this FSRL."
+      },
+      "throws": []
+    },
+    {
+      "name": "isEquivalent",
+      "comment": "Returns true if the two FSRLs are the same, excluding any MD5 values.",
+      "javadoc": "Returns true if the two FSRLs are the same, excluding any MD5 values.\n@param fsrlStr string-ified {@link FSRL}\n@return boolean true if this instance is the same as the specified string-ified fsrl,\n ignoring any md5 values.",
+      "static": false,
+      "params": [
+        {
+          "name": "fsrlStr",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "string-ified FSRL"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if this instance is the same as the specified string-ified fsrl,\n ignoring any md5 values."
+      },
+      "throws": []
+    },
+    {
+      "name": "isEquivalent",
+      "comment": "Returns true if the two FSRLs are the same, excluding any MD5 values.",
+      "javadoc": "Returns true if the two {@link FSRL}s are the same, excluding any MD5 values.\n@param other {@link FSRL} to compare with\n@return boolean true if this instance is the same as the specified FSRL, ignoring\n any md5 values.",
+      "static": false,
+      "params": [
+        {
+          "name": "other",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL to compare with"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if this instance is the same as the specified FSRL, ignoring\n any md5 values."
+      },
+      "throws": []
+    },
+    {
+      "name": "isDescendantOf",
+      "comment": "Returns  if this object is a child or descendant of the\n specified  parameter.\n ",
+      "javadoc": "Returns {@code true} if this object is a child or descendant of the\n specified {@code potentialParent} parameter.\n \u003cp\u003e\n@param potentialParent {@link FSRL} to test against\n@return boolean true if the specified {@link FSRL} is a parent (ignoring md5 hashes)\n of this instance.",
+      "static": false,
+      "params": [
+        {
+          "name": "potentialParent",
+          "type_long": "ghidra.formats.gfilesystem.FSRL",
+          "type_short": "FSRL",
+          "comment": "FSRL to test against"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "boolean true if the specified FSRL is a parent (ignoring md5 hashes)\n of this instance."
+      },
+      "throws": []
+    },
+    {
+      "name": "isParentPath",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "parent",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "child",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hashCode",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "equals",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "obj",
+          "type_long": "java.lang.Object",
+          "type_short": "Object",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

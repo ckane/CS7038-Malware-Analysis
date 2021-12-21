@@ -1,0 +1,197 @@
+{
+  "name": "CachingPool",
+  "comment": "A thread-safe pool that knows how to create instances as needed.  When clients are done\n with the pooled item they then call #release(Object), thus enabling them to be\n re-used in the future.\n\n Calling #setCleanupTimeout(long) with a non-negative value will start a timer when\n #release(Object) is called to BasicFactory#dispose(Object) any objects in the\n pool.   By default, the cleanup timer does not run.\n\n Once #dispose() has been called on this class, items created or released will no\n longer be pooled.",
+  "javadoc": "A thread-safe pool that knows how to create instances as needed.  When clients are done\n with the pooled item they then call {@link #release(Object)}, thus enabling them to be\n re-used in the future.\n\n \u003cp\u003eCalling {@link #setCleanupTimeout(long)} with a non-negative value will start a timer when\n {@link #release(Object)} is called to {@link BasicFactory#dispose(Object)} any objects in the\n pool.   By default, the cleanup timer does not run.\n\n \u003cp\u003eOnce {@link #dispose()} has been called on this class, items created or released will no\n longer be pooled.\n@param \u003cT\u003e the type of object to pool",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "TIMEOUT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "-1"
+    },
+    {
+      "name": "isDisposed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "factory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "generic.cache.BasicFactory\u003cT\u003e",
+      "type_short": "BasicFactory",
+      "constant_value": null
+    },
+    {
+      "name": "cache",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Deque\u003cT\u003e",
+      "type_short": "Deque",
+      "constant_value": null
+    },
+    {
+      "name": "disposeTimeout",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "timerMonitor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.timer.GTimerMonitor",
+      "type_short": "GTimerMonitor",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new pool that uses the given factory to create new items as needed",
+      "javadoc": "Creates a new pool that uses the given factory to create new items as needed\n@param factory the factory used to create new items",
+      "static": false,
+      "params": [
+        {
+          "name": "factory",
+          "type_long": "generic.cache.BasicFactory\u003cT\u003e",
+          "type_short": "BasicFactory",
+          "comment": "the factory used to create new items"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setCleanupTimeout",
+      "comment": "Sets the time to wait for released items to be disposed by this pool by calling\n BasicFactory#dispose(Object).  A negative timeout value signals to disable\n the cleanup task.\n\n When clients call #get(), the timer will not be running.  It will be restarted\n again once #release(Object) has been called.",
+      "javadoc": "Sets the time to wait for released items to be disposed by this pool by calling\n {@link BasicFactory#dispose(Object)}.  A negative timeout value signals to disable\n the cleanup task.\n\n \u003cp\u003eWhen clients call {@link #get()}, the timer will not be running.  It will be restarted\n again once {@link #release(Object)} has been called.\n@param timeout the new timeout.",
+      "static": false,
+      "params": [
+        {
+          "name": "timeout",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the new timeout."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "get",
+      "comment": "Returns a cached or new ",
+      "javadoc": "Returns a cached or new {@code T}\n@return a cached or new {@code T}\n@throws Exception if there is a problem instantiating a new instance",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "T",
+        "type_short": "T",
+        "comment": "a cached or new "
+      },
+      "throws": [
+        {
+          "type_long": "java.lang.Exception",
+          "type_short": "Exception",
+          "comment": "if there is a problem instantiating a new instance"
+        }
+      ]
+    },
+    {
+      "name": "release",
+      "comment": "Signals that the given object is no longer being used.  The object will be placed back into\n the pool until it is disposed via the cleanup timer, if it is running.",
+      "javadoc": "Signals that the given object is no longer being used.  The object will be placed back into\n the pool until it is disposed via the cleanup timer, if it is running.\n@param t the item to release",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "T",
+          "type_short": "T",
+          "comment": "the item to release"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Triggers all pooled object to be disposed via this pool\u0027s factory.   Future calls to\n #get() will still create new objects, but the internal cache will no longer be used.",
+      "javadoc": "Triggers all pooled object to be disposed via this pool\u0027s factory.   Future calls to\n {@link #get()} will still create new objects, but the internal cache will no longer be used.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposeCachedItems",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "stopCleanupTimer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "restartCleanupTimer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

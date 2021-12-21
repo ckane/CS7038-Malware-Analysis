@@ -1,0 +1,526 @@
+{
+  "name": "FunctionSignatureParser",
+  "comment": "Class for parsing function signatures. This class attempts to be much more\n flexible than a full parser that requires correct C or C++ syntax. To achieve\n this, it scans the original function signature (if present) for names that\n would cause parse problems (parens, brackets, asterisk, commas, and spaces). \n If it finds any problem names, it looks for those strings in the text to be \n parsed and if it finds them, it replaces them with substitutes that parse \n easily. Then, after parsing, those replacement strings are then restored to \n their original values.\n \n Some examples of valid c++ that would fail due to the current limitations:\n \n \n int operator()(int x) - fails due to parens in function name unsigned int\n bar(float y) - fails due to space in return type name\n \n Note: you can edit signatures that already have these features as long as\n your modifications don\u0027t affect the pieces containing parens, commas or\n spaces in their name.",
+  "javadoc": "Class for parsing function signatures. This class attempts to be much more\n flexible than a full parser that requires correct C or C++ syntax. To achieve\n this, it scans the original function signature (if present) for names that\n would cause parse problems (parens, brackets, asterisk, commas, and spaces). \n If it finds any problem names, it looks for those strings in the text to be \n parsed and if it finds them, it replaces them with substitutes that parse \n easily. Then, after parsing, those replacement strings are then restored to \n their original values.\n \u003cP\u003e\n Some examples of valid c++ that would fail due to the current limitations:\n \u003cP\u003e\n {@literal void foo(myclass\u003cint, float\u003e x) - fails due to comma in x\u0027s data type name}\n int operator()(int x) - fails due to parens in function name unsigned int\n bar(float y) - fails due to space in return type name\n \u003cP\u003e\n Note: you can edit signatures that already have these features as long as\n your modifications don\u0027t affect the pieces containing parens, commas or\n spaces in their name.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "REPLACEMENT_DT_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"__REPLACE_DT_NAME__\""
+    },
+    {
+      "name": "REPLACE_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"__REPLACE_NAME__\""
+    },
+    {
+      "name": "dataTypeParser",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.data.DataTypeParser",
+      "type_short": "DataTypeParser",
+      "constant_value": null
+    },
+    {
+      "name": "dtMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,ghidra.program.model.data.DataType\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "nameMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cjava.lang.String,java.lang.String\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "destDataTypeManager",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataTypeManager",
+      "type_short": "DataTypeManager",
+      "constant_value": null
+    },
+    {
+      "name": "dtmService",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.app.util.parser.FunctionSignatureParser.ParserDataTypeManagerService",
+      "type_short": "ParserDataTypeManagerService",
+      "constant_value": null
+    },
+    {
+      "name": "parameterNameCapturePattern",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.util.regex.Pattern",
+      "type_short": "Pattern",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Constructs a SignatureParser for a program.  The destDataTypeManager and/or\n service must be specified.",
+      "javadoc": "Constructs a SignatureParser for a program.  The destDataTypeManager and/or\n service must be specified.\n@param destDataTypeManager the destination datatype maanger.\n@param service the DataTypeManagerService to use for resolving datatypes that\n                can\u0027t be found in the given program. Can be null to utilize\n                program based types only.",
+      "static": false,
+      "params": [
+        {
+          "name": "destDataTypeManager",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "the destination datatype maanger."
+        },
+        {
+          "name": "service",
+          "type_long": "ghidra.app.services.DataTypeQueryService",
+          "type_short": "DataTypeQueryService",
+          "comment": "the DataTypeManagerService to use for resolving datatypes that\n                can\u0027t be found in the given program. Can be null to utilize\n                program based types only."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "parse",
+      "comment": "Parse the given function signature text into a FunctionDefinitionDataType.",
+      "javadoc": "Parse the given function signature text into a FunctionDefinitionDataType.\n@param originalSignature the function signature before editing. This may be\n                          null if the user is entering a new signature instead\n                          of editing an existing one.\n@param signatureText the text to be parsed into a function signature.\n@return the FunctionDefinitionDataType resulting from parsing.\n@throws ParseException if the text could not be parsed.\n@throws CancelledException if parse cancelled by user",
+      "static": false,
+      "params": [
+        {
+          "name": "originalSignature",
+          "type_long": "ghidra.program.model.listing.FunctionSignature",
+          "type_short": "FunctionSignature",
+          "comment": "the function signature before editing. This may be\n                          null if the user is entering a new signature instead\n                          of editing an existing one."
+        },
+        {
+          "name": "signatureText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "the text to be parsed into a function signature."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.FunctionDefinitionDataType",
+        "type_short": "FunctionDefinitionDataType",
+        "comment": "the FunctionDefinitionDataType resulting from parsing."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.cparser.C.ParseException",
+          "type_short": "ParseException",
+          "comment": "if the text could not be parsed."
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if parse cancelled by user"
+        }
+      ]
+    },
+    {
+      "name": "initDataTypeMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "signature",
+          "type_long": "ghidra.program.model.listing.FunctionSignature",
+          "type_short": "FunctionSignature",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "cacheDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasVarArgs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newSignatureText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "extractArguments",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newSignatureText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.ParameterDefinition[]",
+        "type_short": "ghidra.program.model.data.ParameterDefinition[]",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.cparser.C.ParseException",
+          "type_short": "ParseException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "addParameter",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "parameterList",
+          "type_long": "java.util.List\u003cghidra.program.model.data.ParameterDefinition\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "arg",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.cparser.C.ParseException",
+          "type_short": "ParseException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "cleanUpSignatureText",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "signature",
+          "type_long": "ghidra.program.model.listing.FunctionSignature",
+          "type_short": "FunctionSignature",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceDataTypeIfNeeded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "dataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "replacementName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "replaceNameIfNeeded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "replacementName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "extractReturnType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "signatureText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.cparser.C.ParseException",
+          "type_short": "ParseException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "resolveDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dataTypeName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "extractFunctionName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "signatureText",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.cparser.C.ParseException",
+          "type_short": "ParseException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "resolveName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.app.util.cparser.C.ParseException",
+          "type_short": "ParseException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "substitute",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "searchString",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        },
+        {
+          "name": "replacementString",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "canParse",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "text",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

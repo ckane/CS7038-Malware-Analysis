@@ -1,0 +1,917 @@
+{
+  "name": "PointerDataType",
+  "comment": "Basic implementation for a pointer dataType",
+  "javadoc": "Basic implementation for a pointer dataType",
+  "static": false,
+  "implements": [
+    "ghidra.program.model.data.Pointer"
+  ],
+  "extends": "ghidra.program.model.data.BuiltIn",
+  "fields": [
+    {
+      "name": "dataType",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "ghidra.program.model.data.PointerDataType",
+      "type_short": "PointerDataType",
+      "constant_value": null
+    },
+    {
+      "name": "MAX_POINTER_SIZE_BYTES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "POINTER_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"pointer\""
+    },
+    {
+      "name": "POINTER_LABEL_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"PTR\""
+    },
+    {
+      "name": "POINTER_LOOP_LABEL_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"PTR_LOOP\""
+    },
+    {
+      "name": "referencedDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.data.DataType",
+      "type_short": "DataType",
+      "constant_value": null
+    },
+    {
+      "name": "length",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "deleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "displayName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "isEquivalentActive",
+      "comment": "isEquivalentActive is used to break cyclical recursion when\n performing an #isEquivalent(DataType) checks on pointers which must\n also check the base datatype equivelency.",
+      "javadoc": "\u003ccode\u003eisEquivalentActive\u003c/code\u003e is used to break cyclical recursion when\n performing an {@link #isEquivalent(DataType)} checks on pointers which must\n also check the base datatype equivelency.",
+      "static": false,
+      "type_long": "java.lang.ThreadLocal\u003cjava.lang.Boolean\u003e",
+      "type_short": "ThreadLocal",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a dynamically-sized default pointer data type. A dynamic pointer size\n of 4-bytes will be in used, but will adapt to a data type manager\u0027s data\n organization when resolved.",
+      "javadoc": "Creates a dynamically-sized default pointer data type. A dynamic pointer size\n of 4-bytes will be in used, but will adapt to a data type manager\u0027s data\n organization when resolved.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a dynamically-sized default pointer data type. The pointer size is\n established dynamically based upon the data organization associated with the\n specified dtm but can adapt to another data type manager\u0027s data organization\n when resolved.",
+      "javadoc": "Creates a dynamically-sized default pointer data type. The pointer size is\n established dynamically based upon the data organization associated with the\n specified dtm but can adapt to another data type manager\u0027s data organization\n when resolved.\n@param dtm data-type manager whose data organization should be used",
+      "static": false,
+      "params": [
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "data-type manager whose data organization should be used"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a dynamically-sized pointer to a referencedDataType A dynamic\n pointer size of 4-bytes will be in used, but will adapt to a data type\n manager\u0027s data organization when resolved.",
+      "javadoc": "Construct a dynamically-sized pointer to a referencedDataType A dynamic\n pointer size of 4-bytes will be in used, but will adapt to a data type\n manager\u0027s data organization when resolved.\n@param referencedDataType data type this pointer points to",
+      "static": false,
+      "params": [
+        {
+          "name": "referencedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "data type this pointer points to"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a pointer of a specified length to a referencedDataType. Note: It\n is preferred to use default sized pointers when possible (i.e., length\u003d-1,\n see #PointerDataType(DataType)) instead of explicitly specifying the\n pointer length value.",
+      "javadoc": "Construct a pointer of a specified length to a referencedDataType. Note: It\n is preferred to use default sized pointers when possible (i.e., length\u003d-1,\n see {@link #PointerDataType(DataType)}) instead of explicitly specifying the\n pointer length value.\n@param referencedDataType data type this pointer points to\n@param length pointer length (values \u0026lt;\u003d 0 will result in\n                           dynamically-sized pointer)",
+      "static": false,
+      "params": [
+        {
+          "name": "referencedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "data type this pointer points to"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "pointer length (values \u003d 0 will result in\n                           dynamically-sized pointer)"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a dynamically-sized pointer to the given data type. The pointer\n size is established dynamically based upon the data organization associated\n with the specified dtm but can adapt to another data type manager\u0027s data\n organization when resolved.",
+      "javadoc": "Construct a dynamically-sized pointer to the given data type. The pointer\n size is established dynamically based upon the data organization associated\n with the specified dtm but can adapt to another data type manager\u0027s data\n organization when resolved.\n@param referencedDataType data type this pointer points to\n@param dtm data-type manager whose data organization should be\n                           used",
+      "static": false,
+      "params": [
+        {
+          "name": "referencedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "data type this pointer points to"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "data-type manager whose data organization should be\n                           used"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a pointer of a specified length to a referencedDataType. Note: It\n is preferred to use default sized pointers when possible (i.e., length\u003d-1,\n see #PointerDataType(DataType, DataTypeManager)) instead of\n explicitly specifying the pointer length value.",
+      "javadoc": "Construct a pointer of a specified length to a referencedDataType. Note: It\n is preferred to use default sized pointers when possible (i.e., length\u003d-1,\n see {@link #PointerDataType(DataType, DataTypeManager)}) instead of\n explicitly specifying the pointer length value.\n@param referencedDataType data type this pointer points to\n@param length pointer length (-1 will result in dynamically-sized\n                           pointer)\n@param dtm associated data type manager whose data\n                           organization will be used",
+      "static": false,
+      "params": [
+        {
+          "name": "referencedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "data type this pointer points to"
+        },
+        {
+          "name": "length",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "pointer length (-1 will result in dynamically-sized\n                           pointer)"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "associated data type manager whose data\n                           organization will be used"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clone",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.Pointer",
+        "type_short": "Pointer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataType",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.DataType",
+        "type_short": "DataType",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "hasLanguageDependantLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLength",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultLabelPrefix",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultLabelPrefix",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "options",
+          "type_long": "ghidra.program.model.data.DataTypeDisplayOptions",
+          "type_short": "DataTypeDisplayOptions",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getLabelString",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "options",
+          "type_long": "ghidra.program.model.data.DataTypeDisplayOptions",
+          "type_short": "DataTypeDisplayOptions",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPointerClassification",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "ref",
+          "type_long": "ghidra.program.model.symbol.Reference",
+          "type_short": "Reference",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.PointerDataType.PointerReferenceClassification",
+        "type_short": "PointerReferenceClassification",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataAt",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.listing.Data",
+        "type_short": "Data",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDisplayName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "constructUniqueName",
+      "comment": "Return a unique name for this pointer",
+      "javadoc": "Return a unique name for this pointer",
+      "static": true,
+      "params": [
+        {
+          "name": "referencedDataType",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "ptrLength",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getMnemonic",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getValueClass",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Class\u003c?\u003e",
+        "type_short": "Class",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressValue",
+      "comment": "Generate an address value based upon bytes stored at the specified buf\n location",
+      "javadoc": "Generate an address value based upon bytes stored at the specified buf\n location\n@param buf memory buffer and stored pointer location\n@param size pointer size in bytes\n@param targetSpace address space for returned pointer\n@return pointer value or null if unusable buf or data",
+      "static": true,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": "memory buffer and stored pointer location"
+        },
+        {
+          "name": "size",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "pointer size in bytes"
+        },
+        {
+          "name": "targetSpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": "address space for returned pointer"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "pointer value or null if unusable buf or data"
+      },
+      "throws": []
+    },
+    {
+      "name": "getSegmentedAddressValue",
+      "comment": "Read segmented address from memory. NOTE: little-endian memory assumed.",
+      "javadoc": "Read segmented address from memory. NOTE: little-endian memory assumed.\n@param buf memory buffer associated with a segmented-address space\n                positioned at start of address value to be read\n@param dataLen pointer-length (2 and 4-byte pointers supported)\n@return address value returned as segmented Address object or null for\n         unsupported pointer length or meory access error occurs.",
+      "static": true,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": "memory buffer associated with a segmented-address space\n                positioned at start of address value to be read"
+        },
+        {
+          "name": "dataLen",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "pointer-length (2 and 4-byte pointers supported)"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "address value returned as segmented Address object or null for\n         unsupported pointer length or meory access error occurs."
+      },
+      "throws": []
+    },
+    {
+      "name": "normalize",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.SegmentedAddress",
+          "type_short": "SegmentedAddress",
+          "comment": ""
+        },
+        {
+          "name": "memory",
+          "type_long": "ghidra.program.model.mem.Memory",
+          "type_short": "Memory",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.SegmentedAddress",
+        "type_short": "SegmentedAddress",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRepresentation",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "buf",
+          "type_long": "ghidra.program.model.mem.MemBuffer",
+          "type_short": "MemBuffer",
+          "comment": ""
+        },
+        {
+          "name": "settings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        },
+        {
+          "name": "len",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEquivalent",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeDeleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDeleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeReplaced",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "oldDt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "newDt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dataTypeNameChanged",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        },
+        {
+          "name": "oldName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getCategoryPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.data.CategoryPath",
+        "type_short": "CategoryPath",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dependsOn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPointer",
+      "comment": "Get a pointer data-type instance with a default size",
+      "javadoc": "Get a pointer data-type instance with a default size\n@param dt data-type referenced by pointer\n@param dtm program data-type manager (required) a generic data-type will be\n            returned if possible.\n@return signed integer data type",
+      "static": true,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "data-type referenced by pointer"
+        },
+        {
+          "name": "dtm",
+          "type_long": "ghidra.program.model.data.DataTypeManager",
+          "type_short": "DataTypeManager",
+          "comment": "program data-type manager (required) a generic data-type will be\n            returned if possible."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.Pointer",
+        "type_short": "Pointer",
+        "comment": "signed integer data type"
+      },
+      "throws": []
+    },
+    {
+      "name": "getPointer",
+      "comment": "Get a pointer data-type instance of the requested size. NOTE: The returned\n data-type will not be associated with any particular data-type-manager and\n may therefore not utilize dynamically-sized-pointers when a valid pointerSize\n is specified. If an invalid pointerSize is specified, a dynamically-size\n pointer will be returned whose length is based upon the\n default-data-organization.",
+      "javadoc": "Get a pointer data-type instance of the requested size. NOTE: The returned\n data-type will not be associated with any particular data-type-manager and\n may therefore not utilize dynamically-sized-pointers when a valid pointerSize\n is specified. If an invalid pointerSize is specified, a dynamically-size\n pointer will be returned whose length is based upon the\n default-data-organization.\n@param dt data-type referenced by pointer\n@param pointerSize pointer size\n@return signed integer data type",
+      "static": true,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "data-type referenced by pointer"
+        },
+        {
+          "name": "pointerSize",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "pointer size"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.Pointer",
+        "type_short": "Pointer",
+        "comment": "signed integer data type"
+      },
+      "throws": []
+    },
+    {
+      "name": "newPointer",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.data.Pointer",
+        "type_short": "Pointer",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "toString",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

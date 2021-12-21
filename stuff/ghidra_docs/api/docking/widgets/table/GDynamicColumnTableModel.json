@@ -1,0 +1,895 @@
+{
+  "name": "GDynamicColumnTableModel",
+  "comment": "An abstract table model for showing DynamicTableColumns where each row is based on an\n object of type ROW_TYPE.   The client is responsible for implementing\n #createTableColumnDescriptor().  This method specifies which default columns the\n table should have and whether they should be visible or hidden.  Hidden columns can be\n made visible through the UI.\n \n This model will also discover other system columns that understand how to render\n ROW_TYPE data directly.  Also, if you create a TableRowMapper(s) for\n your row type, then this model will load columns for each type for which a mapper was created,\n all as optional, hidden columns.\n \n The various attributes of the columns of this model (visibility, position, size, etc) are\n saved to disk as tool preferences when the user exits the tool.\n \n Implementation Note: this model loads all columns, specific and discovered, as being visible.\n                      Then, during initialization, the TableColumnModelState class will\n                      either hide all non-default columns, or reload the column state if any\n                      previous saved state is found.",
+  "javadoc": "An abstract table model for showing DynamicTableColumns where each row is based on an\n object of type ROW_TYPE.   The client is responsible for implementing\n {@link #createTableColumnDescriptor()}.  This method specifies which default columns the\n table should have and whether they should be visible or hidden.  Hidden columns can be\n made visible through the UI.\n \u003cp\u003e\n This model will also discover other system columns that understand how to render\n \u003ccode\u003eROW_TYPE\u003c/code\u003e data directly.  Also, if you create a {@link TableRowMapper mapper}(s) for\n your row type, then this model will load columns for each type for which a mapper was created,\n all as optional, hidden columns.\n \u003cp\u003e\n The various attributes of the columns of this model (visibility, position, size, etc) are\n saved to disk as tool preferences when the user exits the tool.\n \u003cp\u003e\n Implementation Note: this model loads all columns, specific and discovered, as being visible.\n                      Then, during initialization, the {@link TableColumnModelState} class will\n                      either hide all non-default columns, or reload the column state if any\n                      previous saved state is found.\n@param \u003cROW_TYPE\u003e the row object class for this table model.\n@param \u003cDATA_SOURCE\u003e the type of data that will be returned from {@link #getDataSource()}.  This\n                    object will be given to the {@link DynamicTableColumn} objects used by this\n                    table model when\n                    {@link DynamicTableColumn#getValue(Object, ghidra.docking.settings.Settings, Object, ServiceProvider)}\n                    is called.",
+  "static": false,
+  "implements": [
+    "javax.swing.event.ChangeListener",
+    "docking.widgets.table.VariableColumnTableModel",
+    "docking.widgets.table.DynamicColumnTableModel"
+  ],
+  "extends": "docking.widgets.table.AbstractSortedTableModel",
+  "fields": [
+    {
+      "name": "serviceProvider",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.framework.plugintool.ServiceProvider",
+      "type_short": "ServiceProvider",
+      "constant_value": null
+    },
+    {
+      "name": "columnDescriptor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "docking.widgets.table.TableColumnDescriptor\u003cROW_TYPE\u003e",
+      "type_short": "TableColumnDescriptor",
+      "constant_value": null
+    },
+    {
+      "name": "tableColumns",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "defaultTableColumns",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.List\u003cdocking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e\u003e",
+      "type_short": "List",
+      "constant_value": null
+    },
+    {
+      "name": "columnSettings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.Map\u003cdocking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e,ghidra.docking.settings.Settings\u003e",
+      "type_short": "Map",
+      "constant_value": null
+    },
+    {
+      "name": "ignoreSettingChanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "serviceProvider",
+          "type_long": "ghidra.framework.plugintool.ServiceProvider",
+          "type_short": "ServiceProvider",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createTableColumnDescriptor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.TableColumnDescriptor\u003cROW_TYPE\u003e",
+        "type_short": "TableColumnDescriptor",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSortable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadDiscoveredTableColumns",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "loadDefaultTableColumns",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reloadColumns",
+      "comment": "Allows clients to defer column creation until after this parent class\u0027s constructor has\n been called.   This method will not restore any column settings that have been changed\n after construction.  Thus, this method is intended only to be called during the \n construction process.",
+      "javadoc": "Allows clients to defer column creation until after this parent class\u0027s constructor has\n been called.   This method will not restore any column settings that have been changed\n after construction.  Thus, this method is intended only to be called during the \n construction process.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getTableColumnDescriptor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "docking.widgets.table.TableColumnDescriptor\u003cROW_TYPE\u003e",
+        "type_short": "TableColumnDescriptor",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnForDefaultColumnIdentifier",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "clazz",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+        "type_short": "DynamicTableColumn",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isColumnClassMatch",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+          "type_short": "DynamicTableColumn",
+          "comment": ""
+        },
+        {
+          "name": "clazz",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSortComparator",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Comparator\u003cROW_TYPE\u003e",
+        "type_short": "Comparator",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createSortComparatorForColumn",
+      "comment": "This differs from #createSortComparator(int) in that the other method\n creates a comparator that operates on a full row value, whereas this method operates on\n column values.",
+      "javadoc": "This differs from {@link #createSortComparator(int)} in that the other method\n creates a comparator that operates on a full row value, whereas this method operates on\n column values.\n@param columnIndex the column index\n@return a comparator for the specific column values",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the column index"
+        }
+      ],
+      "return": {
+        "type_long": "java.util.Comparator\u003cjava.lang.Object\u003e",
+        "type_short": "Comparator",
+        "comment": "a comparator for the specific column values"
+      },
+      "throws": []
+    },
+    {
+      "name": "stateChanged",
+      "comment": "Callback when column settings have changed",
+      "javadoc": "Callback when column settings have changed",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "javax.swing.event.ChangeEvent",
+          "type_short": "ChangeEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "resortIfNeeded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "javax.swing.event.ChangeEvent",
+          "type_short": "ChangeEvent",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTableColumn",
+      "comment": "Adds the given column at the end of the list of columns.  This method is intended for\n implementations to add custom column objects, rather than relying on generic, discovered\n DynamicTableColumn implementations.\n \n Note: this method assumes that the columns have already been sorted",
+      "javadoc": "Adds the given column at the end of the list of columns.  This method is intended for\n implementations to add custom column objects, rather than relying on generic, discovered\n DynamicTableColumn implementations.\n \n \u003cp\u003e\u003cb\u003eNote: this method assumes that the columns have already been sorted\u003c/b\u003e\n@param column The field to add",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+          "type_short": "DynamicTableColumn",
+          "comment": "The field to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTableColumns",
+      "comment": "Adds the given columns to the end of the list of columns.  This method is intended for\n implementations to add custom column objects, rather than relying on generic, discovered\n DynamicTableColumn implementations.\n \n Note: this method assumes that the columns have already been sorted.",
+      "javadoc": "Adds the given columns to the end of the list of columns.  This method is intended for\n implementations to add custom column objects, rather than relying on generic, discovered\n DynamicTableColumn implementations.\n \n \u003cp\u003e\u003cb\u003eNote: this method assumes that the columns have already been sorted.\u003c/b\u003e\n@param columns The columns to add",
+      "static": false,
+      "params": [
+        {
+          "name": "columns",
+          "type_long": "java.util.Set\u003cdocking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e\u003e",
+          "type_short": "Set",
+          "comment": "The columns to add"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addTableColumn",
+      "comment": "Adds the given field at the given index to the list of fields in this class.\n This method is intended for implementations to add custom column objects, rather than\n relying on generic, discovered DynamicTableColumn implementations.\n \n Note: this method assumes that the columns have already been sorted.",
+      "javadoc": "Adds the given field at the given index to the list of fields in this class.\n This method is intended for implementations to add custom column objects, rather than\n relying on generic, discovered DynamicTableColumn implementations.\n \u003cp\u003e\n \u003cb\u003eNote: this method assumes that the columns have already been sorted.\u003c/b\u003e\n@param column The field to add.\n@param index The index at which to add the field.  If the index value is invalid (negative\n        or greater than the number of columns), then the column will be added to the\n        end of the columns list.\n@param isDefault true if this is a default column",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+          "type_short": "DynamicTableColumn",
+          "comment": "The field to add."
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "The index at which to add the field.  If the index value is invalid (negative\n        or greater than the number of columns), then the column will be added to the\n        end of the columns list."
+        },
+        {
+          "name": "isDefault",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if this is a default column"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "doAddTableColumn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+          "type_short": "DynamicTableColumn",
+          "comment": ""
+        },
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "isDefault",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTableColumn",
+      "comment": "Removes the given column from this model",
+      "javadoc": "Removes the given column from this model\n@param column the column to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+          "type_short": "DynamicTableColumn",
+          "comment": "the column to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "removeTableColumns",
+      "comment": "Removes the given columns from this model.  This method allows the client to remove\n multiple columns at once, firing only one event when the work is finished.",
+      "javadoc": "Removes the given columns from this model.  This method allows the client to remove\n multiple columns at once, firing only one event when the work is finished.\n@param columns the columns to remove",
+      "static": false,
+      "params": [
+        {
+          "name": "columns",
+          "type_long": "java.util.Set\u003cdocking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e\u003e",
+          "type_short": "Set",
+          "comment": "the columns to remove"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultColumnCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDefaultTableColumns",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "java.util.List\u003cdocking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isVisibleByDefault",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "modelIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isDefaultColumn",
+      "comment": "Returns true if the column indicated by the index in the model is a default column (meaning\n that it was specified by the model and not discovered).",
+      "javadoc": "Returns true if the column indicated by the index in the model is a default column (meaning\n that it was specified by the model and not discovered).\n@param modelIndex the index of the column in the model.\n@return true if the column is a default.",
+      "static": false,
+      "params": [
+        {
+          "name": "modelIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the index of the column in the model."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the column is a default."
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnClass",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Class\u003c?\u003e",
+        "type_short": "Class",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getPreferredColumnWidth",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnDisplayName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnDescription",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getUniqueIdentifier",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "column",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.String",
+        "type_short": "String",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnValueForRow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "t",
+          "type_long": "ROW_TYPE",
+          "type_short": "ROW_TYPE",
+          "comment": ""
+        },
+        {
+          "name": "columnIndex",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.lang.Object",
+        "type_short": "Object",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getDataSource",
+      "comment": "Returns the table\u0027s context for the data.",
+      "javadoc": "Returns the table\u0027s context for the data.\n@return the table\u0027s context for the data.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "DATA_SOURCE",
+        "type_short": "DATA_SOURCE",
+        "comment": "the table\u0027s context for the data."
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnIndex",
+      "comment": "Returns the column index of the given column class",
+      "javadoc": "Returns the column index of the given column class\n@param columnClass the class for the type of DynamicTableColumn you want to find.\n@return the column index for the specified DynamicTableColumn. -1 if not found.",
+      "static": false,
+      "params": [
+        {
+          "name": "columnClass",
+          "type_long": "java.lang.Class\u003c?\u003e",
+          "type_short": "Class",
+          "comment": "the class for the type of DynamicTableColumn you want to find."
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "the column index for the specified DynamicTableColumn. -1 if not found."
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "identifier",
+          "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+          "type_short": "DynamicTableColumn",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumn",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "docking.widgets.table.DynamicTableColumn\u003cROW_TYPE,?,?\u003e",
+        "type_short": "DynamicTableColumn",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnSettingsDefinitions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.docking.settings.SettingsDefinition[]",
+        "type_short": "ghidra.docking.settings.SettingsDefinition[]",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getColumnSettings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.docking.settings.Settings",
+        "type_short": "Settings",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "applySettings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": ""
+        },
+        {
+          "name": "newSettings",
+          "type_long": "ghidra.docking.settings.Settings",
+          "type_short": "Settings",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setAllColumnSettings",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "newSettings",
+          "type_long": "ghidra.docking.settings.Settings[]",
+          "type_short": "ghidra.docking.settings.Settings[]",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRenderer",
+      "comment": "Gets the special table cell renderer for the specified table field column.\n A null value indicates that this field uses a default cell renderer.",
+      "javadoc": "Gets the special table cell renderer for the specified table field column.\n A null value indicates that this field uses a default cell renderer.\n@param index the model column index\n@return a table cell renderer for this field. Otherwise, null if a default\n         renderer should be used.",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "the model column index"
+        }
+      ],
+      "return": {
+        "type_long": "javax.swing.table.TableCellRenderer",
+        "type_short": "TableCellRenderer",
+        "comment": "a table cell renderer for this field. Otherwise, null if a default\n         renderer should be used."
+      },
+      "throws": []
+    },
+    {
+      "name": "getMaxLines",
+      "comment": "Gets the maximum number of text display lines needed for any given cell within the\n specified column.",
+      "javadoc": "Gets the maximum number of text display lines needed for any given cell within the\n specified column.\n@param index column field index\n@return maximum number of lines needed for specified column",
+      "static": false,
+      "params": [
+        {
+          "name": "index",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "column field index"
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "maximum number of lines needed for specified column"
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disposeDynamicColumnData",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,679 @@
+{
+  "name": "VisualEdgeRenderer",
+  "comment": "Edge render for the VisualGraph system\n \n Implementation Notes\n \n Jung Vertex/Edge Rendering\n Jung creates shapes for vertices (see VertexShapeFactory) that are centered.  They\n do this by getting the width/height of the shape and then creating an x/y value that is \n half of the width and height, respectively.  This has the effect of the vertex appearing \n centered over its connected edge.  We mimic that with our \n VisualGraphVertexShapeTransformer so that our edge rendering code is similar to \n Jung\u0027s.\n If we ever decide instead to not center our shapes, then this renderer would have to be\n updated to itself center the edge shape created herein, like this:\n \n Also, there are other spots in the system where we account for this center that would \n have to be changed, such as the AbstractVisualGraphLayout, which needs the centering\n offsets to handle vertex clipping.",
+  "javadoc": "Edge render for the {@link VisualGraph} system\n \n \u003ch2 style\u003d\"text-align:center\"\u003eImplementation Notes\u003c/h2\u003e\n \n \u003ch3\u003eJung Vertex/Edge Rendering\u003c/h3\u003e\n \u003cp\u003eJung creates shapes for vertices (see {@link VertexShapeFactory}) that are centered.  They\n do this by getting the width/height of the shape and then creating an x/y value that is \n half of the width and height, respectively.  This has the effect of the vertex appearing \n centered over its connected edge.  We mimic that with our \n {@link VisualGraphVertexShapeTransformer} so that our edge rendering code is similar to \n Jung\u0027s.\n \u003cp\u003eIf we ever decide instead to not center our shapes, then this renderer would have to be\n updated to itself center the edge shape created herein, like this:\n \u003cpre\u003e{@literal\n \t\tRectangle b1 \u003d s1.getBounds();\n\t\tRectangle b2 \u003d s2.getBounds();\n\n\t\t// translate the edge to be centered in the vertex\n\t\tint w1 \u003d b1.width \u003e\u003e 1;\n\t\tint h1 \u003d b1.height \u003e\u003e 1;\n\t\tint w2 \u003d b2.width \u003e\u003e 1;\n\t\tint h2 \u003d b2.height \u003e\u003e 1;\n\n\t\tfloat tx1 \u003d x1 + w1;\n\t\tfloat ty1 \u003d y1 + h1;\n\t\tfloat tx2 \u003d x2 + w2;\n\t\tfloat ty2 \u003d y2 + h2;\n \t\tShape edgeShape \u003d getEdgeShape(rc, graph, e, tx1, ty1, tx2, ty2, isLoop, xs1);\n }\u003c/pre\u003e\n \u003cp\u003eAlso, there are other spots in the system where we account for this center that would \n have to be changed, such as the {@link AbstractVisualGraphLayout}, which needs the centering\n offsets to handle vertex clipping.\n@param \u003cV\u003e the vertex type\n@param \u003cE\u003e the edge type",
+  "static": false,
+  "implements": [],
+  "extends": "edu.uci.ics.jung.visualization.renderers.BasicEdgeRenderer",
+  "fields": [
+    {
+      "name": "HOVERED_PATH_STROKE_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "float",
+      "type_short": "float",
+      "constant_value": "8.0"
+    },
+    {
+      "name": "FOCUSED_PATH_STROKE_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "float",
+      "type_short": "float",
+      "constant_value": "4.0"
+    },
+    {
+      "name": "SELECTED_STROKE_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "float",
+      "type_short": "float",
+      "constant_value": "6.0"
+    },
+    {
+      "name": "EMPHASIZED_STOKE_WIDTH",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "float",
+      "type_short": "float",
+      "constant_value": "9.0"
+    },
+    {
+      "name": "dashingPatternOffset",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "float",
+      "type_short": "float",
+      "constant_value": null
+    },
+    {
+      "name": "defaultBaseColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.Color",
+      "type_short": "Color",
+      "constant_value": null
+    },
+    {
+      "name": "defaultHighlightColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.awt.Color",
+      "type_short": "Color",
+      "constant_value": null
+    },
+    {
+      "name": "arrowRenderingSupport",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.graph.viewer.edge.VisualEdgeArrowRenderingSupport\u003cV,E\u003e",
+      "type_short": "VisualEdgeArrowRenderingSupport",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setDashingPatternOffset",
+      "comment": "Sets the offset value for painting dashed lines.  This allows clients to animate the \n lines being drawn for edges in the edge direction.",
+      "javadoc": "Sets the offset value for painting dashed lines.  This allows clients to animate the \n lines being drawn for edges in the edge direction.\n@param dashingPatterOffset the offset value",
+      "static": false,
+      "params": [
+        {
+          "name": "dashingPatterOffset",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": "the offset value"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setBaseColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "color",
+          "type_long": "java.awt.Color",
+          "type_short": "Color",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "g",
+          "type_long": "edu.uci.ics.jung.graph.Graph\u003cV,E\u003e",
+          "type_short": "Graph",
+          "comment": ""
+        },
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Color",
+        "type_short": "Color",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setHighlightColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "highlightColor",
+          "type_long": "java.awt.Color",
+          "type_short": "Color",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getHighlightColor",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "g",
+          "type_long": "edu.uci.ics.jung.graph.Graph\u003cV,E\u003e",
+          "type_short": "Graph",
+          "comment": ""
+        },
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Color",
+        "type_short": "Color",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInHoveredVertexPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isInFocusedVertexPath",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isSelected",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmphasiszed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "drawSimpleEdge",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rc",
+          "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+          "type_short": "RenderContext",
+          "comment": ""
+        },
+        {
+          "name": "layout",
+          "type_long": "edu.uci.ics.jung.algorithms.layout.Layout\u003cV,E\u003e",
+          "type_short": "Layout",
+          "comment": ""
+        },
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getVertexShapeForArrow",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rc",
+          "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+          "type_short": "RenderContext",
+          "comment": ""
+        },
+        {
+          "name": "layout",
+          "type_long": "edu.uci.ics.jung.algorithms.layout.Layout\u003cV,E\u003e",
+          "type_short": "Layout",
+          "comment": ""
+        },
+        {
+          "name": "v",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Shape",
+        "type_short": "Shape",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEdgeShape",
+      "comment": "Returns the edge shape for the given points",
+      "javadoc": "Returns the edge shape for the given points\n@param rc the render context for the graph\n@param graph the graph\n@param e the edge to shape\n@param x1 the start vertex point x; layout space\n@param y1 the start vertex point y; layout space\n@param x2 the end vertex point x; layout space\n@param y2 the end vertex point y; layout space\n@param isLoop true if the start \u003d\u003d end, which is a self-loop\n@param vertexShape the vertex shape (used in the case of a loop to draw a circle from the \n              shape to itself)\n@return the edge shape",
+      "static": false,
+      "params": [
+        {
+          "name": "rc",
+          "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+          "type_short": "RenderContext",
+          "comment": "the render context for the graph"
+        },
+        {
+          "name": "graph",
+          "type_long": "edu.uci.ics.jung.graph.Graph\u003cV,E\u003e",
+          "type_short": "Graph",
+          "comment": "the graph"
+        },
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": "the edge to shape"
+        },
+        {
+          "name": "x1",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": "the start vertex point x; layout space"
+        },
+        {
+          "name": "y1",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": "the start vertex point y; layout space"
+        },
+        {
+          "name": "x2",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": "the end vertex point x; layout space"
+        },
+        {
+          "name": "y2",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": "the end vertex point y; layout space"
+        },
+        {
+          "name": "isLoop",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the start \u003d\u003d end, which is a self-loop"
+        },
+        {
+          "name": "vertexShape",
+          "type_long": "java.awt.Shape",
+          "type_short": "Shape",
+          "comment": "the vertex shape (used in the case of a loop to draw a circle from the \n              shape to itself)"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Shape",
+        "type_short": "Shape",
+        "comment": "the edge shape"
+      },
+      "throws": []
+    },
+    {
+      "name": "getHoveredPathStroke",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "scale",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.BasicStroke",
+        "type_short": "BasicStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFocusedPathStroke",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "scale",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.BasicStroke",
+        "type_short": "BasicStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedStroke",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "scale",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.BasicStroke",
+        "type_short": "BasicStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getSelectedAccentStroke",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "scale",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.BasicStroke",
+        "type_short": "BasicStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getEmphasisStroke",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "e",
+          "type_long": "E",
+          "type_short": "E",
+          "comment": ""
+        },
+        {
+          "name": "scale",
+          "type_long": "float",
+          "type_short": "float",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.BasicStroke",
+        "type_short": "BasicStroke",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "scaleArrowForBetterVisibility",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rc",
+          "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+          "type_short": "RenderContext",
+          "comment": ""
+        },
+        {
+          "name": "arrow",
+          "type_long": "java.awt.Shape",
+          "type_short": "Shape",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Shape",
+        "type_short": "Shape",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getFullShape",
+      "comment": "Uses the render context to create a compact shape for the given vertex",
+      "javadoc": "Uses the render context to create a compact shape for the given vertex\n@param rc the render context\n@param layout the layout\n@param vertex the vertex\n@return the vertex shape\n@see VertexShapeProvider#getFullShape()",
+      "static": false,
+      "params": [
+        {
+          "name": "rc",
+          "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+          "type_short": "RenderContext",
+          "comment": "the render context"
+        },
+        {
+          "name": "layout",
+          "type_long": "edu.uci.ics.jung.algorithms.layout.Layout\u003cV,E\u003e",
+          "type_short": "Layout",
+          "comment": "the layout"
+        },
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": "the vertex"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Shape",
+        "type_short": "Shape",
+        "comment": "the vertex shape"
+      },
+      "throws": []
+    },
+    {
+      "name": "getCompactShape",
+      "comment": "Uses the render context to create a compact shape for the given vertex",
+      "javadoc": "Uses the render context to create a compact shape for the given vertex\n@param rc the render context\n@param layout the layout\n@param vertex the vertex\n@return the vertex shape\n@see VertexShapeProvider#getCompactShape()",
+      "static": false,
+      "params": [
+        {
+          "name": "rc",
+          "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+          "type_short": "RenderContext",
+          "comment": "the render context"
+        },
+        {
+          "name": "layout",
+          "type_long": "edu.uci.ics.jung.algorithms.layout.Layout\u003cV,E\u003e",
+          "type_short": "Layout",
+          "comment": "the layout"
+        },
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": "the vertex"
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Shape",
+        "type_short": "Shape",
+        "comment": "the vertex shape"
+      },
+      "throws": []
+    },
+    {
+      "name": "transformFromLayoutToView",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "rc",
+          "type_long": "edu.uci.ics.jung.visualization.RenderContext\u003cV,E\u003e",
+          "type_short": "RenderContext",
+          "comment": ""
+        },
+        {
+          "name": "layout",
+          "type_long": "edu.uci.ics.jung.algorithms.layout.Layout\u003cV,E\u003e",
+          "type_short": "Layout",
+          "comment": ""
+        },
+        {
+          "name": "vertex",
+          "type_long": "V",
+          "type_short": "V",
+          "comment": ""
+        },
+        {
+          "name": "shape",
+          "type_long": "java.awt.Shape",
+          "type_short": "Shape",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.awt.Shape",
+        "type_short": "Shape",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

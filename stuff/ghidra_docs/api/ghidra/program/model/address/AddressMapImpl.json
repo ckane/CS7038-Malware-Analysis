@@ -1,0 +1,484 @@
+{
+  "name": "AddressMapImpl",
+  "comment": "AddressMapImpl provides a stand-alone AddressMap.\n An AddressMapImpl instance should only be used to decode keys which it has generated.\n If this map is used for a specific program instance, the map should be discard if any changes \n are made to that programs address map (e.g., removing or renaming overlay spaces).",
+  "javadoc": "\u003ccode\u003eAddressMapImpl\u003c/code\u003e provides a stand-alone AddressMap.\n An AddressMapImpl instance should only be used to decode keys which it has generated.\n If this map is used for a specific program instance, the map should be discard if any changes \n are made to that programs address map (e.g., removing or renaming overlay spaces).",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "ADDR_OFFSET_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "32"
+    },
+    {
+      "name": "MAP_ID_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "8"
+    },
+    {
+      "name": "MAX_OFFSET",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "4294967295"
+    },
+    {
+      "name": "ADDR_OFFSET_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "4294967295"
+    },
+    {
+      "name": "MAP_ID_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "-72057594037927936"
+    },
+    {
+      "name": "BASE_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": "-4294967296"
+    },
+    {
+      "name": "BASE_ID_SIZE",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "24"
+    },
+    {
+      "name": "BASE_ID_MASK",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16777215"
+    },
+    {
+      "name": "STACK_SPACE_ID",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "16777215"
+    },
+    {
+      "name": "spaceMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cjava.lang.String,ghidra.program.model.address.AddressSpace\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "stackSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressSpace",
+      "type_short": "AddressSpace",
+      "constant_value": null
+    },
+    {
+      "name": "addrFactory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressFactory",
+      "type_short": "AddressFactory",
+      "constant_value": null
+    },
+    {
+      "name": "baseAddrs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address[]",
+      "type_short": "ghidra.program.model.address.Address[]",
+      "constant_value": null
+    },
+    {
+      "name": "sortedBaseStartAddrs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address[]",
+      "type_short": "ghidra.program.model.address.Address[]",
+      "constant_value": null
+    },
+    {
+      "name": "sortedBaseEndAddrs",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address[]",
+      "type_short": "ghidra.program.model.address.Address[]",
+      "constant_value": null
+    },
+    {
+      "name": "addrToIndexMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.util.HashMap\u003cghidra.program.model.address.Address,java.lang.Integer\u003e",
+      "type_short": "HashMap",
+      "constant_value": null
+    },
+    {
+      "name": "lastBaseIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "mapIdBits",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "long",
+      "type_short": "long",
+      "constant_value": null
+    },
+    {
+      "name": "addressInsertionKeyRangeComparator",
+      "comment": "Comparator used to identify if an addr occurs before or after the \n start of a key range.",
+      "javadoc": "Comparator used to identify if an addr occurs before or after the \n start of a key range.",
+      "static": false,
+      "type_long": "java.util.Comparator\u003cjava.lang.Object\u003e",
+      "type_short": "Comparator",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new AddressMapImpl with a mapID of 0.",
+      "javadoc": "Creates a new AddressMapImpl with a mapID of 0.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Creates a new AddressMapImpl with the specified mapID",
+      "javadoc": "Creates a new AddressMapImpl with the specified mapID\n@param mapID the 8-bit value is placed in the upper 8 bits of every address encoding.",
+      "static": false,
+      "params": [
+        {
+          "name": "mapID",
+          "type_long": "byte",
+          "type_short": "byte",
+          "comment": "the 8-bit value is placed in the upper 8 bits of every address encoding."
+        },
+        {
+          "name": "addrFactory",
+          "type_long": "ghidra.program.model.address.AddressFactory",
+          "type_short": "AddressFactory",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "init",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getBaseAddressIndex",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkAddressSpace",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "addrSpace",
+          "type_long": "ghidra.program.model.address.AddressSpace",
+          "type_short": "AddressSpace",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "decodeAddress",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.map.AddressMap#decodeAddress(long)",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKey",
+      "comment": "Generate a unique key for the specified addr.  Only addresses from a single address space or \n single program should be passed to this method. Only limited checking is not performed in order to \n improve performance.",
+      "javadoc": "Generate a unique key for the specified addr.  Only addresses from a single address space or \n single program should be passed to this method. Only limited checking is not performed in order to \n improve performance.\n@param addr address\n@see ghidra.program.database.map.AddressMap#getKey(Address, boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address"
+        }
+      ],
+      "return": {
+        "type_long": "long",
+        "type_short": "long",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "findKeyRange",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.map.AddressMap#findKeyRange(List, Address)",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.map.AddressMap#getKeyRanges(Address, Address, boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getKeyRanges",
+      "comment": "",
+      "javadoc": "@see ghidra.program.database.map.AddressMap#getKeyRanges(AddressSetView, boolean)",
+      "static": false,
+      "params": [
+        {
+          "name": "set",
+          "type_long": "ghidra.program.model.address.AddressSetView",
+          "type_short": "AddressSetView",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+        "type_short": "List",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "addKeyRanges",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "keyRangeList",
+          "type_long": "java.util.List\u003cghidra.program.model.address.KeyRange\u003e",
+          "type_short": "List",
+          "comment": ""
+        },
+        {
+          "name": "start",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "min",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "a1",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "a2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "max",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "a1",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "a2",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "reconcile",
+      "comment": "Reconcile address space changes using associated address factory.\n This method should be invoked following an undo/redo (if the\n associated address factory may have changed) or removal of an\n overlay memory block.",
+      "javadoc": "Reconcile address space changes using associated address factory.\n This method should be invoked following an undo/redo (if the\n associated address factory may have changed) or removal of an\n overlay memory block.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

@@ -1,0 +1,742 @@
+{
+  "name": "AddressRangeMapDB",
+  "comment": "RangeMapDB provides a generic value range map backed by a database table.\n A given range may be occupied by at most a single value which is painted over \n that range.",
+  "javadoc": "\u003ccode\u003eRangeMapDB\u003c/code\u003e provides a generic value range map backed by a database table.\n A given range may be occupied by at most a single value which is painted over \n that range.",
+  "static": false,
+  "implements": [
+    "db.DBListener"
+  ],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "tableName",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": null
+    },
+    {
+      "name": "dbHandle",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.DBHandle",
+      "type_short": "DBHandle",
+      "constant_value": null
+    },
+    {
+      "name": "addrMap",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.database.map.AddressMap",
+      "type_short": "AddressMap",
+      "constant_value": null
+    },
+    {
+      "name": "errHandler",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.util.ErrorHandler",
+      "type_short": "ErrorHandler",
+      "constant_value": null
+    },
+    {
+      "name": "valueField",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Field",
+      "type_short": "Field",
+      "constant_value": null
+    },
+    {
+      "name": "indexed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    },
+    {
+      "name": "rangeMapTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Table",
+      "type_short": "Table",
+      "constant_value": null
+    },
+    {
+      "name": "rangeMapSchema",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Schema",
+      "type_short": "Schema",
+      "constant_value": null
+    },
+    {
+      "name": "lastStart",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "lastEnd",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.Address",
+      "type_short": "Address",
+      "constant_value": null
+    },
+    {
+      "name": "lastValue",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "db.Field",
+      "type_short": "Field",
+      "constant_value": null
+    },
+    {
+      "name": "lastRange",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.address.AddressRange",
+      "type_short": "AddressRange",
+      "constant_value": null
+    },
+    {
+      "name": "modCount",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "RANGE_MAP_TABLE_PREFIX",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"Range Map - \""
+    },
+    {
+      "name": "TO_COL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "0"
+    },
+    {
+      "name": "VALUE_COL",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "1"
+    },
+    {
+      "name": "COLUMN_NAMES",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String[]",
+      "type_short": "java.lang.String[]",
+      "constant_value": null
+    },
+    {
+      "name": "INDEXED_COLUMNS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int[]",
+      "type_short": "int[]",
+      "constant_value": null
+    },
+    {
+      "name": "lock",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.util.Lock",
+      "type_short": "Lock",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Construct a generic range map.",
+      "javadoc": "Construct a generic range map.\n@param dbHandle database handle.\n@param name map name used in naming the underlying database table.  \n This name must be unique across all range maps.\n@param errHandler database error handler.\n@param valueField Field to be used for stored values.\n@param indexed if true, values will be indexed allowing use of the \n getValueRangeIterator method.",
+      "static": false,
+      "params": [
+        {
+          "name": "dbHandle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": "database handle."
+        },
+        {
+          "name": "addrMap",
+          "type_long": "ghidra.program.database.map.AddressMap",
+          "type_short": "AddressMap",
+          "comment": ""
+        },
+        {
+          "name": "lock",
+          "type_long": "ghidra.util.Lock",
+          "type_short": "Lock",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": "map name used in naming the underlying database table.  \n This name must be unique across all range maps."
+        },
+        {
+          "name": "errHandler",
+          "type_long": "db.util.ErrorHandler",
+          "type_short": "ErrorHandler",
+          "comment": "database error handler."
+        },
+        {
+          "name": "valueField",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "Field to be used for stored values."
+        },
+        {
+          "name": "indexed",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "if true, values will be indexed allowing use of the \n getValueRangeIterator method."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setName",
+      "comment": "Set the name associated with this range map.",
+      "javadoc": "Set the name associated with this range map.\n@param newName\n@return true if successful, else false\n@throws DuplicateNameException",
+      "static": false,
+      "params": [
+        {
+          "name": "newName",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if successful, else false"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.DuplicateNameException",
+          "type_short": "DuplicateNameException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "exists",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "params": [
+        {
+          "name": "dbHandle",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        },
+        {
+          "name": "name",
+          "type_long": "java.lang.String",
+          "type_short": "String",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isEmpty",
+      "comment": "Returns true if this map is empty",
+      "javadoc": "Returns true if this map is empty",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getRecordCount",
+      "comment": "Returns the number of records contained within this map.\n NOTE: This number will be greater or equal to the number of\n address ranges contained within the map.",
+      "javadoc": "Returns the number of records contained within this map.\n NOTE: This number will be greater or equal to the number of\n address ranges contained within the map.\n@return record count",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "int",
+        "type_short": "int",
+        "comment": "record count"
+      },
+      "throws": []
+    },
+    {
+      "name": "findTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "createTable",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "java.io.IOException",
+          "type_short": "IOException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "getValue",
+      "comment": "Returns the value associated with the given address.",
+      "javadoc": "Returns the value associated with the given address.\n@param addr the address of the value\n@return value or null no value exists",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address of the value"
+        }
+      ],
+      "return": {
+        "type_long": "db.Field",
+        "type_short": "Field",
+        "comment": "value or null no value exists"
+      },
+      "throws": []
+    },
+    {
+      "name": "paintRange",
+      "comment": "Associates the given value with every index from start to end (inclusive)\n Any previous associates are overwritten.",
+      "javadoc": "Associates the given value with every index from start to end (inclusive)\n Any previous associates are overwritten.\n@param startAddr the start address.\n@param endAddr the end address.\n@param value value to be painted, or null for value removal.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address."
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address."
+        },
+        {
+          "name": "value",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "value to be painted, or null for value removal."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "moveAddressRange",
+      "comment": "Move all values within an address range to a new range.",
+      "javadoc": "Move all values within an address range to a new range.\n@param fromAddr the first address of the range to be moved.\n@param toAddr the address where to the range is to be moved.\n@param length the number of addresses to move.\n@param monitor the task monitor.\n@throws CancelledException if the user canceled the operation via the task monitor.",
+      "static": false,
+      "params": [
+        {
+          "name": "fromAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the first address of the range to be moved."
+        },
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address where to the range is to be moved."
+        },
+        {
+          "name": "length",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": "the number of addresses to move."
+        },
+        {
+          "name": "monitor",
+          "type_long": "ghidra.util.task.TaskMonitor",
+          "type_short": "TaskMonitor",
+          "comment": "the task monitor."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.util.exception.CancelledException",
+          "type_short": "CancelledException",
+          "comment": "if the user canceled the operation via the task monitor."
+        }
+      ]
+    },
+    {
+      "name": "paintRange",
+      "comment": "Paint over a range of address keys which fall within the same key base",
+      "javadoc": "Paint over a range of address keys which fall within the same key base\n@param start\n@param end\n@param value",
+      "static": false,
+      "params": [
+        {
+          "name": "start",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "end",
+          "type_long": "long",
+          "type_short": "long",
+          "comment": ""
+        },
+        {
+          "name": "value",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "clearRange",
+      "comment": "Remove values from the given range.",
+      "javadoc": "Remove values from the given range.\n@param startAddr the start address.\n@param endAddr the end address.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the start address."
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the end address."
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressSet",
+      "comment": "Returns a complete address set where any value has been set.",
+      "javadoc": "Returns a complete address set where any value has been set.\n@return address set",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "address set"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressSet",
+      "comment": "Returns a complete address set where the specified value has been set.",
+      "javadoc": "Returns a complete address set where the specified value has been set.\n@param value field value\n@return address set",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": "field value"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "address set"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "Returns an address range iterator over all occupied ranges in the map.",
+      "javadoc": "Returns an address range iterator over all occupied ranges in the map.\n@return AddressRangeIterator that iterates over all occupied ranges in th\n map.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": "AddressRangeIterator that iterates over all occupied ranges in th\n map."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "Returns an address range iterator over all occupied ranges in the map.\n The first range must have a FROM address at or after \n the specified startAddr.",
+      "javadoc": "Returns an address range iterator over all occupied ranges in the map.\n The first range must have a FROM address at or after \n the specified startAddr.\n@param startAddr the address to start the iterator.\n@return AddressRangeIterator that iterates over all occupied ranges in th\n map.",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the address to start the iterator."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": "AddressRangeIterator that iterates over all occupied ranges in th\n map."
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRanges",
+      "comment": "Returns an address range iterator over all occupied ranges whose\n FROM address falls within the range startAddr to endAddr.",
+      "javadoc": "Returns an address range iterator over all occupied ranges whose\n FROM address falls within the range startAddr to endAddr.\n@param startAddr start of range\n@param endAddr end of range\n@return AddressRangeIterator",
+      "static": false,
+      "params": [
+        {
+          "name": "startAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start of range"
+        },
+        {
+          "name": "endAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "end of range"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": "AddressRangeIterator"
+      },
+      "throws": []
+    },
+    {
+      "name": "getValueRanges",
+      "comment": "Returns an address range iterator for those ranges which contain the\n specified value.  This method may only be invoked for indexed maps.",
+      "javadoc": "Returns an address range iterator for those ranges which contain the\n specified value.  This method may only be invoked for indexed maps.\n@param value\n@return AddressRangeIterator",
+      "static": false,
+      "params": [
+        {
+          "name": "value",
+          "type_long": "db.Field",
+          "type_short": "Field",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRangeIterator",
+        "type_short": "AddressRangeIterator",
+        "comment": "AddressRangeIterator"
+      },
+      "throws": []
+    },
+    {
+      "name": "getAddressRangeContaining",
+      "comment": "Returns the bounding address-range containing addr and the the same value throughout.",
+      "javadoc": "Returns the bounding address-range containing addr and the the same value throughout.\n@param addr the contained address\n@return single value address-range containing addr",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the contained address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressRange",
+        "type_short": "AddressRange",
+        "comment": "single value address-range containing addr"
+      },
+      "throws": []
+    },
+    {
+      "name": "dbRestored",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dbh",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dbClosed",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dbh",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tableDeleted",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dbh",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        },
+        {
+          "name": "table",
+          "type_long": "db.Table",
+          "type_short": "Table",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "tableAdded",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "dbh",
+          "type_long": "db.DBHandle",
+          "type_short": "DBHandle",
+          "comment": ""
+        },
+        {
+          "name": "table",
+          "type_long": "db.Table",
+          "type_short": "Table",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "dispose",
+      "comment": "Deletes the database table used to store this range map.",
+      "javadoc": "Deletes the database table used to store this range map.",
+      "static": false,
+      "params": [],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    }
+  ]
+}

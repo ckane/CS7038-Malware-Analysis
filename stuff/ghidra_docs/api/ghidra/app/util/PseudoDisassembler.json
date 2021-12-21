@@ -1,0 +1,918 @@
+{
+  "name": "PseudoDisassembler",
+  "comment": "PseudoDisassembler.java\n \n Useful for disassembling and getting an Instruction or creating Data\n at a location in memory when you don\u0027t want the program to be changed.\n \n The Instructions or Data that area created are PseudoInstruction\u0027s and\n PseudoData\u0027s.  They act like regular instructions in most respects, but\n they don\u0027t exist in the program.  No references, symbols, are created or\n will be saved when the program is saved.\n \n You do not need to have an open transaction on the program to use the\n PseudoDisassembler.\n \n The PseudoDisassembler can also be used to check if something is a valid\n subroutine.  The algorithm it uses could definitely use some tuning, but\n it generally works well.",
+  "javadoc": "PseudoDisassembler.java\n \n Useful for disassembling and getting an Instruction or creating Data\n at a location in memory when you don\u0027t want the program to be changed.\n \n The Instructions or Data that area created are PseudoInstruction\u0027s and\n PseudoData\u0027s.  They act like regular instructions in most respects, but\n they don\u0027t exist in the program.  No references, symbols, are created or\n will be saved when the program is saved.\n \n You do not need to have an open transaction on the program to use the\n PseudoDisassembler.\n \n The PseudoDisassembler can also be used to check if something is a valid\n subroutine.  The algorithm it uses could definitely use some tuning, but\n it generally works well.",
+  "static": false,
+  "implements": [],
+  "extends": "java.lang.Object",
+  "fields": [
+    {
+      "name": "LOW_BIT_CODE_MODE_REGISTER_NAME",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "java.lang.String",
+      "type_short": "String",
+      "constant_value": "\"LowBitCodeMode\""
+    },
+    {
+      "name": "DEFAULT_MAX_INSTRUCTIONS",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4000"
+    },
+    {
+      "name": "program",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.Program",
+      "type_short": "Program",
+      "constant_value": null
+    },
+    {
+      "name": "programContext",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.listing.ProgramContext",
+      "type_short": "ProgramContext",
+      "constant_value": null
+    },
+    {
+      "name": "language",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.lang.Language",
+      "type_short": "Language",
+      "constant_value": null
+    },
+    {
+      "name": "memory",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "ghidra.program.model.mem.Memory",
+      "type_short": "Memory",
+      "constant_value": null
+    },
+    {
+      "name": "pointerSize",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "MAX_REPEAT_BYTES_LIMIT",
+      "comment": "",
+      "javadoc": "",
+      "static": true,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": "4"
+    },
+    {
+      "name": "maxInstructions",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "int",
+      "type_short": "int",
+      "constant_value": null
+    },
+    {
+      "name": "respectExecuteFlag",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "type_long": "boolean",
+      "type_short": "boolean",
+      "constant_value": null
+    }
+  ],
+  "methods": [
+    {
+      "name": "\u003cinit\u003e",
+      "comment": "Create a pseudo disassembler for the given program.",
+      "javadoc": "Create a pseudo disassembler for the given program.",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setMaxInstructions",
+      "comment": "Set the maximum number of instructions to check",
+      "javadoc": "Set the maximum number of instructions to check\n@param maxNumInstructions - maximum number of instructions to check before returning",
+      "static": false,
+      "params": [
+        {
+          "name": "maxNumInstructions",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "- maximum number of instructions to check before returning"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "setRespectExecuteFlag",
+      "comment": "Set flag to respect Execute bit on memory if present on any memory",
+      "javadoc": "Set flag to respect Execute bit on memory if present on any memory\n@param respect - true, respect execute bit on memory blocks",
+      "static": false,
+      "params": [
+        {
+          "name": "respect",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "- true, respect execute bit on memory blocks"
+        }
+      ],
+      "return": {
+        "type_long": "void",
+        "type_short": "void",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "disassemble",
+      "comment": "Disassemble a single instruction.  The program is not affected.",
+      "javadoc": "Disassemble a single instruction.  The program is not affected.\n@param addr location to disassemble\n@return a PseudoInstruction\n@throws InsufficientBytesException\n@throws UnknownInstructionException\n@throws UnknownContextException",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "location to disassemble"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.PseudoInstruction",
+        "type_short": "PseudoInstruction",
+        "comment": "a PseudoInstruction"
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.InsufficientBytesException",
+          "type_short": "InsufficientBytesException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownInstructionException",
+          "type_short": "UnknownInstructionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownContextException",
+          "type_short": "UnknownContextException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "disassemble",
+      "comment": "Disassemble a single instruction.  The program is not affected.",
+      "javadoc": "Disassemble a single instruction.  The program is not affected.\n@param addr\n@param disassemblerContext\n@param isInDelaySlot\n@return \n@throws InsufficientBytesException\n@throws UnknownInstructionException\n@throws UnknownContextException",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "disassemblerContext",
+          "type_long": "ghidra.app.util.PseudoDisassemblerContext",
+          "type_short": "PseudoDisassemblerContext",
+          "comment": ""
+        },
+        {
+          "name": "isInDelaySlot",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.PseudoInstruction",
+        "type_short": "PseudoInstruction",
+        "comment": ""
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.InsufficientBytesException",
+          "type_short": "InsufficientBytesException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownInstructionException",
+          "type_short": "UnknownInstructionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownContextException",
+          "type_short": "UnknownContextException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "disassemble",
+      "comment": "Disassemble a location in memory with the given set of bytes.\n Useful when the address has no actual bytes defined, or you want to use\n your own bytes instead of what is in the program at the address.",
+      "javadoc": "Disassemble a location in memory with the given set of bytes.\n Useful when the address has no actual bytes defined, or you want to use\n your own bytes instead of what is in the program at the address.\n@param addr address to disassemble\n@param bytes bytes to use instead of those currently defined in program\n@return PseudoInstruction.\n@throws InsufficientBytesException\n@throws UnknownInstructionException\n@throws UnknownContextException",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address to disassemble"
+        },
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "bytes to use instead of those currently defined in program"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.PseudoInstruction",
+        "type_short": "PseudoInstruction",
+        "comment": "PseudoInstruction."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.InsufficientBytesException",
+          "type_short": "InsufficientBytesException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownInstructionException",
+          "type_short": "UnknownInstructionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownContextException",
+          "type_short": "UnknownContextException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "disassemble",
+      "comment": "Disassemble a location in memory with the given set of bytes.\n Useful when the address has no actual bytes defined, or you want to use\n your own bytes instead of what is in the program at the address.",
+      "javadoc": "Disassemble a location in memory with the given set of bytes.\n Useful when the address has no actual bytes defined, or you want to use\n your own bytes instead of what is in the program at the address.\n@param addr address to disassemble\n@param bytes bytes to use instead of those currently defined in program\n@param disassemblerContext the disassembler context to use.\n@return PseudoInstruction.\n@throws InsufficientBytesException\n@throws UnknownInstructionException\n@throws UnknownContextException",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "address to disassemble"
+        },
+        {
+          "name": "bytes",
+          "type_long": "byte[]",
+          "type_short": "byte[]",
+          "comment": "bytes to use instead of those currently defined in program"
+        },
+        {
+          "name": "disassemblerContext",
+          "type_long": "ghidra.app.util.PseudoDisassemblerContext",
+          "type_short": "PseudoDisassemblerContext",
+          "comment": "the disassembler context to use."
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.PseudoInstruction",
+        "type_short": "PseudoInstruction",
+        "comment": "PseudoInstruction."
+      },
+      "throws": [
+        {
+          "type_long": "ghidra.program.model.lang.InsufficientBytesException",
+          "type_short": "InsufficientBytesException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownInstructionException",
+          "type_short": "UnknownInstructionException",
+          "comment": ""
+        },
+        {
+          "type_long": "ghidra.program.model.lang.UnknownContextException",
+          "type_short": "UnknownContextException",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "applyDataType",
+      "comment": "Apply a dataType to the program at the given address.  The program is\n not affected.  A PseudoData item that acts like a Data item retrieved from\n a program is returned.  This is useful if you have a datatype and you\n want to use it to get values from the program at a given address.",
+      "javadoc": "Apply a dataType to the program at the given address.  The program is\n not affected.  A PseudoData item that acts like a Data item retrieved from\n a program is returned.  This is useful if you have a datatype and you\n want to use it to get values from the program at a given address.\n@param addr location to get a PseudoData item for\n@param dt the data type to be applied\n@return PsuedoData that acts like Data",
+      "static": false,
+      "params": [
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "location to get a PseudoData item for"
+        },
+        {
+          "name": "dt",
+          "type_long": "ghidra.program.model.data.DataType",
+          "type_short": "DataType",
+          "comment": "the data type to be applied"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.app.util.PseudoData",
+        "type_short": "PseudoData",
+        "comment": "PsuedoData that acts like Data"
+      },
+      "throws": []
+    },
+    {
+      "name": "getIndirectAddr",
+      "comment": "Interpret the bytes at a location in memory as an address\n and return the address.  This routine assumes that the bytes\n needed to create the address are the same size as the bytes\n needed to represent the toAddr.  So this is somewhat generic.",
+      "javadoc": "Interpret the bytes at a location in memory as an address\n and return the address.  This routine assumes that the bytes\n needed to create the address are the same size as the bytes\n needed to represent the toAddr.  So this is somewhat generic.\n@param toAddr location of the bytes in memory\n@return the address value",
+      "static": false,
+      "params": [
+        {
+          "name": "toAddr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "location of the bytes in memory"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the address value"
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidSubroutine",
+      "comment": "Check that this entry point leads to a well behaved subroutine:\n \n It should return.\n Hit no bad instructions.\n Have only one entry point.\n Not overlap any existing data or instructions.\n ",
+      "javadoc": "Check that this entry point leads to a well behaved subroutine:\n \u003cul\u003e\n \u003cli\u003eIt should return.\u003c/li\u003e\n \u003cli\u003eHit no bad instructions.\u003c/li\u003e\n \u003cli\u003eHave only one entry point.\u003c/li\u003e\n \u003cli\u003eNot overlap any existing data or instructions.\u003c/li\u003e\n \u003c/ul\u003e\n@param entryPoint entry point to check\n@return true if entry point leads to a well behaved subroutine",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if entry point leads to a well behaved subroutine"
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidSubroutine",
+      "comment": "Check that this entry point leads to a well behaved subroutine, allow it\n to fall into existing code.\n \n It should return.\n Hit no bad instructions.\n Have only one entry point.\n Not overlap any existing data or cause offcut references.\n ",
+      "javadoc": "Check that this entry point leads to a well behaved subroutine, allow it\n to fall into existing code.\n \u003cul\u003e\n \u003cli\u003eIt should return.\u003c/li\u003e\n \u003cli\u003eHit no bad instructions.\u003c/li\u003e\n \u003cli\u003eHave only one entry point.\u003c/li\u003e\n \u003cli\u003eNot overlap any existing data or cause offcut references.\u003c/li\u003e\n \u003c/ul\u003e\n@param entryPoint entry point to check\n@param allowExistingCode true allows this subroutine to flow into existing instructions.\n@return true if entry point leads to a well behaved subroutine",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point to check"
+        },
+        {
+          "name": "allowExistingCode",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true allows this subroutine to flow into existing instructions."
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if entry point leads to a well behaved subroutine"
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidSubroutine",
+      "comment": "Check that this entry point leads to a well behaved subroutine, allow it\n to fall into existing code.\n \n Hit no bad instructions.\n Have only one entry point.\n Not overlap any existing data or cause offcut references.\n ",
+      "javadoc": "Check that this entry point leads to a well behaved subroutine, allow it\n to fall into existing code.\n \u003cul\u003e\n \u003cli\u003eHit no bad instructions.\u003c/li\u003e\n \u003cli\u003eHave only one entry point.\u003c/li\u003e\n \u003cli\u003eNot overlap any existing data or cause offcut references.\u003c/li\u003e\n \u003c/ul\u003e\n@param entryPoint entry point to check\n@param allowExistingCode true allows this subroutine to flow into existing instructions.\n@param mustTerminate true if the subroutine must terminate\n@return true if entry point leads to a well behaved subroutine",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "entry point to check"
+        },
+        {
+          "name": "allowExistingCode",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true allows this subroutine to flow into existing instructions."
+        },
+        {
+          "name": "mustTerminate",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": "true if the subroutine must terminate"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if entry point leads to a well behaved subroutine"
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidCode",
+      "comment": "Check that this entry point leads to valid code:\n \n  May have multiple entries into the body of the code.\n The intent is that it be valid code, not nice code.\n Hit no bad instructions.\n It should return.\n ",
+      "javadoc": "Check that this entry point leads to valid code:\n \u003cul\u003e\n \u003cli\u003e May have multiple entries into the body of the code.\n \u003cli\u003eThe intent is that it be valid code, not nice code.\n \u003cli\u003eHit no bad instructions.\n \u003cli\u003eIt should return.\n \u003c/ul\u003e\n@param entryPoint\n@return true if the entry point leads to valid code",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the entry point leads to valid code"
+      },
+      "throws": []
+    },
+    {
+      "name": "isValidCode",
+      "comment": "Check that this entry point leads to valid code:\n \n  May have multiple entries into the body of the code.\n The intent is that it be valid code, not nice code.\n Hit no bad instructions.\n It should return.\n ",
+      "javadoc": "Check that this entry point leads to valid code:\n \u003cul\u003e\n \u003cli\u003e May have multiple entries into the body of the code.\n \u003cli\u003eThe intent is that it be valid code, not nice code.\n \u003cli\u003eHit no bad instructions.\n \u003cli\u003eIt should return.\n \u003c/ul\u003e\n@param entryPoint location to test for valid code\n@param context disassembly context for program\n@return true if the entry point leads to valid code",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "location to test for valid code"
+        },
+        {
+          "name": "context",
+          "type_long": "ghidra.app.util.PseudoDisassemblerContext",
+          "type_short": "PseudoDisassemblerContext",
+          "comment": "disassembly context for program"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if the entry point leads to valid code"
+      },
+      "throws": []
+    },
+    {
+      "name": "followSubFlows",
+      "comment": "Process a subroutine using the processor function.\n The process function can control what flows are followed and when to stop.",
+      "javadoc": "Process a subroutine using the processor function.\n The process function can control what flows are followed and when to stop.\n@param entryPoint start address\n@param maxInstr maximum number of instructions to evaluate\n@param processor processor to use\n@return the address set of instructions that were followed",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start address"
+        },
+        {
+          "name": "maxInstr",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of instructions to evaluate"
+        },
+        {
+          "name": "processor",
+          "type_long": "ghidra.app.util.PseudoFlowProcessor",
+          "type_short": "PseudoFlowProcessor",
+          "comment": "processor to use"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the address set of instructions that were followed"
+      },
+      "throws": []
+    },
+    {
+      "name": "followSubFlows",
+      "comment": "Process a subroutine using the processor function.\n The process function can control what flows are followed and when to stop.",
+      "javadoc": "Process a subroutine using the processor function.\n The process function can control what flows are followed and when to stop.\n@param entryPoint start address\n@param procContext initial processor context for disassembly\n@param maxInstr maximum number of instructions to evaluate\n@param processor processor to use\n@return the address set of instructions that were followed",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "start address"
+        },
+        {
+          "name": "procContext",
+          "type_long": "ghidra.app.util.PseudoDisassemblerContext",
+          "type_short": "PseudoDisassemblerContext",
+          "comment": "initial processor context for disassembly"
+        },
+        {
+          "name": "maxInstr",
+          "type_long": "int",
+          "type_short": "int",
+          "comment": "maximum number of instructions to evaluate"
+        },
+        {
+          "name": "processor",
+          "type_long": "ghidra.app.util.PseudoFlowProcessor",
+          "type_short": "PseudoFlowProcessor",
+          "comment": "processor to use"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.AddressSet",
+        "type_short": "AddressSet",
+        "comment": "the address set of instructions that were followed"
+      },
+      "throws": []
+    },
+    {
+      "name": "getNextTarget",
+      "comment": "Gets a new target address from the untried target list if it can find one not already in the\n disassembled address set that is passed in.",
+      "javadoc": "Gets a new target address from the untried target list if it can find one not already in the\n disassembled address set that is passed in.\n@param body address set of disassembled instructions\n@param untriedTargetList list of untried valid targets\n@return a new target address or null",
+      "static": false,
+      "params": [
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": "address set of disassembled instructions"
+        },
+        {
+          "name": "untriedTargetList",
+          "type_long": "java.util.ArrayList\u003cghidra.program.model.address.Address\u003e",
+          "type_short": "ArrayList",
+          "comment": "list of untried valid targets"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "a new target address or null"
+      },
+      "throws": []
+    },
+    {
+      "name": "checkValidSubroutine",
+      "comment": "Check if there is a valid subroutine starting at the target address.\n It does this by following the flow until a terminator is reached.\n If a bad instruction is hit or it does not flow well, then return\n false.",
+      "javadoc": "Check if there is a valid subroutine starting at the target address.\n It does this by following the flow until a terminator is reached.\n If a bad instruction is hit or it does not flow well, then return\n false.\n@param target - taraget address to disassemble\n@return true if this is a probable subroutine.",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "allowExistingInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if this is a probable subroutine."
+      },
+      "throws": []
+    },
+    {
+      "name": "checkValidSubroutine",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "allowExistingInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "mustTerminate",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkValidSubroutine",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entryPoint",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "procContext",
+          "type_long": "ghidra.app.util.PseudoDisassemblerContext",
+          "type_short": "PseudoDisassemblerContext",
+          "comment": ""
+        },
+        {
+          "name": "allowExistingInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "mustTerminate",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkNonReturning",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "flowType",
+          "type_long": "ghidra.program.model.symbol.FlowType",
+          "type_short": "FlowType",
+          "comment": ""
+        },
+        {
+          "name": "instr",
+          "type_long": "ghidra.app.util.PseudoInstruction",
+          "type_short": "PseudoInstruction",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "isReallyReturn",
+      "comment": "Make sure the instruction really has a return in it.",
+      "javadoc": "Make sure the instruction really has a return in it.\n@param instr instruction to check",
+      "static": false,
+      "params": [
+        {
+          "name": "instr",
+          "type_long": "ghidra.program.model.listing.Instruction",
+          "type_short": "Instruction",
+          "comment": "instruction to check"
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "checkPseudoBody",
+      "comment": "",
+      "javadoc": "",
+      "static": false,
+      "params": [
+        {
+          "name": "entry",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        },
+        {
+          "name": "body",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "starts",
+          "type_long": "ghidra.program.model.address.AddressSet",
+          "type_short": "AddressSet",
+          "comment": ""
+        },
+        {
+          "name": "allowExistingInstructions",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        },
+        {
+          "name": "didCallValidSubroutine",
+          "type_long": "boolean",
+          "type_short": "boolean",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": ""
+      },
+      "throws": []
+    },
+    {
+      "name": "getNormalizedDisassemblyAddress",
+      "comment": "Get an address that can be used for disassembly.  Useful for some processors where\n pointers to code have 1 added to them for different modes such as Thumb mode for ARM.",
+      "javadoc": "Get an address that can be used for disassembly.  Useful for some processors where\n pointers to code have 1 added to them for different modes such as Thumb mode for ARM.\n@param program to get address from\n@param addr to be normallized/aligned for disassembly\n@return the normalized/aligned address for disassembly",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": "to get address from"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "to be normallized/aligned for disassembly"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the normalized/aligned address for disassembly"
+      },
+      "throws": []
+    },
+    {
+      "name": "getTargetContextRegisterValueForDisassembly",
+      "comment": "",
+      "javadoc": "@return RegisterValue setting for the context register to disassemble correctly at the given address\n         or null, if no setting is needed.",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.lang.RegisterValue",
+        "type_short": "RegisterValue",
+        "comment": "RegisterValue setting for the context register to disassemble correctly at the given address\n         or null, if no setting is needed."
+      },
+      "throws": []
+    },
+    {
+      "name": "hasLowBitCodeModeInAddrValues",
+      "comment": "",
+      "javadoc": "@return true if program has uses the low bit of an address to change Instruction Set mode",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        }
+      ],
+      "return": {
+        "type_long": "boolean",
+        "type_short": "boolean",
+        "comment": "true if program has uses the low bit of an address to change Instruction Set mode"
+      },
+      "throws": []
+    },
+    {
+      "name": "setTargeContextForDisassembly",
+      "comment": "If this processor uses the low bit of an address to change to a new Instruction Set mode\n   Check the low bit and change the instruction state at the address.",
+      "javadoc": "If this processor uses the low bit of an address to change to a new Instruction Set mode\n   Check the low bit and change the instruction state at the address.\n@param program\n@param addr the raw address\n@return the correct address to disassemble at if it needs to be aligned",
+      "static": true,
+      "params": [
+        {
+          "name": "program",
+          "type_long": "ghidra.program.model.listing.Program",
+          "type_short": "Program",
+          "comment": ""
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "the raw address"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the correct address to disassemble at if it needs to be aligned"
+      },
+      "throws": []
+    },
+    {
+      "name": "setTargeContextForDisassembly",
+      "comment": "In order to check a location to see if it disassembles from an address reference, the\n address is checked for low-bit code switch behavior.  If it does switch, the context\n is changed.",
+      "javadoc": "In order to check a location to see if it disassembles from an address reference, the\n address is checked for low-bit code switch behavior.  If it does switch, the context\n is changed.\n@param procContext context to change\n@param addr destination address that will be disassembled (possible pseudo disassembled)\n@return the correct disassembly location if the address needed to be adjusted.",
+      "static": false,
+      "params": [
+        {
+          "name": "procContext",
+          "type_long": "ghidra.app.util.PseudoDisassemblerContext",
+          "type_short": "PseudoDisassemblerContext",
+          "comment": "context to change"
+        },
+        {
+          "name": "addr",
+          "type_long": "ghidra.program.model.address.Address",
+          "type_short": "Address",
+          "comment": "destination address that will be disassembled (possible pseudo disassembled)"
+        }
+      ],
+      "return": {
+        "type_long": "ghidra.program.model.address.Address",
+        "type_short": "Address",
+        "comment": "the correct disassembly location if the address needed to be adjusted."
+      },
+      "throws": []
+    }
+  ]
+}
